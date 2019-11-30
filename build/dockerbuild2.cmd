@@ -13,27 +13,27 @@ dotnet publish "..\src\Piraeus.TcpGateway\Piraeus.TcpGateway.csproj" -c Release 
 dotnet publish "..\src\Piraeus.UdpGateway\Piraeus.UdpGateway.csproj" -c Release -f netcoreapp3.0 -o "Piraeus.UdpGateway" 
 dotnet publish "..\src\Piraeus.HttpGateway\Piraeus.HttpGateway.csproj" -c Release -f netcoreapp3.0 -o "Piraeus.HttpGateway" 
 
-docker rmi skunklab/piraeus-silo:v3.0
-docker rmi skunklab/piraeus-mgmt-api:v3.0
-docker rmi skunklab/piraeus-websocket-gateway:v3.0
-docker rmi skunklab/piraeus-tcp-gateway:v3.0
-docker rmi skunklab/piraeus-udp-gateway:v3.0
-docker rmi skunklab/piraeus-http-gateway:v3.0
+docker rmi skunklab/piraeus-silo:v3.0.1
+docker rmi skunklab/piraeus-mgmt-api:v3.0.1
+docker rmi skunklab/piraeus-websocket-gateway:v3.0.1
+docker rmi skunklab/piraeus-tcp-gateway:v3.0.1
+docker rmi skunklab/piraeus-udp-gateway:v3.0.1
+docker rmi skunklab/piraeus-http-gateway:v3.0.1
 
 
-docker build -t skunklab/piraeus-silo:v3.0 ./Piraeus.SiloHost
-docker build -t skunklab/piraeus-mgmt-api:v3.0 ./Piraeus.WebApi
-docker build -t skunklab/piraeus-websocket-gateway:v3.0 ./Piraeus.WebSocketGateway
-docker build -t skunklab/piraeus-tcp-gateway:v3.0 ./Piraeus.TcpGateway
-docker build -t skunklab/piraeus-udp-gateway:v3.0 ./Piraeus.UdpGateway
-docker build -t skunklab/piraeus-http-gateway:v3.0 ./Piraeus.HttpGateway
+docker build -t skunklab/piraeus-silo:v3.0.1 ./Piraeus.SiloHost
+docker build -t skunklab/piraeus-mgmt-api:v3.0.1 ./Piraeus.WebApi
+docker build -t skunklab/piraeus-websocket-gateway:v3.0.1 ./Piraeus.WebSocketGateway
+docker build -t skunklab/piraeus-tcp-gateway:v3.0.1 ./Piraeus.TcpGateway
+docker build -t skunklab/piraeus-udp-gateway:v3.0.1 ./Piraeus.UdpGateway
+docker build -t skunklab/piraeus-http-gateway:v3.0.1 ./Piraeus.HttpGateway
 
 
-::docker push skunklab/piraeus-silo:v3.0
-::docker push skunklab/piraeus-mgmt-api:v3.0
-::docker push skunklab/piraeus-websocket-gateway:v3.0
-::docker push skunklab/piraeus-tcp-gateway:v3.0
-::docker push skunklab/piraeus-udp-gateway:v3.0
-::docker push skunklab/piraeus-http-gateway:v3.0
+::docker push skunklab/piraeus-silo:v3.0.1
+::docker push skunklab/piraeus-mgmt-api:v3.0.1
+::docker push skunklab/piraeus-websocket-gateway:v3.0.1
+::docker push skunklab/piraeus-tcp-gateway:v3.0.1
+::docker push skunklab/piraeus-udp-gateway:v3.0.1
+::docker push skunklab/piraeus-http-gateway:v3.0.1
 
 
