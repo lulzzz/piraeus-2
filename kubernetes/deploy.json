@@ -1,14 +1,16 @@
 {
+  "subscriptionNameOrId": "",
+  "resourceGroupName": "",
+  "clusterName": "piraeuscluster",
   "email": "",
   "dnsName": "",
   "location": "",
   "storageAcctName": "",
-  "resourceGroupName": "",
-  "subscriptionNameOrId": "",
+  "nodeCount": 1,
+  "frontendVMSize": "Standard_D2s_v3",
+  "orleansVMSize": "Standard_D4s_v3",
   "appId": "",
   "pwd": "",
-  "clusterName": "piraeuscluster",
-  "nodeCount": 1,
   "apiIssuer": "http://skunklab.io/mgmt",
   "apiAudience": "http://skunklab.io/mgmt",
   "apiSymmetricKey": "//////////////////////////////////////////8=",
@@ -19,6 +21,5 @@
   "symmetricKey": "//////////////////////////////////////////8=",
   "tokenType": "JWT",
   "coapAuthority": "skunklab.io",
-  "frontendVMSize": "Standard_D2s_v3",
-  "orleansVMSize": "Standard_D4s_v3"
+  
 }

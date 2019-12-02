@@ -7,7 +7,7 @@
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <FileVersion>3.0.0.0</FileVersion>
     <Version>3.0.0</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>Storage library for netcore v3.0. Blob, Table, Queue, File.</Description>    
     <PackageProjectUrl>https://github.com/skunklab/bitrt</PackageProjectUrl>    
     <RepositoryUrl>https://github.com/skunklab/piraeus</RepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <None Include="skunklab.png" Pack="true" PackagePath=""/>
+    <None Include="skunklab.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

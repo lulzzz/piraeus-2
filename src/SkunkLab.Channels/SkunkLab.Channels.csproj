@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Version>3.0.0</Version>
     <RootNamespace>SkunkLab.Channels</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Channel library for dotnet core 3.0.  TCP, UDP, Web socket, HTTP</Description>    
     <PackageProjectUrl>https://github.com/skunklab/bitrt</PackageProjectUrl>    
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="skunklab.png" Pack="true" PackagePath=""/>
+    <None Include="skunklab.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

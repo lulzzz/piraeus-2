@@ -1,6 +1,6 @@
 function New-PiraeusDemo()  
 {	
-    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
+    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName = "piraeuscluster", [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
     
     $apiKey1 = NewRandomKey(16)
 	$apiKey2 = NewRandomKey(16)
@@ -55,8 +55,8 @@ function New-PiraeusDemo()
 	$config.coapAuthority = "http://$Dns.$Location.cloudapp.azure.com"
 	$config.frontendVMSize = $frontendVMSize
 	$config.orleansVMSize  = $orleansVMSize
-	$config.nodeCount = 1
-	$config.clusterName = "piraeuscluster"
+	$config.nodeCount = $NodeCount
+	$config.clusterName = $ClusterName
 	
 	$email = $config.email
 	$dnsName = $config.dnsName
@@ -77,10 +77,6 @@ function New-PiraeusDemo()
 	$coapAuthority = $config.coapAuthority
 	$frontendVMSize = $config.frontendVMSize
 	$orleansVMSize = $config.orleansVMSize
-	$appId = $config.appId
-	$pwd = $config.pwd
-	
-	
 	
 	if($AppID.Length -ne 0)
 	{
@@ -109,25 +105,21 @@ function New-PiraeusDemo()
 	#if not create one and update the file
 	
 	
-	if($config.appId -eq $null -or $config.appId.Length -eq 0)
+	if($appId -eq $null -or $appId.Length -eq 0)
 	{
 		#create the service principal
 		Write-Host "-- Step $step - Creating service principal" -ForegroundColor Green
 		$creds = az ad sp create-for-rbac  --skip-assignment
-		$v1 = $creds[1].Replace(",","").Replace(":","=").Replace(" ","").Replace('"',"")
-		$sd1 = ConvertFrom-StringData -StringData $v1
-		$newAppId = $sd1.Values[0]
-		$v2 = $creds[4].Replace(",","").Replace(":","=").Replace(" ","").Replace('"',"")
-		$sd2 = ConvertFrom-StringData -StringData $v2
-		$newPwd = $sd2.Values[0]
-		$step++
-		$config.appId = $null
-		$config.pwd = $null		
-		$config.appId = "$newAppId"
-		$config.pwd = "$newPwd"	
-
-		Write-Host "Service Principal Application ID $appId" -ForegroundColor Cyan
-		Write-Host "Service Principal Password $pwd" -ForegroundColor Cyan
+		$credsObj = ConvertFrom-Json -InputObject "$creds"
+		$appId = $credsObj.appId
+		$pwd = $credsObj.password
+		$config.appId = $credsObj.appId
+		$config.pwd = $credsObj.password
+	}
+	else
+	{
+		$config.appId = $appId
+		$config.pwd = $pwd		
 	}
 
 	$dateTimeString = Get-Date -Format "MM-dd-yyyyTHH-mm-ss"
@@ -697,7 +689,7 @@ function NewSampleConfig()
     $url = "https://$authority"
     Write-Host "Using $url for management api" -ForegroundColor Yellow
 
-    Import-Module "../src/Piraeus.Module.Core/bin/Release/netcoreapp2.2/Piraeus.Module.Core.dll"
+    Import-Module "../src/Piraeus.Module.Core/bin/Release/netcoreapp3.0/Piraeus.Module.Core.dll"
     Write-Host "Module imported" -ForegroundColor Yellow
 
     #get a security token for the management API

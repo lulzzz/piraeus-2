@@ -12,19 +12,22 @@ The technology is designed to run on docker containers and the getting started s
 ![Architecture](/docs/arch.jpg)
 [Deployment Details](/docs/deploydetail.md)
 ## Getting Started
+See [here](/docs/deploy.md) for more details on deploying Piraues.
 
+**Quick Start** 
  1. Clone the source
- 2. Ensure the [prereqs](/docs/prereqs.md) are installed. 
- 3. Deploy Piraeus to Azure AKS
- 4. Configure Piraeus
- 5. Run a sample client
+ 2. Run the "build.cmd" from a command prompt in the "src" folder.
+ 3. Ensure the [prereqs](/docs/prereqs.md) are installed. 
+ 4. Deploy Piraeus to Azure AKS
+ 5. Configure Piraeus
+ 6. Run a sample client
  
- ### Deploy Piraeus Demo
+ ### Deploying Piraeus Quick Start
  
  1. Open a command prompt and navigate to the /kubernetes folder 
  2. Type *pwsh* to get a powershell v6 command prompt 
  3. Type . ./NewPiraeusDeploy.ps1
- 4. Execute the following command New-PiraeusDemo with the following parameters
+ 4. Execute the following command New-PiraeusDeploy with the following parameters
  -  *-SubscriptionName*  Name of Azure subscription to do the deployment.
  -  *-ResourceGroupName*  Name of the Resoure Group for the deployment.
  -  *-Email* Your email address, which is necessary for the Let's Encrypt certificates (limited 50 dns names per email address per week)
@@ -37,5 +40,5 @@ FQDN of the Piraeus deployment will be:
 
 The sample will be automatically configured in Piraeus and a  configuration file will be written to Samples.Mqtt.Client project. 
 
-Build the Samples.Mqtt.Client project, then run 2 Samples.Mqtt.Client instances. Use the "use file [y]" option when prompted.  Type in different client "names" in each of the 2 instances and select role "A" for one instance and "B" for the other when prompted.  Now, your 2 instances can communicate with each other.
+Run 2 Samples.Mqtt.Client instances. Use the "use file [y]" option when prompted.  Type in different client "names" in each of the 2 instances and select role "A" for one instance and "B" for the other when prompted.  Now, your 2 instances can communicate with each other.
 
