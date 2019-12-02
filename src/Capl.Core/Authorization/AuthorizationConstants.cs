@@ -1,6 +1,6 @@
 ﻿/*
 Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
+Copyright (c) Matt Long thelabskunk@gmail.com 
 All rights reserved. 
 MIT License
 */
