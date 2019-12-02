@@ -20,6 +20,5 @@
   "audience": "http://skunklab.io/",
   "symmetricKey": "//////////////////////////////////////////8=",
   "tokenType": "JWT",
-  "coapAuthority": "skunklab.io",
-  
+  "coapAuthority": "skunklab.io"
 }

@@ -1,12 +1,17 @@
 function New-PiraeusDemo()  
 {	
-    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName = "piraeuscluster", [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
+    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
     
     $apiKey1 = NewRandomKey(16)
 	$apiKey2 = NewRandomKey(16)
 	$apiCodes = $apiKey1 + ";" + $apiKey2
 	$apiSymmetricKey = NewRandomKey(32)
 	$symmetricKey = NewRandomKey(32)
+	
+	if($ClusterName.Length -eq 0)
+	{
+		$ClusterName = "piraeuscluster"
+	}
 	
 	if($StorageAcctName.Length -eq 0)
 	{

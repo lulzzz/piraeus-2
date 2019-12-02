@@ -1,6 +1,6 @@
 function New-PiraeusDeploy()  
 {	
-    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName = "piraeuscluster", [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
+    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
     
     
 	
@@ -9,6 +9,11 @@ function New-PiraeusDeploy()
 	$apiCodes = $apiKey1 + ";" + $apiKey2
 	$apiSymmetricKey = NewRandomKey(32)
 	$symmetricKey = NewRandomKey(32)
+	
+	if($ClusterName.Length -eq 0)
+	{
+		$ClusterName = "piraeuscluster"
+	}
 	
 	if($StorageAcctName.Length -eq 0)
 	{
@@ -59,7 +64,7 @@ function New-PiraeusDeploy()
 	$config.frontendVMSize = $frontendVMSize
 	$config.orleansVMSize  = $orleansVMSize
 	$config.nodeCount = 1
-	$config.clusterName = "piraeuscluster"
+	$config.clusterName = $ClusterName
 	
 	
 	$email = $config.email
@@ -82,7 +87,6 @@ function New-PiraeusDeploy()
 	$frontendVMSize = $config.frontendVMSize
 	$orleansVMSize = $config.orleansVMSize
 	
-
 	
 	if($AppID.Length -ne 0)
 	{
