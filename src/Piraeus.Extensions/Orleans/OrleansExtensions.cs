@@ -20,6 +20,11 @@ namespace Piraeus.Extensions.Orleans
             services.AddSingleton<IClusterClient>(serviceProvider =>
             {
                 var builder = new ClientBuilder();
+                if(!string.IsNullOrEmpty(config.InstrumentationKey))
+                {
+                    builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
+                }
+
                 builder.AddOrleansClusterClient(config);
                 IClusterClient client = builder.Build();
                 client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
@@ -47,6 +52,10 @@ namespace Piraeus.Extensions.Orleans
                 builder.AddOrleansClusterClient(config);
                 IClusterClient client = builder.Build();
                 client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
+                if(!string.IsNullOrEmpty(config.InstrumentationKey))
+                {
+                    builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
+                }
                 return client;
             });
         }
@@ -100,14 +109,14 @@ namespace Piraeus.Extensions.Orleans
 
             if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
             {
-                builder.AddApplicationInsightsTelemetryConsumer(config.AppInsightsKey);
+                builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
             }
 
             builder.ConfigureLogging(op =>
             {
                 if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
                 {
-                    op.AddApplicationInsights(config.AppInsightsKey);
+                    op.AddApplicationInsights(config.InstrumentationKey);
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
 

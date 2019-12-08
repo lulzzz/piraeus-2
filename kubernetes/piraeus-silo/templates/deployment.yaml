@@ -27,8 +27,6 @@ spec:
           env:
           - name: OR_Dockerized
             value: {{ .Values.dockerized | quote }}
-          - name: OR_LogLevel
-            value: {{ .Values.loglevel | quote }}
           - name: OR_LoggerTypes
             value: {{ .Values.loggerTypes | quote }}
           - name: OR_ClusterId
@@ -39,7 +37,22 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "fullname" . }}
-                key: dataConnectionString          
+                key: dataConnectionString   
+          - name: OR_LogLevel           
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: logLevel      
+          - name: OR_InstrumentationKey           
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey 
+          - name: APPINSIGHTS_INSTRUMENTATIONKEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey              
           ports:
           - containerPort: 11111
           - containerPort: 30000   

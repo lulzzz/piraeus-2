@@ -67,9 +67,13 @@ namespace Piraeus.WebApi
             services.AddLogging(log =>
             {
                 log.AddConsole();
-                log.AddDebug();
-                log.SetMinimumLevel(LogLevel.Debug);
+                log.SetMinimumLevel(Enum.Parse<LogLevel>(pconfig.LogLevel));
             });
+            
+            if(!string.IsNullOrEmpty(pconfig.InstrumentationKey))
+            {
+                services.AddApplicationInsightsTelemetry(pconfig.InstrumentationKey);
+            }
 
             services.AddSingleton<Logger>();
             services.AddSingletonOrleansClusterClient(WebApiHelpers.GetOrleansConfig());

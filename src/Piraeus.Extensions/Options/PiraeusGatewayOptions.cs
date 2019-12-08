@@ -16,7 +16,7 @@ namespace Piraeus.Extensions.Options
             ClusterId = config.ClusterId;
             ServiceId = config.ServiceId;
             DataConnectionString = config.DataConnectionString;
-            AppInsightKey = config.AppInsightsKey;
+            AppInsightKey = config.InstrumentationKey;
             LoggerTypes = config.GetLoggerTypes();
             LoggingLevel = Enum.Parse<LogLevel>(config.LogLevel);
             SetStorageType();

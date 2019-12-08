@@ -102,9 +102,18 @@ namespace Piraeus.SiloHost
                 builder.SetMinimumLevel(orleansLogLevel);
             });
 
-            if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(orleansConfig.AppInsightsKey))
-                silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.AppInsightsKey);
-            host = silo.Build();
+            if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+            {
+                silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.InstrumentationKey);
+            }
+            else
+            {
+                if(!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                {
+                    silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.InstrumentationKey);
+                }
+            }
+                host = silo.Build();
 
             //var clusterClient = (IClusterClient)host.Services.GetService(typeof(IClusterClient));
 

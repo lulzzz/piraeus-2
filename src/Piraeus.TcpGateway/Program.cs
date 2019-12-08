@@ -22,11 +22,11 @@ namespace Piraeus.TcpGateway
                 {
                     //PiraeusConfig config;
                     services.AddPiraeusConfiguration(out PiraeusConfig config);
-                    if (!string.IsNullOrEmpty(config.AppInsightsKey))
+                    if (!string.IsNullOrEmpty(config.InstrumentationKey))
                     {
                         services.AddApplicationInsightsTelemetry(op =>
                         {
-                            op.InstrumentationKey = config.AppInsightsKey;
+                            op.InstrumentationKey = config.InstrumentationKey;
                             op.AddAutoCollectedMetricExtractor = true;
                             op.EnableHeartbeat = true;
                         });

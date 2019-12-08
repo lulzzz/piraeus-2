@@ -358,14 +358,14 @@ namespace Piraeus.Configuration
         #region Logging
 
         [JsonProperty("loggerTypes")]
-        public string LoggerTypes { get; set; } = "Console;Debug";
+        public string LoggerTypes { get; set; } = "Console";
 
         [JsonProperty("logLevel")]
         public string LogLevel { get; set; } = "Warning";
 
 
-        [JsonProperty("appInsightsKey")]
-        public string AppInsightsKey { get; set; }
+        [JsonProperty("instrumentationKey")]
+        public string InstrumentationKey { get; set; }
 
 
         #endregion

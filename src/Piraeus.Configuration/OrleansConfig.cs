@@ -33,8 +33,8 @@ namespace Piraeus.Configuration
         [JsonProperty("logLevel")]
         public string LogLevel { get; set; } = "Warning";  //one of warning, error, information, critical, verbose
 
-        [JsonProperty("appInsightsKey")]
-        public string AppInsightsKey { get; set; }         //required when loggertypes as appinsights; otherwise omit             
+        [JsonProperty("instrumentationKey")]
+        public string InstrumentationKey { get; set; }         //required when loggertypes as appinsights; otherwise omit             
 
         public LoggerType GetLoggerTypes()
         {

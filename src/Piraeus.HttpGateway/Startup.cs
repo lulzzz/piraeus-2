@@ -88,7 +88,7 @@ namespace Piraeus.HttpGateway
             {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
-                    op.InstrumentationKey = config.AppInsightsKey;
+                    op.InstrumentationKey = config.InstrumentationKey;
                     op.AddAutoCollectedMetricExtractor = true;
                     op.EnableHeartbeat = true;
                 });

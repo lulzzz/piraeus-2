@@ -3,7 +3,7 @@ dockerized: true
 serviceId: "myservice"
 clusterId: "mycluster"
 loggerTypes: "Console"
-loglevel: "Warning"
+#loglevel: "Warning"
 
 image:
   registry: docker.io

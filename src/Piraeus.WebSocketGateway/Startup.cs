@@ -37,8 +37,6 @@ namespace Piraeus.WebSocketGateway
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //PiraeusConfig config = null;
-            //OrleansConfig orleansConfig = null;
             services.AddPiraeusConfiguration(out PiraeusConfig config);
             services.AddOrleansConfiguration(out OrleansConfig orleansConfig);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -49,10 +47,17 @@ namespace Piraeus.WebSocketGateway
             {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
-                    op.InstrumentationKey = config.AppInsightsKey;
+                    op.InstrumentationKey = config.InstrumentationKey;
                     op.AddAutoCollectedMetricExtractor = true;
                     op.EnableHeartbeat = true;
                 });
+            }
+            else
+            {
+                if(!string.IsNullOrEmpty(config.InstrumentationKey))
+                {
+                    services.AddApplicationInsightsTelemetry(config.InstrumentationKey);
+                }
             }
             services.AddLogging(builder => builder.AddLogging(config));
             services.AddSingleton<Logger>();            

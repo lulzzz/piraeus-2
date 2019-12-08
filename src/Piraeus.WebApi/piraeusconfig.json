@@ -3,7 +3,7 @@
     "managementApiAudience": "http://localhost/mgmt",
     "managmentApiSymmetricKey": "//////////////////////////////////////////8=",
     "managementApiSecurityCodes": "12345678;87654321",
-    "loggerTypes": "Console;Debug",
+    "loggerTypes": "Console",
     "logLevel": "Warning",
     "ports": "8080"
 }

@@ -110,8 +110,8 @@ namespace Piraeus.SiloHost
                 builder.SetMinimumLevel(orleansLogLevel);
             });
 
-            if (!string.IsNullOrEmpty(orleansConfig.AppInsightsKey))
-                silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.AppInsightsKey);
+            if (!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.InstrumentationKey);
 
             return silo.Build();
 

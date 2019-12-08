@@ -20,5 +20,7 @@
   "audience": null,
   "symmetricKey": null,
   "tokenType": null,
-  "coapAuthority": null
+  "coapAuthority": null,
+  "instrumentationKey": null,
+  "logLevel": null
 }

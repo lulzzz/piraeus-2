@@ -2,8 +2,8 @@ replicaCount: 1
 dockerized: true
 serviceId: "myservice"
 clusterId: "mycluster"
-loggerTypes: "Console;Debug"
-loglevel: "Warning"
+loggerTypes: "Console"
+#loglevel: "Warning"
 
 image1:
   registry: docker.io

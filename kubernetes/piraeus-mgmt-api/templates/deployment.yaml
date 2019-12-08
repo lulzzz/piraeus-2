@@ -43,6 +43,16 @@ spec:
               secretKeyRef:
                 name: {{ template "fullname" . }}
                 key: dataConnectionString  
+          - name: OR_InstrumentationKey
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey 
+          - name: OR_LogLevel
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: logLevel  
           - name: PI_ManagementApiIssuer
             valueFrom:
               secretKeyRef:
@@ -62,7 +72,22 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "fullname" . }}
-                key: managementApiSecurityCodes                
+                key: managementApiSecurityCodes  
+          - name: PI_InstrumentationKey
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey  
+          - name: PI_LogLevel
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: logLevel  
+          - name: APPINSIGHTS_INSTRUMENTATIONKEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey                 
           ports:
           - containerPort: 8080
           readinessProbe:

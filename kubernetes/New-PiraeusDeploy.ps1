@@ -1,6 +1,6 @@
 function New-PiraeusDeploy()  
 {	
-    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
+    param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$LogLevel = "Information", [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
     
     
 	
@@ -65,6 +65,7 @@ function New-PiraeusDeploy()
 	$config.orleansVMSize  = $orleansVMSize
 	$config.nodeCount = 1
 	$config.clusterName = $ClusterName
+	$config.logLevel = $LogLevel
 	
 	
 	$email = $config.email
@@ -86,7 +87,7 @@ function New-PiraeusDeploy()
 	$coapAuthority = $config.coapAuthority
 	$frontendVMSize = $config.frontendVMSize
 	$orleansVMSize = $config.orleansVMSize
-	
+	$logLevel = $LogLevel
 	
 	if($AppID.Length -ne 0)
 	{
@@ -133,9 +134,9 @@ function New-PiraeusDeploy()
 		$config.pwd = $pwd		
 	}
 
-	$dateTimeString = Get-Date -Format "MM-dd-yyyyTHH-mm-ss"
-	$filename = "./deploy-" + $dateTimeString + ".json"
-	$config | ConvertTo-Json -depth 100 | Out-File $filename
+	#$dateTimeString = Get-Date -Format "MM-dd-yyyyTHH-mm-ss"
+	#$filename = "./deploy-" + $dateTimeString + ".json"
+	#$config | ConvertTo-Json -depth 100 | Out-File $filename
 	
 	$env:AZURE_HTTP_USER_AGENT='pid-332e88b9-31d3-5070-af65-de3780ad5c8b'
 	
@@ -208,16 +209,18 @@ function New-PiraeusDeploy()
 	}
 	
 	#Get the credentials for the storage accounts
-	$dcs = az storage account show-connection-string --name $storageAcctName --resource-group $resourceGroupName
-	$vs1 = $dcs.Replace(",","").Replace(":","=").Replace(" ","").Replace('"',"").Replace("{","").Replace("}","").Trim()
-	$ts1 = $vs1 -split "connectionString="
-	$dataConnectionString = $ts1[2]  
-
-	$adcs = az storage account show-connection-string --name $auditStorageAcctName --resource-group $resourceGroupName
-	$vsa1 = $adcs.Replace(",","").Replace(":","=").Replace(" ","").Replace('"',"").Replace("{","").Replace("}","").Trim()
-	$tsa1 = $vsa1 -split "connectionString="
-	$auditConnectionString = $tsa1[2] 
+	#Get the credentials for the storage accounts
+	$storageJsonString = az storage account show-connection-string --name $storageAcctName --resource-group $resourceGroupName
+	$storageObj = ConvertFrom-Json -InputObject "$storageJsonString"
+	$dataConnectionString = $storageObj.connectionString
 	
+	$auditStorageJsonString = az storage account show-connection-string --name $auditStorageAcctName --resource-group $resourceGroupName
+    $auditStorageObj = ConvertFrom-Json -InputObject "$auditStorageJsonString"
+	$auditConnectionString = $auditStorageObj.connectionString
+	
+	$dateTimeString = Get-Date -Format "MM-dd-yyyyTHH-mm-ss"
+	$filename = "./deploy-" + $dateTimeString + ".json"
+	$config | ConvertTo-Json -depth 100 | Out-File $filename
 	
 	#create AKS cluster
 	Write-Host "-- Step $step - Create AKS cluster" -ForegroundColor Green	
@@ -336,34 +339,36 @@ function New-PiraeusDeploy()
 
 	Write-Host ("K8 api services online...let's deploy and finish up") -ForegroundColor Green
 
-
+	$siloAIKey = GetInstrumentationKey "$Dns-silo" $resourceGroupName $location
 	#apply the piraeus silo helm chart
 	Write-Host "-- Step $step - Deploying helm chart for piraeus-silo" -ForegroundColor Green
-	helm install ./piraeus-silo --name piraeus-silo --namespace kube-system --set dataConnectionString=$dataConnectionString
+	helm install ./piraeus-silo --name piraeus-silo --namespace kube-system --set dataConnectionString=$dataConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$logLevel
 	if($LASTEXITCODE -ne 0 )
 	{
 		WaitForApiServices
-		helm install ./piraeus-silo --name piraeus-silo --namespace kube-system --set dataConnectionString=$dataConnectionString
+		helm install ./piraeus-silo --name piraeus-silo --namespace kube-system --set dataConnectionString=$dataConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$logLevel
 	}
 	$step++
 
+	$mgmtAIKey = GetInstrumentationKey "$Dns-api" $resourceGroupName $location
 	$tagain = $false
 	Write-Host "-- Step $step - Deploying helm chart for piraeus management api" -ForegroundColor Green
-	helm install ./piraeus-mgmt-api --namespace kube-system --set dataConnectionString="$dataConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes"
+	helm install ./piraeus-mgmt-api --namespace kube-system --set dataConnectionString="$dataConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$logLevel
 	if($LASTEXITCODE -ne 0 )
 	{
 		WaitForApiServices
-		helm install ./piraeus-mgmt-api --namespace kube-system --set dataConnectionString="$dataConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes"
+		helm install ./piraeus-mgmt-api --namespace kube-system --set dataConnectionString="$dataConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$logLevel
 	}
 	
 	$step++
 	
+	$websocketAIKey = GetInstrumentationKey "$Dns-websocket" $resourceGroupName $location
 	Write-Host "-- Step $step - Deploying helm chart for piraeus front end" -ForegroundColor Green
-	helm install ./piraeus-websocket --namespace kube-system --set dataConnectionString="$dataConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" 
+	helm install ./piraeus-websocket --namespace kube-system --set dataConnectionString="$dataConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$logLevel 
 	if($LASTEXITCODE -ne 0 )
 	{
 		WaitForApiServices
-		helm install ./piraeus-websocket --namespace kube-system --set dataConnectionString="$dataConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" 
+		helm install ./piraeus-websocket --namespace kube-system --set dataConnectionString="$dataConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$logLevel 
 	}
 	$step++
 	
@@ -408,6 +413,7 @@ function New-PiraeusDeploy()
    $config.coapAuthority = $null
    $config.frontendVMSize = $null
    $config.orleansVMSize = $null
+   $config.logLevel = $null
    
    $config | ConvertTo-Json -depth 100 | Out-File "./../src/Samples.Mqtt.Client/config.json"
    
@@ -417,8 +423,7 @@ function New-PiraeusDeploy()
    Write-Host "Password - $pwd" -ForegroundColor Magenta
    Write-Host "-------------------" -ForegroundColor Cyan
    Write-Host""
-   Write-Host "Done :-)  Dare Mighty Things" -ForegroundColor Cyan
-	
+   Write-Host "Done :-)  Dare Mighty Things" -ForegroundColor Cyan	
 }
 
 function KubeApply()
@@ -689,6 +694,28 @@ function NewRandomStorageAcctName()
 	}
 	
 	return $randomString
+}
+
+function GetInstrumentationKey()
+{
+    param([string]$appName, [string]$rg, [string]$loc)
+
+    $jsonAppString = az monitor app-insights component show --app $appName -g $rg
+	$host.ui.RawUI.ForegroundColor = 'Gray'	
+    if($LASTEXITCODE -ne 0)
+    {
+	    Write-Host "-- Step $step - Creating App Insights $appName" -ForegroundColor Green
+			
+	    $jsonAppString = az monitor app-insights component create -a $appName -l $loc -k other -g $rg --application-type other
+	    $step++       
+    }
+
+    $appKey = NewRandomKey(8)
+    $jsonKeyString = az monitor app-insights api-key create --api-key $appKey -g testdeploy -a $appName
+    $keyObj = ConvertFrom-Json -InputObject "$jsonKeyString"
+    $instrumentationKey = $keyObj.apiKey	
+	$host.ui.RawUI.ForegroundColor = 'Gray'
+    return $instrumentationKey
 }
 
 

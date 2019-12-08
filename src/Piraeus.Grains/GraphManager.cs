@@ -78,7 +78,7 @@ namespace Piraeus.Grains
         /// <param name="config"></param>
         /// <remarks>Creates a new IClusterClient per instance of GraphManager.</remarks>
         public GraphManager(OrleansConfig config)
-        : this(config.DataConnectionString, config.GetLoggerTypes(), Enum.Parse<LogLevel>(config.LogLevel, true), config.AppInsightsKey)
+        : this(config.DataConnectionString, config.GetLoggerTypes(), Enum.Parse<LogLevel>(config.LogLevel, true), config.InstrumentationKey)
         {
         }
 

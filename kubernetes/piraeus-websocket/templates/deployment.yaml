@@ -43,6 +43,18 @@ spec:
               secretKeyRef:
                 name: {{ template "fullname" . }}
                 key: dataConnectionString 
+          - name: OR_InstrumentationKey
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey 
+          - name: OR_LogLevel
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: logLevel 
+          - name: PI_ClientIdentityNameClaimType
+          - name: PI_ClientIdentityNameClaimType
           - name: PI_ClientIdentityNameClaimType
             valueFrom:
               secretKeyRef:
@@ -77,7 +89,22 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "fullname" . }}
-                key: auditConnectionString      
+                key: auditConnectionString  
+          - name: PI_InstrumentationKey
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey
+          - name: PI_LogLevel
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: logLevel  
+          - name: APPINSIGHTS_INSTRUMENTATIONKEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "fullname" . }}
+                key: instrumentationKey    
           ports:
           - containerPort: 8081
           readinessProbe:
