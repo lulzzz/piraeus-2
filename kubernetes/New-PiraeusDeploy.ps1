@@ -711,7 +711,7 @@ function GetInstrumentationKey()
     }
 
     $appKey = NewRandomKey(8)
-    $jsonKeyString = az monitor app-insights api-key create --api-key $appKey -g testdeploy -a $appName
+    $jsonKeyString = az monitor app-insights api-key create --api-key $appKey -g $resourceGroupName -a $appName
     $keyObj = ConvertFrom-Json -InputObject "$jsonKeyString"
     $instrumentationKey = $keyObj.apiKey	
 	$host.ui.RawUI.ForegroundColor = 'Gray'
