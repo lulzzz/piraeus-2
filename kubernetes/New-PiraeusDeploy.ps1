@@ -2,7 +2,41 @@ function New-PiraeusDeploy()
 {	
     param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$LogLevel = "Information", [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
     
+    if($SubscriptionName.Length -eq 0)
+    {
+		Write-Host "Required parameter -SubscriptionName not set...terminating script" -ForegroundColor Yellow
+		return
+    }
     
+    if($ResourceGroupName.Length -eq 0)
+    {
+		Write-Host "Required parameter -ResourceGroupName not set...terminating script" -ForegroundColor Yellow
+		return
+    }
+    
+    if($Email.Length -eq 0)
+    {
+		Write-Host "Required parameter -Email not set...terminating script" -ForegroundColor Yellow
+		return
+    }
+    
+    if($Dns.Length -eq 0)
+    {
+		Write-Host "Required parameter -Dns not set...terminating script" -ForegroundColor Yellow
+		return
+    }
+    
+    if($Location.Length -eq 0)
+    {
+		Write-Host "Required parameter -Location not set...terminating script" -ForegroundColor Yellow
+		return
+    }
+    
+    if($StorageAcctName.Length -eq 0)
+    {
+		Write-Host "Required parameter -StorageAcctName not set...terminating script" -ForegroundColor Yellow
+		return
+    }
 	
     $apiKey1 = NewRandomKey(16)
 	$apiKey2 = NewRandomKey(16)
@@ -100,6 +134,15 @@ function New-PiraeusDeploy()
 	}	
 
 	$step = 1
+	
+	az extension show -n application-insights
+    
+    if($LASTEXITCODE -ne 0)
+    {
+		Write-Host "-- Step $step - Add Azure CLI extension for Application Insights" -ForegroundColor Green
+		az extension add -n application-insights -y
+		$step++
+    }
 
 	CleanUpK8Deployment "$clusterName" "$resourceGroupName"
 	
