@@ -224,7 +224,7 @@ function New-PiraeusDeploy()
 	
 	#create AKS cluster
 	Write-Host "-- Step $step - Create AKS cluster" -ForegroundColor Green	
-	az aks create --resource-group $resourceGroupName --name $clusterName --node-count $nodeCount --service-principal $appId --client-secret $pwd --node-vm-size $frontendVMSize 
+	az aks create --resource-group $resourceGroupName --name $clusterName --node-count $nodeCount --service-principal $appId --client-secret $pwd --node-vm-size $frontendVMSize --generate-ssh-keys
 	$step++
 
 	#get AKS credentials
