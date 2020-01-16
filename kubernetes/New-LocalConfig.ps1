@@ -4,7 +4,7 @@ function New-LocalConfig()
     $url = "http://localhost:29763"
     Write-Host "Using $url for management api" -ForegroundColor Yellow
 
-    Import-Module "../src/Piraeus.Module.Core/bin/Debug/netcoreapp3.0/Piraeus.Module.Core.dll"
+    Install-Module "Piraeus.Module.Core"
     Write-Host "Module imported" -ForegroundColor Yellow
 
     #get a security token for the management API

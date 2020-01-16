@@ -11,7 +11,7 @@ namespace Samples.Mqtt.Client
         {
         }
 
-        [JsonProperty("dnsName")]
+        [JsonProperty("dns")]
         public string DnsName { get; set; }
 
         [JsonProperty("location")]

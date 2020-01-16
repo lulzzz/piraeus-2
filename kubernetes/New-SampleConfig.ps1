@@ -7,7 +7,6 @@ function New-SampleConfig()
     $url = "https://$authority"
     Write-Host "Using $url for management api" -ForegroundColor Yellow
 
-    Import-Module "../src/Piraeus.Module.Core/bin/Release/netcoreapp3.0/Piraeus.Module.Core.dll"
     Write-Host "Module imported" -ForegroundColor Yellow
 
     #get a security token for the management API

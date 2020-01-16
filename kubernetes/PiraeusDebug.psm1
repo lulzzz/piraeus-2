@@ -1,5 +1,4 @@
-
-function New-PiraeusDeployment()  
+function New-PiraeusDeployment  
 {	
     param ([string]$SubscriptionName, [string]$ResourceGroupName, [string]$ClusterName, [string]$Email, [string]$Dns, [string]$Location, [string]$StorageAcctName, [int]$NodeCount = 1, [string]$LogLevel = "Information", [string]$FrontendVMSize, [string]$OrleansVMSize, [string]$AppID, [string]$Password)
   
@@ -39,11 +38,11 @@ function New-PiraeusDeployment()
 		return
     }
 	
-    $apiKey1 = NewRandomKey(16)
-	$apiKey2 = NewRandomKey(16)
+    $apiKey1 = New-RandomKey(16)
+	$apiKey2 = New-RandomKey(16)
 	$apiCodes = $apiKey1 + ";" + $apiKey2
-	$apiSymmetricKey = NewRandomKey(32)
-	$symmetricKey = NewRandomKey(32)
+	$apiSymmetricKey = New-RandomKey(32)
+	$symmetricKey = New-RandomKey(32)
 	
 	if($ClusterName.Length -eq 0)
 	{
@@ -52,7 +51,7 @@ function New-PiraeusDeployment()
 	
 	if($StorageAcctName.Length -eq 0)
 	{
-		$storageAcctName = NewRandomStorageAcctName
+		$storageAcctName = New-NewRandomStorageAcctName
     }
     else
     {
@@ -145,7 +144,7 @@ function New-PiraeusDeployment()
 		$step++
     }
 
-	CleanUpK8Deployment "$clusterName" "$resourceGroupName"
+	New-CleanUpK8Deployment "$clusterName" "$resourceGroupName"
 	
 	#Delete the AKS cluster if exists
 	$clusterLine = az aks list --query "[?contains(name, '$clusterName')]" --output table
@@ -273,12 +272,12 @@ function New-PiraeusDeployment()
 
 	#get AKS credentials
 	Write-Host "-- Step $step - Get AKS credentials" -ForegroundColor Green
-	GetAksCredentials $resourceGroupName $clusterName
+	Get-AksCredentials $resourceGroupName $clusterName
 	$step++
 	
 	#apply RBAC
 	Write-Host "-- Step $step - Apply kubectl RBAC" -ForegroundColor Green
-	ApplyYaml "./helm-rbac.yaml" "kube-system"
+	Set-ApplyYaml "./helm-rbac.yaml" "kube-system"
 	$step++
 	
 	#initialize tiller with helm
@@ -289,7 +288,7 @@ function New-PiraeusDeployment()
 	$step++
 	
 	Write-Host "-- Step $step - Label existing node in cluster pool=nodepool1" -ForegroundColor Green
-	SetNodeLabel "nodepool1" "pool" "nodepool1"
+	Set-NodeLabel "nodepool1" "pool" "nodepool1"
 	$step++
 	
 	Write-Host "-- Step $step - Creating namespace for cert-manager" -ForegroundColor Green
@@ -301,7 +300,7 @@ function New-PiraeusDeployment()
 	$step++
 
 	Write-Host "-- Step $step - Getting cert-manager CRDs" -ForegroundColor Green
-	#ApplyYaml "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml" "cert-manager"
+	#Set-ApplyYaml "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml" "cert-manager"
 	kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml" -n "cert-manager" --validate=false
 	$step++
 	
@@ -317,7 +316,7 @@ function New-PiraeusDeployment()
 
 	Write-Host "-- Step $step - Applying the certificate issuer" -ForegroundColor Green
 	Copy-Item -Path "./issuer.yaml" -Destination "./issuer-copy.yaml"
-	UpdateYaml -newValue $email -matchString "EMAILREF" -filename "./issuer-copy.yaml"            
+	Update-Yaml -newValue $email -matchString "EMAILREF" -filename "./issuer-copy.yaml"            
 	kubectl apply -f ./issuer-copy.yaml -n kube-system
 	Write-Host "Wait 30 seconds for issuer to initialize"
 	Start-Sleep -Seconds 30
@@ -329,14 +328,14 @@ function New-PiraeusDeployment()
 	$step++
 
 	Write-Host "-- Step $step - Installing NGINX ingress controller" -ForegroundColor Green
-	InstallNGINX
+	New-InstallNGINX
 	#helm install stable/nginx-ingress --namespace kube-system --set controller.replicaCount=1
 	Write-Host "Wait 45 seconds for nginx to initialize"
 	Start-Sleep -Seconds 45
 	$step++
 
 	Write-Host "-- Step $step - NGINX ingress controller's external IP" -ForegroundColor Green
-	$IP = GetExternalIP            
+	$IP = Get-ExternalIP            
 	Write-Host "Got external IP = $IP" -ForegroundColor Yellow
  
 	# Get the resource-id of the public ip
@@ -360,9 +359,9 @@ function New-PiraeusDeployment()
 	#update and apply certificate with DNS and location
 	Write-Host "-- Step $step - Update and apply the certificate" -ForegroundColor Green
 	Copy-Item -Path "./certificate.yaml" -Destination "./certificate-copy.yaml"
-	UpdateYaml -newValue $dnsName -matchString "INGRESSDNS" -filename "./certificate-copy.yaml"
-	UpdateYaml -newValue $location -matchString "LOCATION" -filename "./certificate-copy.yaml"
-	ApplyYaml "./certificate-copy.yaml" -n "cert-manager"
+	Update-Yaml -newValue $dnsName -matchString "INGRESSDNS" -filename "./certificate-copy.yaml"
+	Update-Yaml -newValue $location -matchString "LOCATION" -filename "./certificate-copy.yaml"
+	Set-ApplyYaml "./certificate-copy.yaml" -n "cert-manager"
 	Remove-Item -Path "./certificate-copy.yaml"
 	$step++
 
@@ -375,7 +374,7 @@ function New-PiraeusDeployment()
 	
 	#label the new node pool
 	Write-Host "-- Step $step - Label orleans node in cluster pool=nodepool2" -ForegroundColor Green
-	SetNodeLabel "nodepool2" "pool" "nodepool2"
+	Set-NodeLabel "nodepool2" "pool" "nodepool2"
 	$step++
 
 	
@@ -383,35 +382,35 @@ function New-PiraeusDeployment()
 
 	Write-Host ("K8 api services online...let's deploy and finish up") -ForegroundColor Green
 
-	$siloAIKey = GetInstrumentationKey "$Dns-silo" $resourceGroupName $location
+	$siloAIKey = Get-InstrumentationKey "$Dns-silo" $resourceGroupName $location
 	#apply the piraeus silo helm chart
 	Write-Host "-- Step $step - Deploying helm chart for piraeus-silo" -ForegroundColor Green
 	helm install ./piraeus-silo --name piraeus-silo --namespace kube-system --set dataConnectionString=$dataConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$logLevel
 	if($LASTEXITCODE -ne 0 )
 	{
-		WaitForApiServices
+		New-WaitForApiServices
 		helm install ./piraeus-silo --name piraeus-silo --namespace kube-system --set dataConnectionString=$dataConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$logLevel
 	}
 	$step++
 
-	$mgmtAIKey = GetInstrumentationKey "$Dns-api" $resourceGroupName $location
+	$mgmtAIKey = Get-InstrumentationKey "$Dns-api" $resourceGroupName $location
 	$tagain = $false
 	Write-Host "-- Step $step - Deploying helm chart for piraeus management api" -ForegroundColor Green
 	helm install ./piraeus-mgmt-api --namespace kube-system --set dataConnectionString="$dataConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$logLevel
 	if($LASTEXITCODE -ne 0 )
 	{
-		WaitForApiServices
+		New-WaitForApiServices
 		helm install ./piraeus-mgmt-api --namespace kube-system --set dataConnectionString="$dataConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$logLevel
 	}
 	
 	$step++
 	
-	$websocketAIKey = GetInstrumentationKey "$Dns-websocket" $resourceGroupName $location
+	$websocketAIKey = Get-InstrumentationKey "$Dns-websocket" $resourceGroupName $location
 	Write-Host "-- Step $step - Deploying helm chart for piraeus front end" -ForegroundColor Green
 	helm install ./piraeus-websocket --namespace kube-system --set dataConnectionString="$dataConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$logLevel 
 	if($LASTEXITCODE -ne 0 )
 	{
-		WaitForApiServices
+		New-WaitForApiServices
 		helm install ./piraeus-websocket --namespace kube-system --set dataConnectionString="$dataConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$logLevel 
 	}
 	$step++
@@ -419,9 +418,9 @@ function New-PiraeusDeployment()
 	#update the ingress controller with the routing data and dns
 	Write-Host "-- Step $step - Apply update to NGINX ingress controller" -ForegroundColor Green
 	Copy-Item -Path "./ingress.yaml" -Destination "./ingress-copy.yaml"
-	UpdateYaml -newValue $dnsName -matchString "INGRESSDNS" -filename "./ingress-copy.yaml"
-	UpdateYaml -newValue $location -matchString "LOCATION" -filename "./ingress-copy.yaml"
-	ApplyYaml "./ingress-copy.yaml" "kube-system"
+	Update-Yaml -newValue $dnsName -matchString "INGRESSDNS" -filename "./ingress-copy.yaml"
+	Update-Yaml -newValue $location -matchString "LOCATION" -filename "./ingress-copy.yaml"
+	Set-ApplyYaml "./ingress-copy.yaml" "kube-system"
 	Remove-Item -Path "./ingress-copy.yaml"
 	$step++
 	
@@ -437,7 +436,7 @@ function New-PiraeusDeployment()
 	
 	Write-Host "-- Step $step - Running Sample Configuration" -ForegroundColor Green
 	Write-Host "---- Running Sample Configuration ---" -Foreground Cyan
-	NewSampleConfig $Dns $Location $apiKey1
+	New-SampleConfig $Dns $Location $apiKey1
 	$step++
 	
    Write-Host "-- Step $step - Writing file for MQTT client configuration" -ForegroundColor Green   
@@ -470,7 +469,7 @@ function New-PiraeusDeployment()
    Write-Host "Done :-)  Dare Mighty Things" -ForegroundColor Cyan	
 }
 
-function KubeApply()
+function Set-KubeApply
 {
 	param([string]$filename, [string]$ns)
 	$looper = $true
@@ -489,7 +488,7 @@ function KubeApply()
 	}
 }
 
-function InstallNGINX()
+function New-InstallNGINX
 {
 	$looper = $true
     while($looper)
@@ -515,7 +514,7 @@ function InstallNGINX()
 	}
 }
 
-function WaitForApiServices()
+function New-WaitForApiServices
 {
 	$v = kubectl get apiservice
 	$ft = $true
@@ -537,7 +536,7 @@ function WaitForApiServices()
 
 
 
-function GetAksCredentials()
+function Get-AksCredentials
 {
     param([string]$rgn, [string]$cn)
 
@@ -559,7 +558,7 @@ function GetAksCredentials()
 
 
 
-function GetExternalIP()
+function Get-ExternalIP
 {
     $looper = $TRUE
     while($looper)
@@ -600,7 +599,7 @@ function GetExternalIP()
 }
 
 #---- functions ----
-function SetNodeLabel
+function Set-NodeLabel
 {
     param([string]$nodeMatchValue, [string]$key, [string]$value)
     
@@ -636,7 +635,7 @@ function SetNodeLabel
     }
 }
 
-function ApplyYaml
+function Set-ApplyYaml
 {
     param([string]$file, [string]$ns)
 
@@ -656,7 +655,7 @@ function ApplyYaml
     }
 }
 
-function UpdateYaml()
+function Update-Yaml
 {
     Param ([string]$newValue, [string]$matchString, [string]$filename)
 
@@ -666,7 +665,7 @@ function UpdateYaml()
 #---- end functions
 
 
-function CleanUpK8Deployment()
+function New-CleanUpK8Deployment
 {
 	param([string]$cName, [string]$rgName)
 
@@ -694,7 +693,7 @@ function CleanUpK8Deployment()
 	}
 }
 
-function NewRandomKey()	   
+function New-RandomKey	   
 {
     param([int]$Length)
     
@@ -704,7 +703,7 @@ function NewRandomKey()
 	$stringVar = [Convert]::ToBase64String($buffer)
     if($stringVar.Contains("+") -or $stringVar.Contains("/"))
     {
-        return NewRandomKey($Length)
+        return New-RandomKey($Length)
     }
     else
     {
@@ -713,7 +712,7 @@ function NewRandomKey()
 }
 
 
-function NewRandomStorageAcctName()
+function New-NewRandomStorageAcctName
 {
 	$alpha = "abcdefghijklmnopqrstuvwxyz"
 	$alpha2 = "0123456789"
@@ -740,7 +739,7 @@ function NewRandomStorageAcctName()
 	return $randomString
 }
 
-function GetInstrumentationKey()
+function Get-InstrumentationKey
 {
     param([string]$appName, [string]$rg, [string]$loc)
 
@@ -754,7 +753,7 @@ function GetInstrumentationKey()
 	    $step++       
     }
 
-    $appKey = NewRandomKey(8)
+    $appKey = New-RandomKey(8)
     $jsonKeyString = az monitor app-insights api-key create --api-key $appKey -g $resourceGroupName -a $appName
     $keyObj = ConvertFrom-Json -InputObject "$jsonKeyString"
     $instrumentationKey = $keyObj.apiKey	
@@ -763,7 +762,7 @@ function GetInstrumentationKey()
 }
 
 
-function NewSampleConfig()
+function New-SampleConfig
 {
     param([string]$DnsName, [string]$Location, [string]$Key)
     
@@ -876,4 +875,66 @@ function NewSampleConfig()
 
     Write-Host "----- PI-System $resource_B Metadata ----" -ForegroundColor Green
     Get-PiraeusEventMetadata -ResourceUriString $resource_B -ServiceUrl $url -SecurityToken $token
+}
+
+function New-PiraeusCleanup
+{
+#cleanup script for source check in
+
+    $path1 = "./deploy.json"
+    $deploy = Get-Content -Raw -Path $path1 | ConvertFrom-Json
+    $deploy.email = ""
+    $deploy.dnsName = ""
+    $deploy.location = ""
+    $deploy.storageAcctName = ""
+    $deploy.resourceGroupName = ""
+    $deploy.subscriptionNameOrId = ""
+    $deploy.appId = ""
+    $deploy.pwd = ""
+    $deploy.clusterName = "piraeuscluster"
+    $deploy.nodeCount = 1
+    $deploy.apiIssuer = "http://skunklab.io/mgmt"
+    $deploy.apiAudience = "http://skunklab.io/mgmt"
+    $deploy.apiSymmetricKey = "//////////////////////////////////////////8="
+    $deploy.apiSecurityCodes = "12345678;87654321"
+    $deploy.identityClaimType = "http://skunklab.io/name"
+    $deploy.issuer = "http://skunklab.io/"
+    $deploy.audience = "http://skunklab.io/"
+    $deploy.symmetricKey = "//////////////////////////////////////////8="
+    $deploy.tokenType = "JWT"
+    $deploy.coapAuthority = "skunklab.io"
+    $deploy.frontendVMSize = "Standard_D2s_v3"
+    $deploy.orleansVMSize = "Standard_D4s_v3"
+    $deploy | ConvertTo-Json -depth 100 | Out-File $path1
+
+
+    $path2 = "../src/Samples.Mqtt.Client/config.json"
+    $sampleConfig = Get-Content -Raw -Path $path2 | ConvertFrom-Json
+    $sampleConfig.email = ""
+    $sampleConfig.dnsName = ""
+    $sampleConfig.location = ""
+    $sampleConfig.storageAcctName = ""
+    $sampleConfig.resourceGroupName = ""
+    $sampleConfig.subscriptionNameOrId = ""
+    $sampleConfig.appId = $null
+
+    $sampleConfig.appId = $null
+    $sampleConfig.pwd = $null
+    $sampleConfig.clusterName = $null
+    $sampleConfig.nodeCount = $null
+    $sampleConfig.apiIssuer = $null
+    $sampleConfig.apiAudience = $null
+    $sampleConfig.apiSymmetricKey = $null
+    $sampleConfig.apiSecurityCodes = $null
+    $sampleConfig.identityClaimType = $null
+    $sampleConfig.issuer = $null
+    $sampleConfig.audience = $null
+    $sampleConfig.symmetricKey = $null
+    $sampleConfig.tokenType = $null
+    $sampleConfig.coapAuthority = $null
+    $sampleConfig.frontendVMSize = $null
+    $sampleConfig.orleansVMSize = $null
+
+    $sampleConfig | ConvertTo-Json -depth 100 | Out-File $path2 
+  
 }

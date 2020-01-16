@@ -1,9 +1,9 @@
 {
-  "subscriptionNameOrId": "",
+  "subscriptionName": "",
   "resourceGroupName": "",
   "clusterName": "piraeuscluster",
   "email": "",
-  "dnsName": "",
+  "dns": "",
   "location": "",
   "storageAcctName": "",
   "nodeCount": 1,

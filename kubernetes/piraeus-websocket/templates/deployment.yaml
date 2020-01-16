@@ -52,9 +52,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "fullname" . }}
-                key: logLevel 
-          - name: PI_ClientIdentityNameClaimType
-          - name: PI_ClientIdentityNameClaimType
+                key: logLevel          
           - name: PI_ClientIdentityNameClaimType
             valueFrom:
               secretKeyRef:

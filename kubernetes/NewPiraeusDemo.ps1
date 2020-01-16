@@ -44,10 +44,10 @@ function New-PiraeusDemo()
 	$config = Get-Content -Raw -Path "./deploy.json" | ConvertFrom-Json	
 	$config.storageAcctName = $storageAcctName
 	$config.resourceGroupName = $ResourceGroupName
-	$config.subscriptionNameOrId = $SubscriptionName
+	$config.subscriptionName = $SubscriptionName
 	$config.location = $Location
 	$config.email = $Email
-	$config.dnsName = $Dns
+	$config.dns = $Dns
 	$config.apiSymmetricKey = $apiSymmetricKey
 	$config.apiSecurityCodes = $apiCodes
 	$config.symmetricKey = $symmetricKey
@@ -64,10 +64,10 @@ function New-PiraeusDemo()
 	$config.clusterName = $ClusterName
 	
 	$email = $config.email
-	$dnsName = $config.dnsName
+	$dnsName = $config.dns
 	$location = $config.location
 	$resourceGroupName = $config.resourceGroupName
-	$subscriptionNameOrId = $config.subscriptionNameOrId
+	$subscriptionName = $config.subscriptionName
 	$clusterName = $config.clusterName
 	$nodeCount = $config.nodeCount
 	$apiIssuer = $config.apiIssuer			
@@ -134,11 +134,11 @@ function New-PiraeusDemo()
 	$env:AZURE_HTTP_USER_AGENT='pid-332e88b9-31d3-5070-af65-de3780ad5c8b'
 	
 	#Set the subscription 
-	Write-Host "-- Step $step - Setting subscription  $subscriptionNameOrId" -ForegroundColor Green
-	az account set --subscription "$subscriptionNameOrId"
+	Write-Host "-- Step $step - Setting subscription  $subscriptionName" -ForegroundColor Green
+	az account set --subscription "$subscriptionName"
 	if($LASTEXITCODE -ne 0)
 	{
-		Write-Host "Subscription - $subscriptionNameOrId could not be set" -ForegroundColor Yellow
+		Write-Host "Subscription - $subscriptionName could not be set" -ForegroundColor Yellow
 		Write-Host "Exiting script" -ForegroundColor Yellow
 		return;
 	}
@@ -293,9 +293,9 @@ function New-PiraeusDemo()
 
 	#update the azure network with the public IP ID
 	Write-Host "-- Step $step - Update Azure Network with Public IP ID" -ForegroundColor Green
-	if($subscriptionNameOrId.Length -ne 0)
+	if($subscriptionName.Length -ne 0)
 	{
-	  az network public-ip update --ids $PUBLICIPID --dns-name $dnsName --subscription $subscriptionNameOrId
+	  az network public-ip update --ids $PUBLICIPID --dns-name $dnsName --subscription $subscriptionName
 	}
 	else
 	{
@@ -389,7 +389,7 @@ function New-PiraeusDemo()
    $config.email = $null
    $config.storageAcctName = $null
    $config.resourceGroupName = $null
-   $config.subscriptionNameOrId = $null
+   $config.subscriptionName = $null
    $config.appId = $null
    $config.pwd = $null
    $config.clusterName = $null
@@ -406,7 +406,7 @@ function New-PiraeusDemo()
    $config | ConvertTo-Json -depth 100 | Out-File "./../src/Samples.Mqtt.Client/config.json"
    
    Write-Host "---- OUTPUTS -----" -ForegroundColor Cyan
-   Write-Host "Hostname - $dnsName.$location.cloudapp.azure.com" -ForegroundColor Magenta
+   Write-Host "Hostname - $dns.$location.cloudapp.azure.com" -ForegroundColor Magenta
    Write-Host "Application ID - $appId" -ForegroundColor Magenta
    Write-Host "Password - $pwd" -ForegroundColor Magenta
    Write-Host "-------------------" -ForegroundColor Cyan
@@ -694,8 +694,6 @@ function NewSampleConfig()
     $url = "https://$authority"
     Write-Host "Using $url for management api" -ForegroundColor Yellow
 
-    Import-Module "../src/Piraeus.Module.Core/bin/Release/netcoreapp3.0/Piraeus.Module.Core.dll"
-    Write-Host "Module imported" -ForegroundColor Yellow
 
     #get a security token for the management API
     Write-Host "--- Get security token for Piraeus configuration ---" -Foreground Yellow
