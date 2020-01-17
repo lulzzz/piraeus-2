@@ -4,7 +4,7 @@
 RootModule = 'Piraeus.Module.Core.dll'
 
 # Version number of this module.
-ModuleVersion = '1.1.19'
+ModuleVersion = '1.2.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()

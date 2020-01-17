@@ -52,18 +52,18 @@ CALL :remove "skunklab/piraeus-tcp-gateway:v3.0"
 CALL :remove "skunklab/piraeus-udp-gateway:v3.0"
 CALL :remove "skunklab/piraeus-http-gateway:v3.0"
 
-CALL :remove "piraeus-silo:v3.0.1"
-CALL :remove "piraeus-mgmt-api:v3.0.1"
-CALL :remove "piraeus-websocket-gateway:v3.0.1"
-CALL :remove "piraeus-tcp-gateway:v3.0.1"
-CALL :remove "piraeus-udp-gateway:v3.0.1"
-CALL :remove "piraeus-http-gateway:v3.0.1"
-CALL :remove "skunklab/piraeus-silo:v3.0.1"
-CALL :remove "skunklab/piraeus-mgmt-api:v3.0.1"
-CALL :remove "skunklab/piraeus-websocket-gateway:v3.0.1"
-CALL :remove "skunklab/piraeus-tcp-gateway:v3.0.1"
-CALL :remove "skunklab/piraeus-udp-gateway:v3.0.1"
-CALL :remove "skunklab/piraeus-http-gateway:v3.0.1"
+CALL :remove "piraeus-silo:v3.0.2"
+CALL :remove "piraeus-mgmt-api:v3.0.2"
+CALL :remove "piraeus-websocket-gateway:v3.0.2"
+CALL :remove "piraeus-tcp-gateway:v3.0.2"
+CALL :remove "piraeus-udp-gateway:v3.0.2"
+CALL :remove "piraeus-http-gateway:v3.0.2"
+CALL :remove "skunklab/piraeus-silo:v3.0.2"
+CALL :remove "skunklab/piraeus-mgmt-api:v3.0.2"
+CALL :remove "skunklab/piraeus-websocket-gateway:v3.0.2"
+CALL :remove "skunklab/piraeus-tcp-gateway:v3.0.2"
+CALL :remove "skunklab/piraeus-udp-gateway:v3.0.2"
+CALL :remove "skunklab/piraeus-http-gateway:v3.0.2"
 
 
 
@@ -75,27 +75,27 @@ docker build -t piraeus-udp-gateway ./Piraeus.UdpGateway-Out
 docker build -t piraeus-http-gateway ./Piraeus.HttpGateway-Out
 
 
-docker tag piraeus-silo piraeus-silo:v3.0.1
-docker tag piraeus-mgmt-api piraeus-mgmt-api:v3.0.1
-docker tag piraeus-websocket-gateway piraeus-websocket-gateway:v3.0.1
-docker tag piraeus-tcp-gateway piraeus-tcp-gateway:v3.0.1
-docker tag piraeus-udp-gateway piraeus-udp-gateway:v3.0.1
-docker tag piraeus-http-gateway piraeus-http-gateway:v3.0.1
+docker tag piraeus-silo piraeus-silo:v3.0.2
+docker tag piraeus-mgmt-api piraeus-mgmt-api:v3.0.2
+docker tag piraeus-websocket-gateway piraeus-websocket-gateway:v3.0.2
+docker tag piraeus-tcp-gateway piraeus-tcp-gateway:v3.0.2
+docker tag piraeus-udp-gateway piraeus-udp-gateway:v3.0.2
+docker tag piraeus-http-gateway piraeus-http-gateway:v3.0.2
 
-docker tag piraeus-silo:v3.0 skunklab/piraeus-silo:v3.0.1
-docker tag piraeus-mgmt-api:v3.0 skunklab/piraeus-mgmt-api:v3.0.1
-docker tag piraeus-websocket-gateway:v3.0 skunklab/piraeus-websocket-gateway:v3.0.1
-docker tag piraeus-tcp-gateway:v3.0 skunklab/piraeus-tcp-gateway:v3.0.1
-docker tag piraeus-udp-gateway:v3.0 skunklab/piraeus-udp-gateway:v3.0.1
-docker tag piraeus-http-gateway:v3.0 skunklab/piraeus-http-gateway:v3.0.1
+docker tag piraeus-silo:v3.0 skunklab/piraeus-silo:v3.0.2
+docker tag piraeus-mgmt-api:v3.0 skunklab/piraeus-mgmt-api:v3.0.2
+docker tag piraeus-websocket-gateway:v3.0 skunklab/piraeus-websocket-gateway:v3.0.2
+docker tag piraeus-tcp-gateway:v3.0 skunklab/piraeus-tcp-gateway:v3.0.2
+docker tag piraeus-udp-gateway:v3.0 skunklab/piraeus-udp-gateway:v3.0.2
+docker tag piraeus-http-gateway:v3.0 skunklab/piraeus-http-gateway:v3.0.2
 
 
-::docker push skunklab/piraeus-silo:v3.0.1
-::docker push skunklab/piraeus-mgmt-api:v3.0.1
-::docker push skunklab/piraeus-websocket-gateway:v3.0.1
-::docker push skunklab/piraeus-tcp-gateway:v3.0.1
-::docker push skunklab/piraeus-udp-gateway:v3.0.1
-::docker push skunklab/piraeus-http-gateway:v3.0.1
+docker push skunklab/piraeus-silo:v3.0.2
+docker push skunklab/piraeus-mgmt-api:v3.0.2
+docker push skunklab/piraeus-websocket-gateway:v3.0.2
+docker push skunklab/piraeus-tcp-gateway:v3.0.2
+docker push skunklab/piraeus-udp-gateway:v3.0.2
+docker push skunklab/piraeus-http-gateway:v3.0.2
 
 
 ECHO "done"
