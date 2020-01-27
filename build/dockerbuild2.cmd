@@ -29,11 +29,11 @@ docker build -t skunklab/piraeus-udp-gateway:v3.0.2 ./Piraeus.UdpGateway
 docker build -t skunklab/piraeus-http-gateway:v3.0.2 ./Piraeus.HttpGateway
 
 
-::docker push skunklab/piraeus-silo:v3.0.2
-::docker push skunklab/piraeus-mgmt-api:v3.0.2
-::docker push skunklab/piraeus-websocket-gateway:v3.0.2
-::docker push skunklab/piraeus-tcp-gateway:v3.0.2
-::docker push skunklab/piraeus-udp-gateway:v3.0.2
-::docker push skunklab/piraeus-http-gateway:v3.0.2
+docker push skunklab/piraeus-silo:v3.0.2
+docker push skunklab/piraeus-mgmt-api:v3.0.2
+docker push skunklab/piraeus-websocket-gateway:v3.0.2
+docker push skunklab/piraeus-tcp-gateway:v3.0.2
+docker push skunklab/piraeus-udp-gateway:v3.0.2
+docker push skunklab/piraeus-http-gateway:v3.0.2
 
 

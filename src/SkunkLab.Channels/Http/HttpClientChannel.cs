@@ -38,8 +38,7 @@ namespace SkunkLab.Channels.Http
             this.cacheKey = cacheKey;
             this.indexes = indexes;
         }
-
-
+        
         public HttpClientChannel(string endpoint, string resourceUriString, string contentType, X509Certificate2 certificate, string cacheKey = null, List<KeyValuePair<string, string>> indexes = null)
         {
             Id = "http-" + Guid.NewGuid().ToString();
@@ -143,8 +142,6 @@ namespace SkunkLab.Channels.Http
         public override event EventHandler<ChannelErrorEventArgs> OnError;
         public override event EventHandler<ChannelStateEventArgs> OnStateChange;
 
-
-
         public override async Task AddMessageAsync(byte[] message)
         {
             await Task.CompletedTask;
@@ -165,8 +162,6 @@ namespace SkunkLab.Channels.Http
             await Task.CompletedTask;
         }
 
-
-
         public override async Task OpenAsync()
         {
             OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
@@ -184,6 +179,10 @@ namespace SkunkLab.Channels.Http
                 HttpWebRequest request = GetRequest(HttpMethod.Get);
                 Port = request.RequestUri.Port;
                 IsEncrypted = request.RequestUri.Scheme == "https";
+                foreach(var item in observers)
+                {
+                    request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER, item.ResourceUri.ToString().ToLowerInvariant());
+                }
 
                 try
                 {
@@ -199,6 +198,12 @@ namespace SkunkLab.Channels.Http
                                 await stream.ReadAsync(buffer, 0, buffer.Length);
 
                                 string resourceHeader = response.Headers.Get(HttpChannelConstants.RESOURCE_HEADER);
+                                
+                                if(resourceHeader == null)
+                                {
+                                    continue;
+                                }
+
                                 string resourceUriString = new Uri(resourceHeader).ToString().ToLowerInvariant();
 
                                 foreach (Observer observer in observers)
@@ -237,6 +242,7 @@ namespace SkunkLab.Channels.Http
                 }
                 catch (Exception ex)
                 {
+                    
                     Trace.TraceError("Http client channel '{0}' receive error '{1}'", Id, ex.Message);
                     State = ChannelState.Closed;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
@@ -331,13 +337,13 @@ namespace SkunkLab.Channels.Http
                 //request.ContentType = contentType;
                 request.KeepAlive = true;
                 request.Timeout = Int32.MaxValue;
-                if (observers != null)
-                {
-                    foreach (Observer observer in observers)
-                    {
-                        request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER, observer.ResourceUri.ToString().ToLowerInvariant());
-                    }
-                }
+                //if (observers != null)
+                //{
+                //    foreach (Observer observer in observers)
+                //    {
+                //        request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER, observer.ResourceUri.ToString().ToLowerInvariant());
+                //    }
+                //}
             }
             else if (method == HttpMethod.Post)
             {

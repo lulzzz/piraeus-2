@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -18,8 +19,14 @@ namespace Piraeus.Core.Utilities
         public MessageUri(HttpRequest request)
             : this(HttpUtility.HtmlDecode(UriHelper.GetEncodedUrl(request)))
         {
-            if(request.ContentType != null)
-                ContentType = request.ContentType.ToLowerInvariant();
+            if(request.QueryString.HasValue)
+            {
+                var query = QueryHelpers.ParseQuery(request.QueryString.Value);
+                items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
+            }
+            
+
+            Read(request);
         }
 
         public MessageUri(HttpRequestMessage request)
@@ -74,6 +81,34 @@ namespace Piraeus.Core.Utilities
             Indexes = BuildIndexes(GetEnumerableParameters(QueryStringConstants.INDEX));
         }
 
+        private void Read(HttpRequest request)
+        {
+            ContentType ??= request.ContentType?.ToLowerInvariant();
+            Resource ??= request.Headers[HttpHeaderConstants.RESOURCE_HEADER];
+            if (request.Headers.ContainsKey(HttpHeaderConstants.SUBSCRIBE_HEADER))
+            {
+                string[] arr = request.Headers[HttpHeaderConstants.SUBSCRIBE_HEADER].ToArray();
+                string[] subs = arr[0].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                if(subs != null && subs.Count() > 0)
+                    Subscriptions = new List<string>(subs);
+            }
+
+            CacheKey ??= request.Headers[HttpHeaderConstants.CACHE_KEY];
+            if (request.Headers.ContainsKey(HttpHeaderConstants.INDEX_HEADER))
+            {
+                StringValues vals = request.Headers[HttpHeaderConstants.INDEX_HEADER];
+                List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
+
+                foreach(var val in vals)
+                {
+                    string[] parts = val.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    list.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
+                }
+
+                Indexes = list;
+            }
+        }
+
         private void Read(HttpRequestMessage request)
         {
             ContentType = request.Content.Headers.ContentType != null ? request.Content.Headers.ContentType.MediaType : "application/octet-stream";
@@ -118,6 +153,8 @@ namespace Piraeus.Core.Utilities
             SecurityToken ??= securityToken;
             ContentType ??= contentType;
         }
+
+        
 
         private void SetResource(IEnumerable<string> resources)
         {

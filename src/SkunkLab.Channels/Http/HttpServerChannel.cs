@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SkunkLab.Channels.Http
@@ -167,7 +168,8 @@ namespace SkunkLab.Channels.Http
         {
             try
             {
-                byte[] message = await request.Content.ReadAsByteArrayAsync();
+                byte[] message = await request.Content.ReadAsByteArrayAsync();          
+                
                 OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, message));
             }
             catch (Exception ex)

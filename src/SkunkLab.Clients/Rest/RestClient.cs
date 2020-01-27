@@ -16,7 +16,12 @@ namespace Piraeus.Clients.Rest
 
             if (observers != null)
             {
-                receiveChannel = ChannelFactory.Create(endpoint, securityToken, observers, token);
+                foreach (var ob in observers)
+                {
+                    if (endpoint.Contains("?"))
+                        endpoint = endpoint + $"&sub={ob.ResourceUri.ToString().ToLowerInvariant()}";
+                }
+                receiveChannel = ChannelFactory.Create(endpoint, securityToken, observers, token);                
                 Task openTask = receiveChannel.OpenAsync();
                 Task.WaitAll(openTask);
 

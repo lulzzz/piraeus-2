@@ -4,7 +4,7 @@
 RootModule = 'Piraeus.Module.Core.dll'
 
 # Version number of this module.
-ModuleVersion = '1.2.0'
+ModuleVersion = '1.2.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -64,7 +64,7 @@ RequiredAssemblies = @('Capl.dll', 'Piraeus.Core.dll')
 FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @('Get-PiraeusManagmentToken','Add-CaplPolicy','Get-CaplPolicy','Remove-CaplPolicy','New-CaplPolicy','New-CaplRule','New-CaplOperation','New-CaplMatch','New-CaplLogicalAnd','New-CaplLogicalOr','New-CaplTransform','New-CaplLiteralClaim','Add-PiraeusEventMetadata','Get-PiraeusEventMetadata','Get-PiraeusSigmaAlgebra','Remove-PiraeusEvent','Add-PiraeusSubscriptionMetadata','Get-PiraeusSubscriptionMetadata','Remove-PiraeusSubscription','Add-PiraeusBlobStorageSubscription','Add-PiraeusCosmosDbSubscription','Add-PiraeusEventGridSubscription','Add-PiraeusEventHubSubscription','Add-PiraeusIotHubCommandSubscription','Add-PiraeusIotHubDeviceSubscription','Add-PiraeusIotHubDirectMethodSubscription','Add-PiraeusQueueStorageSubscription','Add-PiraeusServiceBusSubscription','Add-PiraeusWebServiceSubscription','Add-PiraeusRedisCacheSubscription','Get-PiraeusSubscriptionList','Get-PiraeusSubscriberSubscriptions','Get-PiraeusEventMetrics','Get-PiraeusSubscriptionMetrics','Add-PiraeusServiceIdentityClaims','Add-PiraeusServiceIdentityCertificate','Add-PiraeusPskSecret','Get-PiraeusPskSecret','Get-PiraeusPskKeys','Remove-PiraeusPskSecret')
+CmdletsToExport = @('Get-PiraeusManagementToken','Add-CaplPolicy','Get-CaplPolicy','Remove-CaplPolicy','New-CaplPolicy','New-CaplRule','New-CaplOperation','New-CaplMatch','New-CaplLogicalAnd','New-CaplLogicalOr','New-CaplTransform','New-CaplLiteralClaim','Add-PiraeusEventMetadata','Get-PiraeusEventMetadata','Get-PiraeusSigmaAlgebra','Remove-PiraeusEvent','Add-PiraeusSubscriptionMetadata','Get-PiraeusSubscriptionMetadata','Remove-PiraeusSubscription','Add-PiraeusBlobStorageSubscription','Add-PiraeusCosmosDbSubscription','Add-PiraeusEventGridSubscription','Add-PiraeusEventHubSubscription','Add-PiraeusIotHubCommandSubscription','Add-PiraeusIotHubDeviceSubscription','Add-PiraeusIotHubDirectMethodSubscription','Add-PiraeusQueueStorageSubscription','Add-PiraeusServiceBusSubscription','Add-PiraeusWebServiceSubscription','Add-PiraeusRedisCacheSubscription','Get-PiraeusSubscriptionList','Get-PiraeusSubscriberSubscriptions','Get-PiraeusEventMetrics','Get-PiraeusSubscriptionMetrics','Add-PiraeusServiceIdentityClaims','Add-PiraeusServiceIdentityCertificate','Add-PiraeusPskSecret','Get-PiraeusPskSecret','Get-PiraeusPskKeys','Remove-PiraeusPskSecret')
 
 # Variables to export from this module
 VariablesToExport = '*'

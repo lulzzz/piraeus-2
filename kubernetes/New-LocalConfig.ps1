@@ -1,7 +1,7 @@
 function New-LocalConfig()
 {    
     
-    $url = "http://localhost:29763"
+    $url = "https://localhost:44393"
     Write-Host "Using $url for management api" -ForegroundColor Yellow
 
     Install-Module "Piraeus.Module.Core"

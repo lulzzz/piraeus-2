@@ -12,6 +12,7 @@ namespace Piraeus.HttpGateway.Middleware
     {
         private HttpContext context;
         private readonly PiraeusConfig config;
+        private readonly RequestDelegate next;
         private ProtocolAdapter adapter;
         private CancellationTokenSource source;
         private delegate void HttpResponseObserverHandler(object sender, SkunkLab.Channels.ChannelObserverEventArgs args);
@@ -26,32 +27,39 @@ namespace Piraeus.HttpGateway.Middleware
 
         public PiraeusHttpMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client)
         {
+            this.next = next;
             this.config = config;
             graphManager = new GraphManager(client);
+            
         }
 
         public async Task Invoke(HttpContext context)
         {
+            
             source = new CancellationTokenSource();
-            if (context.Request.Method.ToUpperInvariant() == "POST")
-            {
-                //sending a message
-                adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
-                adapter.Init();
-            }
-            else if (context.Request.Method.ToUpperInvariant() == "GET")
+            adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
+            adapter.OnObserve += Adapter_OnObserve;
+            adapter.OnClose += Adapter_OnClose;
+            adapter.Init();
+            await next(context);
+            if (context.Request.Method.ToUpperInvariant() == "GET")
             {
                 //long polling               
-                adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
-                adapter.OnObserve += Adapter_OnObserve;
-                adapter.Init();
+                //adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
+                
+                //adapter.Init();
                 this.context = context;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Listen), waitHandles[0]);
                 WaitHandle.WaitAll(waitHandles);
-                adapter.Dispose();
+                //adapter.Dispose();
             }
 
             await Task.CompletedTask;
+        }
+
+        private void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs e)
+        {
+            adapter.Dispose();
         }
 
         private void Listen(object state)
