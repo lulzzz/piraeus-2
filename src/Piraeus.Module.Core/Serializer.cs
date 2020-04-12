@@ -19,11 +19,11 @@ namespace Piraeus.Module
             else if (contentType == "application/xml" || contentType == "text/xml")
             {
                 XmlSerializer xs = new XmlSerializer(typeof(T));
-                using (MemoryStream stream = new MemoryStream(body))
+                using MemoryStream stream = new MemoryStream(body)
                 {
-                    stream.Position = 0;
-                    result = (T)xs.Deserialize(stream);
-                }
+                    Position = 0
+                };
+                result = (T)xs.Deserialize(stream);
             }
             else if (contentType == "text/plain")
             {
@@ -52,12 +52,10 @@ namespace Piraeus.Module
             else if (contentType == "application/xml" || contentType == "text/xml")
             {
                 XmlSerializer xs = new XmlSerializer(typeof(T));
-                using (MemoryStream stream = new MemoryStream())
-                {
-                    xs.Serialize(stream, body);
-                    stream.Position = 0;
-                    result = stream.ToArray();
-                }
+                using MemoryStream stream = new MemoryStream();
+                xs.Serialize(stream, body);
+                stream.Position = 0;
+                result = stream.ToArray();
             }
             else if (contentType == "text/plain")
             {

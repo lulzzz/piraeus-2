@@ -80,7 +80,7 @@ namespace Piraeus.Adapters
                     string leaseKey = await graphManager.AddSubscriptionObserverAsync(item, leaseTime, observer);
 
                     durableObservers.Add(item, observer);
-                    Console.WriteLine($"Durable observer added - '{item}' - {DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff")}");
+                    Console.WriteLine($"Durable observer added - '{item}' - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
 
                     Uri uri = new Uri(item);
                     string resourceUriString = item.Replace(uri.Segments[^1], "");
@@ -90,7 +90,7 @@ namespace Piraeus.Adapters
                     if (!container.ContainsKey(resourceUriString))
                     {
                         container.Add(resourceUriString, new Tuple<string, string>(item, leaseKey));
-                        Console.WriteLine($"Resource, subscriptioon and lease key added to container {resourceUriString}, {item}, and {leaseKey} - {DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff")}");
+                        Console.WriteLine($"Resource, subscriptioon and lease key added to container {resourceUriString}, {item}, and {leaseKey} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                     }
                 }
             }
@@ -175,7 +175,7 @@ namespace Piraeus.Adapters
             {
                 if (container.ContainsKey(resourceUriString))
                 {
-                    Console.WriteLine($"Container has '{resourceUriString}' needed to unsubscribe - {DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff")}");
+                    Console.WriteLine($"Container has '{resourceUriString}' needed to unsubscribe - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
 
                     if (ephemeralObservers.ContainsKey(container[resourceUriString].Item1))
                     {
@@ -273,7 +273,7 @@ namespace Piraeus.Adapters
             int cnt = durableObservers.Count;
             if (durableObservers.Count > 0)
             {
-                Console.WriteLine($"Durable subscription observers found to remove for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
+                Console.WriteLine($"Durable subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 List<Task> taskList = new List<Task>();
                 KeyValuePair<string, IMessageObserver>[] kvps = durableObservers.ToArray();
                 foreach (var item in kvps)
@@ -298,13 +298,13 @@ namespace Piraeus.Adapters
 
                 durableObservers.Clear();
                 RemoveFromContainer(list);
-                Console.WriteLine($"Durable subscription observers removed for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
-                Trace.TraceInformation("'{0}' - Durable observers removed by Orleans Adapter for identity '{1}'", cnt, identity);
+                Console.WriteLine($"Durable subscription observers removed for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
+                await logger?.LogInformationAsync("'{0}' - Durable observers removed by Orleans Adapter for identity '{1}'", cnt, identity);
             }
             else
             {
-                Console.WriteLine($"No durable subscription observers found to remove for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
-                Trace.TraceInformation("No Durable observers found by Orleans Adapter to be removed for identity '{0}'", identity);
+                Console.WriteLine($"No durable subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
+                await logger?.LogInformationAsync("No Durable observers found by Orleans Adapter to be removed for identity '{0}'", identity);
             }
         }
 
@@ -315,7 +315,7 @@ namespace Piraeus.Adapters
 
             if (ephemeralObservers.Count > 0)
             {
-                Console.WriteLine($"Ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
+                Console.WriteLine($"Ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 KeyValuePair<string, IMessageObserver>[] kvps = ephemeralObservers.ToArray();
                 List<Task> unobserveTaskList = new List<Task>();
                 foreach (var item in kvps)
@@ -340,13 +340,13 @@ namespace Piraeus.Adapters
 
                 ephemeralObservers.Clear();
                 RemoveFromContainer(list);
-                Console.WriteLine($"Ephemeral subscription observers removed for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
-                Trace.TraceInformation("'{0}' - Ephemeral observers removed by Orleans Adapter for identity '{1}'", cnt, identity);
+                Console.WriteLine($"Ephemeral subscription observers removed for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
+                await logger?.LogInformationAsync("'{0}' - Ephemeral observers removed by Orleans Adapter for identity '{1}'", cnt, identity);
             }
             else
             {
-                Console.WriteLine($"No ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
-                Trace.TraceInformation("No Ephemeral observers found by Orleans Adapter to be removed for identity '{0}'", identity);
+                Console.WriteLine($"No ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
+                await logger?.LogInformationAsync("No Ephemeral observers found by Orleans Adapter to be removed for identity '{0}'", identity);
             }
         }
 

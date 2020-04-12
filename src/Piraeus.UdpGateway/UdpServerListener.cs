@@ -84,7 +84,7 @@ namespace Piraeus.UdpGateway
             listener.DontFragment = true;
             listener.Client.Bind(localEP);
 
-            await logger.LogDebugAsync($"UDP Gateway started on {localEP.Address.ToString()} and port {localEP.Port}");
+            await logger.LogDebugAsync($"UDP Gateway started on {localEP.Address} and port {localEP.Port}");
 
             while (!token.IsCancellationRequested)
             {
@@ -93,7 +93,7 @@ namespace Piraeus.UdpGateway
                     UdpReceiveResult result = await listener.ReceiveAsync();
                     if (result.Buffer.Length > 0)
                     {
-                        string key = CreateNamedKey($"{result.RemoteEndPoint.Address.ToString()}:{result.RemoteEndPoint.Port}");
+                        string key = CreateNamedKey($"{result.RemoteEndPoint.Address}:{result.RemoteEndPoint.Port}");
                         if (cache.Contains(key))
                         {
                             Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(key);
@@ -133,7 +133,7 @@ namespace Piraeus.UdpGateway
 
         public async Task StopAsync()
         {
-            await logger?.LogInformationAsync($"UDP Listener stopping on Address {localEP.Address.ToString()} and Port {localEP.Port}");
+            await logger?.LogInformationAsync($"UDP Listener stopping on Address {localEP.Address} and Port {localEP.Port}");
 
             if (dict != null & dict.Count > 0)
             {

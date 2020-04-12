@@ -21,15 +21,12 @@
             {
                 if (receiveResult.EndOfMessage)
                 {
-                    switch (receiveResult.MessageType)
+                    return receiveResult.MessageType switch
                     {
-                        case WebSocketMessageType.Text:
-                            return new WebSocketMessage(BufferSliceToString(buffer, receiveResult.Count), WebSocketMessageType.Text);
-
-                        case WebSocketMessageType.Binary:
-                            return new WebSocketMessage(BufferSliceToByteArray(buffer, receiveResult.Count), WebSocketMessageType.Binary);
-                    }
-                    throw new Exception("This code path should never be hit.");
+                        WebSocketMessageType.Text => new WebSocketMessage(BufferSliceToString(buffer, receiveResult.Count), WebSocketMessageType.Text),
+                        WebSocketMessageType.Binary => new WebSocketMessage(BufferSliceToByteArray(buffer, receiveResult.Count), WebSocketMessageType.Binary),
+                        _ => throw new Exception("This code path should never be hit."),
+                    };
                 }
                 ByteBuffer bytebuffer = new ByteBuffer(maxMessageSize);
                 bytebuffer.Append(BufferSliceToByteArray(buffer, receiveResult.Count));
@@ -44,15 +41,12 @@
                     bytebuffer.Append(BufferSliceToByteArray(buffer, receiveResult.Count));
                     if (receiveResult.EndOfMessage)
                     {
-                        switch (receiveResult.MessageType)
+                        return receiveResult.MessageType switch
                         {
-                            case WebSocketMessageType.Text:
-                                return new WebSocketMessage(bytebuffer.GetString(), WebSocketMessageType.Text);
-
-                            case WebSocketMessageType.Binary:
-                                return new WebSocketMessage(bytebuffer.GetByteArray(), WebSocketMessageType.Binary);
-                        }
-                        throw new Exception("This code path should never be hit.");
+                            WebSocketMessageType.Text => new WebSocketMessage(bytebuffer.GetString(), WebSocketMessageType.Text),
+                            WebSocketMessageType.Binary => new WebSocketMessage(bytebuffer.GetByteArray(), WebSocketMessageType.Binary),
+                            _ => throw new Exception("This code path should never be hit."),
+                        };
                     }
                 }
             }

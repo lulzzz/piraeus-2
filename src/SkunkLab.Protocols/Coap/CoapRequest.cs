@@ -63,12 +63,10 @@
 
             index += this.TokenLength;
             int previous = 0;
-            int delta = 0;
-
             bool marker = ((message[index] & 0xFF) == 0xFF);
             while (!marker)
             {
-                delta = (message[index] >> 0x04);
+                int delta = (message[index] >> 0x04);
                 CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
                 this.Options.Add(CoapOption);
                 previous += delta;
@@ -115,8 +113,7 @@
                 length += options.Length;
             }
 
-            byte[] buffer = null;
-
+            byte[] buffer;
             if (this.Payload != null)
             {
                 length += this.Payload.Length + 1;

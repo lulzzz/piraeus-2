@@ -20,53 +20,24 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
         public static MqttMessageHandler Create(MqttSession session, MqttMessage message, IMqttDispatch dispatcher = null)
         {
-            switch (message.MessageType)
+            return message.MessageType switch
             {
-                case MqttMessageType.CONNACK:
-                    return new MqttConnackHandler(session, message);
-
-                case MqttMessageType.CONNECT:
-                    return new MqttConnectHandler(session, message);
-
-                case MqttMessageType.DISCONNECT:
-                    return new MqttDisconnectHandler(session, message);
-
-                case MqttMessageType.PINGREQ:
-                    return new MqttPingReqHandler(session, message);
-
-                case MqttMessageType.PINGRESP:
-                    return new MqttPingRespHandler(session, message);
-
-                case MqttMessageType.PUBACK:
-                    return new MqttPubAckHandler(session, message);
-
-                case MqttMessageType.PUBCOMP:
-                    return new MqttPubCompHandler(session, message);
-
-                case MqttMessageType.PUBLISH:
-                    return new MqttPublishHandler(session, message, dispatcher);
-
-                case MqttMessageType.PUBREC:
-                    return new MqttPubRecHandler(session, message);
-
-                case MqttMessageType.PUBREL:
-                    return new MqttPubRelHandler(session, message, dispatcher);
-
-                case MqttMessageType.SUBACK:
-                    return new MqttSubAckHandler(session, message);
-
-                case MqttMessageType.SUBSCRIBE:
-                    return new MqttSubscribeHandler(session, message);
-
-                case MqttMessageType.UNSUBACK:
-                    return new MqttUnsubAckHandler(session, message);
-
-                case MqttMessageType.UNSUBSCRIBE:
-                    return new MqttUnsubscribeHandler(session, message);
-
-                default:
-                    throw new InvalidCastException("MqttMessageType");
-            }
+                MqttMessageType.CONNACK => new MqttConnackHandler(session, message),
+                MqttMessageType.CONNECT => new MqttConnectHandler(session, message),
+                MqttMessageType.DISCONNECT => new MqttDisconnectHandler(session, message),
+                MqttMessageType.PINGREQ => new MqttPingReqHandler(session, message),
+                MqttMessageType.PINGRESP => new MqttPingRespHandler(session, message),
+                MqttMessageType.PUBACK => new MqttPubAckHandler(session, message),
+                MqttMessageType.PUBCOMP => new MqttPubCompHandler(session, message),
+                MqttMessageType.PUBLISH => new MqttPublishHandler(session, message, dispatcher),
+                MqttMessageType.PUBREC => new MqttPubRecHandler(session, message),
+                MqttMessageType.PUBREL => new MqttPubRelHandler(session, message, dispatcher),
+                MqttMessageType.SUBACK => new MqttSubAckHandler(session, message),
+                MqttMessageType.SUBSCRIBE => new MqttSubscribeHandler(session, message),
+                MqttMessageType.UNSUBACK => new MqttUnsubAckHandler(session, message),
+                MqttMessageType.UNSUBSCRIBE => new MqttUnsubscribeHandler(session, message),
+                _ => throw new InvalidCastException("MqttMessageType"),
+            };
         }
 
         public abstract Task<MqttMessage> ProcessAsync();

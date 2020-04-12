@@ -42,7 +42,7 @@
 
         public override byte[] Encode()
         {
-            byte qos = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), this.QualityOfService.ToString(), false));
+            _ = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), this.QualityOfService.ToString(), false));
 
             byte fixedHeader = (0x08 << Constants.Header.MessageTypeOffset) |
                    1 << Constants.Header.QosLevelOffset |

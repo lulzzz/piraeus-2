@@ -206,7 +206,7 @@ namespace Piraeus.Adapters
 
         private void Channel_OnStateChange(object sender, ChannelStateEventArgs e)
         {
-            logger?.LogDebugAsync($"CoAP adapter channel state changed to {e.State.ToString()}");
+            logger?.LogDebugAsync($"CoAP adapter channel state changed to {e.State}");
         }
 
         #endregion events

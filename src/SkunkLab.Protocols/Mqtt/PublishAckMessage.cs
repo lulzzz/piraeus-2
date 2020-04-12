@@ -21,14 +21,11 @@
         public override byte[] Encode()
         {
             byte ackType = Convert.ToByte((int)this.AckType);
-            byte fixedHeader = 0;
-
             byte reserved = this.AckType != PublishAckType.PUBREL ? (byte)0x00 : (byte)0x02;
-            fixedHeader = (byte)((ackType << Constants.Header.MessageTypeOffset) |
-                        0x00 |
-                        reserved |
-                        0x00);
-
+            byte fixedHeader = (byte)(ackType << Constants.Header.MessageTypeOffset |
+            0x00 |
+            reserved |
+            0x00);
             byte[] remainingLength = base.EncodeRemainingLength(2);
 
             byte[] buffer = new byte[4];

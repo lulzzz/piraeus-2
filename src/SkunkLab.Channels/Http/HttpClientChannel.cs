@@ -187,48 +187,44 @@ namespace SkunkLab.Channels.Http
                 try
                 {
                     State = ChannelState.Open;
-                    using (HttpWebResponse response = await request.GetResponseAsync().WithCancellation<WebResponse>(internalToken) as HttpWebResponse)
+                    using HttpWebResponse response = await request.GetResponseAsync().WithCancellation(internalToken) as HttpWebResponse;
+                    if (response.StatusCode == HttpStatusCode.OK ||
+response.StatusCode == HttpStatusCode.Accepted)
                     {
-                        if (response.StatusCode == HttpStatusCode.OK ||
-                            response.StatusCode == HttpStatusCode.Accepted)
+                        using Stream stream = response.GetResponseStream();
+                        byte[] buffer = new byte[response.ContentLength];
+                        await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                        string resourceHeader = response.Headers.Get(HttpChannelConstants.RESOURCE_HEADER);
+
+                        if (resourceHeader == null)
                         {
-                            using (Stream stream = response.GetResponseStream())
+                            continue;
+                        }
+
+                        string resourceUriString = new Uri(resourceHeader).ToString().ToLowerInvariant();
+
+                        foreach (Observer observer in observers)
+                        {
+                            if (observer.ResourceUri.ToString().ToLowerInvariant() == resourceUriString)
                             {
-                                byte[] buffer = new byte[response.ContentLength];
-                                await stream.ReadAsync(buffer, 0, buffer.Length);
+                                observer.Update(observer.ResourceUri, response.ContentType, buffer);
+                            }
+                        }
 
-                                string resourceHeader = response.Headers.Get(HttpChannelConstants.RESOURCE_HEADER);
-
-                                if (resourceHeader == null)
-                                {
-                                    continue;
-                                }
-
-                                string resourceUriString = new Uri(resourceHeader).ToString().ToLowerInvariant();
-
-                                foreach (Observer observer in observers)
-                                {
-                                    if (observer.ResourceUri.ToString().ToLowerInvariant() == resourceUriString)
-                                    {
-                                        observer.Update(observer.ResourceUri, response.ContentType, buffer);
-                                    }
-                                }
-
-                                List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>
+                        List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>
                                 {
                                     new KeyValuePair<string, string>("Resource", resourceUriString),
                                     new KeyValuePair<string, string>("Content-Type", response.ContentType)
                                 };
-                                OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, buffer, list));
-                            }
-                        }
-                        else
-                        {
-                            OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(string.Format("Unexpected status code {0}", response.StatusCode))));
-                        }
-
-                        State = ChannelState.Closed;
+                        OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, buffer, list));
                     }
+                    else
+                    {
+                        OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(string.Format("Unexpected status code {0}", response.StatusCode))));
+                    }
+
+                    State = ChannelState.Closed;
                 }
                 catch (OperationCanceledException)
                 {
@@ -272,21 +268,19 @@ namespace SkunkLab.Channels.Http
                     await stream.WriteAsync(message, 0, message.Length);
                 }
 
-                using (HttpWebResponse response = await request.GetResponseAsync().WithCancellation(internalToken) as HttpWebResponse)
+                using HttpWebResponse response = await request.GetResponseAsync().WithCancellation(internalToken) as HttpWebResponse;
+                if (response.StatusCode == HttpStatusCode.OK ||
+                    response.StatusCode == HttpStatusCode.Accepted ||
+                    response.StatusCode == HttpStatusCode.NoContent)
                 {
-                    if (response.StatusCode == HttpStatusCode.OK ||
-                        response.StatusCode == HttpStatusCode.Accepted ||
-                        response.StatusCode == HttpStatusCode.NoContent)
-                    {
-                        IsAuthenticated = true;
-                        State = ChannelState.CloseSent;
-                    }
-                    else
-                    {
-                        State = ChannelState.Aborted;
-                        OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(
-                            string.Format("Invalid HTTP response status code {0}", response.StatusCode))));
-                    }
+                    IsAuthenticated = true;
+                    State = ChannelState.CloseSent;
+                }
+                else
+                {
+                    State = ChannelState.Aborted;
+                    OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(
+                        string.Format("Invalid HTTP response status code {0}", response.StatusCode))));
                 }
             }
             catch (OperationCanceledException oce)

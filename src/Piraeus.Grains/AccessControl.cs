@@ -26,14 +26,10 @@ namespace Piraeus.Grains
             AuthorizationPolicy policy = null;
             if (State.Policy != null)
             {
-                using (MemoryStream stream = new MemoryStream(State.Policy))
-                {
-                    using (XmlReader reader = XmlReader.Create(stream))
-                    {
-                        policy = AuthorizationPolicy.Load(reader);
-                        reader.Close();
-                    }
-                }
+                using MemoryStream stream = new MemoryStream(State.Policy);
+                using XmlReader reader = XmlReader.Create(stream);
+                policy = AuthorizationPolicy.Load(reader);
+                reader.Close();
             }
 
             return await Task.FromResult<AuthorizationPolicy>(policy);

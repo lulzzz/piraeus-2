@@ -307,7 +307,7 @@ namespace Piraeus.Adapters
                     if (EventValidator.Validate(false, uri.Resource, Channel, graphManager, context).Validated)
                     {
                         adapter.UnsubscribeAsync(uri.Resource).GetAwaiter();
-                        logger?.LogInformationAsync($"MQTT adapter unsubscribed {uri.ToString()}");
+                        logger?.LogInformationAsync($"MQTT adapter unsubscribed {uri}");
                     }
                 }
             }

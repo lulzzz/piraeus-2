@@ -29,71 +29,24 @@
             byte msgType = (byte)(fixedHeader >> 0x04);
 
             MqttMessageType messageType = (MqttMessageType)msgType;
-
-            MqttMessage mqttMessage = null;
-
-            switch (messageType)
+            MqttMessage mqttMessage = messageType switch
             {
-                case MqttMessageType.CONNECT:
-                    mqttMessage = new ConnectMessage();
-                    break;
-
-                case MqttMessageType.CONNACK:
-                    mqttMessage = new ConnectAckMessage();
-                    break;
-
-                case MqttMessageType.PUBLISH:
-                    mqttMessage = new PublishMessage();
-                    break;
-
-                case MqttMessageType.PUBACK:
-                    mqttMessage = new PublishAckMessage();
-                    break;
-
-                case MqttMessageType.PUBREC:
-                    mqttMessage = new PublishAckMessage();
-                    break;
-
-                case MqttMessageType.PUBREL:
-                    mqttMessage = new PublishAckMessage();
-                    break;
-
-                case MqttMessageType.PUBCOMP:
-                    mqttMessage = new PublishAckMessage();
-                    break;
-
-                case MqttMessageType.SUBSCRIBE:
-                    mqttMessage = new SubscribeMessage();
-                    break;
-
-                case MqttMessageType.SUBACK:
-                    mqttMessage = new SubscriptionAckMessage();
-                    break;
-
-                case MqttMessageType.UNSUBSCRIBE:
-                    mqttMessage = new UnsubscribeMessage();
-                    break;
-
-                case MqttMessageType.UNSUBACK:
-                    mqttMessage = new UnsubscribeAckMessage();
-                    break;
-
-                case MqttMessageType.PINGREQ:
-                    mqttMessage = new PingRequestMessage();
-                    break;
-
-                case MqttMessageType.PINGRESP:
-                    mqttMessage = new PingResponseMessage();
-                    break;
-
-                case MqttMessageType.DISCONNECT:
-                    mqttMessage = new DisconnectMessage();
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Unknown message type.");
-            }
-
+                MqttMessageType.CONNECT => new ConnectMessage(),
+                MqttMessageType.CONNACK => new ConnectAckMessage(),
+                MqttMessageType.PUBLISH => new PublishMessage(),
+                MqttMessageType.PUBACK => new PublishAckMessage(),
+                MqttMessageType.PUBREC => new PublishAckMessage(),
+                MqttMessageType.PUBREL => new PublishAckMessage(),
+                MqttMessageType.PUBCOMP => new PublishAckMessage(),
+                MqttMessageType.SUBSCRIBE => new SubscribeMessage(),
+                MqttMessageType.SUBACK => new SubscriptionAckMessage(),
+                MqttMessageType.UNSUBSCRIBE => new UnsubscribeMessage(),
+                MqttMessageType.UNSUBACK => new UnsubscribeAckMessage(),
+                MqttMessageType.PINGREQ => new PingRequestMessage(),
+                MqttMessageType.PINGRESP => new PingResponseMessage(),
+                MqttMessageType.DISCONNECT => new DisconnectMessage(),
+                _ => throw new InvalidOperationException("Unknown message type."),
+            };
             mqttMessage.Decode(message);
             return mqttMessage;
         }
@@ -120,9 +73,8 @@
             int index = 0;
             int multiplier = 1;
             int value = 0;
-            int digit = 0;
             index++;
-            byte[] nextByte = new byte[1];
+            int digit;
             do
             {
                 digit = buffer[index++];
@@ -135,10 +87,9 @@
         internal byte[] EncodeRemainingLength(int remainingLength)
         {
             List<byte> list = new List<byte>();
-            int digit = 0;
             do
             {
-                digit = remainingLength % 128;
+                int digit = remainingLength % 128;
                 remainingLength /= 128;
 
                 if (remainingLength > 0)

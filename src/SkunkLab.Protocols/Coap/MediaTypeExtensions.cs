@@ -7,49 +7,28 @@
     {
         public static MediaType ConvertFromContentType(this MediaType mediaType, string contentType)
         {
-            switch (contentType.ToLower(CultureInfo.InvariantCulture))
+            return (contentType.ToLower(CultureInfo.InvariantCulture)) switch
             {
-                case "text/xml":
-                    return MediaType.Xml;
-
-                case "application/xml":
-                    return MediaType.Xml;
-
-                case "text/plain":
-                    return MediaType.TextPlain;
-
-                case "application/octet-stream":
-                    return MediaType.OctetStream;
-
-                case "text/json":
-                    return MediaType.Json;
-
-                case "application/json":
-                    return MediaType.Json;
-
-                default: throw new InvalidCastException("contentType");
-            }
+                "text/xml" => MediaType.Xml,
+                "application/xml" => MediaType.Xml,
+                "text/plain" => MediaType.TextPlain,
+                "application/octet-stream" => MediaType.OctetStream,
+                "text/json" => MediaType.Json,
+                "application/json" => MediaType.Json,
+                _ => throw new InvalidCastException("contentType"),
+            };
         }
 
         public static string ConvertToContentType(this MediaType mediaType)
         {
-            switch (mediaType)
+            return mediaType switch
             {
-                case MediaType.Xml:
-                    return "text/xml";
-
-                case MediaType.TextPlain:
-                    return "text/plain";
-
-                case MediaType.OctetStream:
-                    return "application/octet-stream";
-
-                case MediaType.Json:
-                    return "application/json";
-
-                default:
-                    throw new InvalidCastException("MediaType content");
-            }
+                MediaType.Xml => "text/xml",
+                MediaType.TextPlain => "text/plain",
+                MediaType.OctetStream => "application/octet-stream",
+                MediaType.Json => "application/json",
+                _ => throw new InvalidCastException("MediaType content"),
+            };
         }
     }
 }

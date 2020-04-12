@@ -14,16 +14,8 @@ namespace Samples.Http.Client
 {
     internal class Program
     {
-        private static readonly int index;
-
-        private static readonly string pubResource = null;
-
-        private static readonly bool send;
-
         private static readonly string subResource = null;
-
         private static string audience = issuer;
-
         private static CancellationTokenSource cts;
 
         private static string hostname;

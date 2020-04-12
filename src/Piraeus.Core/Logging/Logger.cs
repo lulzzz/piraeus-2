@@ -79,7 +79,7 @@ namespace Piraeus.Core.Logging
 
         private string AppendTimestamp(string message)
         {
-            return $"{message} - {DateTime.Now.ToString("dd-MM-yyyyThh:mm:ss.ffff")}";
+            return $"{message} - {DateTime.Now:dd-MM-yyyyThh:mm:ss.ffff}";
         }
     }
 }

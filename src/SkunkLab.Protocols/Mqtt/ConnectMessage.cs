@@ -231,8 +231,7 @@
 
             if (this.passwordFlag)
             {
-                this.Password = ByteContainer.DecodeString(buffer, index, out length);
-                index += length;
+                this.Password = ByteContainer.DecodeString(buffer, index, out _);
             }
 
             return connectMessage;

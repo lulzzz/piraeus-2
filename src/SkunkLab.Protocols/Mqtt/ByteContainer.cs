@@ -49,10 +49,7 @@
                 return;
             }
 
-            byte[] valueArray = null;
-
-            valueArray = Encoding.UTF8.GetBytes(value);
-
+            byte[] valueArray = Encoding.UTF8.GetBytes(value);
             byte[] buffer = new byte[valueArray.Length + 2];
 
             byte[] lengthSB = new byte[2];
