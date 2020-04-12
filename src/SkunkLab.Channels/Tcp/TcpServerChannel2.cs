@@ -17,7 +17,7 @@ namespace SkunkLab.Channels.Tcp
     {
         #region ctor
 
-        public TcpServerChannel2(TcpClient client, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpServerChannel2(TcpClient client, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.client = client;
             this.blockSize = blockSize;
@@ -29,7 +29,7 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpServerChannel2(TcpClient client, X509Certificate2 certificate, bool clientAuth, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpServerChannel2(TcpClient client, X509Certificate2 certificate, bool clientAuth, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.client = client;
             this.certificate = certificate;
@@ -43,7 +43,7 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpServerChannel2(TcpClient client, TlsPskIdentityManager pskManager, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpServerChannel2(TcpClient client, TlsPskIdentityManager pskManager, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.client = client;
             this.pskManager = pskManager;
@@ -276,7 +276,7 @@ namespace SkunkLab.Channels.Tcp
                         {
                             do
                             {
-                                buffer = new byte[16384];
+                                buffer = new byte[blockSize];
 
                                 bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
@@ -292,7 +292,7 @@ namespace SkunkLab.Channels.Tcp
                                 }
 
                                 await bufferStream.WriteAsync(buffer, 0, bytesRead);
-                            } while (localStream.DataAvailable && bytesRead == 16384);
+                            } while (localStream.DataAvailable && bytesRead == blockSize);
 
                             await bufferStream.FlushAsync();
                             bufferStream.Position = 0;

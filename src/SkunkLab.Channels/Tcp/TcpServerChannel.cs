@@ -18,7 +18,7 @@ namespace SkunkLab.Channels.Tcp
     {
         #region ctor
 
-        public TcpServerChannel(TcpClient client, int maxBufferSize, CancellationToken token)
+        public TcpServerChannel(TcpClient client, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.client = client;
             this.token = token;
@@ -29,7 +29,7 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpServerChannel(TcpClient client, X509Certificate2 certificate, bool clientAuth, int maxBufferSize, CancellationToken token)
+        public TcpServerChannel(TcpClient client, X509Certificate2 certificate, bool clientAuth, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.client = client;
             this.certificate = certificate;
@@ -42,7 +42,7 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpServerChannel(TcpClient client, TlsPskIdentityManager pskManager, int maxBufferSize, CancellationToken token)
+        public TcpServerChannel(TcpClient client, TlsPskIdentityManager pskManager, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.client = client;
             this.pskManager = pskManager;

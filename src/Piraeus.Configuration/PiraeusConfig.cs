@@ -53,10 +53,10 @@ namespace Piraeus.Configuration
         #region Channels
 
         [JsonProperty("blockSize")]
-        public int BlockSize { get; set; } = 16344;
+        public int BlockSize { get; set; } = 0x4000;
 
         [JsonProperty("maxBufferSize")]
-        public int MaxBufferSize { get; set; } = 4112000;
+        public int MaxBufferSize { get; set; } = 0x400000;
 
         [JsonProperty("usePrefixLength")]
         public bool UsePrefixLength { get; set; } = false;

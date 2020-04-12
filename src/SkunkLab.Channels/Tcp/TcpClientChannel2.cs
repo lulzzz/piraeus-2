@@ -17,7 +17,7 @@ namespace SkunkLab.Channels.Tcp
     {
         #region ctor
 
-        public TcpClientChannel2(string hostname, int port, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(string hostname, int port, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.hostname = hostname;
             this.port = port;
@@ -28,12 +28,12 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(string hostname, int port, IPEndPoint localEP, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(string hostname, int port, IPEndPoint localEP, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(hostname, port, localEP, null, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(IPEndPoint remoteEndpoint, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPEndPoint remoteEndpoint, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.remoteEP = remoteEndpoint;
             this.blockSize = blockSize;
@@ -43,12 +43,12 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPEndPoint remoteEndpoint, IPEndPoint localEP, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPEndPoint remoteEndpoint, IPEndPoint localEP, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(remoteEndpoint, localEP, null, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(IPAddress address, int port, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPAddress address, int port, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.address = address;
             this.port = port;
@@ -59,17 +59,17 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPAddress address, int port, IPEndPoint localEP, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPAddress address, int port, IPEndPoint localEP, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(address, port, localEP, null, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(string hostname, int port, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(string hostname, int port, X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(hostname, port, null, certificate, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(string hostname, int port, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(string hostname, int port, IPEndPoint localEP, X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.hostname = hostname;
             this.port = port;
@@ -84,12 +84,12 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPEndPoint remoteEndpoint, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPEndPoint remoteEndpoint, X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(remoteEndpoint, null, certificate, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(IPEndPoint remoteEndpoint, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPEndPoint remoteEndpoint, IPEndPoint localEP, X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             _ = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
 
@@ -112,12 +112,12 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPAddress address, int port, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPAddress address, int port, X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(address, port, null, certificate, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(IPAddress address, int port, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPAddress address, int port, IPEndPoint localEP, X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             _ = address ?? throw new ArgumentNullException(nameof(address));
 
@@ -141,7 +141,7 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPAddress address, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPAddress address, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.address = address;
             this.port = port;
@@ -155,17 +155,17 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPAddress address, int port, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPAddress address, int port, string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(address, port, null, pskIdentity, psk, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(string hostname, int port, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(string hostname, int port, string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(hostname, port, null, pskIdentity, psk, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(string hostname, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(string hostname, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.hostname = hostname;
             this.port = port;
@@ -179,12 +179,12 @@ namespace SkunkLab.Channels.Tcp
             this.queue = new Queue<byte[]>();
         }
 
-        public TcpClientChannel2(IPEndPoint remoteEP, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPEndPoint remoteEP, string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
             : this(remoteEP, null, pskIdentity, psk, blockSize, maxBufferSize, token)
         {
         }
 
-        public TcpClientChannel2(IPEndPoint remoteEP, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
+        public TcpClientChannel2(IPEndPoint remoteEP, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
             this.remoteEP = remoteEP;
             this.localEP = localEP;
@@ -527,7 +527,7 @@ namespace SkunkLab.Channels.Tcp
                         {
                             do
                             {
-                                buffer = new byte[16384];
+                                buffer = new byte[blockSize];
 
                                 bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
@@ -544,7 +544,7 @@ namespace SkunkLab.Channels.Tcp
                                 }
 
                                 await bufferStream.WriteAsync(buffer, 0, bytesRead);
-                            } while (localStream.DataAvailable && bytesRead == 16384);
+                            } while (localStream.DataAvailable && bytesRead == blockSize);
 
                             await bufferStream.FlushAsync();
                             bufferStream.Position = 0;

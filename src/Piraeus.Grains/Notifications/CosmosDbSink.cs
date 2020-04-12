@@ -51,7 +51,6 @@ namespace Piraeus.Grains.Notifications
 
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);
-            string docDBUri = string.Format("https://{0}", uri.Authority);
             documentDBUri = new Uri(string.Format("https://{0}", uri.Authority));
 
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);

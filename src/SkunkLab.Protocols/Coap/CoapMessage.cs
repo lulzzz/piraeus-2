@@ -240,8 +240,8 @@
             object[] ifmatch = message.Options.GetOptionValues(OptionType.IfMatch);
             object[] etag = message.Options.GetOptionValues(OptionType.ETag);
             object[] locationpath = message.Options.GetOptionValues(OptionType.LocationPath);
-            object[] uripath = message.Options.GetOptionValues(OptionType.UriPath);
-            object[] uriquery = message.Options.GetOptionValues(OptionType.UriQuery);
+            _ = message.Options.GetOptionValues(OptionType.UriPath);
+            _ = message.Options.GetOptionValues(OptionType.UriQuery);
             object[] locationquery = message.Options.GetOptionValues(OptionType.LocationQuery);
             object observe = message.Options.GetOptionValue(OptionType.Observe);
 
