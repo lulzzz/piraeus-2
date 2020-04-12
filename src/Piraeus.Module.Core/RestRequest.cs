@@ -102,20 +102,18 @@ namespace Piraeus.Module
                 //    buffer = new byte[response.ContentLength];
                 //    responseStream.Read(buffer, 0, buffer.Length);
 
-                using (MemoryStream bufferStream = new MemoryStream())
+                using MemoryStream bufferStream = new MemoryStream();
+                int bytesRead;
+                do
                 {
-                    int bytesRead;
-                    do
+                    bytesRead = responseStream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead > 0)
                     {
-                        bytesRead = responseStream.Read(buffer, 0, buffer.Length);
-                        if (bytesRead > 0)
-                        {
-                            bufferStream.Write(buffer, 0, bytesRead);
-                        }
-                    } while (bytesRead > 0);
+                        bufferStream.Write(buffer, 0, bytesRead);
+                    }
+                } while (bytesRead > 0);
 
-                    msg = bufferStream.ToArray();
-                }
+                msg = bufferStream.ToArray();
             }
 
             //return Serializer.Deserialize<T>(contentType, buffer);
@@ -145,20 +143,18 @@ namespace Piraeus.Module
             byte[] msg = null;
             using (Stream responseStream = response.GetResponseStream())
             {
-                using (MemoryStream bufferStream = new MemoryStream())
+                using MemoryStream bufferStream = new MemoryStream();
+                int bytesRead;
+                do
                 {
-                    int bytesRead;
-                    do
+                    bytesRead = responseStream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead > 0)
                     {
-                        bytesRead = responseStream.Read(buffer, 0, buffer.Length);
-                        if (bytesRead > 0)
-                        {
-                            bufferStream.Write(buffer, 0, bytesRead);
-                        }
-                    } while (bytesRead > 0);
+                        bufferStream.Write(buffer, 0, bytesRead);
+                    }
+                } while (bytesRead > 0);
 
-                    msg = bufferStream.ToArray();
-                }
+                msg = bufferStream.ToArray();
                 //buffer = new byte[response.ContentLength];
                 //responseStream.Read(buffer, 0, buffer.Length);
             }

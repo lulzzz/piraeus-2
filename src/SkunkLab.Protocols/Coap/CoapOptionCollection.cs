@@ -156,12 +156,12 @@
 
             if (path.Length > 0)
             {
-                builder.Path = "/" + path.Substring(0, path.Length - 1);
+                builder.Path = "/" + path[0..^1];
             }
 
             if (query.Length > 0)
             {
-                builder.Query = query.Substring(0, query.Length - 1);
+                builder.Query = query[0..^1];
             }
 
             return builder.Scheme == "http" ? null : builder.Uri;

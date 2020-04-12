@@ -133,7 +133,7 @@ namespace Orleans.Clustering.Redis
                 };
             }
 
-            if (options.IsLocalDocker)  //redis instance on same host as clients
+            if (options.IsLocalDocker)
             {
                 IPAddress address = GetIPAddress(configOptions.EndPoints[0]);
                 EndPoint endpoint = configOptions.EndPoints[0];

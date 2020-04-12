@@ -26,8 +26,6 @@ namespace Piraeus.WebSocketGateway
             app.UseAuthentication();
             app.UseWebSockets();
             app.UseMiddleware<PiraeusWebSocketMiddleware>();
-
-            //app.UseMvc();
         }
 
         public void ConfigureServices(IServiceCollection services)

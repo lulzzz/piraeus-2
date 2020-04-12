@@ -14,8 +14,6 @@ namespace Orleans.Clustering.Redis
         {
         }
 
-        //[NonSerialized]
-        //private ulong? lastIndex;
         public string DeploymentId { get; set; }
 
         public int FaultZone { get; set; }
@@ -44,8 +42,6 @@ namespace Orleans.Clustering.Redis
 
         public int UpdateZone { get; set; }
 
-        //[NonSerialized]
-        //private DateTime? iAmAliveTime;
         internal SiloAddress Address
         {
             get => SiloAddress.FromParsableString(parsableAddress);
@@ -73,17 +69,12 @@ namespace Orleans.Clustering.Redis
             return ret;
         }
 
-        //[NonSerialized]
-        //private string deploymentId;
-
-        //[NonSerialized]
-        //private SiloAddress siloAddress;
         public Tuple<MembershipEntry, string> ToMembershipEntryTuple()
         {
             MembershipEntry entry = new MembershipEntry()
             {
                 HostName = this.Hostname,
-                IAmAliveTime = this.IAmAliveTime.HasValue ? this.IAmAliveTime.Value : DateTime.UtcNow,
+                IAmAliveTime = this.IAmAliveTime ?? DateTime.UtcNow,
                 ProxyPort = this.ProxyPort,
                 RoleName = string.Empty,
                 SiloAddress = this.Address,
@@ -103,7 +94,7 @@ namespace Orleans.Clustering.Redis
             MembershipEntry entry = new MembershipEntry()
             {
                 HostName = this.Hostname,
-                IAmAliveTime = this.IAmAliveTime.HasValue ? this.IAmAliveTime.Value : DateTime.UtcNow,
+                IAmAliveTime = IAmAliveTime ?? DateTime.UtcNow,
                 ProxyPort = this.ProxyPort,
                 RoleName = string.Empty,
                 SiloAddress = address,

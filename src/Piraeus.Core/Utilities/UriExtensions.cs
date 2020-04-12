@@ -46,8 +46,6 @@ namespace Piraeus.Core.Utilities
         {
             string resourceString = uriString.Replace(uri.Query, "");
             return GetBase(resourceString, new Uri(resourceString), false);
-            //string canonicalResourceString = GetBase(resourceString, new Uri(resourceString), false);
-            //return canonicalResourceString + uri.Query;
         }
     }
 }

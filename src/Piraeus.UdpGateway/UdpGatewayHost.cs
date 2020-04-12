@@ -26,10 +26,15 @@ namespace Piraeus.UdpGateway
         }
 
         private readonly Logger logger;
+
         private readonly PiraeusConfig config;
+
         private readonly OrleansConfig orleansConfig;
+
         private readonly Dictionary<int, UdpServerListener> listeners;
+
         private readonly Dictionary<int, CancellationTokenSource> sources;
+
         private string hostname;
 
         public Task StartAsync(CancellationToken cancellationToken)

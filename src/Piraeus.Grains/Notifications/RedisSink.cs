@@ -18,14 +18,23 @@ namespace Piraeus.Grains.Notifications
     public class RedisSink : EventSink
     {
         private readonly IAuditor auditor;
+
         private readonly string cacheClaimType;
+
         private readonly string connectionString;
+
         private readonly ConcurrentQueueManager cqm;
+
         private readonly TimeSpan? expiry;
+
         private readonly TaskQueue tqueue;
+
         private readonly Uri uri;
+
         private ConnectionMultiplexer connection;
+
         private IDatabase database;
+
         private int dbNumber;
 
         public RedisSink(SubscriptionMetadata metadata)
@@ -58,15 +67,10 @@ namespace Piraeus.Grains.Notifications
             }
 
             connection = ConnectionMultiplexer.ConnectAsync(connectionString).GetAwaiter().GetResult();
-
-            //Task<ConnectionMultiplexer> task = ConnectionMultiplexer.ConnectAsync(connectionString);
-            //Task.WaitAll(task);
-            //connection = task.Result;
         }
 
         public string GetKey(EventMessage message)
         {
-            //if the cache key is sent on the message URI use it.  Otherwise, look for a matching claim type and return the value.
             if (!string.IsNullOrEmpty(message.CacheKey))
             {
                 return message.CacheKey;
@@ -86,7 +90,7 @@ namespace Piraeus.Grains.Notifications
                             c.Type.ToLowerInvariant() ==
                             cacheClaimType.ToLowerInvariant());
 
-                    return claim == null ? null : claim.Value;
+                    return claim?.Value;
                 }
                 else
                 {

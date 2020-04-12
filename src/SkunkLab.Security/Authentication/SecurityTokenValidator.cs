@@ -54,9 +54,6 @@
                     {
                         context.User.AddIdentity(ci);
                     }
-                    //GenericIdentity identity = new GenericIdentity(nameClaim.Value);
-                    //identity.AddClaims(claimset);
-                    //Thread.CurrentPrincipal = new GenericPrincipal(identity, null);
                     return true;
                 }
                 else
@@ -87,7 +84,6 @@
                     ValidateIssuerSigningKey = true
                 };
 
-
                 ClaimsPrincipal prin = tokenHandler.ValidateToken(tokenString, validationParameters, out SecurityToken stoken);
                 if (context == null)
                 {
@@ -106,44 +102,5 @@
                 return false;
             }
         }
-
-        //private static bool ValidateSwt(string tokenString, string securityKey, string issuer = null, string audience = null)
-        //{
-        //    bool result = false;
-
-        //    try
-        //    {
-        //        SimpleWebToken token = SimpleWebToken.FromString(tokenString);
-        //        if(!token.SignVerify(Convert.FromBase64String(securityKey)))
-        //        {
-        //            throw new System.Security.SecurityException("SWT cannot be verified.");
-        //        }
-
-        //        if(audience != null && token.Audience.ToLower(CultureInfo.InvariantCulture) != audience.ToLower(CultureInfo.InvariantCulture))
-        //        {
-        //            throw new System.Security.SecurityException("SWT audience mismatch.");
-        //        }
-
-        //        if(issuer != null && token.Issuer.ToLower(CultureInfo.InvariantCulture) != issuer.ToLower(CultureInfo.InvariantCulture))
-        //        {
-        //            throw new System.Security.SecurityException("SWT issuer mismatch.");
-        //        }
-
-        //        if(token.ExpiresOn < DateTime.UtcNow)
-        //        {
-        //            throw new System.Security.SecurityException("SWT token has expired.");
-        //        }
-
-        //        ClaimsPrincipal principal = new ClaimsPrincipal(token.Identity);
-        //        Thread.CurrentPrincipal = principal;
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        Trace.TraceWarning("SWT validation exception.");
-        //        Trace.TraceError(ex.Message);
-        //    }
-
-        //    return result;
-        //}
     }
 }

@@ -10,11 +10,6 @@ namespace Piraeus.Extensions.Logging
         {
             LoggerType loggerTypes = config.GetLoggerTypes();
 
-            //if (loggerTypes.HasFlag(LoggerType.None))
-            //{
-            //    return builder;
-            //}
-
             LogLevel logLevel = Enum.Parse<LogLevel>(config.LogLevel, true);
 
             if (loggerTypes.HasFlag(LoggerType.Console))

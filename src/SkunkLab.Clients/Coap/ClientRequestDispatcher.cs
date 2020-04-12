@@ -22,11 +22,6 @@ namespace SkunkLab.Clients.Coap
             set => this.identity = value;
         }
 
-        /// <summary>
-        /// Not implemented in client
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
         public Task<CoapMessage> DeleteAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
@@ -35,11 +30,6 @@ namespace SkunkLab.Clients.Coap
             return tcs.Task;
         }
 
-        /// <summary>
-        /// Not implemented in client
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
         public Task<CoapMessage> GetAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
@@ -48,11 +38,6 @@ namespace SkunkLab.Clients.Coap
             return tcs.Task;
         }
 
-        /// <summary>
-        /// Not implemented in client
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
         public Task<CoapMessage> ObserveAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
@@ -73,11 +58,6 @@ namespace SkunkLab.Clients.Coap
             return tcs.Task;
         }
 
-        /// <summary>
-        /// Not implemented in client
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
         public Task<CoapMessage> PutAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();

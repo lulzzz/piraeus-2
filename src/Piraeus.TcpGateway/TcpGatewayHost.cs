@@ -26,10 +26,15 @@ namespace Piraeus.TcpGateway
         }
 
         private readonly Logger logger;
+
         private readonly PiraeusConfig config;
+
         private readonly OrleansConfig orleansConfig;
+
         private readonly Dictionary<int, TcpServerListener> listeners;
+
         private readonly Dictionary<int, CancellationTokenSource> sources;
+
         private string hostname;
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -115,7 +120,6 @@ namespace Piraeus.TcpGateway
                 if (sources.ContainsKey(e.Port))
                 {
                     logger?.LogInformation($"Sending cancellation on on channel type '{e.ChannelType}' and port '{e.Port}'.");
-                    //cancel the server
                     sources[e.Port].Cancel();
                 }
                 else
@@ -133,10 +137,8 @@ namespace Piraeus.TcpGateway
                     sources.Remove(e.Port);
 
                     logger?.LogInformation($"Restarting TCP server on listener and port on channel type '{e.ChannelType}' and port '{e.Port}'.");
-                    //restart the server
                     sources.Add(e.Port, new CancellationTokenSource());
 
-                    //string hostname = config.Hostname == null ? "localhost" : config.Hostname;
                     listeners.Add(e.Port, new TcpServerListener(new IPEndPoint(GetIPAddress(hostname), e.Port), config, orleansConfig, logger, sources[e.Port].Token));
                 }
             }

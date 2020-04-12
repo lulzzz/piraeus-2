@@ -36,8 +36,6 @@
                     }
 
                     Task.Delay(delayMilliseconds).GetAwaiter();
-                    //Task task = Task.Delay(delayMilliseconds);
-                    //Task.WaitAll(task);
                     attempt++;
                 }
             }

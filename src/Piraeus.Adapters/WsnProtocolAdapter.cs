@@ -24,7 +24,6 @@ namespace Piraeus.Adapters
 
         private readonly string cacheKey;
 
-        //private readonly HttpContext context;
         private readonly PiraeusConfig config;
 
         private readonly string contentType;
@@ -165,18 +164,9 @@ namespace Piraeus.Adapters
             if (!Channel.IsAuthenticated)
             {
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, new SecurityException("Not authenticated on WSN channel")));
-                Channel.CloseAsync().Ignore(); //shutdown channel immediately
+                Channel.CloseAsync().Ignore();
                 return;
             }
-
-            //string uriString = HttpUtility.HtmlDecode(UriHelper.GetEncodedUrl(context.Request));
-
-            //MessageUri uri = new MessageUri(uriString);
-            //IdentityDecoder decoder = new IdentityDecoder(config.ClientIdentityNameClaimType, context, config.GetClientIndexes());
-            //identity = decoder.Id;
-            ////resource = uri.Resource;
-            ////indexes = uri.Indexes == null ? null : new List<KeyValuePair<string, string>>(uri.Indexes);
-            //var localIndexes = decoder.Indexes;
 
             adapter = new OrleansAdapter(identity, "WebSocket", "WSN", graphManager);
             adapter.OnObserve += Adapter_OnObserve;
@@ -185,7 +175,6 @@ namespace Piraeus.Adapters
             {
                 foreach (var sub in subscriptions)
                 {
-                    //subscribe
                     SubscriptionMetadata metadata = new SubscriptionMetadata()
                     {
                         Identity = identity,
@@ -194,7 +183,6 @@ namespace Piraeus.Adapters
                     };
 
                     adapter.SubscribeAsync(resource, metadata).GetAwaiter();
-                    //SubscribeAsync(sub, metadata).GetAwaiter();
                 }
             }
         }
@@ -211,10 +199,6 @@ namespace Piraeus.Adapters
             adapter.PublishAsync(msg, indexes).GetAwaiter();
         }
 
-        //private async Task SubscribeAsync(string resource, SubscriptionMetadata metadata)
-        //{
-        //    await adapter.SubscribeAsync(resource, metadata);
-        //}
         private async Task Send(byte[] message)
         {
             try
@@ -240,9 +224,7 @@ namespace Piraeus.Adapters
 
         public override void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
 

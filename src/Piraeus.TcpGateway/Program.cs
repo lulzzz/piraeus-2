@@ -14,7 +14,6 @@ namespace Piraeus.TcpGateway
             return Host.CreateDefaultBuilder(args)
 .ConfigureServices((hostContext, services) =>
 {
-    //PiraeusConfig config;
     services.AddPiraeusConfiguration(out PiraeusConfig config);
     if (!string.IsNullOrEmpty(config.InstrumentationKey))
     {
@@ -26,10 +25,10 @@ namespace Piraeus.TcpGateway
         });
     }
 
-    services.AddOrleansConfiguration(); //add orleans config as singleton
+    services.AddOrleansConfiguration();
     services.AddLogging(builder => builder.AddLogging(config));
-    services.AddSingleton<Logger>();    //add the logger
-    services.AddHostedService<TcpGatewayHost>(); //start the service
+    services.AddSingleton<Logger>();
+    services.AddHostedService<TcpGatewayHost>();
 });
         }
 

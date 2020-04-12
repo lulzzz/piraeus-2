@@ -78,7 +78,7 @@ namespace Piraeus.Adapters.Utilities
 
         private static ValidatorResult ValidateAuthorizationPolicy(AuthorizationPolicy policy, ClaimsIdentity identity = null)
         {
-            return new ValidatorResult(policy.Evaluate(identity), $"Access control check failed for {policy.PolicyId.ToString()}");
+            return new ValidatorResult(policy.Evaluate(identity), $"Access control check failed for {policy.PolicyId}");
         }
 
         private static ValidatorResult ValidateEnabled(EventMetadata metadata, bool? encryptedChannel = null)

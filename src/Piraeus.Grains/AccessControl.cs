@@ -24,9 +24,6 @@ namespace Piraeus.Grains
         public async Task<AuthorizationPolicy> GetPolicyAsync()
         {
             AuthorizationPolicy policy = null;
-
-            //serializing to byte array avoids issues with recursion serialization
-            //when storage provider for grain state uses json serialization format.
             if (State.Policy != null)
             {
                 using (MemoryStream stream = new MemoryStream(State.Policy))
@@ -49,9 +46,6 @@ namespace Piraeus.Grains
 
         public async Task UpsertPolicyAsync(AuthorizationPolicy policy)
         {
-            //deserializing to byte array avoids issues with recursion deserialization
-            //when storage provider for grain state uses json serialization format.
-
             XmlWriterSettings settings = new XmlWriterSettings() { OmitXmlDeclaration = true };
             StringBuilder builder = new StringBuilder();
             using (XmlWriter writer = XmlWriter.Create(builder, settings))

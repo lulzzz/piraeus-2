@@ -20,7 +20,6 @@
 
         public List<string> Topics { get; set; }
 
-        //public ushort MessageId { get; set; }
         public override byte[] Encode()
         {
             byte fixedHeader = (0x0A << Constants.Header.MessageTypeOffset) |
@@ -29,8 +28,8 @@
                    0x00;
 
             byte[] messageId = new byte[2];
-            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
-            messageId[1] = (byte)(this.MessageId & 0x00FF); //LSB
+            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF);
+            messageId[1] = (byte)(this.MessageId & 0x00FF);
 
             ByteContainer topicContainer = new ByteContainer();
             int index = 0;
@@ -63,11 +62,11 @@
 
             int remainingLength = base.DecodeRemainingLength(message);
 
-            int temp = remainingLength; //increase the fixed header size
+            int temp = remainingLength;
             do
             {
                 index++;
-                temp = temp / 128;
+                temp /= 128;
             } while (temp > 0);
 
             index++;

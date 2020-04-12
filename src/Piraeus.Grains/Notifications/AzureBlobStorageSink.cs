@@ -16,18 +16,29 @@ namespace Piraeus.Grains.Notifications
 {
     public class AzureBlobStorageSink : EventSink
     {
-        private readonly string blobType;
-        private readonly int clientCount;
-        private readonly string connectionString;
-        private readonly string container;
-        private readonly string key;
-        private readonly Uri sasUri;
-        private readonly BlobStorage[] storageArray;
-        private string appendFilename;
-        private int arrayIndex;
         private readonly IAuditor auditor;
+
+        private readonly string blobType;
+
+        private readonly int clientCount;
+
+        private readonly string connectionString;
+
+        private readonly string container;
+
+        private readonly string key;
+
         private readonly ConcurrentQueue<EventMessage> queue;
+
+        private readonly Uri sasUri;
+
+        private readonly BlobStorage[] storageArray;
+
         private readonly Uri uri;
+
+        private string appendFilename;
+
+        private int arrayIndex;
 
         public AzureBlobStorageSink(SubscriptionMetadata metadata)
             : base(metadata)

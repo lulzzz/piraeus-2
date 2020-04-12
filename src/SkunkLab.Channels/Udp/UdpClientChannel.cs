@@ -9,12 +9,6 @@ namespace SkunkLab.Channels.Udp
 {
     public class UdpClientChannel : UdpChannel
     {
-        private ChannelState _state;
-
-        private UdpClient client;
-
-        private bool disposedValue;
-
         private readonly string hostname;
 
         private readonly int port;
@@ -22,6 +16,12 @@ namespace SkunkLab.Channels.Udp
         private readonly IPEndPoint remoteEP;
 
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private UdpClient client;
+
+        private bool disposedValue;
 
         public UdpClientChannel(int localPort, IPEndPoint remoteEP, CancellationToken token)
         {

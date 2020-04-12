@@ -14,6 +14,7 @@ namespace Piraeus.SiloHost
     public class Host
     {
         private OrleansConfig orleansConfig;
+
         private ISiloHost host;
 
         public Host()
@@ -29,35 +30,21 @@ namespace Piraeus.SiloHost
 #else
             CreateLocalSiloHost();
 #endif
-            //if (orleansConfig.Dockerized)
-            //{
-            //    CreateClusteredSiloHost();
-            //}
-            //else
-            //{
-            //    CreateLocalSiloHost();
-            //}
-
             host.StartAsync().GetAwaiter();
         }
 
         private void CreateLocalSiloHost()
         {
             var builder = new SiloHostBuilder()
-            // Use localhost clustering for a single local silo
             .UseLocalhostClustering()
-            // Configure ClusterId and ServiceId
             .Configure<ClusterOptions>(options =>
             {
                 options.ClusterId = orleansConfig.ClusterId;
                 options.ServiceId = orleansConfig.ServiceId;
             })
             .AddMemoryGrainStorage("store")
-            // Configure connectivity
             .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
 
-            // Configure logging with any logging framework that supports Microsoft.Extensions.Logging.
-            // In this particular case it logs using the Microsoft.Extensions.Logging.Console package.
             .ConfigureLogging(logging => logging.AddConsole());
 
             host = builder.Build();
@@ -85,7 +72,6 @@ namespace Piraeus.SiloHost
             }
             else
             {
-                //throw
             }
 
             silo.ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000);
@@ -119,8 +105,6 @@ namespace Piraeus.SiloHost
                 }
             }
             host = silo.Build();
-
-            //var clusterClient = (IClusterClient)host.Services.GetService(typeof(IClusterClient));
         }
 
         private LogLevel GetLogLevel()

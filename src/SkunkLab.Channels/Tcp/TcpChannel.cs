@@ -36,12 +36,6 @@ namespace SkunkLab.Channels.Tcp
 
         public abstract string TypeId { get; }
 
-        /// <summary>
-        /// Creates a new TCP server channel.
-        /// </summary>
-        /// <param name="client">TCP client obtained from TCP listener.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, TcpClient client, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -54,19 +48,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates TCP client channel
-        /// </summary>
-        /// <param name="usePrefixLength"></param>
-        /// <param name="address"></param>
-        /// <param name="port"></param>
-        /// <param name="localEP"></param>
-        /// <param name="pskIdentity"></param>
-        /// <param name="psk"></param>
-        /// <param name="blockSize"></param>
-        /// <param name="maxBufferSize"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -79,19 +60,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates TCP client channel
-        /// </summary>
-        /// <param name="usePrefixLength"></param>
-        /// <param name="hostname"></param>
-        /// <param name="port"></param>
-        /// <param name="localEP"></param>
-        /// <param name="pskIdentity"></param>
-        /// <param name="psk"></param>
-        /// <param name="blockSize"></param>
-        /// <param name="maxBufferSize"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -104,18 +72,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates TCP client channel
-        /// </summary>
-        /// <param name="usePrefixLength"></param>
-        /// <param name="hostname"></param>
-        /// <param name="port"></param>
-        /// <param name="pskIdentity"></param>
-        /// <param name="psk"></param>
-        /// <param name="blockSize"></param>
-        /// <param name="maxBufferSize"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -128,18 +84,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates TCP client channel
-        /// </summary>
-        /// <param name="usePrefixLength"></param>
-        /// <param name="address"></param>
-        /// <param name="port"></param>
-        /// <param name="pskIdentity"></param>
-        /// <param name="psk"></param>
-        /// <param name="blockSize"></param>
-        /// <param name="maxBufferSize"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -176,14 +120,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP server channel.
-        /// </summary>
-        /// <param name="client">TCP client obtained from TCP listener.</param>
-        /// <param name="certificate">Server certificate used for authentication.</param>
-        /// <param name="clientAuth">Determines whether to authenticate the client certificate.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, TcpClient client, X509Certificate2 certificate, bool clientAuth, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -196,14 +132,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Create new TCP server channel
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="pskIdentity"></param>
-        /// <param name="psk"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, TcpClient client, TlsPskIdentityManager pskManager, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -216,13 +144,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Create a new TCP client channel.
-        /// </summary>
-        /// <param name="hostname">Host name of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -235,14 +156,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="hostname">Host name of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="localEP">Local endpoint to bind for client connection.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, IPEndPoint localEP, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -255,12 +168,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="remoteEndpoint">Remote endpoint of server to connect.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -273,13 +180,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="remoteEndpoint">Remote endpoint of server to connect.</param>
-        /// <param name="localEP">Local endpoint for client connection.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, IPEndPoint localEP, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -292,13 +192,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="address">Address of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -311,14 +204,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates new TCP client channel.
-        /// </summary>
-        /// <param name="address">Address of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="localEP">Local endpoint for client connection.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, IPEndPoint localEP, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -331,14 +216,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="hostname">Host name of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="certificate">Certificate used to authenticate the client.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -351,15 +228,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates new TCP client channel.
-        /// </summary>
-        /// <param name="hostname">Host name of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="localEP">Local endpoint for client connection.</param>
-        /// <param name="certificate">Certificate used to authenticate the client.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -372,13 +240,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="remoteEndpoint">Remote endpoint of server to connect.</param>
-        /// <param name="certificate">Certificate used to authenticate the client.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -391,14 +252,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates new TCP client channel.
-        /// </summary>
-        /// <param name="remoteEndpoint">Remote endpoint of server to connect.</param>
-        /// <param name="localEP">Local endpoint for client connection.</param>
-        /// <param name="certificate">Certificate used to authenticate the client.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBuferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -411,13 +264,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Creates a new TCP client channel.
-        /// </summary>
-        /// <param name="address">Address of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="certificate">Certificate to authenticate client.</param>
-        /// <param name="token">Cancellation token.</param>
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)
@@ -430,15 +276,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-        /// <summary>
-        /// Create new TCP client channel.
-        /// </summary>
-        /// <param name="address">Address of server to connect.</param>
-        /// <param name="port">Port of server to connect.</param>
-        /// <param name="localEP">Local endpoint for client connection.</param>
-        /// <param name="certificate">Certificate used to authenticate the client.</param>
-        /// <param name="token">Cancellation token.</param>
-        /// <returns></returns>
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
         {
             if (usePrefixLength)

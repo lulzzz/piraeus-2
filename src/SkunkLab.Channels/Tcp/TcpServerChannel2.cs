@@ -61,19 +61,33 @@ namespace SkunkLab.Channels.Tcp
         #region private member variables
 
         private readonly int blockSize;
+
         private readonly X509Certificate2 certificate;
+
         private readonly bool clientAuth;
+
         private readonly int maxBufferSize;
+
         private readonly TlsPskIdentityManager pskManager;
-        private ChannelState _state;
-        private TcpClient client;
-        private bool disposed;
-        private NetworkStream localStream;
-        private TlsServerProtocol protocol;
+
         private readonly Queue<byte[]> queue;
-        private SemaphoreSlim readConnection;
-        private Stream stream;
+
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private TcpClient client;
+
+        private bool disposed;
+
+        private NetworkStream localStream;
+
+        private TlsServerProtocol protocol;
+
+        private SemaphoreSlim readConnection;
+
+        private Stream stream;
+
         private SemaphoreSlim writeConnection;
 
         #endregion private member variables
@@ -268,7 +282,7 @@ namespace SkunkLab.Channels.Tcp
 
                                 if (bytesRead == 0 && bufferStream.Length == 0)
                                 {
-                                    return; //closing instruction from client
+                                    return;
                                 }
 
                                 if (bytesRead + bufferStream.Length > maxBufferSize)
@@ -280,17 +294,16 @@ namespace SkunkLab.Channels.Tcp
                                 await bufferStream.WriteAsync(buffer, 0, bytesRead);
                             } while (localStream.DataAvailable && bytesRead == 16384);
 
-                            await bufferStream.FlushAsync(); //flush the writable stream
-                            bufferStream.Position = 0;  //position to beginning
+                            await bufferStream.FlushAsync();
+                            bufferStream.Position = 0;
 
-                            //load the messag buffer with the data
                             msgBuffer = new byte[bufferStream.Length];
                             await bufferStream.ReadAsync(msgBuffer, 0, msgBuffer.Length);
 
                             readConnection.Release();
                         }
 
-                        if (msgBuffer != null && msgBuffer.Length > 0)  //make sure data is available for the message
+                        if (msgBuffer != null && msgBuffer.Length > 0)
                         {
                             OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, msgBuffer));
                         }
@@ -375,8 +388,6 @@ namespace SkunkLab.Channels.Tcp
                     try
                     {
                         CloseAsync().GetAwaiter();
-                        //Task task = CloseAsync();
-                        //Task.WaitAll(task);
                     }
                     catch (Exception ex)
                     {

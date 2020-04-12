@@ -32,18 +32,6 @@ namespace Piraeus.Grains.Notifications
 
         private readonly Uri uri;
 
-        /// <summary>
-        /// Create IoTHub subscription for device client or service client
-        /// </summary>
-        /// <param name="contentType"></param>
-        /// <param name="messageId"></param>
-        /// <param name="metadata"></param>
-        /// <remarks>For a service client the format is URI iothub://hostname?deviceId=id&key=sharedaccesskey&method=mymethod&propname=name&propvalue=value
-        /// where propname, propvalue, and method are optional.  The use of "method" parameter indicates a direct message to the device ID.
-        /// The use of propname and propvalue indicates the service client send property with this name/value pair.
-        /// For a device client the format is iothub://hostname?deviceId=id&key=sharedaccesskey&
-        /// iothub://hostname?keyname=name&key=sharedaccesskey where the key parameter is the device </remarks>
-        ///
         public IoTHubSink(SubscriptionMetadata metadata)
             : base(metadata)
         {
@@ -80,9 +68,9 @@ namespace Piraeus.Grains.Notifications
                     return;
                 }
 
-                if (serviceClient != null) //send message to device
+                if (serviceClient != null)
                 {
-                    if (!string.IsNullOrEmpty(methodName)) //direct method to device
+                    if (!string.IsNullOrEmpty(methodName))
                     {
                         if (message.ContentType == "application/json")
                         {
@@ -97,7 +85,7 @@ namespace Piraeus.Grains.Notifications
                             record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, string.Format("Cannot send IoTHub device {0} direct message because content-type is not JSON.", deviceId));
                         }
                     }
-                    else //command to device
+                    else
                     {
                         Microsoft.Azure.Devices.Message serviceMessage = new Microsoft.Azure.Devices.Message(payload)
                         {
@@ -114,7 +102,7 @@ namespace Piraeus.Grains.Notifications
                         record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }
-                else if (deviceClient != null) //this subscription is a device and will send to IoTHub
+                else if (deviceClient != null)
                 {
                     Microsoft.Azure.Devices.Client.Message msg = new Microsoft.Azure.Devices.Client.Message(payload)
                     {

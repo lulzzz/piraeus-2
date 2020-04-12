@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization
+﻿namespace Capl.Authorization
 {
     using System;
     using System.Globalization;

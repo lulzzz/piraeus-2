@@ -3,7 +3,9 @@
     public enum MembershipProviderType
     {
         Memory,
+
         AzureStorage,
+
         Redis
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization
+﻿namespace Capl.Authorization
 {
     using Capl.Authorization.Matching;
     using Capl.Authorization.Transforms;
@@ -44,8 +43,11 @@ namespace Capl.Authorization
         }
 
         public override Term Expression { get; set; }
+
         public override Match MatchExpression { get; set; }
+
         public override LiteralClaim TargetClaim { get; set; }
+
         public override Uri TransformID { get; set; }
 
         public override Uri Type { get; set; }

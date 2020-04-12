@@ -33,7 +33,6 @@ namespace Piraeus.Grains
 
         public async Task<List<string>> GetListAsync()
         {
-            //return await Task.FromResult<IEnumerable<string>>(State.Container.ToArray());
             return await Task.FromResult<List<string>>(State.Container);
         }
 

@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Issuance
+﻿namespace Capl.Issuance
 {
     using System;
 
@@ -7,6 +6,7 @@ namespace Capl.Issuance
     public enum IssueMode
     {
         Aggregate,
+
         Unique
     }
 }

@@ -15,6 +15,7 @@ namespace Piraeus.Grains
         }
 
         public Exception Error { get; internal set; }
+
         public string Id { get; internal set; }
     }
 }

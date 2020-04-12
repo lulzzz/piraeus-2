@@ -95,12 +95,6 @@ namespace Piraeus.HttpGateway.Controllers
                 longpollValue = a.Message;
                 longpollResource = a.ResourceUriString;
                 contentType = a.ContentType;
-                //context.Response.ContentType = a.ContentType;
-                //context.Response.ContentLength = a.Message.Length;
-                //context.Response.Headers.Add("x-sl-resource", a.ResourceUriString);
-                //context.Response.StatusCode = 200;
-                //context.Response.BodyWriter.WriteAsync(a.Message);
-                //context.Response.CompleteAsync();
                 are.Set();
             };
         }

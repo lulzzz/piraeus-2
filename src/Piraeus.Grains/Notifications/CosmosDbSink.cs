@@ -18,19 +18,31 @@ namespace Piraeus.Grains.Notifications
 {
     public class CosmosDBSink : EventSink
     {
-        private int arrayIndex;
         private readonly IAuditor auditor;
+
         private readonly int clientCount;
+
         private readonly DocumentCollection collection;
+
         private readonly string collectionId;
+
         private readonly Database database;
+
         private readonly string databaseId;
+
         private readonly int delay;
+
         private readonly Uri documentDBUri;
+
         private readonly ConcurrentQueue<EventMessage> queue;
+
         private readonly DocumentClient[] storageArray;
+
         private readonly string symmetricKey;
+
         private readonly Uri uri;
+
+        private int arrayIndex;
 
         public CosmosDBSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -66,15 +78,7 @@ namespace Piraeus.Grains.Notifications
 
             database = GetDatabaseAsync().GetAwaiter().GetResult();
 
-            //Task<Database> dbtask = GetDatabaseAsync();
-            //Task.WaitAll(dbtask);
-            //database = dbtask.Result;
-
             collection = GetCollectionAsync(database.SelfLink, collectionId).GetAwaiter().GetResult();
-
-            //Task<DocumentCollection> coltask = GetCollectionAsync(database.SelfLink, collectionId);
-            //Task.WaitAll(coltask);
-            //collection = coltask.Result;
         }
 
         public override async Task SendAsync(EventMessage message)
@@ -82,13 +86,6 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
             queue.Enqueue(message);
-            //byte[] doc = GetPayload(message);
-
-            //if (doc != null)
-            //{
-            //    queue.Enqueue(doc);
-            //}
-
             try
             {
                 while (!queue.IsEmpty)

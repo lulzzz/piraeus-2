@@ -10,6 +10,7 @@ namespace Orleans.Clustering.Redis
     public class RedisMembershipCollection : IList<RedisMembershipEntry>
     {
         public static readonly TableVersion _tableVersion = new TableVersion(0, "0");
+
         private readonly List<RedisMembershipEntry> list;
 
         public RedisMembershipCollection()
@@ -125,35 +126,5 @@ namespace Orleans.Clustering.Redis
 
             return ret;
         }
-
-        //public Tuple<MembershipEntry, string> UpdateIAmAlive(string clusterId, SiloAddress address, DateTime iAmAlivetime)
-        //{
-        //    try
-        //    {
-        //        string key = String.Format("{0}{1}", clusterId, address.ToParsableString());
-        //        string val = iAmAlivetime.ToString();
-
-        //        var data = list.ToArray().Where((x) => x != null)
-        //            .Select(x => x.ToMembershipEntryTuple())
-        //            .ToList();
-
-        //        var items = data.Where((x) => x.Item1.SiloAddress.ToParsableString() == address.ToParsableString()).ToList();
-        //        //var items = data.TakeWhile((x) => x.Item1.SiloAddress.ToParsableString() == address.ToParsableString()).ToList();
-        //        if (items == null || items.Count != 1)
-        //        {
-        //            return null;
-        //        }
-        //        else
-        //        {
-        //            items[0].Item1.IAmAliveTime = iAmAlivetime;
-        //            return items[0];
-        //        }
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-
-        //}
     }
 }

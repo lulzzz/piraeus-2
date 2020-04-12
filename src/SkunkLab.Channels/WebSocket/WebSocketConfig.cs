@@ -28,6 +28,7 @@ namespace SkunkLab.Channels.WebSocket
         }
 
         public TimeSpan CloseTimeout { get; internal set; }
+
         public int MaxIncomingMessageSize { get; internal set; }
 
         public int ReceiveLoopBufferSize { get; internal set; }

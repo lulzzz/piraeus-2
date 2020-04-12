@@ -9,6 +9,7 @@
         }
 
         public string ErrorMessage { get; set; }
+
         public bool Validated { get; internal set; }
     }
 }

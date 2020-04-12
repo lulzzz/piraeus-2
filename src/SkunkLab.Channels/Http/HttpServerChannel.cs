@@ -30,11 +30,6 @@ namespace SkunkLab.Channels.Http
 
         private HttpRequestMessage request;
 
-        /// <summary>
-        /// Creates HTTP server channel for a published message or long polling
-        /// </summary>
-        /// <param name="request">Http request from client.</param>
-        //public HttpServerChannel(HttpRequestMessage request)
         public HttpServerChannel(HttpContext context)
         {
             Id = "http-" + Guid.NewGuid().ToString();
@@ -172,12 +167,9 @@ namespace SkunkLab.Channels.Http
 response.StatusCode == HttpStatusCode.Accepted ||
 response.StatusCode == HttpStatusCode.NoContent)
                 {
-                    //await Log.LogAsync("Channel {0} sent http request.", this.Id);
                 }
                 else
                 {
-                    //invalid response code
-                    //await Log.LogWarningAsync("Channel '{0}' invalid response code from send operation of {1}", response.StatusCode);
                 }
             }
             catch (WebException we)

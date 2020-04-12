@@ -10,11 +10,6 @@ namespace SkunkLab.Security.Identity
 {
     public class IdentityDecoder
     {
-        /// <summary>
-        /// Decodes the claims identity
-        /// </summary>
-        /// <param name="identityClaimType">Claim type of the unique identifier of the identity.</param>
-        /// <param name="indexes">Key value pair of claim type and index name.</param>
         public IdentityDecoder(string identityClaimType, HttpContext context = null, List<KeyValuePair<string, string>> indexes = null)
         {
             Id = DecodeClaimType(context, identityClaimType);
@@ -70,8 +65,7 @@ namespace SkunkLab.Security.Identity
                     return null;
                 }
 
-                var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
-                if (principal == null)
+                if (!(Thread.CurrentPrincipal is ClaimsPrincipal principal))
                 {
                     return null;
                 }
@@ -83,7 +77,7 @@ namespace SkunkLab.Security.Identity
                             c.Type.ToLower(CultureInfo.InvariantCulture) ==
                             claimType.ToLower(CultureInfo.InvariantCulture));
 
-                return claim == null ? null : claim.Value;
+                return claim?.Value;
             });
 
             return task.Result;

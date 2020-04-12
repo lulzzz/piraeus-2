@@ -15,7 +15,9 @@ namespace Piraeus.Grains.Notifications
     public class WebHookSink : EventSink
     {
         private readonly string address;
+
         private readonly IAuditor auditor;
+
         private readonly ILog logger;
 
         public WebHookSink(SubscriptionMetadata metadata, ILog logger)

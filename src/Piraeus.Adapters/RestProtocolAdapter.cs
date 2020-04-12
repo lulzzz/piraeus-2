@@ -17,7 +17,6 @@ namespace Piraeus.Adapters
 {
     public class RestProtocolAdapter : ProtocolAdapter
     {
-        //private readonly GraphManager graphManager;
         private readonly OrleansAdapter adapter;
 
         private readonly IAuditFactory auditFactory;
@@ -58,7 +57,6 @@ namespace Piraeus.Adapters
             method = context.Request.Method.ToUpperInvariant();
             messageUri = new MessageUri(context.Request);
 
-            //this.graphManager = graphManager;
             IdentityDecoder decoder = new IdentityDecoder(config.ClientIdentityNameClaimType, context, config.GetClientIndexes());
             identity = decoder.Id;
             indexes = decoder.Indexes;

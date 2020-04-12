@@ -10,7 +10,7 @@ namespace Piraeus.Module
     {
         public static T Deserialize<T>(string contentType, byte[] body)
         {
-            T result = default(T);
+            T result = default;
             if (contentType == "application/json")
             {
                 string jsonString = Encoding.UTF8.GetString(body);

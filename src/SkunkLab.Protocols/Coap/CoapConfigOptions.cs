@@ -6,7 +6,9 @@ namespace SkunkLab.Protocols.Coap
     public enum CoapConfigOptions
     {
         None = 0,
+
         Observe = 1,
+
         NoResponse = 2
     }
 }

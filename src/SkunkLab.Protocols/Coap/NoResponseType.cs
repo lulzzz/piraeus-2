@@ -6,8 +6,11 @@ namespace SkunkLab.Protocols.Coap
     public enum NoResponseType
     {
         All = 0,
+
         No200 = 2,
+
         No400 = 8,
+
         No500 = 16
     }
 

@@ -29,43 +29,31 @@ namespace SkunkLab.Protocols.Mqtt
         public IAuthenticator Authenticator { get; set; }
 
         public TimeSpan ExchangeLifetime =>
-                //MAX_TRANSMIT_SPAN + (2 * MAX_LATENCY) + PROCESSING_DELAY
                 TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + (2 * MaxLatency.TotalSeconds) + AckTimeout.TotalSeconds);
 
-        /// <summary>
-        /// Claim type that uniquely identifies the an identity.
-        /// </summary>
-        /// <remarks>Used only on server.</remarks>
         public string IdentityClaimType { get; set; }
 
-        /// <summary>
-        /// List of claim type and index name used to associated indexes with an ephemeral subscription.
-        /// </summary>
-        /// <remarks>Used only on server.</remarks>
         public List<KeyValuePair<string, string>> Indexes { get; set; }
 
-        //public IAuthenticator Authenticator { get; set; }
         public double KeepAliveSeconds { get; internal set; }
 
         public TimeSpan MaxLatency { get; internal set; }
+
         public int MaxRetransmit { get; internal set; }
 
         public TimeSpan MaxTransmitSpan
         {
             get
             {
-                //ACK_TIMEOUT * (( 2 ** MAX_RETRANSMIT) - 1) * ACK_RANDOM_FACTOR
                 double secs = (AckTimeout.TotalSeconds) * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit)) - 1) * AckRandomFactor;
                 return TimeSpan.FromSeconds(secs);
             }
         }
 
         public TimeSpan MaxTransmitWait =>
-                //ACK_TIMEOUT * (( 2 ** (MAX_RETRANSMIT + 1)) - 1) * ACK_RANDOM_FACTOR
                 TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) * AckRandomFactor);
 
         public TimeSpan NonLifetime =>
-                //MAX_TRANSMIT_SPAN + MAX_LATENCY
                 TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
     }
 }

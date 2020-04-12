@@ -81,28 +81,6 @@ namespace Piraeus.Extensions.Orleans
             }
 #endif
 
-            //if (!config.Dockerized)
-            //{
-            //    builder.UseLocalhostClustering();
-            //}
-            //else
-            //{
-            //    builder.Configure<ClusterOptions>(options =>
-            //    {
-            //        options.ClusterId = config.ClusterId;
-            //        options.ServiceId = config.ServiceId;
-            //    });
-
-            //    if (config.DataConnectionString.Contains("6379") || config.DataConnectionString.Contains("6380"))
-            //    {
-            //        builder.UseRedisGatewayListProvider(options => options.ConnectionString = config.DataConnectionString);
-            //    }
-            //    else
-            //    {
-            //        builder.UseAzureStorageClustering(options => options.ConnectionString = config.DataConnectionString);
-            //    }
-            //}
-
             Piraeus.Configuration.LoggerType loggers = config.GetLoggerTypes();
 
             if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))

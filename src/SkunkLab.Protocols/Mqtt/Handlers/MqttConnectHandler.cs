@@ -19,14 +19,12 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
             ConnectMessage msg = Message as ConnectMessage;
 
-            //wrong protocol version
             if (msg.ProtocolVersion != 4)
             {
                 Session.ConnectResult = ConnectAckCode.UnacceptableProtocolVersion;
                 return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.UnacceptableProtocolVersion));
             }
 
-            //0-byte client id and clean session = 0
             if (msg.ClientId == null && !msg.CleanSession)
             {
                 Session.ConnectResult = ConnectAckCode.IdentifierRejected;

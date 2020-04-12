@@ -11,8 +11,8 @@ namespace SkunkLab.Security.Authentication
         public JwtAuthenticationOptions(string signingKey, string issuer = null, string audience = null)
         {
             SigningKey = signingKey;
-            Issuer = issuer == null ? null : issuer.ToLowerInvariant();
-            Audience = audience == null ? null : audience.ToLowerInvariant();
+            Issuer = issuer?.ToLowerInvariant();
+            Audience = audience?.ToLowerInvariant();
         }
 
         public string Audience { get; set; }

@@ -15,18 +15,29 @@ namespace Piraeus.Grains.Notifications
 {
     public class EventHubSink : EventSink
     {
-        private int arrayIndex;
         private readonly IAuditor auditor;
+
         private readonly int clientCount;
+
         private readonly string connectionString;
+
         private readonly int delay;
+
         private readonly string hubName;
+
         private readonly string keyName;
+
         private readonly string partitionId;
+
         private readonly ConcurrentQueue<byte[]> queue;
+
         private readonly PartitionSender[] senderArray;
+
         private readonly EventHubClient[] storageArray;
+
         private readonly Uri uri;
+
+        private int arrayIndex;
 
         public EventHubSink(SubscriptionMetadata metadata)
             : base(metadata)

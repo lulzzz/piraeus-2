@@ -119,10 +119,7 @@ namespace SkunkLab.Channels.Tcp
 
         public TcpClientChannel(IPAddress address, int port, IPEndPoint localEP, X509Certificate2 certificate, int maxBufferSize, CancellationToken token)
         {
-            if (address == null)
-            {
-                throw new ArgumentNullException("address");
-            }
+            _ = address ?? throw new ArgumentNullException(nameof(address));
 
             this.address = address;
             this.port = port;
@@ -202,24 +199,42 @@ namespace SkunkLab.Channels.Tcp
 
         #region private member variables
 
-        private ChannelState _state;
         private readonly IPAddress address;
+
         private readonly X509Certificate2 certificate;
-        private TcpClient client;
-        private bool disposed;
+
         private readonly string hostname;
+
         private readonly IPEndPoint localEP;
-        private NetworkStream localStream;
+
         private readonly int maxBufferSize;
+
         private readonly int port;
-        private TlsClientProtocol protocol;
+
         private readonly byte[] psk;
+
         private readonly string pskIdentity;
+
         private readonly Queue<byte[]> queue;
-        private SemaphoreSlim readConnection;
+
         private readonly IPEndPoint remoteEP;
-        private Stream stream;
+
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private TcpClient client;
+
+        private bool disposed;
+
+        private NetworkStream localStream;
+
+        private TlsClientProtocol protocol;
+
+        private SemaphoreSlim readConnection;
+
+        private Stream stream;
+
         private SemaphoreSlim writeConnection;
 
         #endregion private member variables
@@ -424,8 +439,6 @@ namespace SkunkLab.Channels.Tcp
 
         public override async Task ReceiveAsync()
         {
-            //await Log.LogInfoAsync("Channel {0} tcp client channel receiving.", Id);
-
             Exception error = null;
             byte[] buffer = null;
             byte[] prefix = null;
@@ -439,7 +452,7 @@ namespace SkunkLab.Channels.Tcp
                 {
                     await readConnection.WaitAsync();
 
-                    while (offset < 4) //read the prefix to discover the length of the message (big endian)
+                    while (offset < 4)
                     {
                         if (offset == 0)
                         {
@@ -449,14 +462,12 @@ namespace SkunkLab.Channels.Tcp
 
                         if (bytesRead == 0)
                         {
-                            //await CloseAsync();
                             return;
                         }
 
                         offset += bytesRead;
                     }
 
-                    //ensure the length prefix is ordered correctly to calc the remaining length
                     prefix = BitConverter.IsLittleEndian ? prefix.Reverse().ToArray() : prefix;
                     remainingLength = BitConverter.ToInt32(prefix, 0);
 
@@ -469,7 +480,6 @@ namespace SkunkLab.Channels.Tcp
 
                     byte[] message = new byte[remainingLength];
 
-                    //loop through the messages to ensure they are pieced together based on the prefix length
                     while (remainingLength > 0)
                     {
                         buffer = new byte[remainingLength];
@@ -491,8 +501,7 @@ namespace SkunkLab.Channels.Tcp
             }
             finally
             {
-                OnError?.Invoke(this, new ChannelErrorEventArgs(Id, error != null ? error : new TimeoutException("Receiver closing")));
-                //await CloseAsync();
+                OnError?.Invoke(this, new ChannelErrorEventArgs(Id, error ?? new TimeoutException("Receiver closing")));
             }
         }
 
@@ -552,8 +561,6 @@ namespace SkunkLab.Channels.Tcp
                     try
                     {
                         CloseAsync().GetAwaiter();
-                        //Task task = CloseAsync();
-                        //Task.WaitAll(task);
                     }
                     catch (Exception ex)
                     {

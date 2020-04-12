@@ -25,11 +25,17 @@
         }
 
         public CodeType Code { get; internal set; }
+
         public string ContentType { get; internal set; }
+
         public string FaultMessage { get; internal set; }
+
         public string InternalMessageId { get; internal set; }
+
         public ushort MessageId { get; internal set; }
+
         public byte[] ResponseMessage { get; internal set; }
+
         public byte[] Token { get; internal set; }
     }
 }

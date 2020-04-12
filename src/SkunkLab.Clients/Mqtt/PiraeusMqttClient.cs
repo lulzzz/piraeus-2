@@ -19,22 +19,16 @@ namespace Piraeus.Clients.Mqtt
     {
         private readonly IChannel channel;
 
-        private ConnectAckCode? code;
-
         private readonly IMqttDispatch dispatcher;
 
         private readonly Queue<byte[]> queue;
 
-        private MqttSession session;
-
         private readonly double timeoutMilliseconds;
 
-        /// <summary>
-        /// Creates a new instance of MQTT client.
-        /// </summary>
-        /// <param name="config">MQTT configuration.</param>
-        /// <param name="channel">Channel for communications.</param>
-        /// <param name="dispatcher">Optional custom dispatcher to receive published messages.</param>
+        private ConnectAckCode? code;
+
+        private MqttSession session;
+
         public PiraeusMqttClient(MqttConfig config, IChannel channel, IMqttDispatch dispatcher = null)
         {
             this.dispatcher = dispatcher ?? new GenericMqttDispatcher();
@@ -88,14 +82,6 @@ namespace Piraeus.Clients.Mqtt
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Connect to Piraeus using MQTT
-        /// </summary>
-        /// <param name="clientId">MQTT client ID</param>
-        /// <param name="username">MQTT username.  Piraeus uses the security token type used in the MQTT password.</param>
-        /// <param name="password">MQTT passowrd.  Piraeus uses the security token that will be authenticated (JWT, SWT, X509).</param>
-        /// <param name="keepaliveSeconds">Number of seconds that keep alive should fire when messages not sent during the duration.</param>
-        /// <returns></returns>
         public async Task<ConnectAckCode> ConnectAsync(string clientId, string username, string password, int keepaliveSeconds)
         {
             code = null;
@@ -148,10 +134,6 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        /// <summary>
-        /// Disconnect from Piraeus
-        /// </summary>
-        /// <returns></returns>
         public async Task DisconnectAsync()
         {
             try
@@ -198,16 +180,6 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        /// <summary>
-        /// MQTT publish to a topic.
-        /// </summary>
-        /// <param name="qos"></param>
-        /// <param name="topicUriString"></param>
-        /// <param name="contentType"></param>
-        /// <param name="data"></param>
-        /// <param name="indexes"></param>
-        /// <param name="messageId"></param>
-        /// <returns></returns>
         public async Task PublishAsync(QualityOfServiceLevelType qos, string topicUriString, string contentType, byte[] data, string cacheKey = null, IEnumerable<KeyValuePair<string, string>> indexes = null, string messageId = null)
         {
             try
@@ -242,15 +214,7 @@ namespace Piraeus.Clients.Mqtt
                 {
                     byte[] message = queue.Dequeue();
 
-                    //if (channel.RequireBlocking)
-                    //{
-                    //    //Task t = channel.SendAsync(message);
-                    //    //Task.WaitAll(t);
-                    //}
-                    //else
-                    //{
                     await channel.SendAsync(message);
-                    //}
                 }
             }
             catch (Exception ex)
@@ -259,24 +223,12 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        /// <summary>
-        /// Register a topic that already has a subscription.
-        /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="action"></param>
         public void RegisterTopic(string topic, Action<string, string, byte[]> action)
         {
             Uri uri = new Uri(topic.ToLowerInvariant());
             dispatcher.Register(uri.ToString(), action);
         }
 
-        /// <summary>
-        /// MQTT subscribe to a topic.  Remember, these subscriptionns are ephemeral.
-        /// </summary>
-        /// <param name="topicUriString"></param>
-        /// <param name="qos"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
         public async Task SubscribeAsync(string topicUriString, QualityOfServiceLevelType qos, Action<string, string, byte[]> action)
         {
             try
@@ -295,11 +247,6 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        /// <summary>
-        /// MQTT subscribe to a topic.  Remember, these subscriptions are ephemeral.
-        /// </summary>
-        /// <param name="subscriptions"></param>
-        /// <returns></returns>
         public async Task SubscribeAsync(Tuple<string, QualityOfServiceLevelType, Action<string, string, byte[]>>[] subscriptions)
         {
             try
@@ -314,16 +261,7 @@ namespace Piraeus.Clients.Mqtt
 
                 SubscribeMessage msg = new SubscribeMessage(session.NewId(), dict);
 
-                //if (channel.RequireBlocking)
-                //{
-                //    channel.SendAsync(msg.Encode()).GetAwaiter();
-                //    //Task t = channel.SendAsync(msg.Encode());
-                //    //Task.WaitAll(t);
-                //}
-                //else
-                //{
                 await channel.SendAsync(msg.Encode());
-                //}
             }
             catch (Exception ex)
             {
@@ -331,37 +269,19 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        /// <summary>
-        /// Unregister a topic that has a subscription
-        /// </summary>
-        /// <param name="topic"></param>
         public void UnregisterTopic(string topic)
         {
             Uri uri = new Uri(topic.ToLowerInvariant());
             dispatcher.Unregister(uri.ToString());
         }
 
-        /// <summary>
-        /// Unsubscribe from an ephemeral subscription.
-        /// </summary>
-        /// <param name="topic"></param>
-        /// <returns></returns>
         public async Task UnsubscribeAsync(string topic)
         {
             try
             {
                 UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new string[] { topic });
 
-                //if (channel.RequireBlocking)
-                //{
-                //    Task t = channel.SendAsync(msg.Encode());
-                //    Task.WaitAll(t);
-                //}
-                //else
-                //{
                 await channel.SendAsync(msg.Encode());
-                //}
-
                 dispatcher.Unregister(topic);
             }
             catch (Exception ex)
@@ -370,27 +290,13 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        /// <summary>
-        /// Unsubscribe from an ephemeral subscription.
-        /// </summary>
-        /// <param name="topics"></param>
-        /// <returns></returns>
         public async Task UnsubscribeAsync(IEnumerable<string> topics)
         {
             try
             {
                 UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
 
-                //if (channel.RequireBlocking)
-                //{
-                //    Task t = channel.SendAsync(msg.Encode());
-                //    Task.WaitAll(t);
-                //}
-                //else
-                //{
                 await channel.SendAsync(msg.Encode());
-                //}
-
                 foreach (var topic in topics)
                 {
                     dispatcher.Unregister(topic);
@@ -455,30 +361,6 @@ namespace Piraeus.Clients.Mqtt
                 Trace.TraceError(ex.Message);
                 OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
             }
-
-            //Task task = Task.Factory.StartNew(async () =>
-            //{
-            //    try
-            //    {
-            //        MqttMessage message = await handler.ProcessAsync();
-            //        if (message != null)
-            //        {
-            //            await channel.SendAsync(message.Encode());
-            //        }
-            //    }
-            //    catch(Exception ex)
-            //    {
-            //        Console.WriteLine(ex.Message);
-            //        Trace.TraceError(ex.Message);
-            //    }
-            //});
-
-            //Task.WaitAll(task);
-
-            //if (task.Exception != null)
-            //{
-            //    OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, task.Exception.InnerException));
-            //}
         }
 
         private void Channel_OnStateChange(object sender, ChannelStateEventArgs args)
@@ -521,8 +403,6 @@ namespace Piraeus.Clients.Mqtt
         private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)
         {
             channel.CloseAsync().GetAwaiter();
-            //Task task = channel.CloseAsync();
-            //Task.WaitAll(task);
             channel.Dispose();
         }
 
@@ -554,8 +434,6 @@ namespace Piraeus.Clients.Mqtt
             MqttMessage msg = args.Message;
             msg.Dup = true;
             channel.SendAsync(msg.Encode()).GetAwaiter();
-            //Task task = channel.SendAsync(msg.Encode());
-            //Task.WhenAll(task);
         }
 
         #endregion Session Events

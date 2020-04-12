@@ -37,14 +37,6 @@ namespace Piraeus.Adapters
             }
         }
 
-        /// <summary>
-        /// Create protocol adapter for rest service or Web socket
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="request"></param>
-        /// <param name="token"></param>
-        /// <param name="authenticator"></param>
-        /// <returns></returns>
         public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, HttpContext context, ILog logger = null, IAuthenticator authenticator = null, CancellationToken token = default)
         {
             IChannel channel;
@@ -56,7 +48,7 @@ namespace Piraeus.Adapters
                 {
                     return new MqttProtocolAdapter(config, graphManager, authenticator, channel, logger);
                 }
-                else if (context.WebSockets.WebSocketRequestedProtocols.Contains("coapv1"))  //(context.WebSocketRequestedProtocols.Contains("coapv1"))
+                else if (context.WebSockets.WebSocketRequestedProtocols.Contains("coapv1"))
                 {
                     return new CoapProtocolAdapter(config, graphManager, authenticator, channel, logger);
                 }
@@ -81,12 +73,6 @@ namespace Piraeus.Adapters
             }
         }
 
-        /// <summary>
-        /// Creates a protocol adapter for TCP server channel
-        /// </summary>
-        /// <param name="client">TCP client initialized by TCP Listener on server.</param>
-        /// <param name="token">Cancellation token</param>
-        /// <returns></returns>
         public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, TcpClient client, ILog logger = null, CancellationToken token = default)
         {
             TlsPskIdentityManager pskManager = null;
@@ -122,13 +108,12 @@ namespace Piraeus.Adapters
             IPEndPoint localEP = (IPEndPoint)client.Client.LocalEndPoint;
             int port = localEP.Port;
 
-            if (port == 5684) //CoAP over TCP
+            if (port == 5684)
             {
                 return new CoapProtocolAdapter(config, graphManager, authenticator, channel, logger);
             }
-            else if (port == 1883 || port == 8883) //MQTT over TCP
+            else if (port == 1883 || port == 8883)
             {
-                //MQTT
                 return new MqttProtocolAdapter(config, graphManager, authenticator, channel, logger);
             }
             else
@@ -164,24 +149,6 @@ namespace Piraeus.Adapters
                 config.BlockSize,
                 config.BlockSize, 250.0);
         }
-
-        //private static CoapConfig GetCoapConfig(PiraeusConfig config, IAuthenticator authenticator)
-        //{
-        //    CoapConfigOptions options = config.Protocols.Coap.ObserveOption && config.Protocols.Coap.NoResponseOption ? CoapConfigOptions.Observe | CoapConfigOptions.NoResponse : config.Protocols.Coap.ObserveOption ? CoapConfigOptions.Observe : config.Protocols.Coap.NoResponseOption ? CoapConfigOptions.NoResponse : CoapConfigOptions.None;
-        //    return new CoapConfig(authenticator, config.Protocols.Coap.HostName, options, config.Protocols.Coap.AutoRetry,
-        //        config.Protocols.Coap.KeepAliveSeconds, config.Protocols.Coap.AckTimeoutSeconds, config.Protocols.Coap.AckRandomFactor,
-        //        config.Protocols.Coap.MaxRetransmit, config.Protocols.Coap.NStart, config.Protocols.Coap.DefaultLeisure, config.Protocols.Coap.ProbingRate, config.Protocols.Coap.MaxLatencySeconds);
-        //}
-
-        //private static MqttConfig GetMqttConfig(PiraeusConfig config, IAuthenticator authenticator)
-        //{
-        //    MqttConfig mqttConfig = new MqttConfig(authenticator, config.Protocols.Mqtt.KeepAliveSeconds,
-        //           config.Protocols.Mqtt.AckTimeoutSeconds, config.Protocols.Mqtt.AckRandomFactor, config.Protocols.Mqtt.MaxRetransmit, config.Protocols.Mqtt.MaxLatencySeconds);
-        //    mqttConfig.IdentityClaimType = config.Identity.Client.IdentityClaimType;
-        //    mqttConfig.Indexes = config.Identity.Client.Indexes;
-
-        //    return mqttConfig;
-        //}
 
         #endregion configurations
     }

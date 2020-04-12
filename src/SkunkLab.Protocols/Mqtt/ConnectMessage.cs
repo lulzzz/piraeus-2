@@ -10,7 +10,6 @@
 
         private int _version = 0x04;
 
-        //private bool willRetain;
         private byte connectFlags;
 
         private bool passwordFlag;
@@ -94,7 +93,7 @@
 
         public string ProtocolName
         {
-            get => _protocolName;  //return "MQIsdp"; }
+            get => _protocolName;
             set => _protocolName = value;
         }
 
@@ -105,10 +104,15 @@
         }
 
         public string Username { get; internal set; }
+
         public bool WillFlag { get; internal set; }
+
         public string WillMessage { get; internal set; }
+
         public QualityOfServiceLevelType? WillQualityOfServiceLevel { get; internal set; }
+
         public bool WillRetain { get; internal set; }
+
         public string WillTopic { get; internal set; }
 
         public override byte[] Encode()
@@ -118,10 +122,6 @@
                    0x00 << Constants.Header.DupFlagOffset |
                    0x00;
 
-            //ConnectVariableHeader variableHeader = this.VariableHeader as ConnectVariableHeader;
-            //ConnectPayload payload = this.Payload as ConnectPayload;
-            //variableHeader.SetConnectFlags(payload);
-
             SetConnectFlags();
             ByteContainer vhContainer = new ByteContainer();
             vhContainer.Add(this.ProtocolName);
@@ -129,8 +129,8 @@
             vhContainer.Add(this.connectFlags);
 
             byte[] keepAlive = new byte[2];
-            keepAlive[0] = (byte)((this.KeepAlive >> 8) & 0x00FF); // MSB
-            keepAlive[1] = (byte)(this.KeepAlive & 0x00FF); // LSB
+            keepAlive[0] = (byte)((this.KeepAlive >> 8) & 0x00FF);
+            keepAlive[1] = (byte)(this.KeepAlive & 0x00FF);
 
             vhContainer.Add(keepAlive);
 
@@ -145,9 +145,6 @@
 
             byte[] payloadBytes = payloadContainer.ToBytes();
 
-            //byte[] variableHeaderBytes = variableHeader.Encode();
-            //byte[] payloadBytes = payload.Encode();
-
             int remainingLength = variableHeaderBytes.Length + payloadBytes.Length;
             byte[] remainingLengthBytes = base.EncodeRemainingLength(remainingLength);
 
@@ -160,11 +157,6 @@
             return container.ToBytes();
         }
 
-        //public ConnectMessage(ConnectVariableHeader variableHeader, ConnectPayload payload)
-        //{
-        //    this.VariableHeader = variableHeader;
-        //    this.Payload = payload;
-        //}
         internal override MqttMessage Decode(byte[] message)
         {
             MqttMessage connectMessage = new ConnectMessage();
@@ -175,11 +167,11 @@
 
             int remainingLength = base.DecodeRemainingLength(message);
 
-            int temp = remainingLength; //increase the fixed header size
+            int temp = remainingLength;
             do
             {
                 index++;
-                temp = temp / 128;
+                temp /= 128;
             } while (temp > 0);
 
             index++;
@@ -204,18 +196,8 @@
 
             _protocolName = Encoding.UTF8.GetString(protocolName);
 
-            //if (Encoding.UTF8.GetString(protocolName) != this.ProtocolName)
-            //{
-            //fault wrong protocol
-            //}
-
             index += protocolNameLength;
             this.ProtocolVersion = buffer[index++];
-            //if (this.ProtocolVersion != (int)buffer[index++])
-            //{
-            //    //fault wrong version
-            //}
-
             byte connectFlags = buffer[index++];
             this.usernameFlag = ((connectFlags >> 0x07) == 0x01) ? true : false;
             this.passwordFlag = ((connectFlags & 0x64) >> 0x06 == 0x01) ? true : false;
@@ -263,19 +245,16 @@
 
             if (passwordFlag && !usernameFlag)
             {
-                //fault
             }
 
             if (this.WillFlag && ((string.IsNullOrEmpty(this.WillTopic) || string.IsNullOrEmpty(this.WillMessage)) || !this.WillQualityOfServiceLevel.HasValue))
             {
-                //fault
             }
 
             willQoS = 0x00;
             if (this.WillQualityOfServiceLevel.HasValue)
             {
                 willQoS = (byte)(int)this.WillQualityOfServiceLevel;
-                //willQoS = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), this.WillQualityOfServiceLevel.Value.ToString(), false));
             }
 
             this.connectFlags = 0x00;

@@ -40,7 +40,6 @@ namespace Orleans.Storage.Redis
             services.ConfigureNamedOptionForLogging<RedisStorageOptions>(name);
             services.TryAddSingleton<IGrainStorage>(sp => sp.GetServiceByName<IGrainStorage>(DEFAULT_STORAGE_PROVIDER_NAME));
             services.TryAddSingleton<ILogger>(logger);
-            //services.TryAddSingleton<IGrainStorage>(sp => sp.GetServiceByName<IGrainStorage>(name));
             return services.AddSingletonNamedService<IGrainStorage>(name, RedisGrainStorageFactory.Create)
                            .AddSingletonNamedService<ILifecycleParticipant<ISiloLifecycle>>(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
         }

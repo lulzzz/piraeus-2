@@ -50,8 +50,8 @@
                    0x00;
 
             byte[] messageId = new byte[2];
-            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF); // MSB
-            messageId[1] = (byte)(this.MessageId & 0x00FF); // LSB
+            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF);
+            messageId[1] = (byte)(this.MessageId & 0x00FF);
 
             ByteContainer payloadContainer = new ByteContainer();
 
@@ -86,7 +86,6 @@
             }
         }
 
-        //public ushort MessageId { get; set; }
         internal override MqttMessage Decode(byte[] message)
         {
             SubscribeMessage subscribeMessage = new SubscribeMessage();
@@ -97,11 +96,11 @@
 
             int remainingLength = base.DecodeRemainingLength(message);
 
-            int temp = remainingLength; //increase the fixed header size
+            int temp = remainingLength;
             do
             {
                 index++;
-                temp = temp / 128;
+                temp /= 128;
             } while (temp > 0);
 
             index++;
@@ -119,8 +118,6 @@
                 string topic = ByteContainer.DecodeString(buffer, index, out int length);
                 index += length;
                 QualityOfServiceLevelType topicQosLevel = (QualityOfServiceLevelType)buffer[index++];
-                //subscribeMessage._topics.Add(new Tuple<string, QualityOfServiceLevelType>(topic, topicQosLevel));
-                //subscribeMessage.Topics.Add(topic, topicQosLevel);
                 this._topics.Add(topic, topicQosLevel);
             }
 

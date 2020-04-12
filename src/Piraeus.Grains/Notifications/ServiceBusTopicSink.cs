@@ -16,8 +16,6 @@ namespace Piraeus.Grains.Notifications
     {
         private readonly IAuditor auditor;
 
-        private TopicClient client;
-
         private readonly string connectionString;
 
         private readonly string keyName;
@@ -25,6 +23,8 @@ namespace Piraeus.Grains.Notifications
         private readonly string topic;
 
         private readonly Uri uri;
+
+        private TopicClient client;
 
         public ServiceBusTopicSink(SubscriptionMetadata metadata)
                                                             : base(metadata)
@@ -53,7 +53,6 @@ namespace Piraeus.Grains.Notifications
 
                 if (client == null)
                 {
-                    //client = TopicClient.CreateFromConnectionString(connectionString, topic);
                     client = new TopicClient(connectionString, topic);
                 }
 

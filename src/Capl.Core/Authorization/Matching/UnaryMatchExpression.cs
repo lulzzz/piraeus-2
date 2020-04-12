@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization.Matching
+﻿namespace Capl.Authorization.Matching
 {
     using System;
     using System.Collections.Generic;

@@ -41,7 +41,6 @@ namespace Piraeus.Core.Utilities
             : base(uriString)
         {
             List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
-            //NameValueCollection nvc = HttpUtility.ParseQueryString(HttpUtility.UrlDecode(uriString));
             NameValueCollection nvc = HttpUtility.ParseQueryString(HttpUtility.UrlDecode(this.Query));
             for (int i = 0; i < nvc.Count; i++)
             {
@@ -58,12 +57,19 @@ namespace Piraeus.Core.Utilities
         }
 
         public string CacheKey { get; internal set; }
+
         public string ContentType { get; internal set; }
+
         public IEnumerable<KeyValuePair<string, string>> Indexes { get; internal set; }
+
         public string MessageId { get; internal set; }
+
         public string Resource { get; internal set; }
+
         public string SecurityToken { get; internal set; }
+
         public IEnumerable<string> Subscriptions { get; internal set; }
+
         public string TokenType { get; internal set; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -91,9 +97,6 @@ namespace Piraeus.Core.Utilities
             return indexList.Count > 0 ? indexList.ToArray() : null;
         }
 
-        //    //IEnumerable<KeyValuePair<string, string>> kvps = request.GetQueryNameValuePairs();
-        //    return from kv in kvps where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture) select kv.Value.ToLower(CultureInfo.InvariantCulture);
-        //}
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal void CheckUri(IEnumerable<string> uriStrings)
         {
@@ -108,10 +111,6 @@ namespace Piraeus.Core.Utilities
             }
         }
 
-        //private IEnumerable<string> GetEnumerableParameters(string key, HttpRequestMessage request)
-        //{
-        //    var query = QueryHelpers.ParseQuery(request.RequestUri.Query);
-        //    IEnumerable<KeyValuePair<string, string>> kvps = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal void CheckUri(string uriString)
         {

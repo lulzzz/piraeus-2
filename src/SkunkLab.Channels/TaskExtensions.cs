@@ -20,29 +20,5 @@ namespace SkunkLab.Channels
 
             return await task;
         }
-
-        //public static void Ignore(this Task task)
-        //{
-        //    if (task.IsCompleted)
-        //    {
-        //        var ignored = task.Exception;
-        //    }
-        //    else
-        //    {
-        //        IgnoreAsync(task);
-        //    }
-
-        //    async void IgnoreAsync(Task asyncTask)
-        //    {
-        //        try
-        //        {
-        //            await asyncTask.ConfigureAwait(false);
-        //        }
-        //        catch
-        //        {
-        //            // Ignored.
-        //        }
-        //    }
-        //}
     }
 }

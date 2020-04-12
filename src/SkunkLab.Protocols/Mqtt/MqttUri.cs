@@ -17,7 +17,6 @@ namespace SkunkLab.Protocols.Mqtt
         {
             Uri uri = new Uri(uriString.ToLowerInvariant());
             Resource = uri.ToCanonicalString(false);
-            //Resource = new Uri(uri.ToString().Replace(uri.PathAndQuery, "")).ToString();
             List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
             NameValueCollection nvc = HttpUtility.ParseQueryString(new Uri(HttpUtility.UrlDecode(uriString)).Query);
 
@@ -40,9 +39,13 @@ namespace SkunkLab.Protocols.Mqtt
         }
 
         public string CacheKey { get; internal set; }
+
         public string ContentType { get; internal set; }
+
         public IEnumerable<KeyValuePair<string, string>> Indexes { get; internal set; }
+
         public string MessageId { get; internal set; }
+
         public string Resource { get; internal set; }
 
         private KeyValuePair<string, string>[] BuildIndexes(IEnumerable<string> indexes)

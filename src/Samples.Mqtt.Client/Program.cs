@@ -13,27 +13,42 @@ using System.Threading.Tasks;
 
 namespace Samples.Mqtt.Client
 {
-    /* NOTE:  This sample works with the sample configuration script "SampleClient.ps1" */
-
     internal class Program
     {
         private static readonly string pubResource = null;
+
         private static readonly string subResource = null;
+
         private static string audience = issuer;
+
         private static IChannel channel;
+
         private static int channelNum;
+
         private static CancellationTokenSource cts;
+
         private static string hostname;
+
         private static int index;
+
         private static string issuer = "http://localhost/";
+
         private static PiraeusMqttClient mqttClient;
+
         private static string name;
+
         private static string nameClaimType = "http://localhost/name";
+
         private static string resourceA = "http://localhost/resource-a";
+
         private static string resourceB = "http://localhost/resource-b";
+
         private static string role;
+
         private static string roleClaimType = "http://localhost/role";
+
         private static bool send;
+
         private static string symmetricKey = "//////////////////////////////////////////8=";
 
         private static void Main(string[] args)
@@ -54,10 +69,8 @@ namespace Samples.Mqtt.Client
 
             string token = GetSecurityToken(name, role);
 
-            //create the channel
             channel = CreateChannel(token, cts);
 
-            //add some channel events
             channel.OnClose += Channel_OnClose;
             channel.OnError += Channel_OnError;
             channel.OnOpen += Channel_OnOpen;
@@ -209,7 +222,6 @@ namespace Samples.Mqtt.Client
                     string payloadString = string.Format($"{DateTime.Now.Ticks}:{name}-message {index}");
                     byte[] payload = Encoding.UTF8.GetBytes(payloadString);
                     string publishEvent = !string.IsNullOrEmpty(pubResource) ? pubResource : role == "A" ? resourceA : resourceB;
-                    //string publishEvent = role == "A" ? "http://www.skunklab.io/resource-a" : "http://www.skunklab.io/resource-b";
                     Task pubTask = mqttClient.PublishAsync(QualityOfServiceLevelType.AtMostOnce, publishEvent, "text/plain", payload);
                     Task.WhenAll(pubTask);
 
@@ -247,8 +259,6 @@ namespace Samples.Mqtt.Client
             }
 
             string observableEvent = !string.IsNullOrEmpty(pubResource) ? subResource : role == "A" ? resourceB : resourceA;
-            //string observableEvent = role == "A" ? resourceB : resourceA;
-
             try
             {
                 await mqttClient.SubscribeAsync(observableEvent, QualityOfServiceLevelType.AtLeastOnce, ObserveEvent).ContinueWith(SendMessages);
@@ -298,15 +308,8 @@ namespace Samples.Mqtt.Client
 
         private static int SelectChannel()
         {
-            //Console.WriteLine("--- Select Channel ---");
-            //Console.WriteLine("(1) WebSocket");
-            //Console.WriteLine("(2) TCP");
-            //Console.WriteLine("---------- -----------");
-            //Console.Write("Enter channel selection (1/2) ? ");
-
-            //string chn = Console.ReadLine();
             string chn = "1";
-            if (chn == "1")// || chn == "2")
+            if (chn == "1")
             {
                 return Convert.ToInt32(chn);
             }
@@ -362,16 +365,6 @@ namespace Samples.Mqtt.Client
 
         private static string GetSecurityToken(string name, string role)
         {
-            //Normally a security token would be obtained externally
-            //For the sample we are going to build a token that can
-            //be authn'd and authz'd for this sample
-
-            //string issuer = "http://skunklab.io/";
-            //string audience = issuer;
-            //string nameClaimType = "http://skunklab.io/name";
-            //string roleClaimType = "http://skunklab.io/role";
-            //string symmetricKey = "//////////////////////////////////////////8=";
-
             List<Claim> claims = new List<Claim>()
             {
                 new Claim(nameClaimType, name),

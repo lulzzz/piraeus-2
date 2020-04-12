@@ -53,7 +53,6 @@ namespace Piraeus.Adapters
             LoadDurablesAsync().LogExceptions(logger);
         }
 
-        // To detect redundant calls
         public string Identity
         {
             set => adapter.Identity = value;
@@ -80,12 +79,12 @@ namespace Piraeus.Adapters
             if (error == null)
             {
                 ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
-                await logger?.LogDebugAsync($"CoAP delete returning response for '{uri.Resource}' with {rmt.ToString()} for {session.Identity}.");
+                await logger?.LogDebugAsync($"CoAP delete returning response for '{uri.Resource}' with {rmt} for {session.Identity}.");
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Deleted, message.Token);
             }
             else
             {
-                await logger?.LogDebugAsync($"CoAP delete returning response for '{uri.Resource}' with {ResponseCodeType.EmptyMessage.ToString()} for {session.Identity}.");
+                await logger?.LogDebugAsync($"CoAP delete returning response for '{uri.Resource}' with {ResponseCodeType.EmptyMessage} for {session.Identity}.");
                 return new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage);
             }
         }
@@ -94,17 +93,12 @@ namespace Piraeus.Adapters
         {
             await logger?.LogDebugAsync($"CoAP get with RST and empty message for {session.Identity}.");
             return await Task.FromResult<CoapMessage>(new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token));
-            //TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
-            //CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token);
-            //tcs.SetResult(msg);
-            //return tcs.Task;
         }
 
         public async Task<CoapMessage> ObserveAsync(CoapMessage message)
         {
             if (!message.Observe.HasValue)
             {
-                //RST because GET needs to be observe/unobserve
                 await logger?.LogWarningAsync($"CoAP observe received without Observe flag and will return RST for {session.Identity}");
                 await logger?.LogDebugAsync($"Returning RST because GET needs to be observe/unobserve for {session.Identity}");
                 return new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage);
@@ -122,15 +116,13 @@ namespace Piraeus.Adapters
 
             if (!message.Observe.Value)
             {
-                //unsubscribe
-                await logger?.LogInformationAsync($"CoAP unobserve '{message.ResourceUri.ToString()}' for {session.Identity}.");
+                await logger?.LogInformationAsync($"CoAP unobserve '{message.ResourceUri}' for {session.Identity}.");
                 await adapter.UnsubscribeAsync(uri.Resource);
-                await logger?.LogDebugAsync($"CoAP unsubscribed '{message.ResourceUri.ToString()} for {session.Identity}'.");
+                await logger?.LogDebugAsync($"CoAP unsubscribed '{message.ResourceUri} for {session.Identity}'.");
                 coapObserved.Remove(uri.Resource);
             }
             else
             {
-                //subscribe
                 SubscriptionMetadata metadata = new SubscriptionMetadata()
                 {
                     IsEphemeral = true,
@@ -138,10 +130,10 @@ namespace Piraeus.Adapters
                     Indexes = session.Indexes
                 };
 
-                await logger?.LogInformationAsync($"CoAP subscribed '{message.ResourceUri.ToString()}' for {session.Identity}");
+                await logger?.LogInformationAsync($"CoAP subscribed '{message.ResourceUri}' for {session.Identity}");
                 _ = await adapter.SubscribeAsync(uri.Resource, metadata);
 
-                if (!coapObserved.ContainsKey(uri.Resource)) //add resource to observed list
+                if (!coapObserved.ContainsKey(uri.Resource))
                 {
                     coapObserved.Add(uri.Resource, message.Token);
                     await logger?.LogDebugAsync("Key added to observable resource.");
@@ -205,8 +197,6 @@ namespace Piraeus.Adapters
             CoapUri uri = new CoapUri(message.ResourceUri.ToString());
             ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
 
-            //EventValidator.Validate(false, resourceUriString, Channel, graphManager, context).Validated
-            //if (!await adapter.CanSubscribeAsync(uri.Resource, channel.IsEncrypted))
             if (EventValidator.Validate(false, uri.Resource, channel, graphManager).Validated)
             {
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Unauthorized, message.Token);
@@ -214,13 +204,8 @@ namespace Piraeus.Adapters
 
             if (coapObserved.ContainsKey(uri.Resource) || coapUnobserved.Contains(uri.Resource))
             {
-                //resource previously subscribed
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.NotAcceptable, message.Token);
             }
-
-            //this point the resource is not being observed, so we can
-            // #1 subscribe to it
-            // #2 add to unobserved resources (means not coap observed)
 
             SubscriptionMetadata metadata = new SubscriptionMetadata()
             {

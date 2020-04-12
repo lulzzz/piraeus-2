@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Issuance
+﻿namespace Capl.Issuance
 {
     using Capl.Authorization;
     using System;

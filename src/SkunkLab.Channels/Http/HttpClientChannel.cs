@@ -75,14 +75,7 @@ namespace SkunkLab.Channels.Http
             this.indexes = indexes;
         }
 
-        /// <summary>
-        /// Receive only (long polling) http client channel
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="securityToken"></param>
-        /// <param name="observers"></param>
-        /// <param name="token"></param>
-        public HttpClientChannel(string endpoint, string securityToken, IEnumerable<Observer> observers, CancellationToken token = default(CancellationToken))
+        public HttpClientChannel(string endpoint, string securityToken, IEnumerable<Observer> observers, CancellationToken token = default)
         {
             Id = "http-" + Guid.NewGuid().ToString();
             requestUri = new Uri(endpoint);
@@ -94,14 +87,7 @@ namespace SkunkLab.Channels.Http
             this.token.Register(() => this.tokenSource.Cancel());
         }
 
-        /// <summary>
-        /// Receive only (long polling) client channel
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="certificate"></param>
-        /// <param name="observers"></param>
-        /// <param name="token"></param>
-        public HttpClientChannel(string endpoint, X509Certificate2 certificate, IEnumerable<Observer> observers, CancellationToken token = default(CancellationToken))
+        public HttpClientChannel(string endpoint, X509Certificate2 certificate, IEnumerable<Observer> observers, CancellationToken token = default)
         {
             Id = "http-" + Guid.NewGuid().ToString();
             requestUri = new Uri(endpoint);
@@ -238,7 +224,6 @@ namespace SkunkLab.Channels.Http
                         }
                         else
                         {
-                            //unexpected status code
                             OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(string.Format("Unexpected status code {0}", response.StatusCode))));
                         }
 
@@ -247,7 +232,6 @@ namespace SkunkLab.Channels.Http
                 }
                 catch (OperationCanceledException)
                 {
-                    //not an error
                     State = ChannelState.Aborted;
                 }
                 catch (AggregateException ae)
@@ -354,27 +338,12 @@ namespace SkunkLab.Channels.Http
         private HttpWebRequest GetRequest(HttpMethod method)
         {
             HttpWebRequest request = HttpWebRequest.Create(requestUri) as HttpWebRequest;
-            //request.Accept = contentType;
-
             if (method == HttpMethod.Get)
             {
-                //if(string.IsNullOrEmpty(contentType))
-                //{
-                //    contentType = "application/json";
-                //}
-
                 request.ContentLength = 0;
                 request.Method = "GET";
-                //request.ContentType = contentType;
                 request.KeepAlive = true;
                 request.Timeout = int.MaxValue;
-                //if (observers != null)
-                //{
-                //    foreach (Observer observer in observers)
-                //    {
-                //        request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER, observer.ResourceUri.ToString().ToLowerInvariant());
-                //    }
-                //}
             }
             else if (method == HttpMethod.Post)
             {

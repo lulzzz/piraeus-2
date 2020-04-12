@@ -10,6 +10,7 @@ namespace Piraeus.Core
         }
 
         public TimeSpan Duration { get; set; }
+
         public string Key { get; set; }
     }
 }

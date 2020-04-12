@@ -91,10 +91,7 @@ namespace SkunkLab.Channels.Tcp
 
         public TcpClientChannel2(IPEndPoint remoteEndpoint, IPEndPoint localEP, X509Certificate2 certificate, int blockSize, int maxBufferSize, CancellationToken token)
         {
-            if (remoteEndpoint == null)
-            {
-                throw new ArgumentNullException("remoteEndpoint");
-            }
+            _ = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
 
             remoteEP = remoteEndpoint;
             this.localEP = localEP;
@@ -204,25 +201,44 @@ namespace SkunkLab.Channels.Tcp
 
         #region private member variables
 
-        private ChannelState _state;
         private readonly IPAddress address;
+
         private readonly int blockSize;
+
         private readonly X509Certificate2 certificate;
-        private TcpClient client;
-        private bool disposed;
+
         private readonly string hostname;
+
         private readonly IPEndPoint localEP;
-        private NetworkStream localStream;
+
         private readonly int maxBufferSize;
+
         private readonly int port;
-        private TlsClientProtocol protocol;
+
         private readonly byte[] psk;
+
         private readonly string pskIdentity;
+
         private readonly Queue<byte[]> queue;
-        private SemaphoreSlim readConnection;
+
         private readonly IPEndPoint remoteEP;
-        private Stream stream;
+
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private TcpClient client;
+
+        private bool disposed;
+
+        private NetworkStream localStream;
+
+        private TlsClientProtocol protocol;
+
+        private SemaphoreSlim readConnection;
+
+        private Stream stream;
+
         private SemaphoreSlim writeConnection;
 
         #endregion private member variables
@@ -515,12 +531,10 @@ namespace SkunkLab.Channels.Tcp
 
                                 bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                                //Console.WriteLine("Bytes read = {0} - Stream size = {1} - DA {2}", bytesRead, bufferStream.Length, localStream.DataAvailable);
-
                                 if (bytesRead == 0 && bufferStream.Length == 0)
                                 {
                                     Console.WriteLine("Forcing return");
-                                    return; //closing instruction from client
+                                    return;
                                 }
 
                                 if (bytesRead + bufferStream.Length > maxBufferSize)
@@ -532,16 +546,15 @@ namespace SkunkLab.Channels.Tcp
                                 await bufferStream.WriteAsync(buffer, 0, bytesRead);
                             } while (localStream.DataAvailable && bytesRead == 16384);
 
-                            await bufferStream.FlushAsync(); //flush the writable stream
-                            bufferStream.Position = 0;  //position to beginning
+                            await bufferStream.FlushAsync();
+                            bufferStream.Position = 0;
 
-                            //load the messag buffer with the data
                             msgBuffer = new byte[bufferStream.Length];
                             await bufferStream.ReadAsync(msgBuffer, 0, msgBuffer.Length);
                             readConnection.Release();
                         }
 
-                        if (msgBuffer != null && msgBuffer.Length > 0)  //make sure data is available for the message
+                        if (msgBuffer != null && msgBuffer.Length > 0)
                         {
                             OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, msgBuffer));
                         }
@@ -558,7 +571,7 @@ namespace SkunkLab.Channels.Tcp
             }
             finally
             {
-                OnError?.Invoke(this, new ChannelErrorEventArgs(Id, error != null ? error : new TimeoutException("Receiver closing")));
+                OnError?.Invoke(this, new ChannelErrorEventArgs(Id, error ?? new TimeoutException("Receiver closing")));
             }
         }
 
@@ -617,8 +630,6 @@ namespace SkunkLab.Channels.Tcp
                     try
                     {
                         CloseAsync().GetAwaiter();
-                        //Task task = CloseAsync();
-                        //Task.WaitAll(task);
                     }
                     catch (Exception ex)
                     {

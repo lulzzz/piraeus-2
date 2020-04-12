@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization
+﻿namespace Capl.Authorization
 {
     using System;
     using System.IO;
@@ -69,6 +68,5 @@ namespace Capl.Authorization
         public abstract void WriteXml(XmlWriter writer);
 
         #endregion IXmlSerializable Members
-
     }
 }

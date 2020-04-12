@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization.Transforms
+﻿namespace Capl.Authorization.Transforms
 {
     using System;
     using System.Collections;

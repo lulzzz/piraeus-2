@@ -7,7 +7,9 @@
     internal sealed class ByteBuffer
     {
         private readonly int _maxLength;
+
         private readonly List<byte[]> _segments = new List<byte[]>();
+
         private int _currentLength;
 
         public ByteBuffer(int maxLength)

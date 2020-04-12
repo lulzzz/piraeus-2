@@ -11,7 +11,9 @@ namespace Piraeus.HttpGateway.Middleware
     public class PiraeusHttpMiddleware
     {
         private readonly PiraeusConfig config;
+
         private readonly GraphManager graphManager;
+
         private readonly RequestDelegate next;
 
         private readonly WaitHandle[] waitHandles = new WaitHandle[]
@@ -20,7 +22,9 @@ namespace Piraeus.HttpGateway.Middleware
         };
 
         private ProtocolAdapter adapter;
+
         private HttpContext context;
+
         private CancellationTokenSource source;
 
         public PiraeusHttpMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client)

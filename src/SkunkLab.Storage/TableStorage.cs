@@ -14,8 +14,11 @@ namespace SkunkLab.Storage
     public class TableStorage
     {
         private static SkunkLabBufferManager bufferManager;
+
         private static TableStorage instance;
+
         private readonly CloudTableClient client;
+
         private readonly HashSet<string> tableNames;
 
         protected TableStorage(string connectionString)
@@ -97,8 +100,7 @@ namespace SkunkLab.Storage
             CloudTable table = client.GetTableReference(tableName);
             await table.CreateIfNotExistsAsync();
             var query = new TableQuery<T>();
-            TableQuerySegment<T> segment = null;
-            segment = await table.ExecuteQuerySegmentedAsync<T>(query, new TableContinuationToken());
+            TableQuerySegment<T> segment = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
             if (!(segment == null || segment.Results.Count == 0))
             {
@@ -114,8 +116,7 @@ namespace SkunkLab.Storage
         {
             CloudTable table = client.GetTableReference(tableName);
             await table.CreateIfNotExistsAsync();
-            TableQuery<T> query = null;
-
+            TableQuery<T> query;
             if (!string.IsNullOrEmpty(partitionKey) && !string.IsNullOrEmpty(rowKey))
             {
                 string q1 = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);

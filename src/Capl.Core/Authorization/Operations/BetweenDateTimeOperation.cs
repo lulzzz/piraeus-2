@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization.Operations
+﻿namespace Capl.Authorization.Operations
 {
     using System;
     using System.Xml;

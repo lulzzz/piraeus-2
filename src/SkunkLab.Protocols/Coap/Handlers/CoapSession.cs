@@ -16,13 +16,13 @@ namespace SkunkLab.Protocols.Coap.Handlers
     {
         private readonly HttpContext context;
 
+        private readonly Timer keepaliveTimer;
+
         private string bootstrapToken;
 
         private SecurityTokenType bootstrapTokenType;
 
         private bool disposedValue;
-
-        private readonly Timer keepaliveTimer;
 
         private DateTime keepaliveTimestamp;
 
@@ -49,8 +49,11 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public event EventHandler<CoapMessageEventArgs> OnRetry;
 
         public Receiver CoapReceiver { get; internal set; }
+
         public Transmitter CoapSender { get; internal set; }
+
         public CoapConfig Config { get; internal set; }
+
         public bool HasBootstrapToken { get; internal set; }
 
         public string Identity { get; set; }
@@ -119,7 +122,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
         {
             if (keepaliveTimestamp <= DateTime.UtcNow)
             {
-                //signal a ping
                 CoapToken token = CoapToken.Create();
                 ushort id = CoapSender.NewId(token.TokenBytes);
                 CoapRequest ping = new CoapRequest()
@@ -143,9 +145,7 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
 

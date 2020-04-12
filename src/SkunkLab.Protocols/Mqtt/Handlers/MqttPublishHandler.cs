@@ -28,7 +28,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
             MqttMessage response = GetAck(msg);
 
-            //if(!msg.Dup || (msg.Dup && !Session.IsQuarantined(msg.MessageId)))
             if (!Session.IsQuarantined(msg.MessageId))
             {
                 Session.Quarantine(Message, DirectionType.In);

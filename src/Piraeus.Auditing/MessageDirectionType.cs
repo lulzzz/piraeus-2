@@ -3,6 +3,7 @@
     public enum MessageDirectionType
     {
         In,
+
         Out
     }
 }

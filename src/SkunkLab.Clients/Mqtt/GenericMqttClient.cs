@@ -12,17 +12,17 @@ namespace Piraeus.Clients.Mqtt
     {
         private readonly IChannel channel;
 
-        private ConnectAckCode? code;
-
         private readonly IMqttDispatch dispatcher;
 
         private readonly MqttSession session;
 
         private readonly double timeoutMilliseconds;
 
+        private ConnectAckCode? code;
+
         public GenericMqttClient(MqttConfig config, IChannel channel, IMqttDispatch dispatcher = null)
         {
-            this.dispatcher = dispatcher != null ? dispatcher : new GenericMqttDispatcher();
+            this.dispatcher = dispatcher ?? new GenericMqttDispatcher();
             timeoutMilliseconds = config.MaxTransmitSpan.TotalMilliseconds;
             session = new MqttSession(config);
             session.OnConnect += Session_OnConnect;
@@ -145,15 +145,9 @@ namespace Piraeus.Clients.Mqtt
 
             MqttMessage response = handler.ProcessAsync().GetAwaiter().GetResult();
 
-            //Task<MqttMessage> task = handler.ProcessAsync();
-            //Task.WhenAll<MqttMessage>(task);
-            //MqttMessage response = task.Result;
-
             if (response != null)
             {
                 channel.SendAsync(response.Encode()).GetAwaiter();
-                //Task task2 = channel.SendAsync(response.Encode());
-                //Task.WhenAll(task2);
             }
         }
 
@@ -174,8 +168,6 @@ namespace Piraeus.Clients.Mqtt
         private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)
         {
             channel.CloseAsync().GetAwaiter();
-            //Task task = channel.CloseAsync();
-            //Task.WaitAll(task);
             channel.Dispose();
         }
 
@@ -184,8 +176,6 @@ namespace Piraeus.Clients.Mqtt
             MqttMessage msg = args.Message;
             msg.Dup = true;
             channel.SendAsync(msg.Encode()).GetAwaiter();
-            //Task task = channel.SendAsync(msg.Encode());
-            //Task.WhenAll(task);
         }
 
         #endregion Session Events

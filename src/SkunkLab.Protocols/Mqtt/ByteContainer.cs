@@ -56,8 +56,8 @@
             byte[] buffer = new byte[valueArray.Length + 2];
 
             byte[] lengthSB = new byte[2];
-            lengthSB[0] = (byte)((value.Length >> 8) & 0x00FF); // MSB
-            lengthSB[1] = (byte)(value.Length & 0x00FF); // LSB
+            lengthSB[0] = (byte)((value.Length >> 8) & 0x00FF);
+            lengthSB[1] = (byte)(value.Length & 0x00FF);
 
             Buffer.BlockCopy(lengthSB, 0, buffer, 0, lengthSB.Length);
             Buffer.BlockCopy(valueArray, 0, buffer, 2, valueArray.Length);

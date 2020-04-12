@@ -174,7 +174,6 @@ namespace Piraeus.Grains
                 }
                 else if (State.MessageLeases.Count > 0)
                 {
-                    //send to actively connected subsystem
                     foreach (var observer in State.MessageLeases.Values)
                     {
                         observer.Notify(message);
@@ -182,11 +181,11 @@ namespace Piraeus.Grains
                 }
                 else
                 {
-                    if (State.Metadata.DurableMessaging && State.Metadata.TTL.HasValue) //durable message queue
+                    if (State.Metadata.DurableMessaging && State.Metadata.TTL.HasValue)
                     {
                         await QueueDurableMessageAsync(message);
                     }
-                    else //in-memory message queue
+                    else
                     {
                         await QueueInMemoryMessageAsync(message);
                     }
@@ -197,7 +196,6 @@ namespace Piraeus.Grains
                 Trace.TraceWarning("Subscription publish failed to complete.");
                 Trace.TraceError("Subscription publish error {0}", ex.Message);
                 error = ex;
-                //GetLogger().Log(2, Orleans.Runtime.Severity.Error, "Subscription notification exception {0}", new object[] { State.Metadata.SubscriptionUriString }, ex);
             }
 
             await NotifyMetricsAsync();
@@ -235,7 +233,6 @@ namespace Piraeus.Grains
             {
                 Trace.TraceWarning("Subscription publish with indexes failed to complete.");
                 Trace.TraceError("Subscription publish with indexes error {0}", ex.Message);
-                //GetLogger().Log(2, Orleans.Runtime.Severity.Error, "Subscription notification exception {0}", new object[] { State.Metadata.SubscriptionUriString }, ex);
             }
         }
 
@@ -332,15 +329,12 @@ namespace Piraeus.Grains
             var metricQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Metric");
             var errorQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Error");
 
-            //State.LeaseExpiry.Remove(leaseKey);
-
             if (messageQuery.Count() == 1)
             {
                 State.MessageLeases.Remove(leaseKey);
 
                 if (State.MessageLeases.Count == 0 && State.Metadata.IsEphemeral)
                 {
-                    //leaseTimer.Dispose();
                     await UnsubscribeFromResourceAsync();
                 }
             }
@@ -394,8 +388,6 @@ namespace Piraeus.Grains
                 {
                     State.MessageLeases.Remove(item);
                     State.LeaseExpiry.Remove(item);
-                    //GetLogger().Log(3, Orleans.Runtime.Severity.Warning, "Subscription {0} message lease expired", new object[] { State.Metadata.SubscriptionUriString }, null);
-
                     if (State.Metadata.IsEphemeral)
                     {
                         await UnsubscribeFromResourceAsync();
@@ -423,8 +415,6 @@ namespace Piraeus.Grains
 
         private async Task CheckQueueAsync(object args)
         {
-            //timer firing for queued messages
-
             try
             {
                 if (State.MessageLeases.Count > 0)
@@ -532,17 +522,14 @@ namespace Piraeus.Grains
             {
                 if (State.MessageQueue.Count > 0)
                 {
-                    //remove expired messages
                     while (State.MessageQueue.Peek().Timestamp.Add(State.Metadata.TTL.Value) < DateTime.UtcNow)
                     {
                         State.MessageQueue.Dequeue();
                     }
                 }
 
-                //add the new message
                 State.MessageQueue.Enqueue(message);
 
-                //start the timer if not already started
                 if (messageQueueTimer == null)
                 {
                     messageQueueTimer = RegisterTimer(CheckQueueAsync, null, TimeSpan.FromSeconds(1.0), TimeSpan.FromSeconds(5.0));
@@ -580,7 +567,6 @@ namespace Piraeus.Grains
 
         private async Task UnsubscribeFromResourceAsync()
         {
-            //unsubscribe from resource
             string uriString = State.Metadata.SubscriptionUriString;
             Uri uri = new Uri(uriString);
 

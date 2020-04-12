@@ -36,8 +36,6 @@ namespace SkunkLab.Storage
                     }
 
                     Task.Delay(delayMilliseconds).GetAwaiter();
-                    //Task task = Task.Delay(delayMilliseconds);
-                    //Task.WaitAll(task);
                     attempt++;
                 }
             }
@@ -85,8 +83,6 @@ namespace SkunkLab.Storage
                     attempt++;
                 }
             }
-
-            //throw new OperationCanceledException("Operation cancelled due to retry failure.");
         }
     }
 }

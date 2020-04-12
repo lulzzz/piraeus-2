@@ -27,12 +27,10 @@ namespace SkunkLab.Channels.Tcp
 
         public void NotifyIdentityHint(byte[] psk_identity_hint)
         {
-            //Console.WriteLine("Notify Identity Hint {0}", Encoding.UTF8.GetString(psk_identity_hint));
         }
 
         public void SkipIdentityHint()
         {
-            //Console.WriteLine("Skip identity hint");
         }
     }
 }

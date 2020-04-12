@@ -9,11 +9,11 @@ namespace SkunkLab.Protocols.Coap
     {
         private readonly Dictionary<ushort, DateTime> container;
 
-        private bool disposedValue;
-
         private readonly double lifetimeMilliseconds;
 
         private readonly Timer timer;
+
+        private bool disposedValue;
 
         public Receiver(double lifetimeMilliseconds)
         {
@@ -41,9 +41,7 @@ namespace SkunkLab.Protocols.Coap
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
 

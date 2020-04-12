@@ -13,7 +13,7 @@ namespace Piraeus.Clients.Rest
 
         private readonly HttpClientChannel sendChannel;
 
-        public RestClient(string endpoint, string securityToken, IEnumerable<Observer> observers = null, CancellationToken token = default(CancellationToken))
+        public RestClient(string endpoint, string securityToken, IEnumerable<Observer> observers = null, CancellationToken token = default)
         {
             sendChannel = ChannelFactory.Create(endpoint, securityToken) as HttpClientChannel;
 
@@ -23,7 +23,7 @@ namespace Piraeus.Clients.Rest
                 {
                     if (endpoint.Contains("?"))
                     {
-                        endpoint = endpoint + $"&sub={ob.ResourceUri.ToString().ToLowerInvariant()}";
+                        endpoint += $"&sub={ob.ResourceUri.ToString().ToLowerInvariant()}";
                     }
                 }
                 receiveChannel = ChannelFactory.Create(endpoint, securityToken, observers, token);
@@ -35,7 +35,7 @@ namespace Piraeus.Clients.Rest
             }
         }
 
-        public RestClient(string endpoint, X509Certificate2 certificate, IEnumerable<Observer> observers = null, CancellationToken token = default(CancellationToken))
+        public RestClient(string endpoint, X509Certificate2 certificate, IEnumerable<Observer> observers = null, CancellationToken token = default)
         {
             sendChannel = ChannelFactory.Create(endpoint, certificate) as HttpClientChannel;
 

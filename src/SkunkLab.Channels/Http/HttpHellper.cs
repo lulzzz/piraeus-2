@@ -5,6 +5,7 @@ namespace SkunkLab.Channels.Http
     public static class HttpHelper
     {
         private static IHttpContextAccessor _accessor;
+
         public static HttpContext HttpContext => _accessor.HttpContext;
 
         public static void Configure(IHttpContextAccessor httpContextAccessor)

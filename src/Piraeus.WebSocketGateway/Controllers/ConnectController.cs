@@ -20,12 +20,18 @@ namespace Piraeus.WebSocketGateway.Controllers
     [ApiController]
     public class ConnectController : ControllerBase
     {
-        private ProtocolAdapter adapter;
         private readonly IAuthenticator authn;
+
         private readonly PiraeusConfig config;
+
         private readonly GraphManager graphManager;
+
         private readonly ILogger logger;
+
+        private ProtocolAdapter adapter;
+
         private WebSocket socket;
+
         private CancellationTokenSource source;
 
         public ConnectController(PiraeusConfig config, IClusterClient client, ILogger logger)

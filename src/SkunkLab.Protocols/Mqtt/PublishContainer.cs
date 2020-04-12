@@ -8,11 +8,11 @@ namespace SkunkLab.Protocols.Mqtt
 {
     public class PublishContainer : IDictionary<ushort, MqttMessage>, IDisposable
     {
+        private readonly TimeSpan exchangeLifetime;
+
         private Dictionary<ushort, MqttMessage> container;
 
         private bool disposed;
-
-        private readonly TimeSpan exchangeLifetime;
 
         private Dictionary<ushort, DateTime> timeContainer;
 

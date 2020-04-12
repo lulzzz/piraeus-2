@@ -9,15 +9,15 @@ namespace SkunkLab.Channels.Udp
 {
     public class UdpServerChannel : UdpChannel
     {
-        private ChannelState _state;
-
         private readonly UdpClient client;
-
-        private bool disposedValue;
 
         private readonly IPEndPoint remoteEP;
 
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private bool disposedValue;
 
         public UdpServerChannel(UdpClient listener, IPEndPoint remoteEP, CancellationToken token)
         {
@@ -67,17 +67,14 @@ namespace SkunkLab.Channels.Udp
 
         public override async Task AddMessageAsync(byte[] message)
         {
-            //Raise the event received from the Protocol Adapter on the gateway
             OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, message));
             await Task.CompletedTask;
         }
 
         public override async Task CloseAsync()
         {
-            //nothing to do here because closing the client is closing the listener to all channels
-            //connected to the listener.
             State = ChannelState.Closed;
-            OnClose?.Invoke(this, new ChannelCloseEventArgs(Id)); //listener is closing
+            OnClose?.Invoke(this, new ChannelCloseEventArgs(Id));
             await Task.CompletedTask;
         }
 
@@ -91,7 +88,7 @@ namespace SkunkLab.Channels.Udp
         {
             try
             {
-                State = ChannelState.Open; //the channel is already open by the listener
+                State = ChannelState.Open;
 
                 OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
             }
@@ -107,9 +104,6 @@ namespace SkunkLab.Channels.Udp
 
         public override async Task ReceiveAsync()
         {
-            //nothing implemented here because the listener will call AddMessageAsync and raise OnReceive
-            //We do bind the remote endpoint to call SendAsync to the connected UDP client.
-
             await Task.CompletedTask;
         }
 
@@ -130,8 +124,6 @@ namespace SkunkLab.Channels.Udp
         {
             if (dispose & !disposedValue)
             {
-                //client.Close(); cannot close client because is universal listener.
-                //put need this because of  IChannel interface
                 disposedValue = true;
             }
         }

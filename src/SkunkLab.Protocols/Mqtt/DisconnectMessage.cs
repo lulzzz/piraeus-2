@@ -30,7 +30,6 @@
 
             if (remainingLength != 0)
             {
-                //fault
             }
 
             return disconnect;

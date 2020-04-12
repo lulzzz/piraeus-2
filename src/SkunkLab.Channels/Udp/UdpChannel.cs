@@ -34,37 +34,16 @@ namespace SkunkLab.Channels.Udp
 
         public abstract string TypeId { get; }
 
-        /// <summary>
-        /// Create a UDP server-side connection to send/receive.
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static UdpChannel Create(UdpClient client, IPEndPoint remoteEP, CancellationToken token)
         {
             return new UdpServerChannel(client, remoteEP, token);
         }
 
-        /// <summary>
-        /// Create UDP client channel.
-        /// </summary>
-        /// <param name="localPort"></param>
-        /// <param name="hostname"></param>
-        /// <param name="port"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static UdpChannel Create(int localPort, string hostname, int port, CancellationToken token)
         {
             return new UdpClientChannel(localPort, hostname, port, token);
         }
 
-        /// <summary>
-        /// Creates UDP client channel.
-        /// </summary>
-        /// <param name="localPort"></param>
-        /// <param name="remoteEP"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public static UdpChannel Create(int localPort, IPEndPoint remoteEP, CancellationToken token)
         {
             return new UdpClientChannel(localPort, remoteEP, token);

@@ -95,7 +95,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token, null, action);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString); //String.Format("{0}://{1}?r={2}", scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
 
             RequestMessageType mtype = confirmable ? RequestMessageType.Confirmable : RequestMessageType.NonConfirmable;
             CoapRequest cr = new CoapRequest(id, mtype, MethodType.POST, token, new Uri(coapUriString), MediaTypeConverter.ConvertToMediaType(contentType), payload);
@@ -257,20 +257,6 @@ namespace SkunkLab.Clients.Coap
 
             Task task = ReceiveAsync(handler);
             Task.WhenAll(task);
-
-            //Task task = Task.Factory.StartNew(async () =>
-            //{
-            //    CoapMessage msg = await handler.ProcessAsync();
-
-            //    if (msg != null && pingId.Contains(msg.MessageId))
-            //    {
-            //        pingId.Remove(msg.MessageId);
-            //        //ping complete
-            //        OnPingResponse?.Invoke(this, new CoapMessageEventArgs(msg));
-            //    }
-            //});
-
-            //Task.WaitAll(task);
         }
 
         private void Channel_OnStateChange(object sender, ChannelStateEventArgs args)
@@ -284,7 +270,6 @@ namespace SkunkLab.Clients.Coap
             if (msg != null && pingId.Contains(msg.MessageId))
             {
                 pingId.Remove(msg.MessageId);
-                //ping complete
                 OnPingResponse?.Invoke(this, new CoapMessageEventArgs(msg));
             }
         }
@@ -320,7 +305,7 @@ namespace SkunkLab.Clients.Coap
         private Task Open()
         {
             TaskCompletionSource<Task> tcs = new TaskCompletionSource<Task>();
-            Task task = channel.OpenAsync();
+            channel.OpenAsync().GetAwaiter();
             tcs.SetResult(null);
             return tcs.Task;
         }

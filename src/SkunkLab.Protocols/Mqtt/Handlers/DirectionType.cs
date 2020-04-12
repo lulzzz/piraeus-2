@@ -6,6 +6,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
     public enum DirectionType
     {
         In,
+
         Out
     }
 }

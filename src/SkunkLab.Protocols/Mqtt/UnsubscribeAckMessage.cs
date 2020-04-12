@@ -13,8 +13,6 @@
             this.MessageId = messageId;
         }
 
-        //public ushort MessageId { get; set; }
-
         public override bool HasAck => false;
 
         public override byte[] Encode()
@@ -25,8 +23,8 @@
                    0x00;
 
             byte[] messageId = new byte[2];
-            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
-            messageId[1] = (byte)(this.MessageId & 0x00FF); //LSB
+            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF);
+            messageId[1] = (byte)(this.MessageId & 0x00FF);
 
             byte[] remainingLengthBytes = base.EncodeRemainingLength(2);
 
@@ -48,11 +46,11 @@
 
             int remainingLength = base.DecodeRemainingLength(message);
 
-            int temp = remainingLength; //increase the fixed header size
+            int temp = remainingLength;
             do
             {
                 index++;
-                temp = temp / 128;
+                temp /= 128;
             } while (temp > 0);
 
             index++;

@@ -3,6 +3,7 @@
     public enum AuditType
     {
         User,
+
         Message
     }
 }

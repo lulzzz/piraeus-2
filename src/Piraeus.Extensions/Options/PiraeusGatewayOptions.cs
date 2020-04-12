@@ -7,7 +7,9 @@ namespace Piraeus.Extensions.Options
     public enum OrleansStorageType
     {
         Memory = 0,
+
         AzureStorage = 1,
+
         Redis = 2
     }
 
@@ -30,19 +32,26 @@ namespace Piraeus.Extensions.Options
         }
 
         public string AppInsightKey { get; set; }
+
         public string ClusterId { get; set; }
+
         public string DataConnectionString { get; set; }
+
         public bool Dockerized { get; set; } = false;
+
         public LoggerType LoggerTypes { get; set; }
+
         public LogLevel LoggingLevel { get; set; }
+
         public string ServiceId { get; set; }
+
         public OrleansStorageType StorageType { get; set; }
 
         private OrleansStorageType SetStorageType()
         {
             if (string.IsNullOrEmpty(DataConnectionString))
             {
-                return default(OrleansStorageType);
+                return default;
             }
 
             string cs = DataConnectionString.ToLowerInvariant();

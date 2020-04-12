@@ -15,7 +15,7 @@ namespace Piraeus.Auditing
                 IgnoreAsync(task);
             }
 
-            async void IgnoreAsync(Task asyncTask)
+            static async void IgnoreAsync(Task asyncTask)
             {
                 try
                 {
@@ -23,7 +23,6 @@ namespace Piraeus.Auditing
                 }
                 catch
                 {
-                    // Ignored.
                 }
             }
         }

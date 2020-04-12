@@ -13,9 +13,11 @@ namespace SkunkLab.Storage
         }
 
         public long BytesTransferred { get; internal set; }
+
         public string ContainerName { get; internal set; }
 
         public string Filename { get; internal set; }
+
         public long Length { get; internal set; }
     }
 }

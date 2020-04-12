@@ -80,7 +80,6 @@ namespace SkunkLab.Protocols.Mqtt
 
                 if (ids != null && ids.Length > 0)
                 {
-                    //signal to remove items.
                     OnExpired?.Invoke(this, new LifetimeEventArgs(ids));
                 }
             }

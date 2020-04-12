@@ -15,11 +15,17 @@ namespace Orleans.Storage.Redis
     public class RedisGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>
     {
         private readonly ILogger logger;
-        private ConnectionMultiplexer connection;
-        private IDatabase database;
+
         private readonly string name;
+
         private readonly RedisStorageOptions options;
+
         private readonly SerializationManager serializationManager;
+
+        private ConnectionMultiplexer connection;
+
+        private IDatabase database;
+
         private BinarySerializer serializer;
 
         public RedisGrainStorage(string name, RedisStorageOptions options, SerializationManager serializationManager, ILogger logger)
@@ -164,7 +170,7 @@ namespace Orleans.Storage.Redis
                 };
             }
 
-            if (options.IsLocalDocker)  //redis instance on same host as clients
+            if (options.IsLocalDocker)
             {
                 IPAddress address = GetIPAddress(configOptions.EndPoints[0]);
                 EndPoint endpoint = configOptions.EndPoints[0];

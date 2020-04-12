@@ -21,8 +21,6 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            //Rule rule = new Rule(this.MatchExpression, this.Operation, this.Evaluates);
-
             Rule rule = new Rule
             {
                 Evaluates = this.Evaluates,

@@ -15,7 +15,9 @@ namespace SkunkLab.Storage
     public class BlobStorage
     {
         private static SkunkLabBufferManager bufferManager;
+
         private static BlobStorage instance;
+
         private readonly CloudBlobClient client;
 
         protected BlobStorage(string connectionString)
@@ -101,7 +103,7 @@ namespace SkunkLab.Storage
 
         #region Block Blob Writers
 
-        public async Task WriteBlockBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WriteBlockBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -128,7 +130,7 @@ namespace SkunkLab.Storage
                 CloudBlockBlob blob = container.GetBlockBlobReference(filename);
                 blob.Properties.ContentType = contentType;
 
-                await blob.UploadFromStreamAsync(source, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromStreamAsync(source, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -149,7 +151,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task WriteBlockBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WriteBlockBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -176,7 +178,7 @@ namespace SkunkLab.Storage
                 CloudBlockBlob blob = container.GetBlockBlobReference(filename);
                 blob.Properties.ContentType = contentType;
 
-                await blob.UploadFromByteArrayAsync(source, 0, source.Length, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromByteArrayAsync(source, 0, source.Length, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -201,7 +203,7 @@ namespace SkunkLab.Storage
 
         #region Page Blob Writers
 
-        public async Task WritePageBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WritePageBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -228,7 +230,7 @@ namespace SkunkLab.Storage
                 CloudPageBlob blob = container.GetPageBlobReference(filename);
 
                 blob.Properties.ContentType = contentType;
-                await blob.UploadFromStreamAsync(source, null, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromStreamAsync(source, null, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -249,7 +251,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task WritePageBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WritePageBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
 
@@ -280,7 +282,7 @@ namespace SkunkLab.Storage
                 CloudPageBlob blob = container.GetPageBlobReference(filename);
 
                 blob.Properties.ContentType = contentType;
-                await blob.UploadFromByteArrayAsync(source, 0, source.Length, null, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromByteArrayAsync(source, 0, source.Length, null, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -305,7 +307,7 @@ namespace SkunkLab.Storage
 
         #region Append Blob Writers
 
-        public async Task WriteAppendBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WriteAppendBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -330,7 +332,7 @@ namespace SkunkLab.Storage
             {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudAppendBlob blob = container.GetAppendBlobReference(filename);
-                await blob.UploadFromStreamAsync(source, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromStreamAsync(source, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -351,7 +353,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task WriteAppendBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WriteAppendBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -376,7 +378,7 @@ namespace SkunkLab.Storage
             {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudAppendBlob blob = container.GetAppendBlobReference(filename);
-                await blob.UploadFromByteArrayAsync(source, 0, source.Length, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromByteArrayAsync(source, 0, source.Length, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -470,7 +472,7 @@ namespace SkunkLab.Storage
 
         #region Direct File Upload/Download
 
-        public async Task DownloadBlockBlobToFile(string filePath, string containerName, string blobFilename, CancellationToken token = default(CancellationToken))
+        public async Task DownloadBlockBlobToFile(string filePath, string containerName, string blobFilename, CancellationToken token = default)
         {
             _ = filePath ?? throw new ArgumentNullException(nameof(filePath));
             _ = containerName ?? throw new ArgumentNullException(nameof(containerName));
@@ -502,7 +504,7 @@ namespace SkunkLab.Storage
             {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudBlockBlob blob = container.GetBlockBlobReference(blobFilename);
-                await blob.DownloadToFileAsync(filePath, FileMode.Create, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.DownloadToFileAsync(filePath, FileMode.Create, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -519,7 +521,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task UploadFileToBlockBlob(string filePath, string containerName, string blobFilename, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task UploadFileToBlockBlob(string filePath, string containerName, string blobFilename, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = filePath ?? throw new ArgumentNullException(nameof(filePath));
             _ = containerName ?? throw new ArgumentNullException(nameof(containerName));
@@ -551,7 +553,7 @@ namespace SkunkLab.Storage
             {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudBlockBlob blob = container.GetBlockBlobReference(blobFilename);
-                await blob.UploadFromFileAsync(filePath, default(AccessCondition), default(BlobRequestOptions), default(OperationContext), progressHandler, token);
+                await blob.UploadFromFileAsync(filePath, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -616,18 +618,17 @@ namespace SkunkLab.Storage
 
         private async Task UploadAsync(ICloudBlob blob, byte[] buffer)
         {
-            using (MemoryStream stream = new MemoryStream(buffer))
+            try
             {
-                try
-                {
-                    await stream.FlushAsync();
-                    stream.Close();
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceWarning("Blob upload failed with {0}", ex.Message);
-                    throw ex;
-                }
+                using MemoryStream stream = new MemoryStream(buffer);
+                await blob.UploadFromStreamAsync(stream);
+                await stream.FlushAsync();
+                stream.Close();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning("Blob upload failed with {0}", ex.Message);
+                throw ex;
             }
         }
 
@@ -647,6 +648,5 @@ namespace SkunkLab.Storage
         }
 
         #endregion Utilities
-
     }
 }

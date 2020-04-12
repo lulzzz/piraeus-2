@@ -33,12 +33,11 @@ namespace SkunkLab.Storage
 
         public event System.EventHandler<BlobCompleteEventArgs> OnUploadCompleted;
 
-        public async Task<byte[]> DownloadFileAsync(string path, string share, string filename, CancellationToken token = default(CancellationToken))
+        public async Task<byte[]> DownloadFileAsync(string path, string share, string filename, CancellationToken token = default)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
             _ = share ?? throw new ArgumentNullException(nameof(share));
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
-
 
             Exception error = null;
             Stopwatch watch = new Stopwatch();
@@ -65,7 +64,7 @@ namespace SkunkLab.Storage
                      });
 
                 buffer = new byte[file.Properties.Length];
-                await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+                await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -88,7 +87,7 @@ namespace SkunkLab.Storage
             return buffer;
         }
 
-        public async Task<byte[]> ReadFileAsync(string share, string filename, CancellationToken token = default(CancellationToken))
+        public async Task<byte[]> ReadFileAsync(string share, string filename, CancellationToken token = default)
         {
             _ = share ?? throw new ArgumentNullException(nameof(share));
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
@@ -118,7 +117,7 @@ namespace SkunkLab.Storage
                          }
                      });
 
-                await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+                await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -141,7 +140,7 @@ namespace SkunkLab.Storage
             return buffer;
         }
 
-        public async Task<Stream> ReadFileAsync(string share, string filename, Stream stream, CancellationToken token = default(CancellationToken))
+        public async Task<Stream> ReadFileAsync(string share, string filename, Stream stream, CancellationToken token = default)
         {
             _ = share ?? throw new ArgumentNullException(nameof(share));
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
@@ -169,7 +168,7 @@ namespace SkunkLab.Storage
                          }
                      });
 
-                await file.DownloadToStreamAsync(stream, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+                await file.DownloadToStreamAsync(stream, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -192,7 +191,7 @@ namespace SkunkLab.Storage
             return stream;
         }
 
-        public async Task UploadFileAsync(string path, string share, string filename, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task UploadFileAsync(string path, string share, string filename, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
             _ = share ?? throw new ArgumentNullException(nameof(share));
@@ -226,7 +225,7 @@ namespace SkunkLab.Storage
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
                 file.Properties.ContentType = contentType;
-                await file.UploadFromFileAsync(path, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+                await file.UploadFromFileAsync(path, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {
@@ -243,7 +242,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task WriteFileAsync(string share, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WriteFileAsync(string share, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = share ?? throw new ArgumentNullException(nameof(share));
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
@@ -271,7 +270,7 @@ namespace SkunkLab.Storage
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
                 file.Properties.ContentType = contentType;
-                await file.UploadFromByteArrayAsync(source, 0, source.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), null, token);
+                await file.UploadFromByteArrayAsync(source, 0, source.Length, default, default, default, null, token);
             }
             catch (Exception ex)
             {
@@ -292,7 +291,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task WriteFileAsync(string share, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        public async Task WriteFileAsync(string share, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default)
         {
             _ = share ?? throw new ArgumentNullException(nameof(share));
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
@@ -320,7 +319,7 @@ namespace SkunkLab.Storage
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
                 file.Properties.ContentType = contentType;
-                await file.UploadFromStreamAsync(source, source.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+                await file.UploadFromStreamAsync(source, source.Length, default, default, default, progressHandler, token);
             }
             catch (Exception ex)
             {

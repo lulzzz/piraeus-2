@@ -6,7 +6,9 @@ namespace Piraeus.Core.Metadata
     public enum SecurityTokenType
     {
         None,
+
         Jwt,
+
         X509
     }
 }

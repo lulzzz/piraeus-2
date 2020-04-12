@@ -8,19 +8,6 @@ namespace SkunkLab.Channels.WebSocket
 {
     public class WebSocketServerChannel : WebSocketChannel
     {
-        //public WebSocketServerChannel(HttpListenerWebSocketContext context, WebSocketConfig config, CancellationToken token)
-        //{
-        //    Id = "ws-" + Guid.NewGuid().ToString();
-        //    this.token = token;
-        //    this.IsEncrypted = context.RequestUri.Scheme == "wss";
-        //    this.IsAuthenticated = HttpHelper.HttpContext.User.Identity.IsAuthenticated;
-        //    this.handler = new WebSocketHandler(config, token);
-        //    this.handler.OnReceive += Handler_OnReceive;
-        //    this.handler.OnError += Handler_OnError;
-        //    this.handler.OnOpen += Handler_OnOpen;
-        //    this.handler.OnClose += Handler_OnClose;
-        //}
-
         private readonly TaskQueue _sendQueue = new TaskQueue();
 
         private readonly WebSocketConfig config;
@@ -193,13 +180,6 @@ namespace SkunkLab.Channels.WebSocket
         public override void Send(byte[] message)
         {
             handler.SendAsync(message, WebSocketMessageType.Binary).GetAwaiter();
-
-            //Task task = Task.Factory.StartNew(async () =>
-            //{
-            //    await handler.SendAsync(message, WebSocketMessageType.Binary);
-            //});
-
-            //Task.WaitAll(task);
         }
 
         public override async Task SendAsync(byte[] message)
@@ -224,97 +204,5 @@ namespace SkunkLab.Channels.WebSocket
                 }
             }
         }
-
-        //private static bool IsFatalException(Exception ex)
-        //{
-        //    COMException exception = ex as COMException;
-        //    if (exception != null)
-        //    {
-        //        switch (((uint)exception.ErrorCode))
-        //        {
-        //            case 0x80070026:
-        //            case 0x800703e3:
-        //            case 0x800704cd:
-        //                return false;
-        //        }
-        //    }
-        //    return true;
-        //}
-
-        //[EditorBrowsable(EditorBrowsableState.Never)]
-        //public Task ProcessWebSocketRequestAsync(WebSocketContext webSocketContext)
-        //{
-        //    if (webSocketContext == null)
-        //    {
-        //        throw new ArgumentNullException("webSocketContext");
-        //    }
-
-        //    byte[] buffer = new byte[config.ReceiveLoopBufferSize];
-        //    System.Net.WebSockets.WebSocket webSocket = webSocketContext.WebSocket;
-        //    return ProcessWebSocketRequestAsync(webSocketContext, () => WebSocketMessageReader.ReadMessageAsync(webSocket, buffer, config.MaxIncomingMessageSize, token));
-        //}
-
-        //internal async Task ProcessWebSocketRequestAsync(WebSocketContext webSocketContext, Func<Task<WebSocketMessage>> messageRetriever)
-        //{
-        //    try
-        //    {
-        //        WebSocketContext = webSocketContext;
-        //        OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
-
-        //        while (!token.IsCancellationRequested && WebSocketContext.WebSocket.State == WebSocketState.Open)
-        //        {
-        //            WebSocketMessage message = await messageRetriever();
-        //            if (message.MessageType == WebSocketMessageType.Binary)
-        //            {
-        //                OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, message.Data as byte[]));
-        //            }
-        //            else if (message.MessageType == WebSocketMessageType.Text)
-        //            {
-        //                OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, Encoding.UTF8.GetBytes(message.Data as string)));
-        //            }
-        //            else
-        //            {
-        //                //close received
-        //                OnClose?.Invoke(this, new ChannelCloseEventArgs(Id));
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    catch (AggregateException ae)
-        //    {
-        //        if (!(WebSocketContext.WebSocket.State == WebSocketState.CloseReceived ||
-        //            WebSocketContext.WebSocket.State == WebSocketState.CloseSent))
-        //        {
-        //            OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ae.Flatten()));
-        //        }
-        //    }
-        //    catch (Exception exception)
-        //    {
-        //        if (!(WebSocketContext.WebSocket.State == WebSocketState.CloseReceived ||
-        //            WebSocketContext.WebSocket.State == WebSocketState.CloseSent))
-        //        {
-        //            if (IsFatalException(exception))
-        //            {
-        //                OnError?.Invoke(this, new ChannelErrorEventArgs(Id, exception));
-        //            }
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        try
-        //        {
-        //            await CloseAsync();
-        //        }
-        //        finally
-        //        {
-        //            IDisposable disposable = this as IDisposable;
-        //            if (disposable != null)
-        //            {
-        //                disposable.Dispose();
-        //            }
-        //        }
-        //    }
-
-        //}
     }
 }

@@ -15,13 +15,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
             tokenReference = new Dictionary<string, string>();
         }
 
-        /// <summary>
-        /// Returns and action to execute for a known request.
-        /// </summary>
-        /// <param name="verb"></param>
-        /// <param name="parameter"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
         public Action<string, string, byte[]> GetAction(string verb, string parameter, string value)
         {
             string key = GetKey(verb, parameter, value);
@@ -35,11 +28,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
             }
         }
 
-        /// <summary>
-        /// Returns an action to execute for a response.
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
         public Action<string, string, byte[]> GetTokenReference(string token)
         {
             if (tokenReference.ContainsKey(token) && registry.ContainsKey(tokenReference[token]))
@@ -63,35 +51,17 @@ namespace SkunkLab.Protocols.Coap.Handlers
             return tokenReference.ContainsKey(token);
         }
 
-        /// <summary>
-        /// Registers an action for received request for a client.
-        /// </summary>
-        /// <param name="verb"></param>
-        /// <param name="parameter"></param>
-        /// <param name="value"></param>
-        /// <param name="action"></param>
         public void Register(string verb, string parameter, string value, Action<string, string, byte[]> action)
         {
             string key = GetKey(verb, parameter, value);
             registry.Add(key, action);
         }
 
-        /// <summary>
-        /// Remove a token reference for a request.  Called after the response action is found.
-        /// </summary>
-        /// <param name="token"></param>
         public void RemoveTokenReference(string token)
         {
             tokenReference.Remove(token);
         }
 
-        /// <summary>
-        /// Sets a token for a request to return an action for a response.
-        /// </summary>
-        /// <param name="token"></param>
-        /// <param name="verb"></param>
-        /// <param name="parameter"></param>
-        /// <param name="value"></param>
         public void SetTokenReference(string token, string verb, string parameter, string value)
         {
             string key = GetKey(verb, parameter, value);

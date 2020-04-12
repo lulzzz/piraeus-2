@@ -26,8 +26,7 @@ namespace Piraeus.Auditing
 
         public async Task UpdateAuditRecordAsync(AuditRecord record)
         {
-            UserAuditRecord userRecord = record as UserAuditRecord;
-            if (userRecord != null)
+            if (record is UserAuditRecord userRecord)
             {
                 List<UserAuditRecord> list = await storage.ReadAsync<UserAuditRecord>(tableName, record.PartitionKey, record.RowKey);
                 if (list?.Count == 1)

@@ -11,8 +11,6 @@ namespace Piraeus.Core.Metadata
         {
         }
 
-        //private bool _enabled = true;
-
         [JsonProperty("audit")]
         public bool Audit { get; set; }
 

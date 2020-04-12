@@ -20,6 +20,7 @@ namespace Piraeus.SiloHost
         }
 
         private readonly OrleansConfig orleansConfig;
+
         private ISiloHost host;
 
         public async Task StartAsync(CancellationToken cancellationToken)

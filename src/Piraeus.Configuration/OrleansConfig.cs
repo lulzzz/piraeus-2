@@ -7,9 +7,13 @@ namespace Piraeus.Configuration
     public enum LoggerType
     {
         None = 0,
+
         Console = 1,
+
         Debug = 2,
+
         AppInsights = 4,
+
         File = 8
     }
 
@@ -28,9 +32,7 @@ namespace Piraeus.Configuration
         public string DataConnectionString { get; set; }
 
         [JsonProperty("dockerized")]
-        public bool Dockerized { get; set; }  //true for docker deployments; otherwise local deployment
-
-        //orleans cluster id
+        public bool Dockerized { get; set; }
 
         [JsonProperty("instrumentationKey")]
         public string InstrumentationKey { get; set; }
@@ -42,24 +44,16 @@ namespace Piraeus.Configuration
         public string LogLevel { get; set; } = "Warning";
 
         [JsonProperty("serviceId")]
-        public string ServiceId { get; set; } //orleans service id
-
-        //either azure storage connection string or redis connection string
+        public string ServiceId { get; set; }
 
         [JsonProperty("servicePointFactor")]
-        public int ServicePointFactor { get; set; } = 24; //service point factor, e.g., 24 associated with Azure storage
-
-        //any of console, debug, file, appinsights, or none.
-
-        //one of warning, error, information, critical, verbose
-
-        //required when loggertypes as appinsights; otherwise omit
+        public int ServicePointFactor { get; set; } = 24;
 
         public LoggerType GetLoggerTypes()
         {
             if (string.IsNullOrEmpty(LoggerTypes))
             {
-                return default(LoggerType);
+                return default;
             }
 
             string loggerTypes = LoggerTypes.Replace(";", ",");

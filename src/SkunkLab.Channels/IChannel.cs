@@ -16,12 +16,19 @@ namespace SkunkLab.Channels
         event EventHandler<ChannelStateEventArgs> OnStateChange;
 
         string Id { get; }
+
         bool IsAuthenticated { get; }
+
         bool IsConnected { get; }
+
         bool IsEncrypted { get; }
+
         int Port { get; }
+
         bool RequireBlocking { get; }
+
         ChannelState State { get; }
+
         string TypeId { get; }
 
         Task AddMessageAsync(byte[] message);

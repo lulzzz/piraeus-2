@@ -139,16 +139,13 @@
             Buffer.BlockCopy(message, index, tokenBytes, 0, this.TokenLength);
             this.Token = tokenBytes;
 
-            //get the options
             index += this.TokenLength;
             int previous = 0;
-            int delta = 0;
-
             bool marker = ((message[index] & 0xFF) == 0xFF);
 
             while (!marker)
             {
-                delta = (message[index] >> 0x04);
+                int delta = (message[index] >> 0x04);
                 CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
                 this.Options.Add(CoapOption);
                 previous += delta;
@@ -162,7 +159,7 @@
                 }
             }
 
-            if (marker) //grab the payload
+            if (marker)
             {
                 index++;
                 this.Payload = new byte[message.Length - index];
@@ -188,8 +185,8 @@
             int code = (int)this.Code;
             header[index++] = code < 10 ? (byte)code : (byte)((byte)(Convert.ToByte(Convert.ToString((int)this.Code).Substring(0, 1)) << 0x05) |
                                                               Convert.ToByte(Convert.ToString((int)this.Code).Substring(1, 2)));
-            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
-            header[index++] = (byte)(this.MessageId & 0x00FF); //LSB
+            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF);
+            header[index++] = (byte)(this.MessageId & 0x00FF);
 
             if (this.TokenLength > 0)
             {
@@ -207,8 +204,7 @@
                 length += options.Length;
             }
 
-            byte[] buffer = null;
-
+            byte[] buffer;
             if (this.Payload != null)
             {
                 length += this.Payload.Length + 1;
@@ -275,7 +271,6 @@
                 message.Accept = (MediaType)Convert.ToInt32(accept);
             }
 
-            //message.Accept = message.Options.GetOptionValue(OptionType.Accept) != null ? (uint)message.Options.GetOptionValue(OptionType.Accept) : 0;
             message._locationQuery = locationquery == null ? new List<string>() : new List<string>(locationquery as string[]);
             message.ProxyUri = message.Options.GetOptionValue(OptionType.ProxyUri) as string;
             message.ProxyScheme = message.Options.GetOptionValue(OptionType.ProxyScheme) as string;
@@ -364,7 +359,6 @@
                 loadUint(OptionType.Accept, (uint)this.Accept.Value, false);
             }
 
-            //loadUint(OptionType.Accept, this.Accept, false);
             this.LocationQuery.ForEach(s => loadString(OptionType.LocationQuery, s));
             loadString(OptionType.ProxyUri, this.ProxyUri);
             loadString(OptionType.ProxyScheme, this.ProxyScheme);

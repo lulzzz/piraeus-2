@@ -85,9 +85,9 @@
 
         public byte[] Encode(int previousDelta)
         {
-            int delta = (int)this.Type - previousDelta;  //the delta
-            byte[] encodedValue = this.Type.EncodeOptionValue(this.Value); //the encoded option value
-            int valueLength = encodedValue.Length; //total length of the option value
+            int delta = (int)this.Type - previousDelta;
+            byte[] encodedValue = this.Type.EncodeOptionValue(this.Value);
+            int valueLength = encodedValue.Length;
 
             if (delta > ushort.MaxValue)
             {
@@ -114,7 +114,7 @@
             if (deltaArray != null)
             {
                 Buffer.BlockCopy(deltaArray, 0, buffer, index, deltaArray.Length);
-                index = index + deltaArray.Length;
+                index += deltaArray.Length;
             }
 
             byte[] valueArray = valueBuffer.Length == 0 ? null : valueBuffer.Length == 1 ? new byte[] { (byte)(valueLength - 13) } : new byte[] { (byte)(((valueLength - 269) >> 8) & 0x00FF), (byte)((valueLength - 269) & 0x00FF) };
@@ -122,7 +122,7 @@
             if (valueArray != null)
             {
                 Buffer.BlockCopy(valueArray, 0, buffer, index, valueArray.Length);
-                index = index + valueArray.Length;
+                index += valueArray.Length;
             }
 
             Buffer.BlockCopy(encodedValue, 0, buffer, index, encodedValue.Length);

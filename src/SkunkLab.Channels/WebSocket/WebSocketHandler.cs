@@ -22,7 +22,6 @@
 
         private readonly WebSocketConfig config;
 
-        //public WebSocketContext WebSocketContext { get; set; }
         private readonly CancellationToken token;
 
         public WebSocketHandler(WebSocketConfig config, CancellationToken token)
@@ -61,63 +60,13 @@
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
             SendAsync(message).GetAwaiter();
-            //Task task = SendAsync(message);
-            //Task.WaitAll(task);
         }
 
-        //        while (!token.IsCancellationRequested && WebSocketContext.WebSocket.State == WebSocketState.Open)
-        //        {
-        //            WebSocketMessage message = await messageRetriever();
-        //            if (message.MessageType == WebSocketMessageType.Binary)
-        //            {
-        //                OnReceive?.Invoke(this, new WebSocketReceiveEventArgs(message.Data as byte[]));
-        //            }
-        //            else if (message.MessageType == WebSocketMessageType.Text)
-        //            {
-        //                OnReceive?.Invoke(this, new WebSocketReceiveEventArgs(Encoding.UTF8.GetBytes(message.Data as string)));
-        //            }
-        //            else
-        //            {
-        //                //close received
-        //                OnClose?.Invoke(this, new WebSocketCloseEventArgs(WebSocketCloseStatus.NormalClosure));
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    catch (Exception exception)
-        //    {
-        //        if (!(WebSocketContext.WebSocket.State == WebSocketState.CloseReceived ||
-        //            WebSocketContext.WebSocket.State == WebSocketState.CloseSent))
-        //        {
-        //            if (IsFatalException(exception))
-        //            {
-        //                OnError?.Invoke(this, new WebSocketErrorEventArgs(exception));
-        //            }
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        try
-        //        {
-        //            await CloseAsync();
-        //        }
-        //        finally
-        //        {
-        //            IDisposable disposable = this as IDisposable;
-        //            if (disposable != null)
-        //            {
-        //                disposable.Dispose();
-        //            }
-        //        }
-        //    }
-        //}
         public void Send(byte[] message)
         {
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
             SendAsync(message, WebSocketMessageType.Binary).GetAwaiter();
-            //Task task = SendAsync(message, WebSocketMessageType.Binary);
-            //Task.WaitAll(task);
         }
 
         internal Task CloseAsync()
@@ -153,7 +102,6 @@
                     }
                     else
                     {
-                        //close received
                         OnClose?.Invoke(this, new WebSocketCloseEventArgs(WebSocketCloseStatus.NormalClosure));
                         break;
                     }
@@ -178,8 +126,7 @@
                 }
                 finally
                 {
-                    IDisposable disposable = this as IDisposable;
-                    if (disposable != null)
+                    if (this is IDisposable disposable)
                     {
                         disposable.Dispose();
                     }
@@ -187,21 +134,11 @@
             }
         }
 
-        //internal async Task ProcessWebSocketRequestAsync(HttpListenerWebSocketContext webSocketContext, Func<Task<WebSocketMessage>> messageRetriever)
-        //{
-        //    try
-        //    {
-        //        WebSocketContext = webSocketContext;
-        //        OnOpen?.Invoke(this, new WebSocketOpenEventArgs());
         internal Task SendAsync(string message)
         {
             return SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text);
         }
 
-        //    return ProcessWebSocketRequestAsync(webSocketContext, () => WebSocketMessageReader.ReadMessageAsync(webSocket, buffer, config.MaxIncomingMessageSize,CancellationToken.None));
-        //    //source.SetResult(ProcessWebSocketRequestAsync(webSocketContext, () => WebSocketMessageReader.ReadMessageAsync(webSocket, buffer, config.MaxIncomingMessageSize, CancellationToken.None)));
-        //    //return source.Task;
-        //}
         internal Task SendAsync(byte[] message, WebSocketMessageType messageType)
         {
             TaskCompletionSource<Task> tcs = new TaskCompletionSource<Task>();
@@ -220,8 +157,7 @@
 
         private static bool IsFatalException(Exception ex)
         {
-            COMException exception = ex as COMException;
-            if (exception != null)
+            if (ex is COMException exception)
             {
                 switch (((uint)exception.ErrorCode))
                 {
@@ -233,16 +169,5 @@
             }
             return true;
         }
-
-        //[EditorBrowsable(EditorBrowsableState.Never)]
-        //public Task ProcessWebSocketRequestAsync(HttpListenerWebSocketContext webSocketContext)
-        //{
-        //    if (webSocketContext == null)
-        //    {
-        //        throw new ArgumentNullException("webSocketContext");
-        //    }
-
-        //    byte[] buffer = new byte[config.ReceiveLoopBufferSize];
-        //    WebSocket webSocket = webSocketContext.WebSocket;
     }
 }

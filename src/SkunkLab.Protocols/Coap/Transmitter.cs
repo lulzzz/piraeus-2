@@ -9,10 +9,6 @@ namespace SkunkLab.Protocols.Coap
     {
         private readonly Dictionary<ushort, Tuple<string, DateTime, Action<CodeType, string, byte[]>>> container;
 
-        private ushort currentId;
-
-        private bool disposedValue;
-
         private readonly double lifetimeMilliseconds;
 
         private readonly int maxAttempts;
@@ -24,6 +20,10 @@ namespace SkunkLab.Protocols.Coap
         private readonly double retryMilliseconds;
 
         private readonly Timer timer;
+
+        private ushort currentId;
+
+        private bool disposedValue;
 
         public Transmitter(double lifetimeMilliseconds, double retryMilliseconds, int maxRetryAttempts)
         {
@@ -76,25 +76,12 @@ namespace SkunkLab.Protocols.Coap
                     container.Remove(kvp.Key);
                 }
             }
-            //var query = container.Where((c) => c.Value.Item1 == Convert.ToBase64String(message.Token));
-
-            //if(observeQuery.Count() == 0 && query.Count() >= 1)
-            //{
-            //    query.First().Value.Item3(message.Code, MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload);
-
-            //    Remove(query.First().Key);
-
-            //    container.Remove(query.First().Key);
-            //}
-
             timer.Enabled = container.Count() > 0;
         }
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
 

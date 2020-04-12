@@ -34,7 +34,6 @@
 
             if (remainingLength != 0)
             {
-                //fault
             }
 
             return ping;

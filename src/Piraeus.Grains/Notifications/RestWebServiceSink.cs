@@ -30,19 +30,14 @@ namespace Piraeus.Grains.Notifications
 
         private readonly List<Claim> claims;
 
-        //private readonly Piraeus.Core.Metadata.SecurityTokenType? tokenType;
-        //private readonly string symmetricKey;
         private readonly string issuer;
 
-        //private DateTime tokenExpiration;
         private string token;
 
         public RestWebServiceSink(SubscriptionMetadata metadata, List<Claim> claimset = null, X509Certificate2 certificate = null)
                                                                     : base(metadata)
         {
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
-            //tokenType = metadata.TokenType;
-            //symmetricKey = metadata.SymmetricKey;
             this.certificate = certificate;
 
             Uri uri = new Uri(metadata.NotifyAddress);

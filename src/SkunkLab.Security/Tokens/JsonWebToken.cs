@@ -22,7 +22,7 @@
             this.issuer = issuer;
             id = Guid.NewGuid().ToString();
             created = DateTime.UtcNow;
-            expires = created.AddMinutes(lifetimeMinutes.HasValue ? lifetimeMinutes.Value : 20);
+            expires = created.AddMinutes(lifetimeMinutes ?? 20);
             SigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
@@ -116,7 +116,6 @@
                     ValidateIssuer = true,
                     ValidateIssuerSigningKey = true
                 };
-
 
                 Thread.CurrentPrincipal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken stoken);
             }

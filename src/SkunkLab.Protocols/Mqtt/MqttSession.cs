@@ -15,6 +15,10 @@ namespace SkunkLab.Protocols.Mqtt
 
     public class MqttSession : IDisposable
     {
+        private readonly PublishContainer pubContainer;
+
+        private readonly MqttQuarantineTimer quarantine;
+
         private ConnectAckCode _code;
 
         private double _keepaliveSeconds;
@@ -25,19 +29,11 @@ namespace SkunkLab.Protocols.Mqtt
 
         private bool disposed;
 
-        //keepalive time increment
         private DateTime keepaliveExpiry;
 
         private Timer keepaliveTimer;
 
-        private readonly PublishContainer pubContainer;
-
-        //manages QoS 2 message features
-        //timer for tracking keepalives
-        //expiry of the keepalive
         private Dictionary<string, QualityOfServiceLevelType> qosLevels;
-
-        private readonly MqttQuarantineTimer quarantine;
 
         public MqttSession(MqttConfig config)
         {
@@ -50,24 +46,19 @@ namespace SkunkLab.Protocols.Mqtt
             quarantine.OnRetry += Quarantine_OnRetry;
         }
 
-        public event ConnectionHandler OnConnect;                       //client function
+        public event ConnectionHandler OnConnect;
 
         public event EventHandler<MqttMessageEventArgs> OnDisconnect;
 
-        //client & server function
         public event EventHandler<MqttMessageEventArgs> OnKeepAlive;
 
         public event EventHandler<MqttMessageEventArgs> OnPublish;
 
-        public event EventHandler<MqttMessageEventArgs> OnRetry;        //client function
+        public event EventHandler<MqttMessageEventArgs> OnRetry;
 
-        public event SubscriptionHandler OnSubscribe;                   //server function
+        public event SubscriptionHandler OnSubscribe;
 
-        public event EventHandler<MqttMessageEventArgs> OnUnsubscribe;  //server function
-
-        //server function
-        //client function
-        //public event EventHandler<MqttMessageEventArgs> OnKeepAliveExpiry; //server function
+        public event EventHandler<MqttMessageEventArgs> OnUnsubscribe;
 
         public MqttConfig Config { get; set; }
 
@@ -77,8 +68,6 @@ namespace SkunkLab.Protocols.Mqtt
             internal set => _code = value;
         }
 
-        //quarantines ids for reuse and supplies valid ids
-        //qos levels return from subscriptions
         public bool HasBootstrapToken { get; internal set; }
 
         public string Identity { get; set; }
@@ -86,6 +75,7 @@ namespace SkunkLab.Protocols.Mqtt
         public List<KeyValuePair<string, string>> Indexes { get; set; }
 
         public bool IsAuthenticated { get; set; }
+
         public bool IsConnected { get; internal set; }
 
         public bool Authenticate()
@@ -127,20 +117,11 @@ namespace SkunkLab.Protocols.Mqtt
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Returns a fresh usable message id.
-        /// </summary>
-        /// <returns></returns>
         public ushort NewId()
         {
             return quarantine.NewId();
         }
 
-        /// <summary>
-        /// Processes a receive MQTT message and a response or null (no response).
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
         public async Task<MqttMessage> ReceiveAsync(MqttMessage message)
         {
             MqttMessageHandler handler = MqttMessageHandler.Create(this, message);
@@ -186,7 +167,6 @@ namespace SkunkLab.Protocols.Mqtt
 
         internal void Publish(MqttMessage message, bool force = false)
         {
-            //if the message is QoS = 2, the message is held waiting for release.
             if (message.QualityOfService != QualityOfServiceLevelType.ExactlyOnce
                 || (message.QualityOfService == QualityOfServiceLevelType.ExactlyOnce && force))
             {
@@ -266,16 +246,6 @@ namespace SkunkLab.Protocols.Mqtt
 
         private void KeepaliveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            //DateTime expiry = keepaliveExpiry.AddSeconds(Convert.ToDouble(_keepaliveSeconds * 1.5));
-
-            //communicates to server keep alive expired
-            //if (expiry < DateTime.Now)
-            //{
-            //    OnKeepAliveExpiry?.Invoke(this, null);
-            //return;
-            //}
-
-            //signals client to send a ping to keep alive
             if (keepaliveExpiry < DateTime.Now)
             {
                 OnKeepAlive?.Invoke(this, new MqttMessageEventArgs(new PingRequestMessage()));
@@ -305,11 +275,6 @@ namespace SkunkLab.Protocols.Mqtt
 
         #region Retry Signal
 
-        /// <summary>
-        /// Signals a retry
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
         private void Quarantine_OnRetry(object sender, MqttMessageEventArgs args)
         {
             MqttMessage msg = args.Message;

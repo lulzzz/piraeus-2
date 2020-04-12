@@ -16,10 +16,15 @@ namespace Piraeus.Grains.Notifications
     public class AzureQueueStorageSink : EventSink
     {
         private readonly IAuditor auditor;
+
         private readonly ConcurrentQueue<EventMessage> loadQueue;
+
         private readonly string queue;
+
         private readonly QueueStorage storage;
+
         private readonly TimeSpan? ttl;
+
         private readonly Uri uri;
 
         public AzureQueueStorageSink(SubscriptionMetadata metadata)

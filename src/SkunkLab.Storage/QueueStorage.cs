@@ -129,8 +129,7 @@ namespace SkunkLab.Storage
 
         private CloudQueue GetQueue(string queueName)
         {
-            CloudQueue queue = null;
-
+            CloudQueue queue;
             if (container.ContainsKey(queueName))
             {
                 queue = container[queueName];

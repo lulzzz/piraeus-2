@@ -50,7 +50,7 @@ namespace SkunkLab.Storage
             File.Delete(path);
         }
 
-        public async Task AppendFileAsync(string path, byte[] source, CancellationToken token = default(CancellationToken))
+        public async Task AppendFileAsync(string path, byte[] source, CancellationToken token = default)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
@@ -71,7 +71,7 @@ namespace SkunkLab.Storage
             await WriteFileAsync(path, buffer, token);
         }
 
-        public async Task AppendFileAsync(string path, byte[] source, int maxSize, CancellationToken token = default(CancellationToken))
+        public async Task AppendFileAsync(string path, byte[] source, int maxSize, CancellationToken token = default)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
@@ -85,17 +85,16 @@ namespace SkunkLab.Storage
                 FileInfo info = new FileInfo(path);
                 if (maxSize > 0 && info.Length >= Convert.ToInt64(maxSize))
                 {
-                    //copy the file with an epoch
                     RenameFile(path);
                 }
             }
 
             byte[] existing = await ReadFileAsync(path, token);
-
-            byte[] buffer = null;
             string crlf = "\r\n";
             byte[] crlfBytes = Encoding.UTF8.GetBytes(crlf);
 
+
+            byte[] buffer;
             if (existing.Length == 0)
             {
                 buffer = new byte[source.Length];
@@ -136,34 +135,32 @@ namespace SkunkLab.Storage
                     File.Create(path);
                 }
 
-                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                int bytesRead = 0;
+                do
                 {
-                    int bytesRead = 0;
-                    do
+                    if (token.IsCancellationRequested)
                     {
-                        if (token.IsCancellationRequested)
-                        {
-                            message = null;
-                            break;
-                        }
+                        message = null;
+                        break;
+                    }
 
-                        byte[] buffer = new byte[ushort.MaxValue];
-                        bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    byte[] buffer = new byte[ushort.MaxValue];
+                    bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                        if (message == null)
-                        {
-                            message = new byte[bytesRead];
-                            Buffer.BlockCopy(buffer, 0, message, 0, bytesRead);
-                        }
-                        else
-                        {
-                            byte[] temp = new byte[message.Length + buffer.Length];
-                            Buffer.BlockCopy(message, 0, temp, 0, message.Length);
-                            Buffer.BlockCopy(buffer, 0, temp, message.Length, buffer.Length);
-                            message = temp;
-                        }
-                    } while (bytesRead > 0);
-                }
+                    if (message == null)
+                    {
+                        message = new byte[bytesRead];
+                        Buffer.BlockCopy(buffer, 0, message, 0, bytesRead);
+                    }
+                    else
+                    {
+                        byte[] temp = new byte[message.Length + buffer.Length];
+                        Buffer.BlockCopy(message, 0, temp, 0, message.Length);
+                        Buffer.BlockCopy(buffer, 0, temp, message.Length, buffer.Length);
+                        message = temp;
+                    }
+                } while (bytesRead > 0);
             }
             catch (Exception ex)
             {
@@ -184,7 +181,7 @@ namespace SkunkLab.Storage
             return message;
         }
 
-        public async Task TruncateFileAsync(string path, int maxBytes, CancellationToken token = default(CancellationToken))
+        public async Task TruncateFileAsync(string path, int maxBytes, CancellationToken token = default)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 

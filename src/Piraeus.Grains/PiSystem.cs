@@ -114,25 +114,13 @@ namespace Piraeus.Grains
             if (subscription == null)
             {
                 Exception ex = new ArgumentNullException("resource subscribe null");
-                //GetLogger().Log(1009, Orleans.Runtime.Severity.Error, "Resource subscribe null subscription on resource {0}", new object[] { State.Metadata.ResourceUriString }, ex);
                 await NotifyErrorAsync(ex);
                 return;
             }
 
-            //test for invalid subscription uri string
             string id = await subscription.GetIdAsync();
             Uri uri = new Uri(id);
 
-            //test for match with resource
-            //if(id == null || State.Metadata.ResourceUriString != id.Replace("/" + uri.Segments[uri.Segments.Length - 1], ""))
-            //{
-            //    Exception ex = new SubscriptionIdentityMismatchException(String.Format("Subscription identity is mismatched with resource. Subscription {0}, Resource {1}", id, State.Metadata.ResourceUriString));
-            //    //GetLogger().Log(1010, Orleans.Runtime.Severity.Error, ex.Message, null, ex);
-            //    await NotifyErrorAsync(ex);
-            //    return;
-            //}
-
-            //get the subscription into resource state
             if (State.Subscriptions.ContainsKey(id))
             {
                 State.Subscriptions[id] = subscription;
@@ -142,23 +130,16 @@ namespace Piraeus.Grains
                 State.Subscriptions.Add(id, subscription);
             }
 
-            //determine if a durable subscriber
             SubscriptionMetadata metadata = await subscription.GetMetadataAsync();
 
             if (!metadata.IsEphemeral && !string.IsNullOrEmpty(metadata.Identity) && metadata.NotifyAddress == null)
             {
-                //add as a durable active connection subscriber (no notify address)
                 ISubscriber subscriber = GrainFactory.GetGrain<ISubscriber>(metadata.Identity.ToLowerInvariant());
                 await subscriber.AddSubscriptionAsync(metadata.SubscriptionUriString);
             }
 
             await WriteStateAsync();
         }
-
-        //private object GetLogger()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         public async Task UnsubscribeAsync(string subscriptionUriString, string identity)
         {
@@ -226,7 +207,6 @@ namespace Piraeus.Grains
                 Trace.TraceWarning("Resource publish failed to complete.");
                 Trace.TraceError("Resource publish error {0}", ex.Message);
                 error = ex;
-                //GetLogger().Log(1006, Orleans.Runtime.Severity.Error, "Resource publish error {0}", new object[] { State.Metadata.ResourceUriString }, ex);
             }
 
             if (error != null)
@@ -285,7 +265,6 @@ namespace Piraeus.Grains
 
             if (error != null)
             {
-                //GetLogger().Log(1008, Orleans.Runtime.Severity.Error, "Resource publish with index error {0}", new object[] { State.Metadata.ResourceUriString }, error);
                 await NotifyErrorAsync(error);
             }
         }
@@ -344,7 +323,6 @@ namespace Piraeus.Grains
             catch (Exception ex)
             {
                 error = ex;
-                //GetLogger().Log(1001, Orleans.Runtime.Severity.Error, "Resource add metric observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);
             }
 
             if (error != null)
@@ -381,7 +359,6 @@ namespace Piraeus.Grains
             catch (Exception ex)
             {
                 error = ex;
-                //GetLogger().Log(1002, Orleans.Runtime.Severity.Error, "Resource add error observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);
             }
 
             if (error != null)
@@ -423,7 +400,6 @@ namespace Piraeus.Grains
             catch (Exception ex)
             {
                 error = ex;
-                //GetLogger().Log(1005, Orleans.Runtime.Severity.Error, "Resource remove observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);
             }
 
             if (error != null)

@@ -38,12 +38,11 @@
         }
 
         public MethodType Method { get; set; }
+
         public RequestMessageType RequestType { get; set; }
 
         public override void Decode(byte[] message)
         {
-            //CoapRequest message = new CoapRequest();
-
             int index = 0;
             byte header = message[index++];
             if (header >> 0x06 != 1)
@@ -62,7 +61,6 @@
             Buffer.BlockCopy(message, index, tokenBytes, 0, this.TokenLength);
             this.Token = tokenBytes;
 
-            //get the options
             index += this.TokenLength;
             int previous = 0;
             int delta = 0;
@@ -77,7 +75,7 @@
                 marker = ((message[index] & 0xFF) == 0xFF);
             }
 
-            if (marker) //grab the payload
+            if (marker)
             {
                 index++;
                 this.Payload = new byte[message.Length - index];
@@ -98,8 +96,8 @@
 
             header[index++] = (byte)(0x01 << 0x06 | (byte)(Convert.ToByte((int)RequestType) << 0x04) | this.TokenLength);
             header[index++] = (byte)(int)this.Method;
-            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
-            header[index++] = (byte)(this.MessageId & 0x00FF); //LSB
+            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF);
+            header[index++] = (byte)(this.MessageId & 0x00FF);
 
             if (this.TokenLength > 0)
             {

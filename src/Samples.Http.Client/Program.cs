@@ -14,22 +14,38 @@ namespace Samples.Http.Client
 {
     internal class Program
     {
-        private static readonly string pubResource = null;
-        private static readonly string subResource = null;
-        private static string audience = issuer;
-        private static CancellationTokenSource cts;
-        private static string hostname;
         private static readonly int index;
-        private static string issuer = "http://localhost/";
-        private static string name;
-        private static string nameClaimType = "http://localhost/name";
-        private static string resourceA = "http://localhost/resource-a";
-        private static string resourceB = "http://localhost/resource-b";
-        private static RestClient restClient;
-        private static string role;
-        private static string roleClaimType = "http://localhost/role";
+
+        private static readonly string pubResource = null;
+
         private static readonly bool send;
+
+        private static readonly string subResource = null;
+
+        private static string audience = issuer;
+
+        private static CancellationTokenSource cts;
+
+        private static string hostname;
+
+        private static string issuer = "http://localhost/";
+
+        private static string name;
+
+        private static string nameClaimType = "http://localhost/name";
+
+        private static string resourceA = "http://localhost/resource-a";
+
+        private static string resourceB = "http://localhost/resource-b";
+
+        private static RestClient restClient;
+
+        private static string role;
+
+        private static string roleClaimType = "http://localhost/role";
+
         private static DateTime startTime;
+
         private static string symmetricKey = "//////////////////////////////////////////8=";
 
         private static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey, double lifetimeMinutes)

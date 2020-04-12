@@ -17,14 +17,21 @@ namespace Piraeus.Grains.Notifications
 {
     public class EventGridSink : EventSink
     {
-        private int arrayIndex;
         private readonly IAuditor auditor;
+
         private readonly int clientCount;
+
         private readonly EventGridClient[] clients;
+
         private readonly string resourceUriString;
+
         private readonly string topicHostname;
+
         private readonly string topicKey;
+
         private readonly Uri uri;
+
+        private int arrayIndex;
 
         public EventGridSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -68,7 +75,7 @@ namespace Piraeus.Grains.Notifications
                 EventGridEvent gridEvent = new EventGridEvent(message.MessageId, resourceUriString, payload, resourceUriString, DateTime.UtcNow, "1.0");
                 IList<EventGridEvent> events = new List<EventGridEvent>(new EventGridEvent[] { gridEvent });
                 Task task = clients[arrayIndex].PublishEventsAsync(topicHostname, events);
-                Task innerTask = task.ContinueWith(async (a) => { await FaultTask(message.MessageId, payload, message.ContentType, message.Audit); }, TaskContinuationOptions.OnlyOnFaulted);
+                Task innerTask = task.ContinueWith(async (a) => { await FaultTask(message.MessageId, payload, message.Audit); }, TaskContinuationOptions.OnlyOnFaulted);
                 await Task.WhenAll(task);
 
                 record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
@@ -87,7 +94,7 @@ namespace Piraeus.Grains.Notifications
             }
         }
 
-        private async Task FaultTask(string id, byte[] payload, string contentType, bool canAudit)
+        private async Task FaultTask(string id, byte[] payload, bool canAudit)
         {
             AuditRecord record = null;
             try

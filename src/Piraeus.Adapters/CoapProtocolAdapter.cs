@@ -156,7 +156,6 @@ namespace Piraeus.Adapters
 
             if (!session.IsAuthenticated && e.Message != null)
             {
-                //close the channel
                 logger?.LogWarningAsync("CoAP adpater closing due to unauthenticated user.");
                 Channel.CloseAsync().Ignore();
             }

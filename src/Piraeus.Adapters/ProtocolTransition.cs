@@ -28,12 +28,10 @@ namespace Piraeus.Adapters
                 if (observableToken == null)
                 {
                     RequestMessageType messageType = msg.QualityOfService == QualityOfServiceLevelType.AtMostOnce ? RequestMessageType.NonConfirmable : RequestMessageType.Confirmable;
-                    //request
                     coapMessage = new CoapRequest(id, messageType, MethodType.POST, new Uri(uriString), MediaTypeConverter.ConvertToMediaType(message.ContentType));
                 }
                 else
                 {
-                    //response
                     coapMessage = new CoapResponse(id, ResponseMessageType.NonConfirmable, ResponseCodeType.Content, observableToken, MediaTypeConverter.ConvertToMediaType(uri.ContentType), msg.Payload);
                 }
             }
@@ -42,12 +40,10 @@ namespace Piraeus.Adapters
                 CoapMessage msg = CoapMessage.DecodeMessage(message.Message);
                 if (observableToken == null)
                 {
-                    //request
                     coapMessage = new CoapRequest(id, msg.MessageType == CoapMessageType.Confirmable ? RequestMessageType.Confirmable : RequestMessageType.NonConfirmable, MethodType.POST, new Uri(uriString), MediaTypeConverter.ConvertToMediaType(message.ContentType), msg.Payload);
                 }
                 else
                 {
-                    //response
                     coapMessage = new CoapResponse(id, ResponseMessageType.NonConfirmable, ResponseCodeType.Content, observableToken, MediaTypeConverter.ConvertToMediaType(message.ContentType), msg.Payload);
                 }
             }
@@ -55,12 +51,10 @@ namespace Piraeus.Adapters
             {
                 if (observableToken == null)
                 {
-                    //request
                     coapMessage = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.POST, new Uri(uriString), MediaTypeConverter.ConvertToMediaType(message.ContentType), message.Message);
                 }
                 else
                 {
-                    //response
                     coapMessage = new CoapResponse(id, ResponseMessageType.NonConfirmable, ResponseCodeType.Content, observableToken, MediaTypeConverter.ConvertToMediaType(message.ContentType), message.Message);
                 }
             }
@@ -101,7 +95,7 @@ namespace Piraeus.Adapters
                 try
                 {
                     QualityOfServiceLevelType? qosType = session.GetQoS(curi.Resource);
-                    qos = qosType.HasValue ? qosType.Value : QualityOfServiceLevelType.AtLeastOnce;
+                    qos = qosType ?? QualityOfServiceLevelType.AtLeastOnce;
                 }
                 catch (Exception ex)
                 {
@@ -129,7 +123,7 @@ namespace Piraeus.Adapters
             MqttUri uri = new MqttUri(msg.Topic);
             QualityOfServiceLevelType? qos = session.GetQoS(uri.Resource);
 
-            PublishMessage pm = new PublishMessage(false, qos.HasValue ? qos.Value : QualityOfServiceLevelType.AtMostOnce, false, session.NewId(), uri.Resource, msg.Payload);
+            PublishMessage pm = new PublishMessage(false, qos ?? QualityOfServiceLevelType.AtMostOnce, false, session.NewId(), uri.Resource, msg.Payload);
 
             if (pm.QualityOfService != QualityOfServiceLevelType.AtMostOnce)
             {

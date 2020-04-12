@@ -42,13 +42,13 @@
         }
 
         public bool Error { get; internal set; }
+
         public ResponseCodeType ResponseCode { get; set; }
+
         public ResponseMessageType ResponseType { get; set; }
 
         public override void Decode(byte[] message)
         {
-            //CoapResponse message = new CoapResponse();
-
             int index = 0;
             byte header = message[index++];
             if (header >> 0x06 != 1)
@@ -68,7 +68,6 @@
             Buffer.BlockCopy(message, index, tokenBytes, 0, this.TokenLength);
             this.Token = tokenBytes;
 
-            //get the options
             index += this.TokenLength;
             int previous = 0;
             int delta = 0;
@@ -83,7 +82,7 @@
                 marker = ((message[index] & 0xFF) == 0xFF);
             }
 
-            if (marker) //grab the payload
+            if (marker)
             {
                 index++;
                 this.Payload = new byte[message.Length - index];
@@ -110,10 +109,8 @@
             header[index++] = code < 10 ? (byte)code : (byte)((byte)(Convert.ToByte(Convert.ToString((int)this.ResponseCode).Substring(0, 1)) << 0x05) |
                                                               Convert.ToByte(Convert.ToString((int)this.ResponseCode).Substring(1, 2)));
 
-            //header[index++] = (byte)((byte)(Convert.ToByte(Convert.ToString((int)this.ResponseCode).Substring(0, 1)) << 0x05) |
-            //                  (byte)(Convert.ToByte(Convert.ToString((int)this.ResponseCode).Substring(1, 2))));
-            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
-            header[index++] = (byte)(this.MessageId & 0x00FF); //LSB
+            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF);
+            header[index++] = (byte)(this.MessageId & 0x00FF);
 
             if (this.TokenLength > 0)
             {

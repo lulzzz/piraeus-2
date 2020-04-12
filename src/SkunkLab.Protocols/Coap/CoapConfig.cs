@@ -4,9 +4,6 @@ using System.Collections.Generic;
 
 namespace SkunkLab.Protocols.Coap
 {
-    /// <summary>
-    /// CoAP configuration parameters
-    /// </summary>
     public sealed class CoapConfig
     {
         public CoapConfig(IAuthenticator authenticator, string authority,
@@ -31,48 +28,54 @@ namespace SkunkLab.Protocols.Coap
         }
 
         public double AckRandomFactor { get; internal set; }
+
         public TimeSpan AckTimeout { get; internal set; }
+
         public IAuthenticator Authenticator { get; set; }
+
         public string Authority { get; internal set; }
+
         public bool AutoRetry { get; internal set; }
+
         public CoapConfigOptions ConfigOptions { get; internal set; }
+
         public TimeSpan DefaultLeisure { get; internal set; }
+
         public string DoNotRetainNonconfirmableResponse { get; internal set; }
 
         public TimeSpan ExchangeLifetime =>
-                //MAX_TRANSMIT_SPAN + (2 * MAX_LATENCY) + PROCESSING_DELAY
                 TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + (2 * MaxLatency.TotalSeconds) + ProcessingDelay.TotalSeconds);
 
         public string IdentityClaimType { get; set; }
 
         public List<KeyValuePair<string, string>> Indexes { get; set; }
+
         public double? KeepAlive { get; internal set; }
+
         public TimeSpan MaxLatency { get; internal set; }
+
         public int MaxRetransmit { get; internal set; }
 
         public TimeSpan MaxRTT =>
-                //(2 * MAX_LATENCY) + PROCESSING_DELAY
                 TimeSpan.FromSeconds((2.0 * MaxLatency.TotalSeconds) + ProcessingDelay.TotalSeconds);
 
         public TimeSpan MaxTransmitSpan
         {
             get
             {
-                //ACK_TIMEOUT * (( 2 ** MAX_RETRANSMIT) - 1) * ACK_RANDOM_FACTOR
                 double secs = (AckTimeout.TotalSeconds) * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit)) - 1) * AckRandomFactor;
                 return TimeSpan.FromSeconds(secs);
             }
         }
 
         public TimeSpan MaxTransmitWait =>
-                //ACK_TIMEOUT * (( 2 ** (MAX_RETRANSMIT + 1)) - 1) * ACK_RANDOM_FACTOR
                 TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) * AckRandomFactor);
 
         public TimeSpan NonLifetime =>
-                //MAX_TRANSMIT_SPAN + MAX_LATENCY
                 TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
 
         public int NStart { get; internal set; }
+
         public double ProbingRate { get; internal set; }
 
         public TimeSpan ProcessingDelay => AckTimeout;

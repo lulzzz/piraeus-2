@@ -11,13 +11,13 @@ namespace SkunkLab.Protocols.Mqtt
     {
         private readonly MqttConfig config;
 
+        private readonly Timer timer;
+
         private Dictionary<ushort, RetryMessageData> container;
 
         private ushort currentId;
 
         private bool disposed;
-
-        private readonly Timer timer;
 
         public MqttQuarantineTimer(MqttConfig config)
         {
@@ -107,11 +107,6 @@ namespace SkunkLab.Protocols.Mqtt
             {
                 List<ushort> list = new List<ushort>();
 
-                //IEnumerable<KeyValuePair<ushort, RetryMessageData>> items = container.Where((c) => c.Value.NextRetryTime < DateTime.UtcNow
-                //                                && c.Value.Direction == DirectionType.Out);
-
-                //KeyValuePair<ushort, RetryMessageData>[] kvps = items?.ToArray();
-
                 KeyValuePair<ushort, RetryMessageData>[] kvps = container.Where((c) => c.Value.NextRetryTime < DateTime.UtcNow
                                                         && c.Value.Direction == DirectionType.Out).ToArray();
 
@@ -124,18 +119,15 @@ namespace SkunkLab.Protocols.Mqtt
 
                         if (item.Value.AttemptCount >= config.MaxRetransmit)
                         {
-                            //add expired items to list to be removed
                             list.Add(item.Key);
                         }
                         else
                         {
-                            //signal retransmit
                             OnRetry?.Invoke(this, new MqttMessageEventArgs(item.Value.Message));
                         }
                     }
                 }
 
-                //remove expired items
                 foreach (var item in list)
                 {
                     Remove(item);

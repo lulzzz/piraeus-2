@@ -1,5 +1,4 @@
-﻿
-namespace Capl.Authorization
+﻿namespace Capl.Authorization
 {
     using System;
     using System.Collections;
@@ -12,14 +11,14 @@ namespace Capl.Authorization
     public abstract class LogicalConnectiveCollection : Term, IList<Term>
     {
         /// <summary>
-        /// Truthful evaluation of the logical connective.
-        /// </summary>
-        private bool _evaluates;
-
-        /// <summary>
         /// A list of terms.
         /// </summary>
         private readonly List<Term> list;
+
+        /// <summary>
+        /// Truthful evaluation of the logical connective.
+        /// </summary>
+        private bool _evaluates;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogicalConnectiveCollection"/> class.

@@ -2,27 +2,38 @@
 {
     public enum OptionType
     {
-        IfMatch = 1,        //opaque
-        UriHost = 3,        //string
-        ETag = 4,           //opaque
-        IfNoneMatch = 5,    //empty
-        Observe = 6,        //unit
-        UriPort = 7,        //uint
-        LocationPath = 8,   //string
-        UriPath = 11,       //string
-        ContentFormat = 12, //uint
-        MaxAge = 14,        //uint
-        UriQuery = 15,      //string
-        Accept = 17,        //uint
-        LocationQuery = 20, //string
-        ProxyUri = 35,      //string
-        ProxyScheme = 39,   //string
-        Size1 = 60,         //uint
-        NoResponse = 258    //uint
+        IfMatch = 1,
 
-        //opaque = 1,4
-        //empty = 5
-        //string = 2,8,11,15,20,35,39
-        //uint = 7,12,14,17,60
+        UriHost = 3,
+
+        ETag = 4,
+
+        IfNoneMatch = 5,
+
+        Observe = 6,
+
+        UriPort = 7,
+
+        LocationPath = 8,
+
+        UriPath = 11,
+
+        ContentFormat = 12,
+
+        MaxAge = 14,
+
+        UriQuery = 15,
+
+        Accept = 17,
+
+        LocationQuery = 20,
+
+        ProxyUri = 35,
+
+        ProxyScheme = 39,
+
+        Size1 = 60,
+
+        NoResponse = 258
     }
 }

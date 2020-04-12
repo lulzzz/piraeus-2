@@ -19,11 +19,17 @@ namespace Piraeus.WebSocketGateway.Middleware
     public class PiraeusWebSocketMiddleware
     {
         private readonly RequestDelegate _next;
+
         private readonly WebSocketOptions _options;
+
         private readonly PiraeusConfig config;
+
         private readonly Dictionary<string, ProtocolAdapter> container;
+
         private readonly GraphManager graphManager;
+
         private readonly ILog logger;
+
         private CancellationTokenSource source;
 
         public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client, Logger logger, IOptions<WebSocketOptions> options)

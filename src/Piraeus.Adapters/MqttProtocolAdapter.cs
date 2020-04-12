@@ -182,7 +182,6 @@ namespace Piraeus.Adapters
                 MqttUri mqttUri = new MqttUri(message.Topic);
                 metadata = await graphManager.GetPiSystemMetadataAsync(mqttUri.Resource);
                 if (EventValidator.Validate(true, metadata, Channel, graphManager, context).Validated)
-                //if (await adapter.CanPublishAsync(metadata, Channel.IsEncrypted))
                 {
                     EventMessage msg = new EventMessage(mqttUri.ContentType, mqttUri.Resource, ProtocolType.MQTT, message.Encode(), DateTime.UtcNow, metadata.Audit);
                     if (!string.IsNullOrEmpty(mqttUri.CacheKey))
@@ -338,27 +337,6 @@ namespace Piraeus.Adapters
 
             return tcs.Task;
         }
-
-        //private Task<bool> CanSubscribe(string resourceUriString)
-        //{
-        //    TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-
-        //    Task t = Task.Factory.StartNew(async () =>
-        //    {
-        //        try
-        //        {
-        //            bool r = await adapter.CanSubscribeAsync(resourceUriString, Channel.IsEncrypted);
-        //            tcs.SetResult(r);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            await logger?.LogErrorAsync(ex, $"MQTT adapter CanSubscribe error on channel '{Channel.Id}'.");
-        //            tcs.SetException(ex);
-        //        }
-        //    });
-
-        //    return tcs.Task;
-        //}
 
         #endregion MQTT Session Events
 

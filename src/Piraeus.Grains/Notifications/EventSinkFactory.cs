@@ -9,7 +9,9 @@ namespace Piraeus.Grains.Notifications
     public class EventSinkFactory
     {
         private static X509Certificate2 cert;
+
         private static List<Claim> claims;
+
         private static bool initialized;
 
         public static bool IsInitialized => initialized;
@@ -25,8 +27,8 @@ namespace Piraeus.Grains.Notifications
 
             if (!initialized)
             {
-                cert = cert ?? certificate;
-                claims = claims ?? claimset;
+                cert ??= certificate;
+                claims ??= claimset;
             }
 
             Uri uri = new Uri(metadata.NotifyAddress);

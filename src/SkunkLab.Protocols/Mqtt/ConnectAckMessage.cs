@@ -17,6 +17,7 @@
         public override bool HasAck => false;
 
         public ConnectAckCode ReturnCode { get; set; }
+
         public bool SessionPresent { get; set; }
 
         public override byte[] Encode()
@@ -29,13 +30,10 @@
                    0x00 |
                    0x00;
 
-            buffer[index++] = 0x02; //2 remaining bytes
+            buffer[index++] = 0x02;
 
-            //byte[] remainingLengthBytes = base.EncodeRemainingLength(2);
             buffer[index++] = this.SessionPresent ? (byte)0x01 : (byte)0x00;
             buffer[index++] = (byte)(int)this.ReturnCode;
-
-            //Buffer.BlockCopy(remainingLengthBytes, 0, buffer, 2, remainingLengthBytes.Length);
 
             return buffer;
         }
@@ -50,21 +48,17 @@
 
             int remainingLength = base.DecodeRemainingLength(message);
 
-            int temp = remainingLength; //increase the fixed header size
+            int temp = remainingLength;
             do
             {
                 index++;
-                temp = temp / 128;
+                temp /= 128;
             } while (temp > 0);
 
             index++;
 
             byte[] buffer = new byte[remainingLength];
             Buffer.BlockCopy(message, index, buffer, 0, buffer.Length);
-
-            //base.VariableHeader = new ConnackVariableHeader();
-
-            //index = base.VariableHeader.Decode(buffer);
 
             index = 0;
             byte reserved = buffer[index++];

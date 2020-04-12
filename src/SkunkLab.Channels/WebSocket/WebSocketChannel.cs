@@ -8,11 +8,6 @@ namespace SkunkLab.Channels.WebSocket
 {
     public abstract class WebSocketChannel : IChannel
     {
-        //public static WebSocketChannel Create(HttpRequestMessage request, WebSocketConfig config, CancellationToken token)
-        //{
-        //    return new WebSocketServerChannel(request, config, token);
-        //}
-
         public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
 
         public abstract event EventHandler<ChannelErrorEventArgs> OnError;

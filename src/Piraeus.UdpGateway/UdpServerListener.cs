@@ -28,7 +28,6 @@ namespace Piraeus.UdpGateway
 
         private readonly GraphManager graphManager;
 
-        //private readonly OrleansConfig orleansConfig;
         private readonly UdpClient listener;
 
         private readonly IPEndPoint localEP;
@@ -44,7 +43,6 @@ namespace Piraeus.UdpGateway
             this.token = token;
             dict = new Dictionary<string, ProtocolAdapter>();
             this.config = config;
-            //this.orleansConfig = orleansConfig;
             this.logger = logger;
             graphManager = new GraphManager(orleansConfig);
 
@@ -66,7 +64,6 @@ namespace Piraeus.UdpGateway
             this.token = token;
             dict = new Dictionary<string, ProtocolAdapter>();
             this.config = config;
-            //this.orleansConfig = orleansConfig;
             this.logger = logger;
             graphManager = new GraphManager(orleansConfig);
 
@@ -102,7 +99,7 @@ namespace Piraeus.UdpGateway
                             Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(key);
                             if (tuple != null && tuple.Item1 != null)
                             {
-                                cache.Get(CreateNamedKey(tuple.Item1.Channel.Id)); //ensure do not expire sliding
+                                cache.Get(CreateNamedKey(tuple.Item1.Channel.Id));
                                 if (tuple.Item1.Channel.State == ChannelState.Open)
                                 {
                                     await tuple.Item1.Channel.AddMessageAsync(result.Buffer);
@@ -214,7 +211,7 @@ namespace Piraeus.UdpGateway
                 try
                 {
                     string[] parts = args.CacheItem.Key.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2) //channel id
+                    if (parts.Length == 2)
                     {
                         if (cache.Contains((string)args.CacheItem.Value))
                         {

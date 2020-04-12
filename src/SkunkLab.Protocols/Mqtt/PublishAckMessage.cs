@@ -18,8 +18,6 @@
 
         public override bool HasAck => (this.AckType == PublishAckType.PUBREC || this.AckType == PublishAckType.PUBREL);
 
-        //public ushort MessageId { get; set; }
-
         public override byte[] Encode()
         {
             byte ackType = Convert.ToByte((int)this.AckType);
@@ -36,8 +34,8 @@
             byte[] buffer = new byte[4];
             buffer[0] = fixedHeader;
             buffer[1] = remainingLength[0];
-            buffer[2] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
-            buffer[3] = (byte)(this.MessageId & 0x00FF); //LSB
+            buffer[2] = (byte)((this.MessageId >> 8) & 0x00FF);
+            buffer[3] = (byte)(this.MessageId & 0x00FF);
 
             return buffer;
         }
@@ -52,11 +50,11 @@
 
             int remainingLength = base.DecodeRemainingLength(message);
 
-            int temp = remainingLength; //increase the fixed header size
+            int temp = remainingLength;
             do
             {
                 index++;
-                temp = temp / 128;
+                temp /= 128;
             } while (temp > 0);
 
             index++;

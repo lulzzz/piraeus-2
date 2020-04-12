@@ -15,10 +15,15 @@ namespace Orleans.Clustering.Redis
     public class RedisMembershipTable : IMembershipTable
     {
         public static readonly TableVersion _tableVersion = new TableVersion(0, "0");
+
         private readonly string clusterId;
+
         private readonly ConnectionMultiplexer connection;
+
         private readonly IDatabase database;
+
         private readonly ILogger<RedisMembershipTable> logger;
+
         private readonly BinarySerializer serializer;
 
         public RedisMembershipTable(ILogger<RedisMembershipTable> logger, IOptions<RedisClusteringOptions> membershipTableOptions, IOptions<ClusterOptions> clusterOptions)
@@ -67,7 +72,6 @@ namespace Orleans.Clustering.Redis
         public async Task CleanupDefunctSiloEntries(DateTimeOffset beforeDate)
         {
             await Task.CompletedTask;
-            //throw new NotImplementedException();
         }
 
         public async Task DeleteMembershipTableEntries(string clusterId)

@@ -60,34 +60,16 @@ namespace Piraeus.Core.Messaging
 
         public string CacheKey { get; set; }
 
-        /// <summary>
-        /// Gets or sets the content type of the message.
-        /// </summary>
         public string ContentType { get; set; }
 
-        /// <summary>
-        /// Gets or set the event message.
-        /// </summary>
         public byte[] Message { get; set; }
 
-        /// <summary>
-        /// A unique message id for the event message.
-        /// </summary>
         public string MessageId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the protocol that generated the event message.
-        /// </summary>
         public ProtocolType Protocol { get; set; }
 
-        /// <summary>
-        /// Gets or sets the resource to be accessed.
-        /// </summary>
         public string ResourceUri { get; set; }
 
-        /// <summary>
-        /// Gets or sets the timestamp of the event message.
-        /// </summary>
         public DateTime Timestamp { get; set; }
     }
 }

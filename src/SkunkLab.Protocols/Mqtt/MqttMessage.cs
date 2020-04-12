@@ -8,8 +8,11 @@
         #region Fixed Header
 
         public bool Dup { get; set; }
+
         public virtual MqttMessageType MessageType { get; internal set; }
+
         public byte[] Payload { get; set; }
+
         public QualityOfServiceLevelType QualityOfService { get; set; }
 
         protected bool Retain { get; set; }
@@ -131,8 +134,6 @@
 
         internal byte[] EncodeRemainingLength(int remainingLength)
         {
-            //do digit = X MOD 128 X = X DIV 128
-            // if there are more digits to encode, set the top bit of this digit if ( X > 0 ) digit = digit OR 0x80 endif 'output' digit while ( X> 0 )
             List<byte> list = new List<byte>();
             int digit = 0;
             do
@@ -142,7 +143,7 @@
 
                 if (remainingLength > 0)
                 {
-                    digit = digit | 0x80;
+                    digit |= 0x80;
                 }
 
                 list.Add((byte)digit);

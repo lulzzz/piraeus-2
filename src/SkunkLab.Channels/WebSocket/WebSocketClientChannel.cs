@@ -61,16 +61,26 @@ namespace SkunkLab.Channels.WebSocket
         #endregion ctor
 
         private readonly X509Certificate2 certificate;
-        private readonly Uri endpoint;
-        private readonly string securityToken;
-        private readonly string subProtocol;
-        private ChannelState _state;
-        private ClientWebSocket client;
+
         private readonly WebSocketConfig config;
-        private bool disposed;
+
+        private readonly Uri endpoint;
+
         private readonly ConcurrentQueue<byte[]> queue;
+
+        private readonly string securityToken;
+
         private readonly TaskQueue sendQueue;
+
+        private readonly string subProtocol;
+
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private ClientWebSocket client;
+
+        private bool disposed;
 
         public override event EventHandler<ChannelCloseEventArgs> OnClose;
 
@@ -143,8 +153,6 @@ namespace SkunkLab.Channels.WebSocket
             {
                 sendQueue.Enqueue(() => client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal", token));
 
-                //Task task =  client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal", token);
-                //Task.WaitAll(task);
                 client.Dispose();
             }
 

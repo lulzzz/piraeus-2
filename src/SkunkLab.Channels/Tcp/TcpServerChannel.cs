@@ -59,18 +59,31 @@ namespace SkunkLab.Channels.Tcp
         #region private member variables
 
         private readonly X509Certificate2 certificate;
+
         private readonly bool clientAuth;
+
         private readonly int maxBufferSize;
+
         private readonly TlsPskIdentityManager pskManager;
-        private ChannelState _state;
-        private TcpClient client;
-        private bool disposed;
-        private NetworkStream localStream;
-        private TlsServerProtocol protocol;
+
         private readonly Queue<byte[]> queue;
-        private SemaphoreSlim readConnection;
-        private Stream stream;
+
         private readonly CancellationToken token;
+
+        private ChannelState _state;
+
+        private TcpClient client;
+
+        private bool disposed;
+
+        private NetworkStream localStream;
+
+        private TlsServerProtocol protocol;
+
+        private SemaphoreSlim readConnection;
+
+        private Stream stream;
+
         private SemaphoreSlim writeConnection;
 
         #endregion private member variables
@@ -253,7 +266,7 @@ namespace SkunkLab.Channels.Tcp
                 {
                     await readConnection.WaitAsync();
 
-                    while (offset < 4) //read the prefix to discover the length of the message (big endian)
+                    while (offset < 4)
                     {
                         if (offset == 0)
                         {
@@ -262,13 +275,11 @@ namespace SkunkLab.Channels.Tcp
                         bytesRead = await stream.ReadAsync(prefix, offset, prefix.Length - offset);
                         if (bytesRead == 0)
                         {
-                            //await CloseAsync();
                             return;
                         }
                         offset += bytesRead;
                     }
 
-                    //ensure the length prefix is ordered correctly to calc the remaining length
                     prefix = BitConverter.IsLittleEndian ? prefix.Reverse().ToArray() : prefix;
                     remainingLength = BitConverter.ToInt32(prefix, 0);
 
@@ -281,7 +292,6 @@ namespace SkunkLab.Channels.Tcp
 
                     byte[] message = new byte[remainingLength];
 
-                    //loop through the messages to ensure they are pieced together based on the prefix length
                     while (remainingLength > 0)
                     {
                         buffer = new byte[remainingLength];
@@ -372,8 +382,6 @@ namespace SkunkLab.Channels.Tcp
                     try
                     {
                         CloseAsync().GetAwaiter();
-                        //Task task = CloseAsync();
-                        //Task.WaitAll(task);
                     }
                     catch (Exception ex)
                     {
