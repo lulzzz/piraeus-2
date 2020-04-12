@@ -17,7 +17,6 @@ namespace Piraeus.Core
                     Trace.TraceError(exception.Message);
                     Console.WriteLine(exception.Message);
                 }
-
             },
             TaskContinuationOptions.OnlyOnFaulted);
         }
@@ -31,7 +30,6 @@ namespace Piraeus.Core
                 {
                     log?.LogErrorAsync(exception, exception.Message);
                 }
-
             },
             TaskContinuationOptions.OnlyOnFaulted);
         }

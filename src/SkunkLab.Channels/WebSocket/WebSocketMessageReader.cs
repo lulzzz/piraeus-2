@@ -1,8 +1,5 @@
-﻿
-
-namespace SkunkLab.Channels.WebSocket
+﻿namespace SkunkLab.Channels.WebSocket
 {
-
     using System;
     using System.Net.WebSockets;
     using System.Text;
@@ -11,16 +8,6 @@ namespace SkunkLab.Channels.WebSocket
 
     internal static class WebSocketMessageReader
     {
-        private static byte[] BufferSliceToByteArray(byte[] buffer, int count)
-        {
-            byte[] dst = new byte[count];
-            System.Buffer.BlockCopy(buffer, 0, dst, 0, count);
-            return dst;
-        }
-
-        private static string BufferSliceToString(byte[] buffer, int count) =>
-            Encoding.UTF8.GetString(buffer, 0, count);
-
         public static async Task<WebSocketMessage> ReadMessageAsync(WebSocket webSocket, byte[] buffer, int maxMessageSize, CancellationToken token)
         {
             WebSocketMessage message;
@@ -71,6 +58,17 @@ namespace SkunkLab.Channels.WebSocket
             }
             return message;
         }
-    }
 
+        private static byte[] BufferSliceToByteArray(byte[] buffer, int count)
+        {
+            byte[] dst = new byte[count];
+            System.Buffer.BlockCopy(buffer, 0, dst, 0, count);
+            return dst;
+        }
+
+        private static string BufferSliceToString(byte[] buffer, int count)
+        {
+            return Encoding.UTF8.GetString(buffer, 0, count);
+        }
+    }
 }

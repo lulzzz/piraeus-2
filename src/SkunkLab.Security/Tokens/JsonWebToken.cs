@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Security.Tokens
+﻿namespace SkunkLab.Security.Tokens
 {
     using Microsoft.IdentityModel.Tokens;
     using System;
@@ -12,11 +11,11 @@ namespace SkunkLab.Security.Tokens
 
     public class JsonWebToken : Microsoft.IdentityModel.Tokens.SecurityToken
     {
-        private string issuer;
-        private DateTime created;
-        private DateTime expires;
-        private string tokenString;
-        private string id;
+        private readonly DateTime created;
+        private readonly DateTime expires;
+        private readonly string id;
+        private readonly string issuer;
+        private readonly string tokenString;
 
         public JsonWebToken(string securityKey, IEnumerable<Claim> claims, double? lifetimeMinutes, string issuer = null, string audience = null)
         {
@@ -86,51 +85,21 @@ namespace SkunkLab.Security.Tokens
                 SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(SigningKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
             };
 
-
             JwtSecurityToken jwtToken = jwt.CreateJwtSecurityToken(msstd);
             tokenString = jwt.WriteToken(jwtToken);
         }
 
-        public override string Id
-        {
-            get { return this.id; }
-        }
+        public override string Id => this.id;
 
+        public override string Issuer => this.issuer;
 
-
-        public override DateTime ValidFrom
-        {
-            get { return created; }
-        }
-
-        public override DateTime ValidTo
-        {
-            get { return expires; }
-        }
-
-        public override string Issuer
-        {
-            get { return this.issuer; }
-        }
-
-
-        public override SecurityKey SecurityKey
-        {
-            get { return null; }
-        }
+        public override SecurityKey SecurityKey => null;
 
         public override SecurityKey SigningKey { get; set; }
 
+        public override DateTime ValidFrom => created;
 
-        public override string ToString()
-        {
-            return tokenString;
-        }
-
-        public void SetSecurityToken(HttpWebRequest request)
-        {
-            request.Headers.Add("Authorization", String.Format("Bearer {0}", tokenString));
-        }
+        public override DateTime ValidTo => expires;
 
         public static void Authenticate(string token, string issuer, string audience, string signingKey)
         {
@@ -148,10 +117,8 @@ namespace SkunkLab.Security.Tokens
                     ValidateIssuerSigningKey = true
                 };
 
-                Microsoft.IdentityModel.Tokens.SecurityToken stoken = null;
 
-                Thread.CurrentPrincipal = tokenHandler.ValidateToken(token, validationParameters, out stoken);
-
+                Thread.CurrentPrincipal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken stoken);
             }
             catch (Microsoft.IdentityModel.Tokens.SecurityTokenValidationException e)
             {
@@ -165,5 +132,14 @@ namespace SkunkLab.Security.Tokens
             }
         }
 
+        public void SetSecurityToken(HttpWebRequest request)
+        {
+            request.Headers.Add("Authorization", string.Format("Bearer {0}", tokenString));
+        }
+
+        public override string ToString()
+        {
+            return tokenString;
+        }
     }
 }

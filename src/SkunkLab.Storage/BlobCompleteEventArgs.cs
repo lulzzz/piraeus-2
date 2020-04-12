@@ -12,12 +12,10 @@ namespace SkunkLab.Storage
             Error = error;
         }
 
+        public bool Cancelled { get; internal set; }
         public string ContainerName { get; internal set; }
 
-        public string Filename { get; internal set; }
-
-        public bool Cancelled { get; internal set; }
-
         public Exception Error { get; internal set; }
+        public string Filename { get; internal set; }
     }
 }

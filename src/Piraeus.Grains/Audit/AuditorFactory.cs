@@ -6,7 +6,6 @@
 //{
 //    public class AuditorFactory : IAuditorFactory
 //    {
-
 //        public static IAuditorFactory Create()
 //        {
 //            if(instance == null)

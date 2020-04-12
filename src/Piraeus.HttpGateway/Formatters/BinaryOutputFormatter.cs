@@ -15,7 +15,7 @@ namespace Piraeus.HttpGateway.Formatters
 
         public override bool CanWriteResult(OutputFormatterCanWriteContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
 
             return context.HttpContext.Request.ContentType == CONTENT_TYPE;
         }
@@ -25,12 +25,9 @@ namespace Piraeus.HttpGateway.Formatters
             return base.WriteAsync(context);
         }
 
-
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             await Task.CompletedTask;
         }
-
-        
     }
 }

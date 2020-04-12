@@ -13,6 +13,8 @@ namespace SkunkLab.Storage
 {
     public class FileStorage
     {
+        private readonly CloudFileClient client;
+
         public FileStorage(string connectionString)
         {
             CloudStorageAccount account = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(connectionString);
@@ -23,340 +25,20 @@ namespace SkunkLab.Storage
             client.DefaultRequestOptions.MaximumExecutionTime = TimeSpan.FromMinutes(10.0);
         }
 
-        public event System.EventHandler<BytesTransferredEventArgs> OnUploadBytesTransferred;
-        public event System.EventHandler<BlobCompleteEventArgs> OnUploadCompleted;
         public event System.EventHandler<BytesTransferredEventArgs> OnDownloadBytesTransferred;
+
         public event System.EventHandler<BlobCompleteEventArgs> OnDownloadCompleted;
 
-        private CloudFileClient client;
+        public event System.EventHandler<BytesTransferredEventArgs> OnUploadBytesTransferred;
 
-        public async Task WriteFileAsync(string share, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
-        {
-            if (string.IsNullOrEmpty(share))
-            {
-                throw new ArgumentNullException("share");
-            }
-
-            if (string.IsNullOrEmpty("filename"))
-            {
-                throw new ArgumentNullException("filename");
-            }
-
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
-
-            Exception error = null;
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            double time = watch.Elapsed.TotalMilliseconds;
-            long bytesTransferred = 0;
-
-            IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
-                     progress =>
-                     {
-                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
-                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
-                         {
-                             OnUploadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, source.Length));
-                         }
-                     });
-
-            try
-            {
-                CloudFileShare choudShare = client.GetShareReference(share);
-                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
-                CloudFile file = dir.GetFileReference(filename);
-                file.Properties.ContentType = contentType;
-                await file.UploadFromByteArrayAsync(source, 0, source.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), null, token);
-            }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is TaskCanceledException)
-                {
-                    source = null;
-                }
-                else
-                {
-                    error = ex;
-                    throw ex;
-                }
-            }
-            finally
-            {
-                watch.Stop();
-                OnUploadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
-            }
-        }
-
-        public async Task WriteFileAsync(string share, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
-        {
-            if (string.IsNullOrEmpty(share))
-            {
-                throw new ArgumentNullException("share");
-            }
-
-            if (string.IsNullOrEmpty("filename"))
-            {
-                throw new ArgumentNullException("filename");
-            }
-
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
-
-            Exception error = null;
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            double time = watch.Elapsed.TotalMilliseconds;
-            long bytesTransferred = 0;
-
-            IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
-                     progress =>
-                     {
-                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
-                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
-                         {
-                             OnUploadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, source.Length));
-                         }
-                     });
-
-            try
-            {
-                CloudFileShare choudShare = client.GetShareReference(share);
-                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
-                CloudFile file = dir.GetFileReference(filename);
-                file.Properties.ContentType = contentType;
-                await file.UploadFromStreamAsync(source, source.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
-            }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is TaskCanceledException)
-                {
-                    source = null;
-                }
-                else
-                {
-                    error = ex;
-                    throw ex;
-                }
-            }
-            finally
-            {
-                watch.Stop();
-                OnUploadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
-            }
-        }
-
-        public async Task<byte[]> ReadFileAsync(string share, string filename, CancellationToken token = default(CancellationToken))
-        {
-            if (string.IsNullOrEmpty(share))
-            {
-                throw new ArgumentNullException("share");
-            }
-
-            if (string.IsNullOrEmpty("filename"))
-            {
-                throw new ArgumentNullException("filename");
-            }
-
-            Exception error = null;
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            double time = watch.Elapsed.TotalMilliseconds;
-            long bytesTransferred = 0;
-
-
-
-            byte[] buffer = null;
-
-            try
-            {
-                CloudFileShare choudShare = client.GetShareReference(share);
-                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
-                CloudFile file = dir.GetFileReference(filename);
-                long length = file.Properties.Length;
-                buffer = new byte[length];
-                IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
-                     progress =>
-                     {
-                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
-                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
-                         {
-                             OnDownloadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, buffer.Length));
-                         }
-                     });
-
-                await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
-            }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is TaskCanceledException)
-                {
-                    buffer = null;
-                }
-                else
-                {
-                    error = ex;
-                    throw ex;
-                }
-            }
-            finally
-            {
-                watch.Stop();
-                OnDownloadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
-            }
-
-            return buffer;
-        }
-
-        public async Task<Stream> ReadFileAsync(string share, string filename, Stream stream, CancellationToken token = default(CancellationToken))
-        {
-
-            if (string.IsNullOrEmpty(share))
-            {
-                throw new ArgumentNullException("share");
-            }
-
-            if (string.IsNullOrEmpty("filename"))
-            {
-                throw new ArgumentNullException("filename");
-            }
-
-            if (stream == null)
-            {
-                throw new ArgumentNullException("stream");
-            }
-
-            Exception error = null;
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            double time = watch.Elapsed.TotalMilliseconds;
-            long bytesTransferred = 0;
-
-
-
-
-
-            try
-            {
-                CloudFileShare choudShare = client.GetShareReference(share);
-                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
-                CloudFile file = dir.GetFileReference(filename);
-
-                IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
-                     progress =>
-                     {
-                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
-                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
-                         {
-                             OnDownloadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, file.Properties.Length));
-                         }
-                     });
-
-                await file.DownloadToStreamAsync(stream, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
-            }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is TaskCanceledException)
-                {
-                    stream = null;
-                }
-                else
-                {
-                    error = ex;
-                    throw ex;
-                }
-            }
-            finally
-            {
-                watch.Stop();
-                OnDownloadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
-            }
-
-            return stream;
-        }
-
-        public async Task UploadFileAsync(string path, string share, string filename, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            if (string.IsNullOrEmpty(share))
-            {
-                throw new ArgumentNullException("share");
-            }
-
-            if (string.IsNullOrEmpty("filename"))
-            {
-                throw new ArgumentNullException("filename");
-            }
-
-            if (!File.Exists(path))
-            {
-                throw new FileNotFoundException("path");
-            }
-
-            Exception error = null;
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            double time = watch.Elapsed.TotalMilliseconds;
-            long bytesTransferred = 0;
-
-            IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
-                     progress =>
-                     {
-                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
-                         FileInfo info = new FileInfo(path);
-                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
-                         {
-                             OnUploadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, info.Length));
-                         }
-                     });
-
-            try
-            {
-                CloudFileShare choudShare = client.GetShareReference(share);
-                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
-                CloudFile file = dir.GetFileReference(filename);
-                file.Properties.ContentType = contentType;
-                await file.UploadFromFileAsync(path, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.InnerException is TaskCanceledException))
-                {
-                    error = ex;
-                    throw ex;
-                }
-            }
-            finally
-            {
-                watch.Stop();
-                OnUploadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
-            }
-        }
+        public event System.EventHandler<BlobCompleteEventArgs> OnUploadCompleted;
 
         public async Task<byte[]> DownloadFileAsync(string path, string share, string filename, CancellationToken token = default(CancellationToken))
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException("path");
-            }
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            _ = share ?? throw new ArgumentNullException(nameof(share));
+            _ = filename ?? throw new ArgumentNullException(nameof(filename));
 
-            if (string.IsNullOrEmpty(share))
-            {
-                throw new ArgumentNullException("share");
-            }
-
-            if (string.IsNullOrEmpty("filename"))
-            {
-                throw new ArgumentNullException("filename");
-            }
 
             Exception error = null;
             Stopwatch watch = new Stopwatch();
@@ -404,7 +86,259 @@ namespace SkunkLab.Storage
             }
 
             return buffer;
+        }
 
+        public async Task<byte[]> ReadFileAsync(string share, string filename, CancellationToken token = default(CancellationToken))
+        {
+            _ = share ?? throw new ArgumentNullException(nameof(share));
+            _ = filename ?? throw new ArgumentNullException(nameof(filename));
+
+            Exception error = null;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            double time = watch.Elapsed.TotalMilliseconds;
+            long bytesTransferred = 0;
+
+            byte[] buffer = null;
+
+            try
+            {
+                CloudFileShare choudShare = client.GetShareReference(share);
+                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
+                CloudFile file = dir.GetFileReference(filename);
+                long length = file.Properties.Length;
+                buffer = new byte[length];
+                IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
+                     progress =>
+                     {
+                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
+                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
+                         {
+                             OnDownloadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, buffer.Length));
+                         }
+                     });
+
+                await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
+                    buffer = null;
+                }
+                else
+                {
+                    error = ex;
+                    throw ex;
+                }
+            }
+            finally
+            {
+                watch.Stop();
+                OnDownloadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
+            }
+
+            return buffer;
+        }
+
+        public async Task<Stream> ReadFileAsync(string share, string filename, Stream stream, CancellationToken token = default(CancellationToken))
+        {
+            _ = share ?? throw new ArgumentNullException(nameof(share));
+            _ = filename ?? throw new ArgumentNullException(nameof(filename));
+            _ = stream ?? throw new ArgumentNullException(nameof(stream));
+
+            Exception error = null;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            double time = watch.Elapsed.TotalMilliseconds;
+            long bytesTransferred = 0;
+
+            try
+            {
+                CloudFileShare choudShare = client.GetShareReference(share);
+                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
+                CloudFile file = dir.GetFileReference(filename);
+
+                IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
+                     progress =>
+                     {
+                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
+                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
+                         {
+                             OnDownloadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, file.Properties.Length));
+                         }
+                     });
+
+                await file.DownloadToStreamAsync(stream, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
+                    stream = null;
+                }
+                else
+                {
+                    error = ex;
+                    throw ex;
+                }
+            }
+            finally
+            {
+                watch.Stop();
+                OnDownloadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
+            }
+
+            return stream;
+        }
+
+        public async Task UploadFileAsync(string path, string share, string filename, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            _ = share ?? throw new ArgumentNullException(nameof(share));
+            _ = filename ?? throw new ArgumentNullException(nameof(filename));
+
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("path");
+            }
+
+            Exception error = null;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            double time = watch.Elapsed.TotalMilliseconds;
+            long bytesTransferred = 0;
+
+            IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
+                     progress =>
+                     {
+                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
+                         FileInfo info = new FileInfo(path);
+                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
+                         {
+                             OnUploadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, info.Length));
+                         }
+                     });
+
+            try
+            {
+                CloudFileShare choudShare = client.GetShareReference(share);
+                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
+                CloudFile file = dir.GetFileReference(filename);
+                file.Properties.ContentType = contentType;
+                await file.UploadFromFileAsync(path, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.InnerException is TaskCanceledException))
+                {
+                    error = ex;
+                    throw ex;
+                }
+            }
+            finally
+            {
+                watch.Stop();
+                OnUploadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
+            }
+        }
+
+        public async Task WriteFileAsync(string share, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        {
+            _ = share ?? throw new ArgumentNullException(nameof(share));
+            _ = filename ?? throw new ArgumentNullException(nameof(filename));
+            _ = source ?? throw new ArgumentNullException(nameof(source));
+
+            Exception error = null;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            double time = watch.Elapsed.TotalMilliseconds;
+            long bytesTransferred = 0;
+
+            IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
+                     progress =>
+                     {
+                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
+                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
+                         {
+                             OnUploadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, source.Length));
+                         }
+                     });
+
+            try
+            {
+                CloudFileShare choudShare = client.GetShareReference(share);
+                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
+                CloudFile file = dir.GetFileReference(filename);
+                file.Properties.ContentType = contentType;
+                await file.UploadFromByteArrayAsync(source, 0, source.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), null, token);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
+                    source = null;
+                }
+                else
+                {
+                    error = ex;
+                    throw ex;
+                }
+            }
+            finally
+            {
+                watch.Stop();
+                OnUploadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
+            }
+        }
+
+        public async Task WriteFileAsync(string share, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default(CancellationToken))
+        {
+            _ = share ?? throw new ArgumentNullException(nameof(share));
+            _ = filename ?? throw new ArgumentNullException(nameof(filename));
+            _ = source ?? throw new ArgumentNullException(nameof(source));
+
+            Exception error = null;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            double time = watch.Elapsed.TotalMilliseconds;
+            long bytesTransferred = 0;
+
+            IProgress<StorageProgress> progressHandler = new Progress<StorageProgress>(
+                     progress =>
+                     {
+                         bytesTransferred = bytesTransferred < progress.BytesTransferred ? progress.BytesTransferred : bytesTransferred;
+                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 && bytesTransferred <= progress.BytesTransferred)
+                         {
+                             OnUploadBytesTransferred?.Invoke(this, new BytesTransferredEventArgs(share, filename, bytesTransferred, source.Length));
+                         }
+                     });
+
+            try
+            {
+                CloudFileShare choudShare = client.GetShareReference(share);
+                CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
+                CloudFile file = dir.GetFileReference(filename);
+                file.Properties.ContentType = contentType;
+                await file.UploadFromStreamAsync(source, source.Length, default(AccessCondition), default(FileRequestOptions), default(OperationContext), progressHandler, token);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
+                    source = null;
+                }
+                else
+                {
+                    error = ex;
+                    throw ex;
+                }
+            }
+            finally
+            {
+                watch.Stop();
+                OnUploadCompleted?.Invoke(this, new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
+            }
         }
     }
 }

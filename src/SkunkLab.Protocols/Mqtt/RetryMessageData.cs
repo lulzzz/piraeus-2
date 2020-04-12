@@ -13,15 +13,11 @@ namespace SkunkLab.Protocols.Mqtt
             Direction = direction;
         }
 
-
-
+        public int AttemptCount { get; set; }
+        public DirectionType Direction { get; set; }
         public MqttMessage Message { get; set; }
 
         public DateTime NextRetryTime { get; set; }
-
-        public int AttemptCount { get; set; }
-
-        public DirectionType Direction { get; set; }
 
         public void Increment(TimeSpan ackTimeout)
         {
@@ -29,6 +25,5 @@ namespace SkunkLab.Protocols.Mqtt
             double nextTimeoutDuration = Math.Pow(2.0, Convert.ToDouble(AttemptCount)) * ackTimeout.TotalMilliseconds;
             NextRetryTime.Add(TimeSpan.FromMilliseconds(nextTimeoutDuration));
         }
-
     }
 }

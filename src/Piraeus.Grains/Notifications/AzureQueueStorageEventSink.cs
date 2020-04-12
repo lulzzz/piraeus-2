@@ -15,12 +15,12 @@ namespace Piraeus.Grains.Notifications
 {
     public class AzureQueueStorageSink : EventSink
     {
-        private QueueStorage storage;
-        private string queue;
-        private TimeSpan? ttl;
-        private Uri uri;
-        private IAuditor auditor;
-        private ConcurrentQueue<EventMessage> loadQueue;
+        private readonly IAuditor auditor;
+        private readonly ConcurrentQueue<EventMessage> loadQueue;
+        private readonly string queue;
+        private readonly QueueStorage storage;
+        private readonly TimeSpan? ttl;
+        private readonly Uri uri;
 
         public AzureQueueStorageSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -33,28 +33,23 @@ namespace Piraeus.Grains.Notifications
             queue = nvc["queue"];
 
             string ttlString = nvc["ttl"];
-            if (!String.IsNullOrEmpty(ttlString))
+            if (!string.IsNullOrEmpty(ttlString))
             {
                 ttl = TimeSpan.Parse(ttlString);
             }
 
-
-            Uri sasUri = null;
-            Uri.TryCreate(metadata.SymmetricKey, UriKind.Absolute, out sasUri);
+            Uri.TryCreate(metadata.SymmetricKey, UriKind.Absolute, out Uri sasUri);
 
             if (sasUri == null)
             {
-                storage = QueueStorage.New(String.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};", uri.Authority.Split(new char[] { '.' })[0], metadata.SymmetricKey), 10000, 1000);
+                storage = QueueStorage.New(string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};", uri.Authority.Split(new char[] { '.' })[0], metadata.SymmetricKey), 10000, 1000);
             }
             else
             {
-                string connectionString = String.Format("BlobEndpoint={0};SharedAccessSignature={1}", queue, metadata.SymmetricKey);
+                string connectionString = string.Format("BlobEndpoint={0};SharedAccessSignature={1}", queue, metadata.SymmetricKey);
                 storage = QueueStorage.New(connectionString, 1000, 5120000);
             }
         }
-
-
-
 
         public override async Task SendAsync(EventMessage message)
         {
@@ -107,13 +102,17 @@ namespace Piraeus.Grains.Notifications
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
+
                 case ProtocolType.MQTT:
                     MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                     return mqtt.Payload;
+
                 case ProtocolType.REST:
                     return message.Message;
+
                 case ProtocolType.WSN:
                     return message.Message;
+
                 default:
                     return null;
             }

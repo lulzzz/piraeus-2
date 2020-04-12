@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     public class PingRequestMessage : MqttMessage
     {
@@ -7,21 +6,17 @@ namespace SkunkLab.Protocols.Mqtt
         {
         }
 
-
-        public override bool HasAck
-        {
-            get { return true; }
-        }
+        public override bool HasAck => true;
 
         public override byte[] Encode()
         {
             int index = 0;
             byte[] buffer = new byte[2];
 
-            buffer[index++] = (byte)((0x0C << Constants.Header.MessageTypeOffset) |
-                   (byte)(0x00) |
-                   (byte)(0x00) |
-                   (byte)(0x00));
+            buffer[index++] = (0x0C << Constants.Header.MessageTypeOffset) |
+                   0x00 |
+                   0x00 |
+                   0x00;
 
             buffer[index] = 0x00;
 
@@ -43,7 +38,6 @@ namespace SkunkLab.Protocols.Mqtt
             }
 
             return ping;
-
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -24,19 +24,12 @@ namespace Capl.Authorization.Transforms
         {
         }
 
-
-        public static Uri TransformUri
-        {
-            get { return new Uri(AuthorizationConstants.TransformUris.Add); }
-        }
+        public static Uri TransformUri => new Uri(AuthorizationConstants.TransformUris.Add);
 
         /// <summary>
         /// Gets the URI that identifies the add transform action.
         /// </summary>
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.TransformUris.Add); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.TransformUris.Add);
 
         /// <summary>
         /// Executes the add transform action.
@@ -47,20 +40,9 @@ namespace Capl.Authorization.Transforms
         /// <returns>A transformed set of claims.</returns>
         public override IEnumerable<Claim> Execute(IEnumerable<Claim> claims, IList<Claim> matchedClaims, LiteralClaim targetClaim)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
-
-            if (targetClaim == null)
-            {
-                throw new ArgumentNullException("targetClaim");
-            }
-
-            if (matchedClaims != null)
-            {
-                throw new ArgumentException("The expected value of matchedClaims must be null.");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
+            _ = matchedClaims ?? throw new ArgumentNullException(nameof(matchedClaims));
+            _ = targetClaim ?? throw new ArgumentNullException(nameof(targetClaim));
 
             List<Claim> claimList = new List<Claim>(claims);
 
@@ -68,7 +50,6 @@ namespace Capl.Authorization.Transforms
             claimList.Add(claim);
 
             return claimList.ToArray();
-
         }
     }
 }

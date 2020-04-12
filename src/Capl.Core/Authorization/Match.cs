@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -18,19 +18,16 @@ namespace Capl.Authorization
     {
         public Match()
         {
-
         }
 
         public Match(Uri matchExpressionUri, string claimType)
             : this(matchExpressionUri, claimType, true, null)
         {
-
         }
 
         public Match(Uri matchExpressionUri, string claimType, bool required)
             : this(matchExpressionUri, claimType, required, null)
         {
-
         }
 
         public Match(Uri matchExpressionUri, string claimType, bool required, string value)
@@ -40,10 +37,6 @@ namespace Capl.Authorization
             Required = required;
             Value = value;
         }
-        /// <summary>
-        /// Gets or set the type of match expression
-        /// </summary>
-        public Uri Type { get; set; }
 
         /// <summary>
         /// Gets or sets a value for a claim type.
@@ -51,15 +44,19 @@ namespace Capl.Authorization
         public string ClaimType { get; set; }
 
         /// <summary>
-        /// Gets or sets a value for claim.
-        /// </summary>
-        public string Value { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether matching is required for evaluation.
         /// </summary>
         public bool Required { get; set; }
 
+        /// <summary>
+        /// Gets or set the type of match expression
+        /// </summary>
+        public Uri Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value for claim.
+        /// </summary>
+        public string Value { get; set; }
 
         public static Match Load(XmlReader reader)
         {
@@ -75,10 +72,7 @@ namespace Capl.Authorization
 
         public void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Match);
             this.ClaimType = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.ClaimType);
@@ -98,17 +92,13 @@ namespace Capl.Authorization
 
             if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Match))
             {
-                throw new SerializationException(String.Format("Unexpected element {0}", reader.LocalName));
+                throw new SerializationException(string.Format("Unexpected element {0}", reader.LocalName));
             }
-
         }
 
         public void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(AuthorizationConstants.Elements.Match, AuthorizationConstants.Namespaces.Xmlns);
 

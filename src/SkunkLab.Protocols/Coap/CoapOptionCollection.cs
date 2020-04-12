@@ -1,12 +1,13 @@
-﻿
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Collections.Generic;
     using System.Text;
+
     public class CoapOptionCollection : IList<CoapOption>
     {
+        private readonly List<CoapOption> list;
+
         public CoapOptionCollection()
         {
             list = new List<CoapOption>();
@@ -17,33 +18,14 @@ namespace SkunkLab.Protocols.Coap
             list = new List<CoapOption>(options);
         }
 
+        public int Count => list.Count;
 
-        private List<CoapOption> list;
-        public int IndexOf(CoapOption item)
-        {
-            return list.IndexOf(item);
-        }
-
-        public void Insert(int index, CoapOption item)
-        {
-            list.Insert(index, item);
-        }
-
-        public void RemoveAt(int index)
-        {
-            list.RemoveAt(index);
-        }
+        public bool IsReadOnly => false;
 
         public CoapOption this[int index]
         {
-            get
-            {
-                return list[index];
-            }
-            set
-            {
-                list[index] = value;
-            }
+            get => list[index];
+            set => list[index] = value;
         }
 
         public void Add(CoapOption item)
@@ -61,36 +43,6 @@ namespace SkunkLab.Protocols.Coap
             return list.Contains(item);
         }
 
-        public void CopyTo(CoapOption[] array, int arrayIndex)
-        {
-            list.CopyTo(array, arrayIndex);
-        }
-
-        public int Count
-        {
-            get { return list.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
-        public bool Remove(CoapOption item)
-        {
-            return list.Remove(item);
-        }
-
-        public IEnumerator<CoapOption> GetEnumerator()
-        {
-            return list.GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return list.GetEnumerator();
-        }
-
         public bool ContainsContentFormat()
         {
             foreach (CoapOption item in this.list)
@@ -102,6 +54,11 @@ namespace SkunkLab.Protocols.Coap
             }
 
             return false;
+        }
+
+        public void CopyTo(CoapOption[] array, int arrayIndex)
+        {
+            list.CopyTo(array, arrayIndex);
         }
 
         public string GetContainFormat()
@@ -117,13 +74,56 @@ namespace SkunkLab.Protocols.Coap
             return null;
         }
 
+        public IEnumerator<CoapOption> GetEnumerator()
+        {
+            return list.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return list.GetEnumerator();
+        }
+
+        public object GetOptionValue(OptionType type)
+        {
+            foreach (CoapOption op in this.list)
+            {
+                if (op.Type == type)
+                {
+                    return op.Value;
+                }
+            }
+
+            return null;
+        }
+
+        public object[] GetOptionValues(OptionType type)
+        {
+            List<object> options = new List<object>();
+
+            foreach (CoapOption op in this.list)
+            {
+                if (op.Type == type)
+                {
+                    options.Add(op.Value);
+                }
+            }
+
+            if (options.Count > 0)
+            {
+                return options.ToArray();
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         public Uri GetResourceUri()
         {
             UriBuilder builder = new UriBuilder();
             StringBuilder pathBuilder = new StringBuilder();
             StringBuilder queryBuilder = new StringBuilder();
-
 
             foreach (CoapOption item in this.list)
             {
@@ -167,41 +167,24 @@ namespace SkunkLab.Protocols.Coap
             return builder.Scheme == "http" ? null : builder.Uri;
         }
 
-
-
-        public object GetOptionValue(OptionType type)
+        public int IndexOf(CoapOption item)
         {
-            foreach (CoapOption op in this.list)
-            {
-                if (op.Type == type)
-                {
-                    return op.Value;
-                }
-            }
-
-            return null;
+            return list.IndexOf(item);
         }
 
-        public object[] GetOptionValues(OptionType type)
+        public void Insert(int index, CoapOption item)
         {
-            List<object> options = new List<object>();
+            list.Insert(index, item);
+        }
 
-            foreach (CoapOption op in this.list)
-            {
-                if (op.Type == type)
-                {
-                    options.Add(op.Value);
-                }
-            }
+        public bool Remove(CoapOption item)
+        {
+            return list.Remove(item);
+        }
 
-            if (options.Count > 0)
-            {
-                return options.ToArray();
-            }
-            else
-            {
-                return null;
-            }
+        public void RemoveAt(int index)
+        {
+            list.RemoveAt(index);
         }
     }
 }

@@ -7,7 +7,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public CoapRstHandler(CoapSession session, CoapMessage message)
             : base(session, message, null)
         {
-
         }
 
         public override async Task<CoapMessage> ProcessAsync()

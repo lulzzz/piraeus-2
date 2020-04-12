@@ -4,13 +4,15 @@ namespace SkunkLab.Protocols.Coap
 {
     public class IdManager
     {
+        private readonly HashSet<ushort> container;
+
+        private ushort currentId;
+
         public IdManager()
         {
             container = new HashSet<ushort>();
         }
 
-        private HashSet<ushort> container;
-        private ushort currentId;
         private ushort NewId()
         {
             currentId++;

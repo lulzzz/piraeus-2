@@ -17,6 +17,24 @@ namespace Piraeus.TcpGateway
 {
     public class TcpServerListener
     {
+        private readonly IAuthenticator authn;
+
+        private readonly PiraeusConfig config;
+
+        private readonly Dictionary<string, ProtocolAdapter> dict;
+
+        private readonly TcpListener listener;
+
+        private readonly ILog logger;
+
+        private readonly OrleansConfig orleansConfig;
+
+        private readonly IPAddress serverIP;
+
+        private readonly int serverPort;
+
+        private readonly CancellationToken token;
+
         public TcpServerListener(IPEndPoint localEP, PiraeusConfig config, OrleansConfig orleansConfig, ILog logger = null, CancellationToken token = default)
         {
             serverIP = localEP.Address;
@@ -51,7 +69,6 @@ namespace Piraeus.TcpGateway
             this.orleansConfig = orleansConfig;
             this.logger = logger;
 
-
             if (config.ClientTokenType != null && config.ClientSymmetricKey != null)
             {
                 SecurityTokenType stt = (SecurityTokenType)System.Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
@@ -62,15 +79,6 @@ namespace Piraeus.TcpGateway
         }
 
         public event EventHandler<ServerFailedEventArgs> OnError;
-        private readonly IPAddress serverIP;
-        private readonly int serverPort;
-        private readonly TcpListener listener;
-        private readonly CancellationToken token;
-        private readonly Dictionary<string, ProtocolAdapter> dict;
-        private readonly PiraeusConfig config;
-        private readonly IAuthenticator authn;
-        private readonly ILog logger;
-        private readonly OrleansConfig orleansConfig;
 
         public async Task StartAsync()
         {
@@ -120,7 +128,6 @@ namespace Piraeus.TcpGateway
                                 {
                                     adapter.Dispose();
                                     await logger.LogWarningAsync($"TCP Listener stopping and dispose Protcol adapter {key}");
-
                                 }
                                 catch (Exception ex)
                                 {
@@ -141,18 +148,6 @@ namespace Piraeus.TcpGateway
             }
 
             listener.Stop();
-        }
-
-        private void ManageConnection(TcpClient client)
-        {
-            GraphManager graphManager = new GraphManager(orleansConfig);
-            ProtocolAdapter adapter = ProtocolAdapterFactory.Create(config, graphManager, authn, client, logger, token);
-            dict.Add(adapter.Channel.Id, adapter);
-            adapter.OnError += Adapter_OnError;
-            adapter.OnClose += Adapter_OnClose;
-            adapter.Init();
-            adapter.Channel.OpenAsync().LogExceptions(logger);
-            adapter.Channel.ReceiveAsync().LogExceptions(logger);
         }
 
         private async void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs args)
@@ -189,6 +184,18 @@ namespace Piraeus.TcpGateway
             {
                 await logger.LogErrorAsync(ex, "Adapter disposing");
             }
+        }
+
+        private void ManageConnection(TcpClient client)
+        {
+            GraphManager graphManager = new GraphManager(orleansConfig);
+            ProtocolAdapter adapter = ProtocolAdapterFactory.Create(config, graphManager, authn, client, logger, token);
+            dict.Add(adapter.Channel.Id, adapter);
+            adapter.OnError += Adapter_OnError;
+            adapter.OnClose += Adapter_OnClose;
+            adapter.Init();
+            adapter.Channel.OpenAsync().LogExceptions(logger);
+            adapter.Channel.ReceiveAsync().LogExceptions(logger);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿
-
-//using SkunkLab.Storage;
+﻿//using SkunkLab.Storage;
 //using System;
 //using System.Diagnostics;
 //using System.Threading.Tasks;
@@ -11,9 +9,8 @@
 //    {
 //        public Auditor()
 //            : this(System.Environment.GetEnvironmentVariable("ORLEANS_AUDIT_DATACONNECTIONSTRING"), System.Environment.GetEnvironmentVariable("ORLEANS_AUDIT_TABLENAME"))
-//        {   
+//        {
 //        }
-
 
 //        public Auditor(string connectionstring, string tablename)
 //        {
@@ -71,6 +68,5 @@
 //            }
 //        }
 //    }
-
 
 //}

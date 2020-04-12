@@ -1,11 +1,9 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
-
-
 
 namespace Capl.Authorization.Matching
 {
@@ -19,15 +17,9 @@ namespace Capl.Authorization.Matching
     /// </summary>
     public class UnaryMatchExpression : MatchExpression
     {
-        public static Uri MatchUri
-        {
-            get { return new Uri(AuthorizationConstants.MatchUris.Any); }
-        }
+        public static Uri MatchUri => new Uri(AuthorizationConstants.MatchUris.Any);
 
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.MatchUris.Any); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.MatchUris.Any);
 
         public override IList<Claim> MatchClaims(IEnumerable<Claim> claims, string claimType, string value)
         {

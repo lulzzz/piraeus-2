@@ -1,14 +1,10 @@
-﻿
-
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Text;
 
     internal static class OptionTypeExtensions
     {
-
         public static object DecodeOptionValue(this OptionType type, byte[] value)
         {
             int typeValue = (int)type;
@@ -55,7 +51,6 @@ namespace SkunkLab.Protocols.Coap
             {
                 throw new InvalidOperationException();
             }
-
         }
 
         public static byte[] EncodeOptionValue(this OptionType type, object value)

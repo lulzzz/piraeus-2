@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
     using System.Diagnostics;
@@ -7,6 +6,19 @@ namespace SkunkLab.Protocols.Mqtt
 
     public class ConnectMessage : MqttMessage
     {
+        private string _protocolName = "MQTT";
+
+        private int _version = 0x04;
+
+        //private bool willRetain;
+        private byte connectFlags;
+
+        private bool passwordFlag;
+
+        private bool usernameFlag;
+
+        private byte willQoS;
+
         public ConnectMessage()
         {
         }
@@ -63,114 +75,48 @@ namespace SkunkLab.Protocols.Mqtt
             this.CleanSession = cleanSession;
         }
 
-        private int _version = 0x04;
-        private string _protocolName = "MQTT";
-
-        public override bool HasAck
-        {
-            get { return true; }
-        }
-
-        public override MqttMessageType MessageType
-        {
-            get
-            {
-                return MqttMessageType.CONNECT;
-            }
-
-            internal set
-            {
-                base.MessageType = value;
-            }
-        }
-
-
-        public string Username { get; internal set; }
-
-        public string Password { get; internal set; }
+        public bool CleanSession { get; internal set; }
 
         public string ClientId { get; internal set; }
 
-        public string WillTopic { get; internal set; }
+        public override bool HasAck => true;
 
-        public string WillMessage { get; internal set; }
+        public int KeepAlive { get; internal set; }
+
+        public override MqttMessageType MessageType
+        {
+            get => MqttMessageType.CONNECT;
+
+            internal set => base.MessageType = value;
+        }
+
+        public string Password { get; internal set; }
 
         public string ProtocolName
         {
-            get { return _protocolName; } //return "MQIsdp"; }
-            set { _protocolName = value; }
+            get => _protocolName;  //return "MQIsdp"; }
+            set => _protocolName = value;
         }
 
         public int ProtocolVersion
         {
-            get { return _version; }
-            set { _version = value; }
+            get => _version;
+            set => _version = value;
         }
 
+        public string Username { get; internal set; }
         public bool WillFlag { get; internal set; }
-
+        public string WillMessage { get; internal set; }
         public QualityOfServiceLevelType? WillQualityOfServiceLevel { get; internal set; }
-
-        public bool CleanSession { get; internal set; }
-
-        public int KeepAlive { get; internal set; }
-
         public bool WillRetain { get; internal set; }
-
-        private bool usernameFlag;
-        private bool passwordFlag;
-        private byte willQoS;
-        //private bool willRetain;
-        private byte connectFlags;
-
-
-        private void SetConnectFlags()
-        {
-            usernameFlag = !string.IsNullOrEmpty(this.Username);
-            passwordFlag = !string.IsNullOrEmpty(this.Password);
-
-            if (passwordFlag && !usernameFlag)
-            {
-                //fault
-            }
-
-            if (this.WillFlag && ((string.IsNullOrEmpty(this.WillTopic) || string.IsNullOrEmpty(this.WillMessage)) || !this.WillQualityOfServiceLevel.HasValue))
-            {
-                //fault
-            }
-
-
-
-            willQoS = 0x00;
-            if (this.WillQualityOfServiceLevel.HasValue)
-            {
-                willQoS = (byte)(int)this.WillQualityOfServiceLevel;
-                //willQoS = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), this.WillQualityOfServiceLevel.Value.ToString(), false));
-            }
-
-            this.connectFlags = 0x00;
-
-            this.connectFlags |= this.usernameFlag ? (byte)(0x01 << 0x07) : (byte)0x00;
-            this.connectFlags |= this.passwordFlag ? (byte)(0x01 << 0x06) : (byte)0x00;
-            this.connectFlags |= this.WillRetain ? (byte)(0x01 << 5) : (byte)0x00;
-            this.connectFlags |= (byte)(willQoS << 0x03);
-            this.connectFlags |= this.WillFlag ? (byte)(0x01 << 0x02) : (byte)0x00;
-            this.connectFlags |= this.CleanSession ? (byte)(0x01 << 0x01) : (byte)0x00;
-        }
-
-
-        //public ConnectMessage(ConnectVariableHeader variableHeader, ConnectPayload payload)
-        //{
-        //    this.VariableHeader = variableHeader;
-        //    this.Payload = payload;
-        //}
+        public string WillTopic { get; internal set; }
 
         public override byte[] Encode()
         {
-            byte fixedHeader = (byte)((0x01 << Constants.Header.MessageTypeOffset) |
-                   (byte)(0x00 << Constants.Header.QosLevelOffset) |
-                   (byte)(0x00 << Constants.Header.DupFlagOffset) |
-                   (byte)(0x00));
+            byte fixedHeader = (0x01 << Constants.Header.MessageTypeOffset) |
+                   0x00 << Constants.Header.QosLevelOffset |
+                   0x00 << Constants.Header.DupFlagOffset |
+                   0x00;
 
             //ConnectVariableHeader variableHeader = this.VariableHeader as ConnectVariableHeader;
             //ConnectPayload payload = this.Payload as ConnectPayload;
@@ -214,6 +160,11 @@ namespace SkunkLab.Protocols.Mqtt
             return container.ToBytes();
         }
 
+        //public ConnectMessage(ConnectVariableHeader variableHeader, ConnectPayload payload)
+        //{
+        //    this.VariableHeader = variableHeader;
+        //    this.Payload = payload;
+        //}
         internal override MqttMessage Decode(byte[] message)
         {
             MqttMessage connectMessage = new ConnectMessage();
@@ -221,7 +172,6 @@ namespace SkunkLab.Protocols.Mqtt
             int index = 0;
             byte fixedHeader = message[index];
             base.DecodeFixedHeader(fixedHeader);
-
 
             int remainingLength = base.DecodeRemainingLength(message);
 
@@ -260,7 +210,7 @@ namespace SkunkLab.Protocols.Mqtt
             //}
 
             index += protocolNameLength;
-            this.ProtocolVersion = (int)buffer[index++];
+            this.ProtocolVersion = buffer[index++];
             //if (this.ProtocolVersion != (int)buffer[index++])
             //{
             //    //fault wrong version
@@ -280,9 +230,7 @@ namespace SkunkLab.Protocols.Mqtt
 
             this.KeepAlive = keepAliveSec;
 
-
-            int length = 0;
-            this.ClientId = ByteContainer.DecodeString(buffer, index, out length);
+            this.ClientId = ByteContainer.DecodeString(buffer, index, out int length);
             index += length;
 
             if (this.WillFlag)
@@ -306,6 +254,38 @@ namespace SkunkLab.Protocols.Mqtt
             }
 
             return connectMessage;
+        }
+
+        private void SetConnectFlags()
+        {
+            usernameFlag = !string.IsNullOrEmpty(this.Username);
+            passwordFlag = !string.IsNullOrEmpty(this.Password);
+
+            if (passwordFlag && !usernameFlag)
+            {
+                //fault
+            }
+
+            if (this.WillFlag && ((string.IsNullOrEmpty(this.WillTopic) || string.IsNullOrEmpty(this.WillMessage)) || !this.WillQualityOfServiceLevel.HasValue))
+            {
+                //fault
+            }
+
+            willQoS = 0x00;
+            if (this.WillQualityOfServiceLevel.HasValue)
+            {
+                willQoS = (byte)(int)this.WillQualityOfServiceLevel;
+                //willQoS = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), this.WillQualityOfServiceLevel.Value.ToString(), false));
+            }
+
+            this.connectFlags = 0x00;
+
+            this.connectFlags |= this.usernameFlag ? (byte)(0x01 << 0x07) : (byte)0x00;
+            this.connectFlags |= this.passwordFlag ? (byte)(0x01 << 0x06) : (byte)0x00;
+            this.connectFlags |= this.WillRetain ? (byte)(0x01 << 5) : (byte)0x00;
+            this.connectFlags |= (byte)(willQoS << 0x03);
+            this.connectFlags |= this.WillFlag ? (byte)(0x01 << 0x02) : (byte)0x00;
+            this.connectFlags |= this.CleanSession ? (byte)(0x01 << 0x01) : (byte)0x00;
         }
     }
 }

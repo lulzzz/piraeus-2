@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -52,22 +52,22 @@ namespace Capl.Authorization
             this.Evaluates = evaluates;
         }
 
-        public override Uri TermId { get; set; }
-
         public string Issuer { get; set; }
+
+        /// <summary>
+        /// Gets or sets an expression that matches claims to be evaluted.  The matching claim values
+        ///  represent the left hand side operand vlaue of the authorization operation.
+        /// </summary>
+        public Match MatchExpression { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the authorization operation.
         /// </summary>
         public EvaluationOperation Operation { get; set; }
 
-        /// <summary>
-        /// Gets or sets an expression that matches claims to be evaluted.  The matching claim values
-        ///  represent the left hand side operand vlaue of the authorization operation.
-        /// </summary>    
-        public Match MatchExpression { get; set; }
+        public override Uri TermId { get; set; }
 
-        new public static Rule Load(XmlReader reader)
+        public static new Rule Load(XmlReader reader)
         {
             Rule rule = new Rule();
             rule.ReadXml(reader);
@@ -83,7 +83,6 @@ namespace Capl.Authorization
         /// <remarks>If the evaluation of the operation matches the Evaluates property, then the evaluation of the rule is true; otherwise false.</remarks>
         public override bool Evaluates { get; set; }
 
-
         /// <summary>
         /// Evaluates a set of claims using the authorization operation.
         /// </summary>
@@ -91,16 +90,11 @@ namespace Capl.Authorization
         /// <returns>True if the set of claims evaluates to true; otherwise false.</returns>
         public override bool Evaluate(IEnumerable<Claim> claims)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
-            IList<Claim> list = null;
-            Capl.Authorization.Operations.Operation operation = null;
             MatchExpression exp = Capl.Authorization.Matching.MatchExpression.Create(this.MatchExpression.Type, null);
 
-            list = exp.MatchClaims(claims, this.MatchExpression.ClaimType, this.MatchExpression.Value);
+            IList<Claim> list = exp.MatchClaims(claims, MatchExpression.ClaimType, MatchExpression.Value);
 
             if (list.Count == 0)
             {
@@ -121,7 +115,7 @@ namespace Capl.Authorization
                 }
             }
 
-            operation = Capl.Authorization.Operations.Operation.Create(this.Operation.Type, null);
+            Operations.Operation operation = Operations.Operation.Create(Operation.Type, null);
 
             foreach (Claim claim in list)
             {
@@ -141,18 +135,13 @@ namespace Capl.Authorization
             return !this.Evaluates;
         }
 
-        #endregion
+        #endregion IEvaluationRule Members
 
         #region IXmlSerializable Members
 
-
-
         public override void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Rule);
             string termId = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.TermId);
@@ -199,10 +188,7 @@ namespace Capl.Authorization
         /// <param name="writer">An XmlWriter for the evaluation rule.</param>
         public override void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(AuthorizationConstants.Elements.Rule, AuthorizationConstants.Namespaces.Xmlns);
 
@@ -225,6 +211,6 @@ namespace Capl.Authorization
             writer.WriteEndElement();
         }
 
-        #endregion
+        #endregion IXmlSerializable Members
     }
 }

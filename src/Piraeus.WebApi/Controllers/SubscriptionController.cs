@@ -17,6 +17,10 @@ namespace Piraeus.WebApi.Controllers
     [ApiController]
     public class SubscriptionController : ControllerBase
     {
+        private readonly GraphManager graphManager;
+
+        private readonly ILogger logger;
+
         public SubscriptionController(IClusterClient clusterClient, Logger logger = null)
         {
             if (!GraphManager.IsInitialized)
@@ -31,8 +35,32 @@ namespace Piraeus.WebApi.Controllers
             this.logger = logger;
         }
 
-        private readonly GraphManager graphManager;
-        private readonly ILogger logger;
+        [HttpGet("GetSubscriberSubscriptions")]
+        [Authorize]
+        [Produces("application/json")]
+        public async Task<ActionResult<IEnumerable<string>>> GetSubscriberSubscriptions(string identity)
+        {
+            try
+            {
+                _ = identity ?? throw new ArgumentNullException(nameof(identity));
+
+                IEnumerable<string> list = await graphManager.GetSubscriberSubscriptionsListAsync(identity);
+                if (list == null || list.Count() == 0)
+                {
+                    logger?.LogWarning($"No subscriber subscriptions found for '{identity}'");
+                }
+                else
+                {
+                    logger?.LogWarning($"Subscriber subscriptions '{list.Count()}' returned for '{identity}'");
+                }
+                return StatusCode(200, list);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Error getting subscriber subscriptions.");
+                return StatusCode(500, ex.Message);
+            }
+        }
 
         [HttpGet("GetSubscriptionMetadata")]
         [Authorize]
@@ -41,10 +69,7 @@ namespace Piraeus.WebApi.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty("subscriptionUriString"))
-                {
-                    throw new ArgumentNullException("subscriptionUriString");
-                }
+                _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
 
                 SubscriptionMetadata metadata = await graphManager.GetSubscriptionMetadataAsync(subscriptionUriString);
                 if (metadata == null)
@@ -62,7 +87,6 @@ namespace Piraeus.WebApi.Controllers
             {
                 logger?.LogError(ex, $"Error getting subscription metadata.");
                 return StatusCode(500, ex.Message);
-
             }
         }
 
@@ -73,10 +97,7 @@ namespace Piraeus.WebApi.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty("subscriptionUriString"))
-                {
-                    throw new ArgumentNullException("subscriptionUriString");
-                }
+                _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
 
                 CommunicationMetrics metrics = await graphManager.GetSubscriptionMetricsAsync(subscriptionUriString);
 
@@ -104,10 +125,7 @@ namespace Piraeus.WebApi.Controllers
         {
             try
             {
-                if (metadata == null)
-                {
-                    throw new ArgumentNullException("metadata");
-                }
+                _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
                 await graphManager.UpsertSubscriptionMetadataAsync(metadata);
                 logger?.LogInformation($"Upserted subscription metadata '{metadata.SubscriptionUriString}'");
@@ -119,37 +137,5 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        [HttpGet("GetSubscriberSubscriptions")]
-        [Authorize]
-        [Produces("application/json")]
-        public async Task<ActionResult<IEnumerable<string>>> GetSubscriberSubscriptions(string identity)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(identity))
-                {
-                    throw new ArgumentNullException("identity");
-                }
-
-                IEnumerable<string> list = await graphManager.GetSubscriberSubscriptionsListAsync(identity);
-                if (list == null || list.Count() == 0)
-                {
-                    logger?.LogWarning($"No subscriber subscriptions found for '{identity}'");
-                }
-                else
-                {
-                    logger?.LogWarning($"Subscriber subscriptions '{list.Count()}' returned for '{identity}'");
-                }
-                return StatusCode(200, list);
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, "Error getting subscriber subscriptions.");
-                return StatusCode(500, ex.Message);
-            }
-        }
-
     }
-
 }

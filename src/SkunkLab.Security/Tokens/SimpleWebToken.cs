@@ -1,5 +1,4 @@
-﻿
-//namespace SkunkLab.Security.Tokens
+﻿//namespace SkunkLab.Security.Tokens
 //{
 //    using Microsoft.IdentityModel.Tokens;
 //    using System;
@@ -14,9 +13,8 @@
 //    using System.Security.Cryptography;
 //    using System.Text;
 //    using System.Web;
-//    public class SimpleWebToken 
+//    public class SimpleWebToken
 //    {
-
 //        private const char DefaultCompoundClaimDelimiter = ',';
 //        private const char ParameterSeparator = '&';
 
@@ -125,7 +123,6 @@
 //        {
 //            get { return new ClaimsIdentity(this._claims); }
 //        }
-
 
 //        /// <summary>
 //        /// The expiry datetime for the token.
@@ -242,7 +239,6 @@
 //            //
 //            Dictionary<string, string> inputDictionary = new Dictionary<string, string>(StringComparer.Ordinal);
 
-
 //            inputDictionary.Decode(rawToken);
 
 //            // TokenAudience is optional.
@@ -265,7 +261,6 @@
 //            {
 //                throw new InvalidDataException();
 //            }
-
 
 //            if (inputDictionary.TryGetValue(TokenDigest256, out signature))
 //            {
@@ -485,9 +480,6 @@
 //        {
 //            return Encode();
 //        }
-
-
-
 
 //        public DateTime ValidFrom
 //        {

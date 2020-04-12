@@ -1,6 +1,4 @@
-﻿
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Runtime.Serialization;
@@ -25,7 +23,6 @@ namespace SkunkLab.Protocols.Coap
         protected CoapVersionMismatchException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-
         }
     }
 }

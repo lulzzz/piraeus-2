@@ -1,5 +1,4 @@
-﻿
-using Org.BouncyCastle.Crypto.Tls;
+﻿using Org.BouncyCastle.Crypto.Tls;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -11,6 +10,32 @@ namespace SkunkLab.Channels.Tcp
 {
     public abstract class TcpChannel : IChannel
     {
+        public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
+
+        public abstract event EventHandler<ChannelErrorEventArgs> OnError;
+
+        public abstract event EventHandler<ChannelOpenEventArgs> OnOpen;
+
+        public abstract event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        public abstract event EventHandler<ChannelStateEventArgs> OnStateChange;
+
+        public abstract string Id { get; internal set; }
+
+        public abstract bool IsAuthenticated { get; internal set; }
+
+        public abstract bool IsConnected { get; }
+
+        public abstract bool IsEncrypted { get; internal set; }
+
+        public abstract int Port { get; internal set; }
+
+        public abstract bool RequireBlocking { get; }
+
+        public abstract ChannelState State { get; internal set; }
+
+        public abstract string TypeId { get; }
+
         /// <summary>
         /// Creates a new TCP server channel.
         /// </summary>
@@ -28,7 +53,6 @@ namespace SkunkLab.Channels.Tcp
                 return new TcpServerChannel2(client, blockSize, maxBufferSize, token);
             }
         }
-
 
         /// <summary>
         /// Creates TCP client channel
@@ -104,7 +128,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-
         /// <summary>
         /// Creates TCP client channel
         /// </summary>
@@ -128,7 +151,6 @@ namespace SkunkLab.Channels.Tcp
                 return new TcpClientChannel2(address, port, null, pskIdentity, psk, blockSize, maxBufferSize, token);
             }
         }
-
 
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, string pskIdentity, byte[] psk, int blockSize, int maxBufferSize, CancellationToken token)
         {
@@ -193,8 +215,6 @@ namespace SkunkLab.Channels.Tcp
                 return new TcpServerChannel2(client, pskManager, blockSize, maxBufferSize, token);
             }
         }
-
-
 
         /// <summary>
         /// Create a new TCP client channel.
@@ -352,8 +372,6 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-
-
         /// <summary>
         /// Creates a new TCP client channel.
         /// </summary>
@@ -433,25 +451,7 @@ namespace SkunkLab.Channels.Tcp
             }
         }
 
-
-
-        public abstract bool RequireBlocking { get; }
-        public abstract int Port { get; internal set; }
-        public abstract string TypeId { get; }
-        public abstract bool IsConnected { get; }
-        public abstract string Id { get; internal set; }
-
-        public abstract bool IsEncrypted { get; internal set; }
-
-        public abstract bool IsAuthenticated { get; internal set; }
-
-        public abstract ChannelState State { get; internal set; }
-
-        public abstract event EventHandler<ChannelReceivedEventArgs> OnReceive;
-        public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
-        public abstract event EventHandler<ChannelOpenEventArgs> OnOpen;
-        public abstract event EventHandler<ChannelErrorEventArgs> OnError;
-        public abstract event EventHandler<ChannelStateEventArgs> OnStateChange;
+        public abstract Task AddMessageAsync(byte[] message);
 
         public abstract Task CloseAsync();
 
@@ -462,7 +462,5 @@ namespace SkunkLab.Channels.Tcp
         public abstract Task ReceiveAsync();
 
         public abstract Task SendAsync(byte[] message);
-
-        public abstract Task AddMessageAsync(byte[] message);
     }
 }

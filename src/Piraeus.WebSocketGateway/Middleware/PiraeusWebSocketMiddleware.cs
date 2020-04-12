@@ -19,13 +19,12 @@ namespace Piraeus.WebSocketGateway.Middleware
     public class PiraeusWebSocketMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly PiraeusConfig config;
-        private CancellationTokenSource source;
         private readonly WebSocketOptions _options;
+        private readonly PiraeusConfig config;
         private readonly Dictionary<string, ProtocolAdapter> container;
         private readonly GraphManager graphManager;
         private readonly ILog logger;
-
+        private CancellationTokenSource source;
 
         public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client, Logger logger, IOptions<WebSocketOptions> options)
         {
@@ -41,7 +40,9 @@ namespace Piraeus.WebSocketGateway.Middleware
         public async Task Invoke(HttpContext context)
         {
             if (!context.WebSockets.IsWebSocketRequest)
+            {
                 return;
+            }
 
             BasicAuthenticator basicAuthn = new BasicAuthenticator();
             SkunkLab.Security.Tokens.SecurityTokenType tokenType = Enum.Parse<SkunkLab.Security.Tokens.SecurityTokenType>(config.ClientTokenType, true);
@@ -57,23 +58,9 @@ namespace Piraeus.WebSocketGateway.Middleware
             adapter.OnError += Adapter_OnError;
             adapter.Init();
 
-
             await adapter.Channel.OpenAsync();
             await _next(context);
             Console.WriteLine("Exiting WS Invoke");
-
-        }
-
-        private void Adapter_OnError(object sender, ProtocolAdapterErrorEventArgs e)
-        {
-            Console.WriteLine($"Adapter OnError - {e.Error.Message}");
-            if (container.ContainsKey(e.ChannelId))
-            {
-                ProtocolAdapter adapter = container[e.ChannelId];
-                adapter.Channel.CloseAsync().GetAwaiter();
-                Console.WriteLine("Adapter channel closed due to error.");
-            }
-
         }
 
         private void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs e)
@@ -105,7 +92,6 @@ namespace Piraeus.WebSocketGateway.Middleware
                         Console.WriteLine("Adpater trying to close channel.");
                         adapter.Channel.CloseAsync().GetAwaiter();
                         Console.WriteLine("Adapter has closed the channel");
-
                     }
                     catch { }
                     adapter.Dispose();
@@ -116,11 +102,17 @@ namespace Piraeus.WebSocketGateway.Middleware
             {
                 Console.WriteLine($"Adapter on close fault - {ex.Message}");
             }
-
         }
 
-
-
-
+        private void Adapter_OnError(object sender, ProtocolAdapterErrorEventArgs e)
+        {
+            Console.WriteLine($"Adapter OnError - {e.Error.Message}");
+            if (container.ContainsKey(e.ChannelId))
+            {
+                ProtocolAdapter adapter = container[e.ChannelId];
+                adapter.Channel.CloseAsync().GetAwaiter();
+                Console.WriteLine("Adapter channel closed due to error.");
+            }
+        }
     }
 }

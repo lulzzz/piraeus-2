@@ -9,6 +9,7 @@ namespace SkunkLab.Protocols.Coap.Handlers
         {
             session.EnsureAuthentication(message);
         }
+
         public override async Task<CoapMessage> ProcessAsync()
         {
             return await Task.FromResult<CoapMessage>(new CoapResponse(Message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage));

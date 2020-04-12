@@ -14,14 +14,13 @@ namespace Orleans.Storage.Redis
 {
     public class RedisGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>
     {
-
-        private BinarySerializer serializer;
-        private string name;
-        private RedisStorageOptions options;
-        private SerializationManager serializationManager;
+        private readonly ILogger logger;
         private ConnectionMultiplexer connection;
         private IDatabase database;
-        private readonly ILogger logger;
+        private readonly string name;
+        private readonly RedisStorageOptions options;
+        private readonly SerializationManager serializationManager;
+        private BinarySerializer serializer;
 
         public RedisGrainStorage(string name, RedisStorageOptions options, SerializationManager serializationManager, ILogger logger)
         {
@@ -43,6 +42,19 @@ namespace Orleans.Storage.Redis
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed clear state for key '{key}'.");
+            }
+        }
+
+        public void Participate(ISiloLifecycle lifecycle)
+        {
+            try
+            {
+                lifecycle.Subscribe(OptionFormattingUtilities.Name<RedisGrainStorage>(this.name), this.options.InitStage, Init);
+                logger.LogInformation($"Lifecycle started for {this.name}");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Redis grain storage failed participate in lifecycle.");
             }
         }
 
@@ -101,44 +113,39 @@ namespace Orleans.Storage.Redis
             }
         }
 
-        public void Participate(ISiloLifecycle lifecycle)
+        private IPAddress GetIPAddress(string hostname)
         {
-            try
+            IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
             {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return hostInfo.AddressList[index];
+                }
+            }
 
-                lifecycle.Subscribe(OptionFormattingUtilities.Name<RedisGrainStorage>(this.name), this.options.InitStage, Init);
-                logger.LogInformation($"Lifecycle started for {this.name}");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Redis grain storage failed participate in lifecycle.");
-            }
+            return null;
         }
 
-        private async Task Init(CancellationToken ct)
+        private IPAddress GetIPAddress(EndPoint endpoint)
         {
-            if (options.Serializer == SerializerType.BinaryFormatter)
+            if (endpoint is DnsEndPoint dnsEndpoint)
             {
-                serializer = new BinarySerializer();
+                return GetIPAddress(dnsEndpoint.Host);
             }
 
-            if (connection != null && !connection.IsConnected)
+            if (endpoint is IPEndPoint ipEndpoint)
             {
-                await connection.CloseAsync();
+                return ipEndpoint.Address;
             }
 
-            ConfigurationOptions configOptions = GetRedisConfiguration();
-
-            connection = await ConnectionMultiplexer.ConnectAsync(configOptions);
-            database = connection.GetDatabase();
-            logger.LogInformation("Redis grain state connection open.");
+            return null;
         }
 
         private ConfigurationOptions GetRedisConfiguration()
         {
-            ConfigurationOptions configOptions = null;
-
-            if (!String.IsNullOrEmpty(options.ConnectionString))
+            ConfigurationOptions configOptions;
+            if (!string.IsNullOrEmpty(options.ConnectionString))
             {
                 configOptions = ConfigurationOptions.Parse(options.ConnectionString);
             }
@@ -168,37 +175,23 @@ namespace Orleans.Storage.Redis
             return configOptions;
         }
 
-
-        private IPAddress GetIPAddress(string hostname)
+        private async Task Init(CancellationToken ct)
         {
-            IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            if (options.Serializer == SerializerType.BinaryFormatter)
             {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return hostInfo.AddressList[index];
-                }
+                serializer = new BinarySerializer();
             }
 
-            return null;
-        }
-
-
-        private IPAddress GetIPAddress(EndPoint endpoint)
-        {
-            DnsEndPoint dnsEndpoint = endpoint as DnsEndPoint;
-            if (dnsEndpoint != null)
+            if (connection != null && !connection.IsConnected)
             {
-                return GetIPAddress(dnsEndpoint.Host);
+                await connection.CloseAsync();
             }
 
-            IPEndPoint ipEndpoint = endpoint as IPEndPoint;
-            if (ipEndpoint != null)
-            {
-                return ipEndpoint.Address;
-            }
+            ConfigurationOptions configOptions = GetRedisConfiguration();
 
-            return null;
+            connection = await ConnectionMultiplexer.ConnectAsync(configOptions);
+            database = connection.GetDatabase();
+            logger.LogInformation("Redis grain state connection open.");
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -17,6 +17,20 @@ namespace Capl.Authorization.Operations
     public class OperationsDictionary : IDictionary<string, Operation>
     {
         private static OperationsDictionary defaultInstance;
+
+        /// <summary>
+        /// Local dictionary of operations.
+        /// </summary>
+        private readonly Dictionary<string, Operation> operations;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OperationsDictionary"/> class.
+        /// </summary>
+        public OperationsDictionary()
+        {
+            this.operations = new Dictionary<string, Operation>();
+        }
+
         public static OperationsDictionary Default
         {
             get
@@ -64,49 +78,24 @@ namespace Capl.Authorization.Operations
         }
 
         /// <summary>
-        /// Local dictionary of operations.
-        /// </summary>
-        private Dictionary<string, Operation> operations;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OperationsDictionary"/> class.
-        /// </summary>
-        public OperationsDictionary()
-        {
-            this.operations = new Dictionary<string, Operation>();
-        }
-
-        /// <summary>
-        /// Gets a collection of keys.
-        /// </summary>
-        public ICollection<string> Keys
-        {
-            get { return this.operations.Keys; }
-        }
-
-        /// <summary>
-        /// Gets a collection of values.
-        /// </summary>
-        public ICollection<Operation> Values
-        {
-            get { return this.operations.Values; }
-        }
-
-        /// <summary>
         /// Gets the number of items in the dictionary.
         /// </summary>
-        public int Count
-        {
-            get { return this.operations.Count; }
-        }
+        public int Count => this.operations.Count;
 
         /// <summary>
         /// Gets a value indicating whether the dictionary is read-only.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
+
+        /// <summary>
+        /// Gets a collection of keys.
+        /// </summary>
+        public ICollection<string> Keys => this.operations.Keys;
+
+        /// <summary>
+        /// Gets a collection of values.
+        /// </summary>
+        public ICollection<Operation> Values => this.operations.Values;
 
         /// <summary>
         /// Indexer to get or set a value.
@@ -115,8 +104,8 @@ namespace Capl.Authorization.Operations
         /// <returns>The value of the key.</returns>
         public Operation this[string key]
         {
-            get { return this.operations[key]; }
-            set { this.operations[key] = value; }
+            get => this.operations[key];
+            set => this.operations[key] = value;
         }
 
         /// <summary>
@@ -127,37 +116,6 @@ namespace Capl.Authorization.Operations
         public void Add(string key, Operation value)
         {
             this.operations.Add(key, value);
-        }
-
-        /// <summary>
-        /// Determines whether an operation's key exists.
-        /// </summary>
-        /// <param name="key">The key that identifies the operation.</param>
-        /// <returns>True, if the key exists; otherwise false.</returns>
-        public bool ContainsKey(string key)
-        {
-            return this.operations.ContainsKey(key);
-        }
-
-        /// <summary>
-        /// Removes the operation.
-        /// </summary>
-        /// <param name="key">Key of the operation.</param>
-        /// <returns>True, if the operation is removed; otherwise false.</returns>
-        public bool Remove(string key)
-        {
-            return this.operations.Remove(key);
-        }
-
-        /// <summary>
-        /// Gets a value associated with a specific key.
-        /// </summary>
-        /// <param name="key">The key of the value to get.</param>
-        /// <param name="value">The value of the key to get.</param>
-        /// <returns>If the key is found, then the return is the value of the key; otherwise an initialized type of the value.</returns>
-        public bool TryGetValue(string key, out Operation value)
-        {
-            return this.operations.TryGetValue(key, out value);
         }
 
         /// <summary>
@@ -188,6 +146,16 @@ namespace Capl.Authorization.Operations
         }
 
         /// <summary>
+        /// Determines whether an operation's key exists.
+        /// </summary>
+        /// <param name="key">The key that identifies the operation.</param>
+        /// <returns>True, if the key exists; otherwise false.</returns>
+        public bool ContainsKey(string key)
+        {
+            return this.operations.ContainsKey(key);
+        }
+
+        /// <summary>
         /// Copies values to an array.
         /// </summary>
         /// <param name="array">Array to copy items.</param>
@@ -195,6 +163,34 @@ namespace Capl.Authorization.Operations
         public void CopyTo(KeyValuePair<string, Operation>[] array, int arrayIndex)
         {
             ((ICollection<KeyValuePair<string, Operation>>)this.operations).CopyTo(array, arrayIndex);
+        }
+
+        /// <summary>
+        /// Gets an enumerator for the dictionary.
+        /// </summary>
+        /// <returns>An enumerator of key-value pairs.</returns>
+        public IEnumerator<KeyValuePair<string, Operation>> GetEnumerator()
+        {
+            return this.operations.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Get an enumerator for the dictionary.
+        /// </summary>
+        /// <returns>An enumerator for the dictionary.</returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.operations.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Removes the operation.
+        /// </summary>
+        /// <param name="key">Key of the operation.</param>
+        /// <returns>True, if the operation is removed; otherwise false.</returns>
+        public bool Remove(string key)
+        {
+            return this.operations.Remove(key);
         }
 
         /// <summary>
@@ -208,21 +204,14 @@ namespace Capl.Authorization.Operations
         }
 
         /// <summary>
-        /// Gets an enumerator for the dictionary.
+        /// Gets a value associated with a specific key.
         /// </summary>
-        /// <returns>An enumerator of key-value pairs.</returns>
-        public IEnumerator<KeyValuePair<string, Operation>> GetEnumerator()
+        /// <param name="key">The key of the value to get.</param>
+        /// <param name="value">The value of the key to get.</param>
+        /// <returns>If the key is found, then the return is the value of the key; otherwise an initialized type of the value.</returns>
+        public bool TryGetValue(string key, out Operation value)
         {
-            return (IEnumerator<KeyValuePair<string, Operation>>)this.operations.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Get an enumerator for the dictionary.
-        /// </summary>
-        /// <returns>An enumerator for the dictionary.</returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.operations.GetEnumerator();
+            return this.operations.TryGetValue(key, out value);
         }
     }
 }

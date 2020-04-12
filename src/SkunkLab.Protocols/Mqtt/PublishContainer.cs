@@ -8,6 +8,16 @@ namespace SkunkLab.Protocols.Mqtt
 {
     public class PublishContainer : IDictionary<ushort, MqttMessage>, IDisposable
     {
+        private Dictionary<ushort, MqttMessage> container;
+
+        private bool disposed;
+
+        private readonly TimeSpan exchangeLifetime;
+
+        private Dictionary<ushort, DateTime> timeContainer;
+
+        private Timer timer;
+
         public PublishContainer(MqttConfig config)
         {
             exchangeLifetime = config.MaxTransmitSpan;
@@ -15,34 +25,16 @@ namespace SkunkLab.Protocols.Mqtt
             timeContainer = new Dictionary<ushort, DateTime>();
         }
 
-        private TimeSpan exchangeLifetime;
-        private Dictionary<ushort, MqttMessage> container;
-        private Dictionary<ushort, DateTime> timeContainer;
-        private Timer timer;
-        private bool disposed;
+        public int Count => container.Count;
+
+        public bool IsReadOnly => false;
+
+        public ICollection<ushort> Keys => container.Keys;
+
+        public ICollection<MqttMessage> Values => container.Values;
 
         public MqttMessage this[ushort key]
-        { get { return container[key]; } set { container[key] = value; } }
-
-        public ICollection<ushort> Keys
-        {
-            get { return container.Keys; }
-        }
-
-        public ICollection<MqttMessage> Values
-        {
-            get { return container.Values; }
-        }
-
-        public int Count
-        {
-            get { return container.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        { get => container[key]; set => container[key] = value; }
 
         public void Add(ushort key, MqttMessage value)
         {
@@ -57,27 +49,6 @@ namespace SkunkLab.Protocols.Mqtt
                     timer.Elapsed += Timer_Elapsed;
                     timer.Start();
                 }
-            }
-        }
-
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            if (timeContainer.Count > 0)
-            {
-                IEnumerable<KeyValuePair<ushort, DateTime>> items = timeContainer.Where((c) => c.Value < DateTime.UtcNow);
-                if (items != null)
-                {
-                    foreach (var item in items)
-                    {
-                        container.Remove(item.Key);
-                    }
-                }
-            }
-
-            if (container.Count == 0)
-            {
-                timer.Stop();
-                timer = null;
             }
         }
 
@@ -109,7 +80,18 @@ namespace SkunkLab.Protocols.Mqtt
             throw new NotImplementedException();
         }
 
+        public void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
+        }
+
         public IEnumerator<KeyValuePair<ushort, MqttMessage>> GetEnumerator()
+        {
+            return container.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return container.GetEnumerator();
         }
@@ -147,17 +129,6 @@ namespace SkunkLab.Protocols.Mqtt
             return container.TryGetValue(key, out value);
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return container.GetEnumerator();
-        }
-
-        public void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected void Disposing(bool dispose)
         {
             if (dispose && !disposed)
@@ -172,6 +143,27 @@ namespace SkunkLab.Protocols.Mqtt
                 container.Clear();
                 timeContainer = null;
                 container = null;
+            }
+        }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (timeContainer.Count > 0)
+            {
+                IEnumerable<KeyValuePair<ushort, DateTime>> items = timeContainer.Where((c) => c.Value < DateTime.UtcNow);
+                if (items != null)
+                {
+                    foreach (var item in items)
+                    {
+                        container.Remove(item.Key);
+                    }
+                }
+            }
+
+            if (container.Count == 0)
+            {
+                timer.Stop();
+                timer = null;
             }
         }
     }

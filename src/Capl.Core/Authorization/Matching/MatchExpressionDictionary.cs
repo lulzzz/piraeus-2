@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -11,19 +11,16 @@ namespace Capl.Authorization.Matching
     using System.Collections;
     using System.Collections.Generic;
 
-
-
-
     public class MatchExpressionDictionary : IDictionary<string, MatchExpression>
     {
+        private static MatchExpressionDictionary defaultInstance;
+
+        private readonly Dictionary<string, MatchExpression> expressions;
+
         public MatchExpressionDictionary()
         {
             this.expressions = new Dictionary<string, MatchExpression>();
         }
-
-        private Dictionary<string, MatchExpression> expressions;
-
-        private static MatchExpressionDictionary defaultInstance;
 
         public static MatchExpressionDictionary Default
         {
@@ -58,8 +55,17 @@ namespace Capl.Authorization.Matching
             }
         }
 
-
         #region IDictionary<string,MatchExpression> Members
+
+        public ICollection<string> Keys => expressions.Keys;
+
+        public ICollection<MatchExpression> Values => expressions.Values;
+
+        public MatchExpression this[string key]
+        {
+            get => expressions[key];
+            set => expressions[key] = value;
+        }
 
         /// <summary>
         /// Adds a new match expression.
@@ -76,11 +82,6 @@ namespace Capl.Authorization.Matching
             return expressions.ContainsKey(key);
         }
 
-        public ICollection<string> Keys
-        {
-            get { return expressions.Keys; }
-        }
-
         public bool Remove(string key)
         {
             return expressions.Remove(key);
@@ -91,20 +92,13 @@ namespace Capl.Authorization.Matching
             return expressions.TryGetValue(key, out value);
         }
 
-        public ICollection<MatchExpression> Values
-        {
-            get { return expressions.Values; }
-        }
-
-        public MatchExpression this[string key]
-        {
-            get { return expressions[key]; }
-            set { expressions[key] = value; }
-        }
-
-        #endregion
+        #endregion IDictionary<string,MatchExpression> Members
 
         #region ICollection<KeyValuePair<string,MatchExpression>> Members
+
+        public int Count => expressions.Count;
+
+        public bool IsReadOnly => false;
 
         public void Add(KeyValuePair<string, MatchExpression> item)
         {
@@ -126,31 +120,21 @@ namespace Capl.Authorization.Matching
             ((ICollection<KeyValuePair<string, MatchExpression>>)expressions).CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return expressions.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
         public bool Remove(KeyValuePair<string, MatchExpression> item)
         {
             return ((ICollection<KeyValuePair<string, MatchExpression>>)expressions).Remove(item);
         }
 
-        #endregion
+        #endregion ICollection<KeyValuePair<string,MatchExpression>> Members
 
         #region IEnumerable<KeyValuePair<string,MatchExpression>> Members
 
         public IEnumerator<KeyValuePair<string, MatchExpression>> GetEnumerator()
         {
-            return (IEnumerator<KeyValuePair<string, MatchExpression>>)expressions.GetEnumerator();
+            return expressions.GetEnumerator();
         }
 
-        #endregion
+        #endregion IEnumerable<KeyValuePair<string,MatchExpression>> Members
 
         #region IEnumerable Members
 
@@ -159,6 +143,6 @@ namespace Capl.Authorization.Matching
             return expressions.GetEnumerator();
         }
 
-        #endregion
+        #endregion IEnumerable Members
     }
 }

@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -23,22 +23,13 @@ namespace Capl.Authorization.Matching
     /// </remarks>
     public class ComplexTypeMatchExpression : MatchExpression
     {
+        public static Uri MatchUri => new Uri(AuthorizationConstants.MatchUris.ComplexType);
 
-        public static Uri MatchUri
-        {
-            get { return new Uri(AuthorizationConstants.MatchUris.ComplexType); }
-        }
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.MatchUris.ComplexType); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.MatchUris.ComplexType);
 
         public override IList<Claim> MatchClaims(IEnumerable<Claim> claims, string claimType, string xpath)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
             IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim)

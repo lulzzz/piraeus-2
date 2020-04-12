@@ -16,6 +16,19 @@ namespace Orleans.Clustering.Redis
 {
     public class RedisGatewayListProvider : IGatewayListProvider
     {
+        private readonly string clusterId;
+
+        private readonly ConnectionMultiplexer connection;
+
+        private readonly IDatabase database;
+
+        private readonly ILog logger;
+
+        private readonly TimeSpan maxStaleness = TimeSpan.FromMinutes(1.0);
+
+        private readonly RedisClusteringOptions options;
+
+        private readonly BinarySerializer serializer;
 
         public RedisGatewayListProvider(IOptions<RedisClusteringOptions> membershipTableOptions, IOptions<ClusterOptions> clusterOptions, ILog logger = null)
         {
@@ -23,32 +36,15 @@ namespace Orleans.Clustering.Redis
             this.options = membershipTableOptions.Value;
             ConfigurationOptions configOptions = GetRedisConfiguration();
 
-
-
             clusterId = clusterOptions.Value.ClusterId;
             connection = ConnectionMultiplexer.Connect(configOptions);
             database = connection.GetDatabase();
             serializer = new BinarySerializer();
         }
 
+        public bool IsUpdatable => true;
 
-        private readonly ILog logger;
-        private readonly TimeSpan maxStaleness = TimeSpan.FromMinutes(1.0);
-        private readonly ConnectionMultiplexer connection;
-        private readonly IDatabase database;
-        private readonly BinarySerializer serializer;
-        private readonly string clusterId;
-        private readonly RedisClusteringOptions options;
-
-        public TimeSpan MaxStaleness
-        {
-            get { return this.maxStaleness; }
-        }
-
-        public Boolean IsUpdatable
-        {
-            get { return true; }
-        }
+        public TimeSpan MaxStaleness => this.maxStaleness;
 
         public Task<IList<Uri>> GetGateways()
         {
@@ -68,7 +64,6 @@ namespace Orleans.Clustering.Redis
                 }
                 catch
                 {
-
                     return Task.FromResult<IList<Uri>>(null);
                 }
             }
@@ -83,11 +78,39 @@ namespace Orleans.Clustering.Redis
             return Task.CompletedTask;
         }
 
+        private IPAddress GetIPAddress(string hostname)
+        {
+            IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return hostInfo.AddressList[index];
+                }
+            }
+
+            return null;
+        }
+
+        private IPAddress GetIPAddress(EndPoint endpoint)
+        {
+            if (endpoint is DnsEndPoint dnsEndpoint)
+            {
+                return GetIPAddress(dnsEndpoint.Host);
+            }
+
+            if (endpoint is IPEndPoint ipEndpoint)
+            {
+                return ipEndpoint.Address;
+            }
+
+            return null;
+        }
+
         private ConfigurationOptions GetRedisConfiguration()
         {
-            ConfigurationOptions configOptions = null;
-
-            if (!String.IsNullOrEmpty(options.ConnectionString))
+            ConfigurationOptions configOptions;
+            if (!string.IsNullOrEmpty(options.ConnectionString))
             {
                 configOptions = ConfigurationOptions.Parse(options.ConnectionString);
                 if (options.DatabaseNo == null)
@@ -119,39 +142,6 @@ namespace Orleans.Clustering.Redis
             }
 
             return configOptions;
-        }
-
-
-        private IPAddress GetIPAddress(string hostname)
-        {
-            IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++)
-            {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return hostInfo.AddressList[index];
-                }
-            }
-
-            return null;
-        }
-
-
-        private IPAddress GetIPAddress(EndPoint endpoint)
-        {
-            DnsEndPoint dnsEndpoint = endpoint as DnsEndPoint;
-            if (dnsEndpoint != null)
-            {
-                return GetIPAddress(dnsEndpoint.Host);
-            }
-
-            IPEndPoint ipEndpoint = endpoint as IPEndPoint;
-            if (ipEndpoint != null)
-            {
-                return ipEndpoint.Address;
-            }
-
-            return null;
         }
     }
 }

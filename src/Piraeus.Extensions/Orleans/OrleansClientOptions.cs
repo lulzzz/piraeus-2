@@ -10,10 +10,9 @@ namespace Piraeus.Extensions.Orleans
         {
         }
 
-        public MembershipProviderType StorageType { get; set; }
         public string DataConnectionString { get; set; }
-        public LogLevel LoggingLevel { get; set; }
-
         public string[] Loggers { get; set; }
+        public LogLevel LoggingLevel { get; set; }
+        public MembershipProviderType StorageType { get; set; }
     }
 }

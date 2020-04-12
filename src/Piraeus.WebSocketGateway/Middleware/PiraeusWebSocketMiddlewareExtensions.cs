@@ -7,9 +7,6 @@ namespace Piraeus.WebSocketGateway.Middleware
         public static IApplicationBuilder UsePiraeusWS(this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<PiraeusWebSocketMiddleware>();
-
         }
-
-
     }
 }

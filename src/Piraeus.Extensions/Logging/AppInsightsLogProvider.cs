@@ -8,7 +8,6 @@
 //        public AppInsightsLogProvider(AppInsightsOptions configOptions)
 //            : this(null, configOptions)
 //        {
-
 //        }
 
 //        public AppInsightsLogProvider(Func<string, LogLevel, bool> filter, AppInsightsOptions configOptions)

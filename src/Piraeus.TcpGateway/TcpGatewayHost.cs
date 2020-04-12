@@ -25,7 +25,6 @@ namespace Piraeus.TcpGateway
             sources = new Dictionary<int, CancellationTokenSource>();
         }
 
-
         private readonly Logger logger;
         private readonly PiraeusConfig config;
         private readonly OrleansConfig orleansConfig;
@@ -53,7 +52,6 @@ namespace Piraeus.TcpGateway
             {
                 sources.Add(port, new CancellationTokenSource());
             }
-
 
 #if DEBUG
             hostname = "localhost";
@@ -85,13 +83,12 @@ namespace Piraeus.TcpGateway
         public Task StopAsync(CancellationToken cancellationToken)
         {
             TcpServerListener[] servers = listeners.Values.ToArray();
-            foreach(var server in servers)
+            foreach (var server in servers)
             {
                 server.StopAsync().Ignore();
             }
 
             return Task.CompletedTask;
-
         }
 
         private IPAddress GetIPAddress(string hostname)

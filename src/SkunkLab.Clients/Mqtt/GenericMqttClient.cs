@@ -10,6 +10,16 @@ namespace Piraeus.Clients.Mqtt
 {
     public class GenericMqttClient
     {
+        private readonly IChannel channel;
+
+        private ConnectAckCode? code;
+
+        private readonly IMqttDispatch dispatcher;
+
+        private readonly MqttSession session;
+
+        private readonly double timeoutMilliseconds;
+
         public GenericMqttClient(MqttConfig config, IChannel channel, IMqttDispatch dispatcher = null)
         {
             this.dispatcher = dispatcher != null ? dispatcher : new GenericMqttDispatcher();
@@ -26,24 +36,13 @@ namespace Piraeus.Clients.Mqtt
             this.channel.OnStateChange += Channel_OnStateChange;
         }
 
-        public event MqttClientChannelStateHandler OnChannelStateChange;
         public event MqttClientChannelErrorHandler OnChannelError;
 
-        private IChannel channel;
-        private MqttSession session;
-        private ConnectAckCode? code;
-        private double timeoutMilliseconds;
-        private IMqttDispatch dispatcher;
+        public event MqttClientChannelStateHandler OnChannelStateChange;
 
-        public bool ChannelConnected
-        {
-            get { return channel.IsConnected; }
-        }
+        public bool ChannelConnected => channel.IsConnected;
 
-        public ConnectAckCode? MqttConnectCode
-        {
-            get { return code; }
-        }
+        public ConnectAckCode? MqttConnectCode => code;
 
         #region MQTT Functions
 
@@ -84,8 +83,10 @@ namespace Piraeus.Clients.Mqtt
 
         public async Task SubscribeAsync(string topic, QualityOfServiceLevelType qos, Action<string, string, byte[]> action)
         {
-            Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>();
-            dict.Add(topic, qos);
+            Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>
+            {
+                { topic, qos }
+            };
             dispatcher.Register(topic, action);
             SubscribeMessage msg = new SubscribeMessage(session.NewId(), dict);
             await channel.SendAsync(msg.Encode());
@@ -122,9 +123,21 @@ namespace Piraeus.Clients.Mqtt
                 dispatcher.Unregister(topic);
             }
         }
-        #endregion
+
+        #endregion MQTT Functions
 
         #region Channel Events
+
+        private void Channel_OnClose(object sender, ChannelCloseEventArgs args)
+        {
+            code = null;
+        }
+
+        private void Channel_OnError(object sender, ChannelErrorEventArgs args)
+        {
+            OnChannelError?.Invoke(this, args);
+        }
+
         private void Channel_OnReceive(object sender, ChannelReceivedEventArgs args)
         {
             MqttMessage msg = MqttMessage.DecodeMessage(args.Message);
@@ -144,34 +157,18 @@ namespace Piraeus.Clients.Mqtt
             }
         }
 
-        private void Channel_OnError(object sender, ChannelErrorEventArgs args)
-        {
-            OnChannelError?.Invoke(this, args);
-        }
-
-        private void Channel_OnClose(object sender, ChannelCloseEventArgs args)
-        {
-            code = null;
-        }
-
         private void Channel_OnStateChange(object sender, ChannelStateEventArgs args)
         {
             OnChannelStateChange?.Invoke(this, args);
         }
-        #endregion
+
+        #endregion Channel Events
 
         #region Session Events
+
         private void Session_OnConnect(object sender, MqttConnectionArgs args)
         {
             code = args.Code;
-        }
-        private void Session_OnRetry(object sender, MqttMessageEventArgs args)
-        {
-            MqttMessage msg = args.Message;
-            msg.Dup = true;
-            channel.SendAsync(msg.Encode()).GetAwaiter();
-            //Task task = channel.SendAsync(msg.Encode());
-            //Task.WhenAll(task);
         }
 
         private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)
@@ -181,6 +178,16 @@ namespace Piraeus.Clients.Mqtt
             //Task.WaitAll(task);
             channel.Dispose();
         }
-        #endregion
+
+        private void Session_OnRetry(object sender, MqttMessageEventArgs args)
+        {
+            MqttMessage msg = args.Message;
+            msg.Dup = true;
+            channel.SendAsync(msg.Encode()).GetAwaiter();
+            //Task task = channel.SendAsync(msg.Encode());
+            //Task.WhenAll(task);
+        }
+
+        #endregion Session Events
     }
 }

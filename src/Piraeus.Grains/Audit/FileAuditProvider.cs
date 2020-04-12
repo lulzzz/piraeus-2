@@ -12,7 +12,7 @@
 //        public FileAuditProvider(string path)
 //        {
 //            storage = LocalFileStorage.Create();
-//            this.path = path;            
+//            this.path = path;
 //        }
 
 //        private LocalFileStorage storage;

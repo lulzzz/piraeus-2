@@ -18,6 +18,28 @@ namespace Piraeus.Adapters
 {
     public class CoapProtocolAdapter : ProtocolAdapter
     {
+        private readonly PiraeusConfig config;
+
+        private readonly HttpContext context;
+
+        private readonly GraphManager graphManager;
+
+        private readonly ILog logger;
+
+        private readonly CoapSession session;
+
+        private IAuditFactory auditFactory;
+
+        private bool closing;
+
+        private ICoapRequestDispatch dispatcher;
+
+        private bool disposed;
+
+        private bool forcePerReceiveAuthn;
+
+        private IAuditor userAuditor;
+
         public CoapProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, IChannel channel, ILog logger, HttpContext context = null)
         {
             this.context = context;
@@ -28,9 +50,11 @@ namespace Piraeus.Adapters
             CoapConfigOptions options = config.ObserveOption && config.NoResponseOption ? CoapConfigOptions.Observe | CoapConfigOptions.NoResponse : config.ObserveOption ? CoapConfigOptions.Observe : config.NoResponseOption ? CoapConfigOptions.NoResponse : CoapConfigOptions.None;
             CoapConfig coapConfig = new CoapConfig(authenticator, config.CoapAuthority, options, config.AutoRetry,
                 config.KeepAliveSeconds, config.AckTimeoutSeconds, config.AckRandomFactor,
-                config.MaxRetransmit, config.NStart, config.DefaultLeisure, config.ProbingRate, config.MaxLatencySeconds);
-            coapConfig.IdentityClaimType = config.ClientIdentityNameClaimType;
-            coapConfig.Indexes = config.GetClientIndexes();
+                config.MaxRetransmit, config.NStart, config.DefaultLeisure, config.ProbingRate, config.MaxLatencySeconds)
+            {
+                IdentityClaimType = config.ClientIdentityNameClaimType,
+                Indexes = config.GetClientIndexes()
+            };
 
             InitializeAuditor(config);
             logger?.LogDebugAsync("CoAP protocol auditor initialized.").GetAwaiter();
@@ -52,33 +76,20 @@ namespace Piraeus.Adapters
             }
         }
 
-
         #region public members
-        public override IChannel Channel { get; set; }
+
+        public override event System.EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
 
         public override event System.EventHandler<ProtocolAdapterErrorEventArgs> OnError;
-        public override event System.EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
+
         public override event System.EventHandler<ChannelObserverEventArgs> OnObserve;
-        #endregion
 
+        public override IChannel Channel { get; set; }
 
-
-        private readonly GraphManager graphManager;
-        private readonly ILog logger;
-        private readonly HttpContext context;
-        private readonly CoapSession session;
-        private ICoapRequestDispatch dispatcher;
-        private bool disposed;
-        private bool forcePerReceiveAuthn;
-        private IAuditor userAuditor;
-        private bool closing;
-        private IAuditFactory auditFactory;
-        private readonly PiraeusConfig config;
-
-
-
+        #endregion public members
 
         #region init
+
         public override void Init()
         {
             forcePerReceiveAuthn = Channel as UdpChannel != null;
@@ -86,9 +97,30 @@ namespace Piraeus.Adapters
             logger?.LogDebugAsync($"CoAP adapter on channel '{Channel.Id}' is initialized.").GetAwaiter();
         }
 
-        #endregion
+        #endregion init
 
         #region events
+
+        private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
+        {
+            if (!closing)
+            {
+                closing = true;
+
+                logger?.LogWarningAsync("CoAP adapter closing channel.");
+
+                UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, DateTime.UtcNow);
+                userAuditor?.UpdateAuditRecordAsync(record).Ignore();
+
+                OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(Channel.Id));
+            }
+        }
+
+        private void Channel_OnError(object sender, ChannelErrorEventArgs e)
+        {
+            logger?.LogErrorAsync(e.Error, "CoAP adapter error on channel.");
+            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, e.Error));
+        }
 
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
@@ -147,14 +179,12 @@ namespace Piraeus.Adapters
 
                     UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, session.Config.IdentityClaimType, Channel.TypeId, "COAP", "Granted", DateTime.UtcNow);
                     userAuditor?.WriteAuditRecordAsync(record).Ignore();
-
                 }
 
                 OnObserve?.Invoke(this, new ChannelObserverEventArgs(this.Channel.Id, message.ResourceUri.ToString(), MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload));
 
                 Task task = Task.Factory.StartNew(async () =>
                 {
-
                     CoapMessageHandler handler = CoapMessageHandler.Create(session, message, dispatcher);
                     CoapMessage msg = await handler.ProcessAsync();
 
@@ -163,7 +193,6 @@ namespace Piraeus.Adapters
                         byte[] payload = msg.Encode();
                         await Channel.SendAsync(payload);
                     }
-
                 });
 
                 task.LogExceptions();
@@ -174,28 +203,6 @@ namespace Piraeus.Adapters
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
                 Channel.CloseAsync().Ignore();
             }
-
-        }
-
-        private void Channel_OnError(object sender, ChannelErrorEventArgs e)
-        {
-            logger?.LogErrorAsync(e.Error, "CoAP adapter error on channel.");
-            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, e.Error));
-        }
-
-        private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
-        {
-            if (!closing)
-            {
-                closing = true;
-
-                logger?.LogWarningAsync("CoAP adapter closing channel.");
-
-                UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, DateTime.UtcNow);
-                userAuditor?.UpdateAuditRecordAsync(record).Ignore();
-
-                OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(Channel.Id));
-            }
         }
 
         private void Channel_OnStateChange(object sender, ChannelStateEventArgs e)
@@ -203,17 +210,22 @@ namespace Piraeus.Adapters
             logger?.LogDebugAsync($"CoAP adapter channel state changed to {e.State.ToString()}");
         }
 
-
-        #endregion
+        #endregion events
 
         #region dispose
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
             {
                 if (disposing)
                 {
-
                     try
                     {
                         if (dispatcher != null)
@@ -258,13 +270,7 @@ namespace Piraeus.Adapters
             }
         }
 
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
+        #endregion dispose
 
         private void InitializeAuditor(PiraeusConfig config)
         {

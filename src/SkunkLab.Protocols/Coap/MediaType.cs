@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     public enum MediaType
     {

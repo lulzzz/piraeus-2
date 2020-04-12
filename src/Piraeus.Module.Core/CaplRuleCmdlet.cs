@@ -13,21 +13,22 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Name of issuer (optional)", Mandatory = false)]
         public string Issuer;
 
-        [Parameter(HelpMessage = "CAPL Operation", Mandatory = true)]
-        public EvaluationOperation Operation;
-
         [Parameter(HelpMessage = "CAPL Match Expression", Mandatory = true)]
         public Match MatchExpression;
+
+        [Parameter(HelpMessage = "CAPL Operation", Mandatory = true)]
+        public EvaluationOperation Operation;
 
         protected override void ProcessRecord()
         {
             //Rule rule = new Rule(this.MatchExpression, this.Operation, this.Evaluates);
 
-
-            Rule rule = new Rule();
-            rule.Evaluates = this.Evaluates;
-            rule.Operation = this.Operation;
-            rule.MatchExpression = this.MatchExpression;
+            Rule rule = new Rule
+            {
+                Evaluates = this.Evaluates,
+                Operation = this.Operation,
+                MatchExpression = this.MatchExpression
+            };
 
             if (!string.IsNullOrEmpty(this.Issuer))
             {

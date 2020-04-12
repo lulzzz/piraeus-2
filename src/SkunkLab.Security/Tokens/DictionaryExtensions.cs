@@ -1,5 +1,4 @@
-﻿
-//namespace SkunkLab.Security.Tokens
+﻿//namespace SkunkLab.Security.Tokens
 //{
 //    using System;
 //    using System.Collections.Generic;

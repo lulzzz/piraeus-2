@@ -6,7 +6,6 @@ namespace SkunkLab.Channels.WebSocket
     {
         public WebSocketOpenEventArgs()
         {
-
         }
     }
 }

@@ -9,9 +9,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
         {
         }
 
-
-
-
         public override async Task<MqttMessage> ProcessAsync()
         {
             if (!Session.IsConnected)
@@ -29,8 +26,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
                 return await Task.FromResult<MqttMessage>(null);
             }
 
-
-
             MqttMessage response = GetAck(msg);
 
             //if(!msg.Dup || (msg.Dup && !Session.IsQuarantined(msg.MessageId)))
@@ -41,7 +36,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
             }
 
             return await Task.FromResult<MqttMessage>(response);
-
         }
 
         private void Dispatch(PublishMessage msg)

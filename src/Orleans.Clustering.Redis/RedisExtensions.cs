@@ -10,8 +10,8 @@ namespace Orleans.Clustering.Redis
 {
     public static class RedisExtensions
     {
-
         #region Membership Table
+
         public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder, ILogger<RedisMembershipTable> logger,
            Action<RedisClusteringOptions> configureOptions)
         {
@@ -53,12 +53,9 @@ namespace Orleans.Clustering.Redis
             return services.AddSingleton<IMembershipTable, RedisMembershipTable>();
         }
 
-        #endregion
+        #endregion Membership Table
 
         #region Gateway List Provider
-
-
-
 
         public static IClientBuilder UseRedisGatewayListProvider(this IClientBuilder builder, Action<RedisClusteringOptions> configureOptions)
         {
@@ -71,7 +68,6 @@ namespace Orleans.Clustering.Redis
             {
                 services.AddOptions<RedisClusteringOptions>();
                 services.AddSingleton<IGatewayListProvider, RedisGatewayListProvider>();
-
             });
         }
 
@@ -79,7 +75,6 @@ namespace Orleans.Clustering.Redis
         {
             return builder.ConfigureServices(services => services.UseRedisGatewayListProvider(configureOptions));
         }
-
 
         public static IServiceCollection UseRedisGatewayListProvider(this IServiceCollection services,
             Action<RedisClusteringOptions> configureOptions)
@@ -94,6 +89,6 @@ namespace Orleans.Clustering.Redis
             return services.AddSingleton<IGatewayListProvider, RedisGatewayListProvider>();
         }
 
-        #endregion
+        #endregion Gateway List Provider
     }
 }

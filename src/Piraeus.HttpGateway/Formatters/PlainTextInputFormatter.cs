@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Formatters;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Piraeus.HttpGateway.Formatters
@@ -16,9 +14,9 @@ namespace Piraeus.HttpGateway.Formatters
             SupportedMediaTypes.Add(CONTENT_TYPE);
         }
 
-        public override Boolean CanRead(InputFormatterContext context)
+        public override bool CanRead(InputFormatterContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
 
             return context.HttpContext.Request.ContentType == CONTENT_TYPE;
         }
@@ -27,7 +25,6 @@ namespace Piraeus.HttpGateway.Formatters
         {
             var request = context.HttpContext.Request;
             var contentType = context.HttpContext.Request.ContentType;
-
 
             if (contentType == CONTENT_TYPE)
             {

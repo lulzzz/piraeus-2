@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -24,19 +24,12 @@ namespace Capl.Authorization.Transforms
         {
         }
 
-        public static Uri TransformUri
-        {
-            get { return new Uri(AuthorizationConstants.TransformUris.Remove); }
-        }
-
+        public static Uri TransformUri => new Uri(AuthorizationConstants.TransformUris.Remove);
 
         /// <summary>
         /// The URI that identifies the remove transform action.
         /// </summary>
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.TransformUris.Remove); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.TransformUris.Remove);
 
         /// <summary>
         /// Executes the transform.
@@ -47,15 +40,8 @@ namespace Capl.Authorization.Transforms
         /// <returns>Transformed set of claims.</returns>
         public override IEnumerable<Claim> Execute(IEnumerable<Claim> claims, IList<Claim> matchedClaims, LiteralClaim targetClaim)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
-
-            if (matchedClaims == null)
-            {
-                throw new ArgumentNullException("matchedClaims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
+            _ = matchedClaims ?? throw new ArgumentNullException(nameof(matchedClaims));
 
             if (targetClaim != null)
             {

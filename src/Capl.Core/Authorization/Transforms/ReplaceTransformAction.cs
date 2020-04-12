@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -23,19 +23,12 @@ namespace Capl.Authorization.Transforms
         {
         }
 
-        public static Uri TransformUri
-        {
-            get { return new Uri(AuthorizationConstants.TransformUris.Replace); }
-        }
-
+        public static Uri TransformUri => new Uri(AuthorizationConstants.TransformUris.Replace);
 
         /// <summary>
         /// Gets the URI that identifies the replace transform action.
         /// </summary>
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.TransformUris.Replace); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.TransformUris.Replace);
 
         /// <summary>
         /// Executes the replacement transform.
@@ -46,20 +39,9 @@ namespace Capl.Authorization.Transforms
         /// <returns>Transformed set of claims.</returns>
         public override IEnumerable<Claim> Execute(IEnumerable<Claim> claims, IList<Claim> matchedClaims, LiteralClaim targetClaim)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
-
-            if (matchedClaims == null)
-            {
-                throw new ArgumentNullException("matchedClaims");
-            }
-
-            if (targetClaim == null)
-            {
-                throw new ArgumentNullException("targetClaim");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
+            _ = matchedClaims ?? throw new ArgumentNullException(nameof(matchedClaims));
+            _ = targetClaim ?? throw new ArgumentNullException(nameof(targetClaim));
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
             IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim)

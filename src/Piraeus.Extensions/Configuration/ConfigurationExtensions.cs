@@ -36,6 +36,17 @@ namespace Piraeus.Extensions.Configuration
 
             return services;
         }
+
+        public static IConfigurationBuilder AddOrleansConfiguration(this IConfigurationBuilder configure, out OrleansConfig orleansConfig)
+        {
+            configure.AddJsonFile("./orleansconfig.json")
+                .AddEnvironmentVariables("OR_");
+            IConfigurationRoot root = configure.Build();
+            orleansConfig = new OrleansConfig();
+            ConfigurationBinder.Bind(root, orleansConfig);
+            return configure;
+        }
+
         public static IServiceCollection AddPiraeusConfiguration(this IServiceCollection services)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder();
@@ -60,15 +71,6 @@ namespace Piraeus.Extensions.Configuration
             services.AddSingleton<PiraeusConfig>(config);
 
             return services;
-        }
-        public static IConfigurationBuilder AddOrleansConfiguration(this IConfigurationBuilder configure, out OrleansConfig orleansConfig)
-        {
-            configure.AddJsonFile("./orleansconfig.json")
-                .AddEnvironmentVariables("OR_");
-            IConfigurationRoot root = configure.Build();
-            orleansConfig = new OrleansConfig();
-            ConfigurationBinder.Bind(root, orleansConfig);
-            return configure;
         }
 
         public static IConfigurationBuilder AddPiraeusConfiguration(this IConfigurationBuilder configure, out PiraeusConfig piraeusConfig)
@@ -113,7 +115,5 @@ namespace Piraeus.Extensions.Configuration
             configureOptions?.Invoke(services.AddOptions<RedisClusteringOptions>());
             return services.AddSingleton<IGatewayListProvider, RedisGatewayListProvider>();
         }
-
-
     }
 }

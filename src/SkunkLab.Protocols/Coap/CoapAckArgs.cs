@@ -1,7 +1,4 @@
-﻿
-
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
 
@@ -27,13 +24,12 @@ namespace SkunkLab.Protocols.Coap
             this.ResponseMessage = responseMessage;
         }
 
-        public ushort MessageId { get; internal set; }
-        public byte[] Token { get; internal set; }
         public CodeType Code { get; internal set; }
-        public string FaultMessage { get; internal set; }
         public string ContentType { get; internal set; }
-        public byte[] ResponseMessage { get; internal set; }
+        public string FaultMessage { get; internal set; }
         public string InternalMessageId { get; internal set; }
-
+        public ushort MessageId { get; internal set; }
+        public byte[] ResponseMessage { get; internal set; }
+        public byte[] Token { get; internal set; }
     }
 }

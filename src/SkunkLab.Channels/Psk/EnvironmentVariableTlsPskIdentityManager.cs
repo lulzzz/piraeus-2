@@ -7,12 +7,12 @@ namespace SkunkLab.Channels.Psk
 {
     public class EnvironmentVariableTlsPskIdentityManager : TlsPskIdentityManager
     {
+        private readonly EnvironmentVariablePskStorage storage;
+
         public EnvironmentVariableTlsPskIdentityManager(string keys, string values)
         {
             storage = EnvironmentVariablePskStorage.CreateSingleton(keys, values);
         }
-
-        private EnvironmentVariablePskStorage storage;
 
         public byte[] GetHint()
         {

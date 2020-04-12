@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Management.Automation;
 
 namespace Piraeus.Module
@@ -7,21 +6,20 @@ namespace Piraeus.Module
     [Cmdlet(VerbsCommon.Add, "PiraeusServiceIdentityClaims")]
     public class AddServiceIdentityClaims : Cmdlet
     {
-        [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
-        public string ServiceUrl;
-
-        [Parameter(HelpMessage = "Security token used to access the REST service.", Mandatory = true)]
-        public string SecurityToken;
-
-        [Parameter(HelpMessage = "Unique name of the service identity.", Mandatory = true)]
-        public string Name;
-
         [Parameter(HelpMessage = "Semi-colon delimited list of claim types.  Must match number of claim values.", Mandatory = true)]
         public string ClaimTypes;
 
         [Parameter(HelpMessage = "Semi-colon delimited list of claim values.  Must match number of claim types.", Mandatory = true)]
         public string ClaimValues;
 
+        [Parameter(HelpMessage = "Unique name of the service identity.", Mandatory = true)]
+        public string Name;
+
+        [Parameter(HelpMessage = "Security token used to access the REST service.", Mandatory = true)]
+        public string SecurityToken;
+
+        [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
+        public string ServiceUrl;
 
         protected override void ProcessRecord()
         {
@@ -32,12 +30,11 @@ namespace Piraeus.Module
             {
                 throw new IndexOutOfRangeException("Claim types and values items do not match same length.");
             }
-            string url = String.Format($"{ServiceUrl}/api/serviceidentity/addclaimtypes?key={Name}&claimtypes={ClaimTypes}&claimvalues={ClaimValues}");
+            string url = string.Format($"{ServiceUrl}/api/serviceidentity/addclaimtypes?key={Name}&claimtypes={ClaimTypes}&claimvalues={ClaimValues}");
             RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             request.Post();
         }
     }
-
 }

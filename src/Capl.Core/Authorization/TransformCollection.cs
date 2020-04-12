@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -18,12 +18,12 @@ namespace Capl.Authorization
     [XmlSchemaProvider(null, IsAny = true)]
     public class TransformCollection : TransformBase, IList<Transform>, IXmlSerializable
     {
+        private readonly List<Transform> transforms;
+
         public TransformCollection()
         {
             transforms = new List<Transform>();
         }
-
-        private List<Transform> transforms;
 
         public static TransformCollection Load(XmlReader reader)
         {
@@ -34,6 +34,12 @@ namespace Capl.Authorization
         }
 
         #region IList<ScopeTransform> Members
+
+        public Transform this[int index]
+        {
+            get => transforms[index];
+            set => transforms[index] = value;
+        }
 
         public int IndexOf(Transform item)
         {
@@ -50,15 +56,13 @@ namespace Capl.Authorization
             transforms.RemoveAt(index);
         }
 
-        public Transform this[int index]
-        {
-            get { return transforms[index]; }
-            set { transforms[index] = value; }
-        }
-
-        #endregion
+        #endregion IList<ScopeTransform> Members
 
         #region ICollection<ScopeTransform> Members
+
+        public int Count => transforms.Count;
+
+        public bool IsReadOnly => false;
 
         public void Add(Transform item)
         {
@@ -80,22 +84,12 @@ namespace Capl.Authorization
             transforms.CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return transforms.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
         public bool Remove(Transform item)
         {
             return transforms.Remove(item);
         }
 
-        #endregion
+        #endregion ICollection<ScopeTransform> Members
 
         #region IEnumerable<ScopeTransform> Members
 
@@ -104,46 +98,38 @@ namespace Capl.Authorization
             return transforms.GetEnumerator();
         }
 
-        #endregion
+        #endregion IEnumerable<ScopeTransform> Members
 
         #region IEnumerable Members
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator)GetEnumerator();
+            return GetEnumerator();
         }
 
-        #endregion
+        #endregion IEnumerable Members
 
         #region ITransform Members
 
         public override IEnumerable<Claim> TransformClaims(IEnumerable<Claim> claims)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             foreach (Transform transform in this)
             {
                 claims = transform.TransformClaims(claims);
             }
 
-
             return claims;
         }
 
-        #endregion
+        #endregion ITransform Members
 
         #region IXmlSerializable Members
 
-
         public override void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Transforms);
 
@@ -163,10 +149,7 @@ namespace Capl.Authorization
 
         public override void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             if (this.Count == 0)
             {
@@ -183,6 +166,6 @@ namespace Capl.Authorization
             writer.WriteEndElement();
         }
 
-        #endregion
+        #endregion IXmlSerializable Members
     }
 }

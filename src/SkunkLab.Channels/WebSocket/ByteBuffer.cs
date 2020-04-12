@@ -1,17 +1,14 @@
-﻿
-namespace SkunkLab.Channels.WebSocket
+﻿namespace SkunkLab.Channels.WebSocket
 {
-
-
     using System;
     using System.Collections.Generic;
     using System.Text;
 
     internal sealed class ByteBuffer
     {
-        private int _currentLength;
         private readonly int _maxLength;
         private readonly List<byte[]> _segments = new List<byte[]>();
+        private int _currentLength;
 
         public ByteBuffer(int maxLength)
         {
@@ -56,6 +53,4 @@ namespace SkunkLab.Channels.WebSocket
             return builder.ToString();
         }
     }
-
-
 }

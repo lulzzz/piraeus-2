@@ -1,6 +1,4 @@
-﻿
-
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
     using System.Collections.Generic;
@@ -18,21 +16,17 @@ namespace SkunkLab.Protocols.Mqtt
             this.Topics = new List<string>(topics);
         }
 
+        public override bool HasAck => true;
+
         public List<string> Topics { get; set; }
 
         //public ushort MessageId { get; set; }
-
-        public override bool HasAck
-        {
-            get { return true; }
-        }
-
         public override byte[] Encode()
         {
-            byte fixedHeader = (byte)((0x0A << Constants.Header.MessageTypeOffset) |
-                   (byte)(0x00) |
-                   (byte)(0x02) |
-                   (byte)(0x00));
+            byte fixedHeader = (0x0A << Constants.Header.MessageTypeOffset) |
+                   0x00 |
+                   0x02 |
+                   0x00;
 
             byte[] messageId = new byte[2];
             messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
@@ -49,7 +43,6 @@ namespace SkunkLab.Protocols.Mqtt
             byte[] payload = topicContainer.ToBytes();
 
             byte[] remainingLengthBytes = base.EncodeRemainingLength(2 + payload.Length);
-
 
             ByteContainer container = new ByteContainer();
             container.Add(fixedHeader);
@@ -89,8 +82,7 @@ namespace SkunkLab.Protocols.Mqtt
 
             while (index < buffer.Length)
             {
-                int length = 0;
-                string topic = ByteContainer.DecodeString(buffer, index, out length);
+                string topic = ByteContainer.DecodeString(buffer, index, out int length);
                 index += length;
                 this.Topics.Add(topic);
             }

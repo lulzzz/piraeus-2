@@ -7,20 +7,20 @@ namespace SkunkLab.Channels.Tcp
 {
     public class PskIdentityManager : TlsPskIdentityManager
     {
+        private readonly Dictionary<string, byte[]> container;
+
+        private readonly byte[] psk;
 
         public PskIdentityManager(Dictionary<string, byte[]> psks)
         {
             container = psks;
         }
 
-        private Dictionary<string, byte[]> container;
-
         public PskIdentityManager(byte[] psk)
         {
             this.psk = psk;
         }
 
-        private byte[] psk;
         public byte[] GetHint()
         {
             return null;

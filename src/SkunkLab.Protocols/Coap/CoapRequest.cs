@@ -1,6 +1,4 @@
-﻿
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Linq;
@@ -39,10 +37,55 @@ namespace SkunkLab.Protocols.Coap
             this.Payload = payload;
         }
 
+        public MethodType Method { get; set; }
         public RequestMessageType RequestType { get; set; }
 
-        public MethodType Method { get; set; }
+        public override void Decode(byte[] message)
+        {
+            //CoapRequest message = new CoapRequest();
 
+            int index = 0;
+            byte header = message[index++];
+            if (header >> 0x06 != 1)
+            {
+                throw new CoapVersionMismatchException("Coap Version 1 is only supported version for Coap request.");
+            }
+
+            this.RequestType = (RequestMessageType)Convert.ToInt32((header >> 0x04) & 0x03);
+
+            this.TokenLength = Convert.ToByte(header & 0x0F);
+
+            this.Method = (MethodType)message[index++];
+
+            this.MessageId = (ushort)(message[index++] << 0x08 | message[index++]);
+            byte[] tokenBytes = new byte[this.TokenLength];
+            Buffer.BlockCopy(message, index, tokenBytes, 0, this.TokenLength);
+            this.Token = tokenBytes;
+
+            //get the options
+            index += this.TokenLength;
+            int previous = 0;
+            int delta = 0;
+
+            bool marker = ((message[index] & 0xFF) == 0xFF);
+            while (!marker)
+            {
+                delta = (message[index] >> 0x04);
+                CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
+                this.Options.Add(CoapOption);
+                previous += delta;
+                marker = ((message[index] & 0xFF) == 0xFF);
+            }
+
+            if (marker) //grab the payload
+            {
+                index++;
+                this.Payload = new byte[message.Length - index];
+                Buffer.BlockCopy(message, index, this.Payload, 0, this.Payload.Length);
+            }
+
+            ReadOptions(this);
+        }
 
         public override byte[] Encode()
         {
@@ -53,7 +96,7 @@ namespace SkunkLab.Protocols.Coap
 
             int index = 0;
 
-            header[index++] = (byte)((byte)(0x01 << 0x06) | (byte)(Convert.ToByte((int)RequestType) << 0x04) | (byte)(this.TokenLength));
+            header[index++] = (byte)(0x01 << 0x06 | (byte)(Convert.ToByte((int)RequestType) << 0x04) | this.TokenLength);
             header[index++] = (byte)(int)this.Method;
             header[index++] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
             header[index++] = (byte)(this.MessageId & 0x00FF); //LSB
@@ -105,54 +148,5 @@ namespace SkunkLab.Protocols.Coap
 
             return buffer;
         }
-
-
-        public override void Decode(byte[] message)
-        {
-            //CoapRequest message = new CoapRequest();
-
-            int index = 0;
-            byte header = message[index++];
-            if (header >> 0x06 != 1)
-            {
-                throw new CoapVersionMismatchException("Coap Version 1 is only supported version for Coap request.");
-            }
-
-            this.RequestType = (RequestMessageType)Convert.ToInt32((header >> 0x04) & 0x03);
-
-            this.TokenLength = Convert.ToByte(header & 0x0F);
-
-            this.Method = (MethodType)message[index++];
-
-            this.MessageId = (ushort)(message[index++] << 0x08 | message[index++]);
-            byte[] tokenBytes = new byte[this.TokenLength];
-            Buffer.BlockCopy(message, index, tokenBytes, 0, this.TokenLength);
-            this.Token = tokenBytes;
-
-            //get the options
-            index += this.TokenLength;
-            int previous = 0;
-            int delta = 0;
-
-            bool marker = ((message[index] & 0xFF) == 0xFF);
-            while (!marker)
-            {
-                delta = (message[index] >> 0x04);
-                CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
-                this.Options.Add(CoapOption);
-                previous += delta;
-                marker = ((message[index] & 0xFF) == 0xFF);
-            }
-
-            if (marker) //grab the payload
-            {
-                index++;
-                this.Payload = new byte[message.Length - index];
-                Buffer.BlockCopy(message, index, this.Payload, 0, this.Payload.Length);
-            }
-
-            ReadOptions(this);
-        }
-
     }
 }

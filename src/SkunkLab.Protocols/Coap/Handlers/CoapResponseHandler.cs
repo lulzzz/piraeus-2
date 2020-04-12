@@ -22,7 +22,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
             {
                 return null;
             }
-
         }
     }
 }

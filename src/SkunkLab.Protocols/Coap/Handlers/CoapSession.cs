@@ -9,9 +9,23 @@ using System.Timers;
 namespace SkunkLab.Protocols.Coap.Handlers
 {
     public delegate void EventHandler<CoapMessageEventArgs>(object sender, CoapMessageEventArgs args);
+
     public delegate CoapMessage RespondingEventHandler(object sender, CoapMessageEventArgs args);
+
     public class CoapSession : IDisposable
     {
+        private readonly HttpContext context;
+
+        private string bootstrapToken;
+
+        private SecurityTokenType bootstrapTokenType;
+
+        private bool disposedValue;
+
+        private readonly Timer keepaliveTimer;
+
+        private DateTime keepaliveTimestamp;
+
         public CoapSession(CoapConfig config, HttpContext context = null)
         {
             Config = config;
@@ -30,17 +44,13 @@ namespace SkunkLab.Protocols.Coap.Handlers
             }
         }
 
+        public event EventHandler<CoapMessageEventArgs> OnKeepAlive;
 
         public event EventHandler<CoapMessageEventArgs> OnRetry;
-        public event EventHandler<CoapMessageEventArgs> OnKeepAlive;
-        private bool disposedValue;
-        private DateTime keepaliveTimestamp;
-        private Timer keepaliveTimer;
-        private string bootstrapToken;
-        private SecurityTokenType bootstrapTokenType;
-        private readonly HttpContext context;
 
-
+        public Receiver CoapReceiver { get; internal set; }
+        public Transmitter CoapSender { get; internal set; }
+        public CoapConfig Config { get; internal set; }
         public bool HasBootstrapToken { get; internal set; }
 
         public string Identity { get; set; }
@@ -48,33 +58,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public List<KeyValuePair<string, string>> Indexes { get; set; }
 
         public bool IsAuthenticated { get; set; }
-
-
-        public Transmitter CoapSender { get; internal set; }
-
-        public Receiver CoapReceiver { get; internal set; }
-
-
-
-        public CoapConfig Config { get; internal set; }
-
-        public void EnsureAuthentication(CoapMessage message, bool force = false)
-        {
-            if (!IsAuthenticated || force)
-            {
-                CoapUri coapUri = new CoapUri(message.ResourceUri.ToString());
-                if (!Authenticate(coapUri.TokenType, coapUri.SecurityToken))
-                {
-                    throw new SecurityException("CoAP session not authenticated.");
-                }
-                else
-                {
-                    IdentityDecoder decoder = new IdentityDecoder(Config.IdentityClaimType, context, Config.Indexes);
-                    Identity = decoder.Id;
-                    Indexes = decoder.Indexes;
-                }
-            }
-        }
 
         public bool Authenticate(string tokenType, string token)
         {
@@ -94,21 +77,37 @@ namespace SkunkLab.Protocols.Coap.Handlers
             return IsAuthenticated;
         }
 
+        public bool CanObserve()
+        {
+            return Config.ConfigOptions.HasFlag(CoapConfigOptions.Observe);
+        }
+
+        public void EnsureAuthentication(CoapMessage message, bool force = false)
+        {
+            if (!IsAuthenticated || force)
+            {
+                CoapUri coapUri = new CoapUri(message.ResourceUri.ToString());
+                if (!Authenticate(coapUri.TokenType, coapUri.SecurityToken))
+                {
+                    throw new SecurityException("CoAP session not authenticated.");
+                }
+                else
+                {
+                    IdentityDecoder decoder = new IdentityDecoder(Config.IdentityClaimType, context, Config.Indexes);
+                    Identity = decoder.Id;
+                    Indexes = decoder.Indexes;
+                }
+            }
+        }
 
         public bool IsNoResponse(NoResponseType? messageNrt, NoResponseType result)
         {
-
             if (!messageNrt.HasValue)
             {
                 return false;
             }
 
             return messageNrt.Value.HasFlag(result);
-        }
-
-        public bool CanObserve()
-        {
-            return Config.ConfigOptions.HasFlag(CoapConfigOptions.Observe);
         }
 
         public void UpdateKeepAliveTimestamp()
@@ -141,6 +140,15 @@ namespace SkunkLab.Protocols.Coap.Handlers
         }
 
         #region Dispose
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -161,14 +169,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
             }
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
+        #endregion Dispose
     }
 }

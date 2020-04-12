@@ -1,8 +1,4 @@
-﻿using Capl.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Piraeus.Adapters.Utilities;
-using Piraeus.Auditing;
+﻿using Piraeus.Auditing;
 using Piraeus.Core;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
@@ -13,17 +9,40 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Piraeus.Adapters
 {
     public class OrleansAdapter
     {
+        //private readonly HttpContext context;
+        private readonly IAuditor auditor;
+
+        private readonly string channelType;
+
+        private readonly Dictionary<string, Tuple<string, string>> container;
+
+        private readonly Dictionary<string, IMessageObserver> durableObservers;
+
+        //resource, subscription + leaseKey
+        private readonly Dictionary<string, IMessageObserver> ephemeralObservers;
+
+        private readonly GraphManager graphManager;
+
+        private readonly ILog logger;
+
+        private readonly string protocolType;
+
+        private bool disposedValue = false;
+
+        private string identity;
+
+        //subscription, observer
+        //subscription, observer
+        private System.Timers.Timer leaseTimer;
+
         public OrleansAdapter(string identity, string channelType, string protocolType, GraphManager graphManager, ILog logger = null)
         {
-
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             this.identity = identity;
             this.channelType = channelType;
@@ -39,24 +58,11 @@ namespace Piraeus.Adapters
 
         public event EventHandler<ObserveMessageEventArgs> OnObserve;   //signal protocol adapter
 
-        private readonly GraphManager graphManager;
-        //private readonly HttpContext context;
-        private readonly IAuditor auditor;
-        private string identity;
-        private readonly string channelType;
-        private readonly string protocolType;
-        private readonly Dictionary<string, Tuple<string, string>> container;  //resource, subscription + leaseKey
-        private readonly Dictionary<string, IMessageObserver> ephemeralObservers; //subscription, observer
-        private readonly Dictionary<string, IMessageObserver> durableObservers;   //subscription, observer
-        private System.Timers.Timer leaseTimer; //timer for leases
-        private bool disposedValue = false; // To detect redundant calls
-        private readonly ILog logger;
-
-
-
+        //timer for leases
+        // To detect redundant calls
         public string Identity
         {
-            set { identity = value; }
+            set => identity = value;
         }
 
         public async Task<List<string>> LoadDurableSubscriptionsAsync(string identity)
@@ -115,7 +121,7 @@ namespace Piraeus.Adapters
         //    if (metadata == null)
         //    {
         //        await logger?.LogWarningAsync($"Cannot publish to Orleans resource with null metadata");
-                
+
         //        return false;
         //    }
 
@@ -169,7 +175,6 @@ namespace Piraeus.Adapters
         //public async Task<bool> CanSubscribeAsync(string resourceUriString, bool channelEncrypted)
         //{
         //    EventMetadata metadata = await graphManager.GetPiSystemMetadataAsync(resourceUriString);
-            
 
         //    if (metadata == null)
         //    {
@@ -225,7 +230,6 @@ namespace Piraeus.Adapters
 
         //    return authz;
         //}
-
 
         public async Task PublishAsync(EventMessage message, List<KeyValuePair<string, string>> indexes = null)
         {
@@ -302,7 +306,6 @@ namespace Piraeus.Adapters
         {
             try
             {
-
                 //unsubscribe from resource
                 if (container.ContainsKey(resourceUriString))
                 {
@@ -327,10 +330,17 @@ namespace Piraeus.Adapters
         }
 
         #region Dispose
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
-            {                
+            {
                 if (disposing)
                 {
                     if (leaseTimer != null)
@@ -347,25 +357,9 @@ namespace Piraeus.Adapters
             }
         }
 
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
-
-
-
+        #endregion Dispose
 
         #region private methods
-        private void Observer_OnNotify(object sender, MessageNotificationArgs e)
-        {
-            //observeCount++;
-            //Trace.TraceInformation("Obsever {0}", observeCount);
-            //signal the protocol adapter
-            OnObserve?.Invoke(this, new ObserveMessageEventArgs(e.Message));
-        }
 
         private void EnsureLeaseTimer()
         {
@@ -379,7 +373,6 @@ namespace Piraeus.Adapters
 
         private void LeaseTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-
             KeyValuePair<string, Tuple<string, string>>[] kvps = container.ToArray();
 
             if (kvps == null || kvps.Length == 0)
@@ -400,7 +393,14 @@ namespace Piraeus.Adapters
             });
 
             leaseTask.LogExceptions();
+        }
 
+        private void Observer_OnNotify(object sender, MessageNotificationArgs e)
+        {
+            //observeCount++;
+            //Trace.TraceInformation("Obsever {0}", observeCount);
+            //signal the protocol adapter
+            OnObserve?.Invoke(this, new ObserveMessageEventArgs(e.Message));
         }
 
         private async Task RemoveDurableObserversAsync()
@@ -475,7 +475,6 @@ namespace Piraeus.Adapters
                     await Task.WhenAll(unobserveTaskList);
                 }
 
-
                 ephemeralObservers.Clear();
                 RemoveFromContainer(list);
                 Console.WriteLine($"Ephemeral subscription observers removed for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
@@ -486,7 +485,6 @@ namespace Piraeus.Adapters
                 Console.WriteLine($"No ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow.ToString("yyyy - MM - ddTHH - MM - ss.fffff")}");
                 Trace.TraceInformation("No Ephemeral observers found by Orleans Adapter to be removed for identity '{0}'", identity);
             }
-
         }
 
         private void RemoveFromContainer(string subscriptionUriString)
@@ -513,9 +511,6 @@ namespace Piraeus.Adapters
             }
         }
 
-
-
-
-        #endregion
+        #endregion private methods
     }
 }

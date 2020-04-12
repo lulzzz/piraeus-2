@@ -16,7 +16,5 @@
         {
             return KeyVaultPskStorage.CreateSingleton(authority, clientId, clientSecret);
         }
-
-
     }
 }

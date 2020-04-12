@@ -7,21 +7,13 @@ namespace SkunkLab.Storage
 {
     public class RedisPskStorage : PskStorageAdapter
     {
-
-        public static RedisPskStorage CreateSingleton(string connectionString)
-        {
-            if (instance == null)
-            {
-                instance = new RedisPskStorage(connectionString);
-            }
-
-            return instance;
-        }
-
         private static RedisPskStorage instance;
-        private ConnectionMultiplexer connection;
-        private IDatabase database;
-        private int? id;
+
+        private readonly ConnectionMultiplexer connection;
+
+        private readonly IDatabase database;
+
+        private readonly int? id;
 
         protected RedisPskStorage(string connectionString)
         {
@@ -31,19 +23,14 @@ namespace SkunkLab.Storage
             database = connection.GetDatabase();
         }
 
-        public override async Task SetSecretAsync(string key, string value)
+        public static RedisPskStorage CreateSingleton(string connectionString)
         {
-            await database.StringSetAsync(key, value);
-        }
+            if (instance == null)
+            {
+                instance = new RedisPskStorage(connectionString);
+            }
 
-        public override async Task<string> GetSecretAsync(string key)
-        {
-            return await database.StringGetAsync(key);
-        }
-
-        public override async Task RemoveSecretAsync(string key)
-        {
-            await database.KeyDeleteAsync(key);
+            return instance;
         }
 
         public override async Task<string[]> GetKeys()
@@ -66,8 +53,19 @@ namespace SkunkLab.Storage
             return null;
         }
 
+        public override async Task<string> GetSecretAsync(string key)
+        {
+            return await database.StringGetAsync(key);
+        }
 
+        public override async Task RemoveSecretAsync(string key)
+        {
+            await database.KeyDeleteAsync(key);
+        }
 
-
+        public override async Task SetSecretAsync(string key, string value)
+        {
+            await database.StringSetAsync(key, value);
+        }
     }
 }

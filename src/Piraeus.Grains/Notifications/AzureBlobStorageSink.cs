@@ -12,27 +12,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-
 namespace Piraeus.Grains.Notifications
 {
     public class AzureBlobStorageSink : EventSink
     {
-
-
-        private readonly string container;
         private readonly string blobType;
-        private string appendFilename;
-        private IAuditor auditor;
-        private Uri uri;
+        private readonly int clientCount;
+        private readonly string connectionString;
+        private readonly string container;
         private readonly string key;
         private readonly Uri sasUri;
         private readonly BlobStorage[] storageArray;
+        private string appendFilename;
         private int arrayIndex;
-        private readonly int clientCount;
-        private readonly string connectionString;
-        private ConcurrentQueue<EventMessage> queue;
-
-
+        private readonly IAuditor auditor;
+        private readonly ConcurrentQueue<EventMessage> queue;
+        private readonly Uri uri;
 
         public AzureBlobStorageSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -56,15 +51,14 @@ namespace Piraeus.Grains.Notifications
                 appendFilename = nvc["file"];
             }
 
-
-            if (String.IsNullOrEmpty(container))
+            if (string.IsNullOrEmpty(container))
             {
                 container = "$Root";
             }
 
             string btype = nvc["blobtype"];
 
-            if (String.IsNullOrEmpty(btype))
+            if (string.IsNullOrEmpty(btype))
             {
                 blobType = "block";
             }
@@ -87,7 +81,7 @@ namespace Piraeus.Grains.Notifications
             storageArray = new BlobStorage[clientCount];
             if (sasUri == null)
             {
-                connectionString = String.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};", uri.Authority.Split(new char[] { '.' })[0], key);
+                connectionString = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};", uri.Authority.Split(new char[] { '.' })[0], key);
 
                 for (int i = 0; i < clientCount; i++)
                 {
@@ -96,7 +90,7 @@ namespace Piraeus.Grains.Notifications
             }
             else
             {
-                connectionString = String.Format("BlobEndpoint={0};SharedAccessSignature={1}", container != "$Root" ? uri.ToString().Replace(uri.LocalPath, "") : uri.ToString(), key);
+                connectionString = string.Format("BlobEndpoint={0};SharedAccessSignature={1}", container != "$Root" ? uri.ToString().Replace(uri.LocalPath, "") : uri.ToString(), key);
 
                 for (int i = 0; i < clientCount; i++)
                 {
@@ -104,8 +98,6 @@ namespace Piraeus.Grains.Notifications
                 }
             }
         }
-
-
 
         public override async Task SendAsync(EventMessage message)
         {
@@ -115,7 +107,6 @@ namespace Piraeus.Grains.Notifications
             queue.Enqueue(message);
             try
             {
-
                 while (!queue.IsEmpty)
                 {
                     bool isdequeued = queue.TryDequeue(out msg);
@@ -137,7 +128,6 @@ namespace Piraeus.Grains.Notifications
                             Task task = storageArray[arrayIndex].WriteBlockBlobAsync(container, filename, payload, msg.ContentType);
                             Task innerTask = task.ContinueWith(async (a) => { await FaultTask(msg.MessageId, container, filename, payload, msg.ContentType, msg.Audit); }, TaskContinuationOptions.OnlyOnFaulted);
                             await Task.WhenAll(task);
-
                         }
                         else if (blobType == "page")
                         {
@@ -163,7 +153,6 @@ namespace Piraeus.Grains.Notifications
                             Task task = storageArray[arrayIndex].WriteAppendBlobAsync(container, appendFilename, buffer, msg.ContentType);
                             Task innerTask = task.ContinueWith(async (a) => { await FaultTask(msg.MessageId, container, appendFilename, buffer, msg.ContentType, msg.Audit); }, TaskContinuationOptions.OnlyOnFaulted);
                             await Task.WhenAll(task);
-
                         }
 
                         record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob", "AzureBlob", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
@@ -182,8 +171,6 @@ namespace Piraeus.Grains.Notifications
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
-
-
         }
 
         private async Task FaultTask(string id, string container, string filename, byte[] payload, string contentType, bool canAudit)
@@ -197,7 +184,7 @@ namespace Piraeus.Grains.Notifications
                 if (blobType == "block")
                 {
                     string[] parts = filename.Split(new char[] { '.' });
-                    string path2 = parts.Length == 2 ? String.Format("{0}-R.{1}", parts[0], parts[1]) : String.Format("{0}-R", filename);
+                    string path2 = parts.Length == 2 ? string.Format("{0}-R.{1}", parts[0], parts[1]) : string.Format("{0}-R", filename);
 
                     await storage.WriteBlockBlobAsync(container, path2, payload, contentType);
                 }
@@ -228,29 +215,6 @@ namespace Piraeus.Grains.Notifications
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
-
-
-        }
-
-
-
-        private byte[] GetPayload(EventMessage message)
-        {
-            switch (message.Protocol)
-            {
-                case ProtocolType.COAP:
-                    CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
-                    return coap.Payload;
-                case ProtocolType.MQTT:
-                    MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
-                    return mqtt.Payload;
-                case ProtocolType.REST:
-                    return message.Message;
-                case ProtocolType.WSN:
-                    return message.Message;
-                default:
-                    return null;
-            }
         }
 
         private string GetAppendFilename(string contentType)
@@ -280,11 +244,31 @@ namespace Piraeus.Grains.Notifications
             }
 
             string guid = Guid.NewGuid().ToString();
-            string filename = String.Format("{0}T{1}", guid, DateTime.UtcNow.ToString("HH-MM-ss-fffff"));
-            return suffix == null ? filename : String.Format("{0}.{1}", filename, suffix);
+            string filename = string.Format("{0}T{1}", guid, DateTime.UtcNow.ToString("HH-MM-ss-fffff"));
+            return suffix == null ? filename : string.Format("{0}.{1}", filename, suffix);
         }
 
+        private byte[] GetPayload(EventMessage message)
+        {
+            switch (message.Protocol)
+            {
+                case ProtocolType.COAP:
+                    CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
+                    return coap.Payload;
 
+                case ProtocolType.MQTT:
+                    MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
+                    return mqtt.Payload;
 
+                case ProtocolType.REST:
+                    return message.Message;
+
+                case ProtocolType.WSN:
+                    return message.Message;
+
+                default:
+                    return null;
+            }
+        }
     }
 }

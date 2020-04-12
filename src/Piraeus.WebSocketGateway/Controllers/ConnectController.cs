@@ -20,14 +20,13 @@ namespace Piraeus.WebSocketGateway.Controllers
     [ApiController]
     public class ConnectController : ControllerBase
     {
-        private PiraeusConfig config;
-        private CancellationTokenSource source;
         private ProtocolAdapter adapter;
+        private readonly IAuthenticator authn;
+        private readonly PiraeusConfig config;
+        private readonly GraphManager graphManager;
+        private readonly ILogger logger;
         private WebSocket socket;
-        private IAuthenticator authn;
-        private GraphManager graphManager;
-        private ILogger logger;
-
+        private CancellationTokenSource source;
 
         public ConnectController(PiraeusConfig config, IClusterClient client, ILogger logger)
         {
@@ -41,7 +40,6 @@ namespace Piraeus.WebSocketGateway.Controllers
             this.graphManager = new GraphManager(client);
             this.logger = logger;
         }
-
 
         [HttpGet]
         public async Task<HttpResponseMessage> Get()
@@ -72,15 +70,6 @@ namespace Piraeus.WebSocketGateway.Controllers
             }
         }
 
-        private void Adapter_OnError(object sender, ProtocolAdapterErrorEventArgs e)
-        {
-            try
-            {
-                adapter.Channel.CloseAsync().GetAwaiter();
-            }
-            catch { }
-        }
-
         private void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs e)
         {
             try
@@ -98,6 +87,15 @@ namespace Piraeus.WebSocketGateway.Controllers
                     catch { }
                     adapter.Dispose();
                 }
+            }
+            catch { }
+        }
+
+        private void Adapter_OnError(object sender, ProtocolAdapterErrorEventArgs e)
+        {
+            try
+            {
+                adapter.Channel.CloseAsync().GetAwaiter();
             }
             catch { }
         }

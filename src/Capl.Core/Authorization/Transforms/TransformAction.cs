@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -29,13 +29,9 @@ namespace Capl.Authorization.Transforms
         /// <returns>An action used to transform claims.</returns>
         public static TransformAction Create(Uri action, TransformsDictionary transforms)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException("action");
-            }
+            _ = action ?? throw new ArgumentNullException(nameof(action));
 
-            TransformAction transformAction = null;
-
+            TransformAction transformAction;
             if (transforms == null)
             {
                 transformAction = TransformsDictionary.Default[action.ToString()]; //CaplConfigurationManager.Transforms[action.ToString()];

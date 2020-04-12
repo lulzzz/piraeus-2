@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -16,6 +16,10 @@ namespace Capl.Authorization.Transforms
     /// </summary>
     public class TransformsDictionary : IDictionary<string, TransformAction>
     {
+        private static TransformsDictionary defaultInstance;
+
+        private readonly Dictionary<string, TransformAction> transforms;
+
         /// <summary>
         /// Creates an instance of the object.
         /// </summary>
@@ -24,7 +28,6 @@ namespace Capl.Authorization.Transforms
             transforms = new Dictionary<string, TransformAction>();
         }
 
-        private static TransformsDictionary defaultInstance;
         public static TransformsDictionary Default
         {
             get
@@ -55,16 +58,20 @@ namespace Capl.Authorization.Transforms
 
                 defaultInstance = dict;
                 return defaultInstance;
-
-
-
-
             }
         }
 
-        Dictionary<string, TransformAction> transforms;
-
         #region IDictionary<string,TransformAction> Members
+
+        public ICollection<string> Keys => transforms.Keys;
+
+        public ICollection<TransformAction> Values => transforms.Values;
+
+        public TransformAction this[string key]
+        {
+            get => transforms[key];
+            set => transforms[key] = value;
+        }
 
         /// <summary>
         /// Adds a new transform.
@@ -81,11 +88,6 @@ namespace Capl.Authorization.Transforms
             return transforms.ContainsKey(key);
         }
 
-        public ICollection<string> Keys
-        {
-            get { return transforms.Keys; }
-        }
-
         public bool Remove(string key)
         {
             return transforms.Remove(key);
@@ -96,20 +98,13 @@ namespace Capl.Authorization.Transforms
             return transforms.TryGetValue(key, out value);
         }
 
-        public ICollection<TransformAction> Values
-        {
-            get { return transforms.Values; }
-        }
-
-        public TransformAction this[string key]
-        {
-            get { return transforms[key]; }
-            set { transforms[key] = value; }
-        }
-
-        #endregion
+        #endregion IDictionary<string,TransformAction> Members
 
         #region ICollection<KeyValuePair<string,TransformAction>> Members
+
+        public int Count => transforms.Count;
+
+        public bool IsReadOnly => false;
 
         public void Add(KeyValuePair<string, TransformAction> item)
         {
@@ -131,31 +126,21 @@ namespace Capl.Authorization.Transforms
             ((ICollection<KeyValuePair<string, TransformAction>>)transforms).CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return transforms.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
         public bool Remove(KeyValuePair<string, TransformAction> item)
         {
             return ((ICollection<KeyValuePair<string, TransformAction>>)transforms).Remove(item);
         }
 
-        #endregion
+        #endregion ICollection<KeyValuePair<string,TransformAction>> Members
 
         #region IEnumerable<KeyValuePair<string,TransformAction>> Members
 
         public IEnumerator<KeyValuePair<string, TransformAction>> GetEnumerator()
         {
-            return (IEnumerator<KeyValuePair<string, TransformAction>>)transforms.GetEnumerator();
+            return transforms.GetEnumerator();
         }
 
-        #endregion
+        #endregion IEnumerable<KeyValuePair<string,TransformAction>> Members
 
         #region IEnumerable Members
 
@@ -164,6 +149,6 @@ namespace Capl.Authorization.Transforms
             return transforms.GetEnumerator();
         }
 
-        #endregion
+        #endregion IEnumerable Members
     }
 }

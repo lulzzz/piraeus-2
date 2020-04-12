@@ -10,32 +10,32 @@ namespace Piraeus.HttpGateway.Middleware
 {
     public class PiraeusHttpMiddleware
     {
-        private HttpContext context;
         private readonly PiraeusConfig config;
+        private readonly GraphManager graphManager;
         private readonly RequestDelegate next;
-        private ProtocolAdapter adapter;
-        private CancellationTokenSource source;
-        private delegate void HttpResponseObserverHandler(object sender, SkunkLab.Channels.ChannelObserverEventArgs args);
-        private event HttpResponseObserverHandler OnMessage;
 
         private readonly WaitHandle[] waitHandles = new WaitHandle[]
         {
             new AutoResetEvent(false)
         };
 
-        private readonly GraphManager graphManager;
+        private ProtocolAdapter adapter;
+        private HttpContext context;
+        private CancellationTokenSource source;
 
         public PiraeusHttpMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client)
         {
             this.next = next;
             this.config = config;
             graphManager = new GraphManager(client);
-            
         }
+
+        private delegate void HttpResponseObserverHandler(object sender, SkunkLab.Channels.ChannelObserverEventArgs args);
+
+        private event HttpResponseObserverHandler OnMessage;
 
         public async Task Invoke(HttpContext context)
         {
-            
             source = new CancellationTokenSource();
             adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
             adapter.OnObserve += Adapter_OnObserve;
@@ -44,9 +44,9 @@ namespace Piraeus.HttpGateway.Middleware
             await next(context);
             if (context.Request.Method.ToUpperInvariant() == "GET")
             {
-                //long polling               
+                //long polling
                 //adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
-                
+
                 //adapter.Init();
                 this.context = context;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Listen), waitHandles[0]);
@@ -62,25 +62,24 @@ namespace Piraeus.HttpGateway.Middleware
             adapter.Dispose();
         }
 
+        private void Adapter_OnObserve(object sender, SkunkLab.Channels.ChannelObserverEventArgs e)
+        {
+            OnMessage?.Invoke(this, e);
+        }
+
         private void Listen(object state)
         {
             AutoResetEvent are = (AutoResetEvent)state;
             OnMessage += (o, a) =>
             {
-                
                 context.Response.ContentType = a.ContentType;
                 context.Response.ContentLength = a.Message.Length;
                 context.Response.Headers.Add("x-sl-resource", a.ResourceUriString);
                 context.Response.StatusCode = 200;
-                context.Response.BodyWriter.WriteAsync(a.Message);                
+                context.Response.BodyWriter.WriteAsync(a.Message);
                 context.Response.CompleteAsync();
                 are.Set();
             };
-        }
-
-        private void Adapter_OnObserve(object sender, SkunkLab.Channels.ChannelObserverEventArgs e)
-        {
-            OnMessage?.Invoke(this, e);
         }
     }
 }

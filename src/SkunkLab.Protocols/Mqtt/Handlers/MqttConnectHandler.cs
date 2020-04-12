@@ -7,7 +7,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
         public MqttConnectHandler(MqttSession session, MqttMessage message)
             : base(session, message)
         {
-
         }
 
         public override async Task<MqttMessage> ProcessAsync()
@@ -45,8 +44,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
                 Session.Connect(ConnectAckCode.ConnectionAccepted);
                 return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.ConnectionAccepted));
             }
-
-
         }
     }
 }

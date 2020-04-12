@@ -1,6 +1,4 @@
-﻿
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Collections.Generic;
@@ -32,7 +30,7 @@ namespace SkunkLab.Protocols.Coap
 
             if (resource.Scheme != "coap" && resource.Scheme != "coaps")
             {
-                throw new UriFormatException(String.Format("Invalid scheme '{0}'", resource.Scheme));
+                throw new UriFormatException(string.Format("Invalid scheme '{0}'", resource.Scheme));
             }
 
             options.Add(new CoapOption(OptionType.UriHost, resource.Host));
@@ -63,8 +61,6 @@ namespace SkunkLab.Protocols.Coap
             }
 
             return options.ToArray();
-
-
         }
     }
 }

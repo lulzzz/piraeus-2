@@ -7,6 +7,14 @@ namespace SkunkLab.Protocols.Coap
 {
     public class Receiver : IDisposable
     {
+        private readonly Dictionary<ushort, DateTime> container;
+
+        private bool disposedValue;
+
+        private readonly double lifetimeMilliseconds;
+
+        private readonly Timer timer;
+
         public Receiver(double lifetimeMilliseconds)
         {
             this.lifetimeMilliseconds = lifetimeMilliseconds;
@@ -14,13 +22,6 @@ namespace SkunkLab.Protocols.Coap
             timer = new Timer(1000);
             timer.Elapsed += Timer_Elapsed;
         }
-
-
-
-        private double lifetimeMilliseconds;
-        private Dictionary<ushort, DateTime> container;
-        private Timer timer;
-        private bool disposedValue;
 
         public void CacheId(ushort id)
         {
@@ -32,6 +33,20 @@ namespace SkunkLab.Protocols.Coap
             timer.Enabled = container.Count() > 0;
         }
 
+        public void Clear()
+        {
+            container.Clear();
+            timer.Enabled = false;
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+
         public bool IsDup(ushort id)
         {
             return container.ContainsKey(id);
@@ -41,34 +56,6 @@ namespace SkunkLab.Protocols.Coap
         {
             container.Remove(id);
             timer.Enabled = container.Count() > 0;
-        }
-
-        public void Clear()
-        {
-            container.Clear();
-            timer.Enabled = false;
-        }
-
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            var query = container.Where((c) => c.Value < DateTime.UtcNow);
-
-            List<ushort> list = new List<ushort>();
-            if (query != null && query.Count() > 0)
-            {
-                foreach (var item in query)
-                {
-                    list.Add(item.Key);
-                }
-            }
-
-            foreach (var item in list)
-            {
-                container.Remove(item);
-            }
-
-            timer.Enabled = container.Count() > 0;
-
         }
 
         protected virtual void Dispose(bool disposing)
@@ -90,12 +77,25 @@ namespace SkunkLab.Protocols.Coap
             }
         }
 
-        public void Dispose()
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            GC.SuppressFinalize(this);
+            var query = container.Where((c) => c.Value < DateTime.UtcNow);
+
+            List<ushort> list = new List<ushort>();
+            if (query != null && query.Count() > 0)
+            {
+                foreach (var item in query)
+                {
+                    list.Add(item.Key);
+                }
+            }
+
+            foreach (var item in list)
+            {
+                container.Remove(item);
+            }
+
+            timer.Enabled = container.Count() > 0;
         }
     }
 }

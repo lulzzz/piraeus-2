@@ -25,16 +25,13 @@ namespace Piraeus.TcpGateway
             MethodInfo = configureServices;
         }
 
+        public MethodInfo MethodInfo { get; }
+
         public IServiceProvider Build(object instance, IServiceCollection services)
         {
-            if (instance == null)
-            {
-                throw new ArgumentNullException(nameof(instance));
-            }
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
+            _ = instance ?? throw new ArgumentNullException(nameof(instance));
+            _ = services ?? throw new ArgumentNullException(nameof(services));
+
             return Invoke(instance, services);
         }
 
@@ -62,7 +59,5 @@ namespace Piraeus.TcpGateway
 
             return serviceProvider;
         }
-
-        public MethodInfo MethodInfo { get; }
     }
 }

@@ -13,25 +13,17 @@ namespace Piraeus.Configuration
     [JsonObject]
     public class PiraeusConfig
     {
-
         //private Dictionary<string, byte[]> psks;
         private List<KeyValuePair<string, string>> clientIndexes;
 
         #region Client Certificate (Optional)
 
         /// <summary>
-        /// Optional path to client ceritficate.  
+        /// Optional path to client ceritficate.
         /// </summary>
         /// <remarks>Must be omitted if client certificate is specified by store, location, and thumbprint.</remarks>
         [JsonProperty("clientCertificateFilename")]
         public string ClientCertificateFilename { get; set; }
-
-        /// <summary>
-        /// Optional certificate store where the client certificate is held. If used, location and thumbprint must also be used.
-        /// </summary>
-        /// <remarks>Must be omitted if client certificate is specified by ClientCertificateFilename</remarks>
-        [JsonProperty("clientCertificateStore")]
-        public string ClientCertificateStore { get; set; }
 
         /// <summary>
         /// Optional certificate location where the client certificate is held. If used, store and thumbprint must also be used.
@@ -41,21 +33,36 @@ namespace Piraeus.Configuration
         public string ClientCertificateLocation { get; set; }
 
         /// <summary>
+        /// Optional certificate store where the client certificate is held. If used, location and thumbprint must also be used.
+        /// </summary>
+        /// <remarks>Must be omitted if client certificate is specified by ClientCertificateFilename</remarks>
+        [JsonProperty("clientCertificateStore")]
+        public string ClientCertificateStore { get; set; }
+
+        /// <summary>
         /// Optional certificate thumbprint of the client certificate. If used, store and location must also be used.
         /// </summary>
         /// <remarks>Must be omitted if client certificate is specified by ClientCertificateFilename</remarks>
         [JsonProperty("clientCertificateThumbprint")]
         public string ClientCertificateThumbprint { get; set; }
-        #endregion
+
+        #endregion Client Certificate (Optional)
 
         #region Service Certificate (Optional)
 
         /// <summary>
-        /// Optional path to server ceritficate.  
+        /// Optional path to server ceritficate.
         /// </summary>
         /// <remarks>Must be omitted if server certificate is specified by store, location, and thumbprint.</remarks>
         [JsonProperty("serverCertificateFilename")]
         public string ServerCertificateFilename { get; set; }
+
+        /// <summary>
+        /// Optional certificate location where the server certificate is held. If used, store and thumbprint must also be used.
+        /// </summary>
+        /// <remarks>Must be omitted if server certificate is specified by ServerCertificateFilename</remarks>
+        [JsonProperty("serverCertificateLocation")]
+        public string ServerCertificateLocation { get; set; }
 
         /// <summary>
         /// Required when ServerCertificateFilename is used to identify a server certificate.
@@ -72,20 +79,13 @@ namespace Piraeus.Configuration
         public string ServerCertificateStore { get; set; }
 
         /// <summary>
-        /// Optional certificate location where the server certificate is held. If used, store and thumbprint must also be used.
-        /// </summary>
-        /// <remarks>Must be omitted if server certificate is specified by ServerCertificateFilename</remarks>
-        [JsonProperty("serverCertificateLocation")]
-        public string ServerCertificateLocation { get; set; }
-
-        /// <summary>
         /// Optional certificate thumbprint of the server certificate. If used, store and location must also be used.
         /// </summary>
         /// <remarks>Must be omitted if server certificate is specified by ServerCertificateFilename</remarks>
         [JsonProperty("serverCertificateThumbprint")]
         public string ServerCertificateThumbprint { get; set; }
 
-        #endregion
+        #endregion Service Certificate (Optional)
 
         #region Channels
 
@@ -102,21 +102,15 @@ namespace Piraeus.Configuration
         public int MaxBufferSize { get; set; } = 4112000;
 
         /// <summary>
-        /// Determines whether a TCP channel should use a 4-byte prefix on each message to communicate the length of a message.  
+        /// Determines whether a TCP channel should use a 4-byte prefix on each message to communicate the length of a message.
         /// Default is false.
         /// </summary>
         [JsonProperty("usePrefixLength")]
         public bool UsePrefixLength { get; set; } = false;
 
-
-
-        #endregion
+        #endregion Channels
 
         #region Management API
-
-        //URI of issuer of management API JWT security token
-        [JsonProperty("managementApiIssuer")]
-        public string ManagementApiIssuer { get; set; }
 
         /// <summary>
         /// URI of audience of management API JWT security token
@@ -124,11 +118,9 @@ namespace Piraeus.Configuration
         [JsonProperty("managementApiAudience")]
         public string ManagementApiAudience { get; set; }
 
-        /// <summary>
-        /// 256-bit/32-byte base64 encoded symmetric key for management API JWT security token.
-        /// </summary>
-        [JsonProperty("managmentApiSymmetricKey")]
-        public string ManagmentApiSymmetricKey { get; set; }
+        //URI of issuer of management API JWT security token
+        [JsonProperty("managementApiIssuer")]
+        public string ManagementApiIssuer { get; set; }
 
         /// <summary>
         /// One or more plain text "codes" semi-colon separated used to acquire management API JWT security token.
@@ -136,9 +128,28 @@ namespace Piraeus.Configuration
         [JsonProperty("managementApiSecurityCodes")]
         public string ManagementApiSecurityCodes { get; set; }
 
-        #endregion
+        /// <summary>
+        /// 256-bit/32-byte base64 encoded symmetric key for management API JWT security token.
+        /// </summary>
+        [JsonProperty("managmentApiSymmetricKey")]
+        public string ManagmentApiSymmetricKey { get; set; }
+
+        #endregion Management API
 
         #region Gateway
+
+        /// <summary>
+        /// Optional - enbles a TCP client to authenticate using the public cert of the TCP server when using TCP channel for encryption.  Default is false.
+        /// </summary>
+        /// <remarks>Authenticating the server TLS connection does not omit the requirement of a security token to authenticate the caller.</remarks>
+        [JsonProperty("tlsCertficateAuthentication")]
+        public bool TlsCertficateAuthentication = false;
+
+        /// <summary>
+        /// Either a path to a folder or an Azure Storage connection string.
+        /// </summary>
+        [JsonProperty("auditConnectionString")]
+        public string AuditConnectionString { get; set; }
 
         /// <summary>
         /// Required authority used for CoAP protocol in a gateway, i.e, skunklab.io
@@ -149,15 +160,9 @@ namespace Piraeus.Configuration
 
         ///// <summary>
         ///// Hostname of a gateway (deprecated)
-        ///// </summary>       
+        ///// </summary>
         //[JsonProperty("hostname")]
         //public string Hostname { get; set; }
-
-        /// <summary>
-        /// List of ports semi-colon (;) separated implemented by a gateway.
-        /// </summary>
-        [JsonProperty("ports")]
-        public string Ports { get; set; }
 
         /// <summary>
         /// Maximum number of connections allowed by a gateway. Default is 10,0000.
@@ -166,11 +171,10 @@ namespace Piraeus.Configuration
         public int MaxConnections { get; set; } = 10000;
 
         /// <summary>
-        /// Optional - enbles a TCP client to authenticate using the public cert of the TCP server when using TCP channel for encryption.  Default is false.
+        /// List of ports semi-colon (;) separated implemented by a gateway.
         /// </summary>
-        /// <remarks>Authenticating the server TLS connection does not omit the requirement of a security token to authenticate the caller.</remarks>
-        [JsonProperty("tlsCertficateAuthentication")]
-        public bool TlsCertficateAuthentication = false;
+        [JsonProperty("ports")]
+        public string Ports { get; set; }
 
         ///// <summary>
         ///// Optional Azure storage connection string used for audit logs and user login logs.
@@ -178,33 +182,10 @@ namespace Piraeus.Configuration
         //[JsonProperty("azureStorageConnectionString")]
         //public string AzureStorageConnectionString { get; set; }
 
-        /// <summary>
-        /// Either a path to a folder or an Azure Storage connection string.
-        /// </summary>
-        [JsonProperty("auditConnectionString")]
-        public string AuditConnectionString { get; set; }
-
-        #endregion
+        #endregion Gateway
 
         #region PSKs (Optional)
 
-        /// <summary>
-        /// One of KeyVault, Redis, EnvironmentVariables; otherwise if omitted no PSK is used.
-        /// </summary>
-        [JsonProperty("pskStorageType")]
-        public string PskStorageType { get; set; }
-
-        [JsonProperty("pskKeyVaultAuthority")]
-        public string PskKeyVaultAuthority { get; set; }
-
-        [JsonProperty("pskKeyVaultClientId")]
-        public string PskKeyVaultClientId { get; set; }
-
-        [JsonProperty("pskKeyVaultClientSecret")]
-        public string PskKeyVaultClientSecret { get; set; }
-
-        [JsonProperty("pskRedisConnectionString")]
-        public string PskRedisConnectionString { get; set; }
         /// <summary>
         /// Optional list of PSK identities semi-colon (;) separated the map to PSK Keys.  Only used when PSKs are used to encrypted a channel.
         /// </summary>
@@ -219,14 +200,34 @@ namespace Piraeus.Configuration
         [JsonProperty("pskKeys")]
         public string PskKeys { get; set; }
 
-        #endregion
+        [JsonProperty("pskKeyVaultAuthority")]
+        public string PskKeyVaultAuthority { get; set; }
+
+        [JsonProperty("pskKeyVaultClientId")]
+        public string PskKeyVaultClientId { get; set; }
+
+        [JsonProperty("pskKeyVaultClientSecret")]
+        public string PskKeyVaultClientSecret { get; set; }
+
+        [JsonProperty("pskRedisConnectionString")]
+        public string PskRedisConnectionString { get; set; }
+
+        /// <summary>
+        /// One of KeyVault, Redis, EnvironmentVariables; otherwise if omitted no PSK is used.
+        /// </summary>
+        [JsonProperty("pskStorageType")]
+        public string PskStorageType { get; set; }
+
+        #endregion PSKs (Optional)
 
         #region Client Identity
+
         /// <summary>
-        /// Unique identifier of the client as a claim type.
+        /// A list of claim keys semicolon (;) separated that map to ClientIdentityClaimTypes.  Used to create indexes for ephemeral subscriptions.
         /// </summary>
-        [JsonProperty("clientIdentityNameClaimType")]
-        public string ClientIdentityNameClaimType { get; set; }
+        /// <remarks>If used the number of ClientIdentityClaimsTypes must match exactly the number of ClientIdentityClaimKeys</remarks>
+        [JsonProperty("clientIdentityClaimKeys")]
+        public string ClientIdentityClaimKeys { get; set; }
 
         /// <summary>
         /// A list of claim types semicolon (;) separated that map to ClientIdentityClaimKeys.  Used to create indexes for ephemeral subscriptions.
@@ -236,29 +237,24 @@ namespace Piraeus.Configuration
         public string ClientIdentityClaimTypes { get; set; }
 
         /// <summary>
-        /// A list of claim keys semicolon (;) separated that map to ClientIdentityClaimTypes.  Used to create indexes for ephemeral subscriptions.
+        /// Unique identifier of the client as a claim type.
         /// </summary>
-        /// <remarks>If used the number of ClientIdentityClaimsTypes must match exactly the number of ClientIdentityClaimKeys</remarks>
-        [JsonProperty("clientIdentityClaimKeys")]
-        public string ClientIdentityClaimKeys { get; set; }
+        [JsonProperty("clientIdentityNameClaimType")]
+        public string ClientIdentityNameClaimType { get; set; }
 
-        #endregion
+        #endregion Client Identity
 
         #region Service Identity
 
         [JsonProperty("serviceIdentityClaimTypes")]
         public string ServiceIdentityClaimTypes { get; set; }
+
         [JsonProperty("serviceIdentityClaimValues")]
         public string ServiceIdentityClaimValues { get; set; }
 
-        #endregion
+        #endregion Service Identity
 
-        #region Client Security 
-        /// <summary>
-        /// Client issuer when using a symmetric key for authentication, e.g., JWT security token.
-        /// </summary>
-        [JsonProperty("clientIssuer")]
-        public string ClientIssuer { get; set; }
+        #region Client Security
 
         /// <summary>
         /// Client audience when using a symmetric key for authentication, e.g., JWT security token.
@@ -267,10 +263,10 @@ namespace Piraeus.Configuration
         public string ClientAudience { get; set; }
 
         /// <summary>
-        /// Client authentication token type, e.g., JWT, SWT, or X509.
+        /// Client issuer when using a symmetric key for authentication, e.g., JWT security token.
         /// </summary>
-        [JsonProperty("clientTokenType")]
-        public string ClientTokenType { get; set; }
+        [JsonProperty("clientIssuer")]
+        public string ClientIssuer { get; set; }
 
         /// <summary>
         /// Client symmetric key authentication is used, e.g., JWT security token.
@@ -278,23 +274,15 @@ namespace Piraeus.Configuration
         [JsonProperty("clientSymmetricKey")]
         public string ClientSymmetricKey { get; set; }
 
-        #endregion
+        /// <summary>
+        /// Client authentication token type, e.g., JWT, SWT, or X509.
+        /// </summary>
+        [JsonProperty("clientTokenType")]
+        public string ClientTokenType { get; set; }
+
+        #endregion Client Security
 
         #region Protocols
-
-        /// <summary>
-        /// Keep alive interval for a protocol. Default 180.0 seconds.  If keep alives exceeded the channel is closed.
-        /// </summary>
-        /// <remarks>Not required for HTTP channels and REST.</remarks>
-        [JsonProperty("keepAliveSeconds")]
-        public double KeepAliveSeconds { get; set; } = 180.0;
-
-        /// <summary>
-        /// Timeout for an ACK to be acknowledged. Default 2.0 seconds.
-        /// </summary>
-        /// <remarks>Required for CoAP and MQTT</remarks>
-        [JsonProperty("ackTimeoutSeconds")]
-        public double AckTimeoutSeconds { get; set; } = 2.0;
 
         /// <summary>
         /// Random factor multiplied to the expectation of an ACK response.  Default 1.5.
@@ -304,11 +292,30 @@ namespace Piraeus.Configuration
         public double AckRandomFactor { get; set; } = 1.5;
 
         /// <summary>
-        /// Maximum number of retransmissions when an ACK is not returned.  Default 4.
+        /// Timeout for an ACK to be acknowledged. Default 2.0 seconds.
+        /// </summary>
+        /// <remarks>Required for CoAP and MQTT</remarks>
+        [JsonProperty("ackTimeoutSeconds")]
+        public double AckTimeoutSeconds { get; set; } = 2.0;
+
+        /// <summary>
+        /// CoAP only specifies whether retries should be attempted.
+        /// </summary>
+        [JsonProperty("autoRetry")]
+        public bool AutoRetry { get; set; } = false;
+
+        /// <summary>
+        /// CoAP only sets Default Leisure.  Default is 4.0.
+        /// </summary>
+        [JsonProperty("defaultLeisure")]
+        public double DefaultLeisure { get; set; } = 4.0;
+
+        /// <summary>
+        /// Keep alive interval for a protocol. Default 180.0 seconds.  If keep alives exceeded the channel is closed.
         /// </summary>
         /// <remarks>Not required for HTTP channels and REST.</remarks>
-        [JsonProperty("maxRetransmit")]
-        public int MaxRetransmit { get; set; } = 4;
+        [JsonProperty("keepAliveSeconds")]
+        public double KeepAliveSeconds { get; set; } = 180.0;
 
         /// <summary>
         /// Maxium latency in seconds required for an ACK.  Default 100.0 seconds.
@@ -318,16 +325,11 @@ namespace Piraeus.Configuration
         public double MaxLatencySeconds { get; set; } = 100.0;
 
         /// <summary>
-        /// CoAP only specifies whether retries should be attempted.
+        /// Maximum number of retransmissions when an ACK is not returned.  Default 4.
         /// </summary>
-        [JsonProperty("autoRetry")]
-        public bool AutoRetry { get; set; } = false;
-
-        /// <summary>
-        /// CoAP only sets whether the Observe Option should be implemented. Default is TRUE.
-        /// </summary>
-        [JsonProperty("observeOption")]
-        public bool ObserveOption { get; set; } = true;
+        /// <remarks>Not required for HTTP channels and REST.</remarks>
+        [JsonProperty("maxRetransmit")]
+        public int MaxRetransmit { get; set; } = 4;
 
         /// <summary>
         /// CoAP only sets whether the No Response Option should be implemented.  Default is TRUE.
@@ -342,10 +344,10 @@ namespace Piraeus.Configuration
         public int NStart { get; set; } = 1;
 
         /// <summary>
-        /// CoAP only sets Default Leisure.  Default is 4.0.
+        /// CoAP only sets whether the Observe Option should be implemented. Default is TRUE.
         /// </summary>
-        [JsonProperty("defaultLeisure")]
-        public double DefaultLeisure { get; set; } = 4.0;
+        [JsonProperty("observeOption")]
+        public bool ObserveOption { get; set; } = true;
 
         /// <summary>
         /// CoAP only sets Probing Rate.  Default is 1.0.
@@ -353,9 +355,12 @@ namespace Piraeus.Configuration
         [JsonProperty("probingRate")]
         public double ProbingRate { get; set; } = 1.0;
 
-        #endregion
+        #endregion Protocols
 
         #region Logging
+
+        [JsonProperty("instrumentationKey")]
+        public string InstrumentationKey { get; set; }
 
         [JsonProperty("loggerTypes")]
         public string LoggerTypes { get; set; } = "Console";
@@ -363,70 +368,31 @@ namespace Piraeus.Configuration
         [JsonProperty("logLevel")]
         public string LogLevel { get; set; } = "Warning";
 
-
-        [JsonProperty("instrumentationKey")]
-        public string InstrumentationKey { get; set; }
-
-
-        #endregion
-
-        public string[] GetSecurityCodes()
-        {
-            string[] result = null;
-            string code = ManagementApiSecurityCodes;
-            if (code.Contains(";"))
-            {
-                result = code.Split(";", StringSplitOptions.RemoveEmptyEntries);
-            }
-            else
-            {
-                result = new string[1];
-                result[0] = code;
-            }
-            return result;
-        }
-
-        public LoggerType GetLoggerTypes()
-        {
-            if (string.IsNullOrEmpty(LoggerTypes))
-            {
-                return default(LoggerType);
-            }
-
-            string loggerTypes = LoggerTypes.Replace(";", ",");
-            return Enum.Parse<LoggerType>(loggerTypes, true);
-        }
+        #endregion Logging
 
         /// <summary>
-        /// Gets a clone of PSK identities and keys
+        /// Gets the cliet certificate.
         /// </summary>
         /// <returns></returns>
-        //public Dictionary<string, byte[]> GetPskClone()
-        //{
-        //    if(psks == null)
-        //    {
-        //        string[] pskIdentities = PskIdentities.Split(";", StringSplitOptions.RemoveEmptyEntries);
-        //        string[] pskKeys = PskKeys.Split(";", StringSplitOptions.RemoveEmptyEntries);
+        public X509Certificate2 GetClientCertificate()
+        {
+            string filename = ClientCertificateFilename ?? null;
+            if (filename != null)
+            {
+                return new X509Certificate2(File.ReadAllBytes(filename));
+            }
 
-        //        if (pskIdentities == null && pskKeys == null)
-        //        {
-        //            return null;
-        //        }
-        //        else if (pskIdentities != null && pskKeys != null && pskIdentities.Length == pskKeys.Length)
-        //        {
-        //            psks = new Dictionary<string, byte[]>();
-        //            for (int index = 0; index < pskIdentities.Length; index++)
-        //                psks.Add(pskIdentities[index], Convert.FromBase64String(pskKeys[index]));
-        //        }
-        //        else
-        //        {
-        //            throw new IndexOutOfRangeException("Service PSK identities and values out of range.");
-        //        }
-        //    }
+            string store = ClientCertificateStore ?? null;
+            string location = ClientCertificateLocation ?? null;
+            string thumbprint = ClientCertificateThumbprint ?? null;
 
+            if (store != null && location != null && thumbprint != null)
+            {
+                return GetCertificateFromStore(store, location, thumbprint);
+            }
 
-        //    return DeepClone<Dictionary<string, byte[]>>(psks);
-        //}
+            return null;
+        }
 
         /// <summary>
         /// Gets the client indexes, where Key is the claim type and Value is the claim key.
@@ -452,7 +418,9 @@ namespace Piraeus.Configuration
                 {
                     clientIndexes = new List<KeyValuePair<string, string>>();
                     for (int index = 0; index < claimTypes.Length; index++)
+                    {
                         clientIndexes.Add(new KeyValuePair<string, string>(claimTypes[index], claimKeys[index]));
+                    }
                 }
                 else
                 {
@@ -463,6 +431,8 @@ namespace Piraeus.Configuration
             return clientIndexes;
         }
 
+        //    return DeepClone<Dictionary<string, byte[]>>(psks);
+        //}
         /// <summary>
         /// Gets the claim indexes that map to the client and can be used for an ephemeral subscription.
         /// </summary>
@@ -495,10 +465,34 @@ namespace Piraeus.Configuration
             {
                 return null;
             }
-
         }
 
+        public LoggerType GetLoggerTypes()
+        {
+            if (string.IsNullOrEmpty(LoggerTypes))
+            {
+                return default;
+            }
 
+            string loggerTypes = LoggerTypes.Replace(";", ",");
+            return Enum.Parse<LoggerType>(loggerTypes, true);
+        }
+
+        //        if (pskIdentities == null && pskKeys == null)
+        //        {
+        //            return null;
+        //        }
+        //        else if (pskIdentities != null && pskKeys != null && pskIdentities.Length == pskKeys.Length)
+        //        {
+        //            psks = new Dictionary<string, byte[]>();
+        //            for (int index = 0; index < pskIdentities.Length; index++)
+        //                psks.Add(pskIdentities[index], Convert.FromBase64String(pskKeys[index]));
+        //        }
+        //        else
+        //        {
+        //            throw new IndexOutOfRangeException("Service PSK identities and values out of range.");
+        //        }
+        //    }
         //Gets the ports used by a gateway
         public int[] GetPorts()
         {
@@ -506,55 +500,20 @@ namespace Piraeus.Configuration
             return parts != null ? Array.ConvertAll(parts, s => int.Parse(s)) : null;
         }
 
-        /// <summary>
-        /// Get the service claims for the service identity.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<Claim> GetServiceClaims()
+        public string[] GetSecurityCodes()
         {
-            string[] claimTypes = ServiceIdentityClaimTypes.Split(";", StringSplitOptions.RemoveEmptyEntries);
-            string[] claimValues = ServiceIdentityClaimValues.Split(";", StringSplitOptions.RemoveEmptyEntries);
-
-            if (claimTypes == null && claimValues == null)
+            string code = ManagementApiSecurityCodes;
+            string[] result;
+            if (code.Contains(";"))
             {
-                return null;
-            }
-            else if (claimTypes != null && claimValues != null && claimTypes.Length == claimTypes.Length)
-            {
-                List<Claim> list = new List<Claim>();
-                for (int index = 0; index < claimTypes.Length; index++)
-                    list.Add(new Claim(claimTypes[index], claimValues[index]));
-
-                return list;
+                result = code.Split(";", StringSplitOptions.RemoveEmptyEntries);
             }
             else
             {
-                throw new IndexOutOfRangeException("Service claim types and values out of range.");
+                result = new string[1];
+                result[0] = code;
             }
-        }
-
-        /// <summary>
-        /// Gets the cliet certificate.
-        /// </summary>
-        /// <returns></returns>
-        public X509Certificate2 GetClientCertificate()
-        {
-            string filename = ClientCertificateFilename ?? null;
-            if (filename != null)
-            {
-                return new X509Certificate2(File.ReadAllBytes(filename));
-            }
-
-            string store = ClientCertificateStore ?? null;
-            string location = ClientCertificateLocation ?? null;
-            string thumbprint = ClientCertificateThumbprint ?? null;
-
-            if (store != null && location != null && thumbprint != null)
-            {
-                return GetCertificateFromStore(store, location, thumbprint);
-            }
-
-            return null;
+            return result;
         }
 
         /// <summary>
@@ -579,7 +538,60 @@ namespace Piraeus.Configuration
             }
 
             return null;
+        }
 
+        /// <summary>
+        /// Gets a clone of PSK identities and keys
+        /// </summary>
+        /// <returns></returns>
+        //public Dictionary<string, byte[]> GetPskClone()
+        //{
+        //    if(psks == null)
+        //    {
+        //        string[] pskIdentities = PskIdentities.Split(";", StringSplitOptions.RemoveEmptyEntries);
+        //        string[] pskKeys = PskKeys.Split(";", StringSplitOptions.RemoveEmptyEntries);
+        /// <summary>
+        /// Get the service claims for the service identity.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<Claim> GetServiceClaims()
+        {
+            string[] claimTypes = ServiceIdentityClaimTypes.Split(";", StringSplitOptions.RemoveEmptyEntries);
+            string[] claimValues = ServiceIdentityClaimValues.Split(";", StringSplitOptions.RemoveEmptyEntries);
+
+            if (claimTypes == null && claimValues == null)
+            {
+                return null;
+            }
+            else if (claimTypes != null && claimValues != null && claimTypes.Length == claimTypes.Length)
+            {
+                List<Claim> list = new List<Claim>();
+                for (int index = 0; index < claimTypes.Length; index++)
+                {
+                    list.Add(new Claim(claimTypes[index], claimValues[index]));
+                }
+
+                return list;
+            }
+            else
+            {
+                throw new IndexOutOfRangeException("Service claim types and values out of range.");
+            }
+        }
+
+        private T DeepClone<T>(T obj)
+        {
+            if (obj == null)
+            {
+                return default;
+            }
+
+            using var ms = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(ms, obj);
+            ms.Position = 0;
+
+            return (T)formatter.Deserialize(ms);
         }
 
         private X509Certificate2 GetCertificateFromStore(string store, string location, string thumbprint)
@@ -596,7 +608,7 @@ namespace Piraeus.Configuration
                 X509Certificate2Collection collection = x509Store.Certificates;
                 foreach (var item in collection)
                 {
-                    if (item.Thumbprint == thumbprint)
+                    if (item.Thumbprint == thumb)
                     {
                         return item;
                     }
@@ -609,23 +621,5 @@ namespace Piraeus.Configuration
                 x509Store.Close();
             }
         }
-
-        private T DeepClone<T>(T obj)
-        {
-            if (obj == null)
-            {
-                return default(T);
-            }
-
-            using (var ms = new MemoryStream())
-            {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, obj);
-                ms.Position = 0;
-
-                return (T)formatter.Deserialize(ms);
-            }
-        }
-
     }
 }

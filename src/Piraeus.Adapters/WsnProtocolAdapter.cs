@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Piraeus.Auditing;
@@ -16,14 +15,46 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Piraeus.Adapters
 {
     public class WsnProtocolAdapter : ProtocolAdapter
     {
+        private readonly IAuditFactory auditFactory;
+
+        private readonly string cacheKey;
+
+        //private readonly HttpContext context;
+        private readonly PiraeusConfig config;
+
+        private readonly string contentType;
+
+        private readonly GraphManager graphManager;
+
+        private readonly string identity;
+
+        private readonly List<KeyValuePair<string, string>> indexes;
+
+        private readonly List<KeyValuePair<string, string>> localIndexes;
+
+        private readonly ILog logger;
+
+        private readonly IAuditor messageAuditor;
+
+        private readonly string resource;
+
+        private readonly List<string> subscriptions;
+
+        private readonly IAuditor userAuditor;
+
+        private OrleansAdapter adapter;
+
+        private bool closing;
+
+        private bool disposedValue;
+
         public WsnProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IChannel channel, HttpContext context, ILog logger = null)
-        {            
+        {
             this.config = config;
             this.graphManager = graphManager;
             this.Channel = channel;
@@ -56,29 +87,13 @@ namespace Piraeus.Adapters
             userAuditor = auditFactory.GetAuditor(AuditType.User);
         }
 
-        public override IChannel Channel { get; set; }
+        public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
 
         public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
-        public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
+
         public override event EventHandler<ChannelObserverEventArgs> OnObserve;
 
-        private readonly GraphManager graphManager;
-        //private readonly HttpContext context;
-        private readonly PiraeusConfig config;
-        private readonly List<string> subscriptions;
-        private OrleansAdapter adapter;
-        private bool disposedValue;
-        private readonly IAuditor messageAuditor;
-        private readonly string identity;
-        private readonly IAuditor userAuditor;
-        private bool closing;
-        private readonly IAuditFactory auditFactory;
-        private readonly ILog logger;
-        private readonly string resource;
-        private readonly string contentType;
-        private readonly string cacheKey;
-        private readonly List<KeyValuePair<string, string>> indexes;
-        private readonly List<KeyValuePair<string, string>> localIndexes;
+        public override IChannel Channel { get; set; }
 
         public override void Init()
         {
@@ -92,11 +107,63 @@ namespace Piraeus.Adapters
 
         #region channel events
 
+        private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
+        {
+            MessageAuditRecord record = null;
+            int length = 0;
+            DateTime sendTime = DateTime.UtcNow;
+            try
+            {
+                byte[] message = ProtocolTransition.ConvertToHttp(e.Message);
+                Send(message).LogExceptions();
+                OnObserve?.Invoke(this, new ChannelObserverEventArgs(Channel.Id, e.Message.ResourceUri, e.Message.ContentType, e.Message.Message));
+
+                length = message.Length;
+                record = new MessageAuditRecord(e.Message.MessageId, identity, this.Channel.TypeId, "WSN", length, MessageDirectionType.Out, true, sendTime);
+            }
+            catch (Exception ex)
+            {
+                string msg = string.Format("{0} - WSN adapter observe error on channel '{1}' with '{2}'", DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
+                logger?.LogError(ex, $"WSN adapter observe error on channel '{Channel.Id}'.");
+                record = new MessageAuditRecord(e.Message.MessageId, identity, this.Channel.TypeId, "WSN", length, MessageDirectionType.Out, true, sendTime, msg);
+            }
+            finally
+            {
+                if (e.Message.Audit)
+                {
+                    messageAuditor?.WriteAuditRecordAsync(record).Ignore();
+                }
+            }
+        }
+
+        private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
+        {
+            try
+            {
+                if (!closing)
+                {
+                    closing = true;
+                    UserAuditRecord record = new UserAuditRecord(Channel.Id, identity, DateTime.UtcNow);
+                    userAuditor?.UpdateAuditRecordAsync(record).IgnoreException();
+                }
+
+                OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(e.ChannelId));
+            }
+            catch
+            {
+            }
+        }
+
+        private void Channel_OnError(object sender, ChannelErrorEventArgs e)
+        {
+            logger?.LogError(e.Error, $"WSN adapter Channel_OnError error on channel '{Channel.Id}'.");
+            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, e.Error));
+        }
+
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
             if (!Channel.IsAuthenticated)
-            {               
-                
+            {
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, new SecurityException("Not authenticated on WSN channel")));
                 Channel.CloseAsync().Ignore(); //shutdown channel immediately
                 return;
@@ -130,43 +197,24 @@ namespace Piraeus.Adapters
                     //SubscribeAsync(sub, metadata).GetAwaiter();
                 }
             }
+        }
 
+        private void Channel_OnReceive(object sender, ChannelReceivedEventArgs e)
+        {
+            var metadata = graphManager.GetPiSystemMetadataAsync(resource).GetAwaiter().GetResult();
+
+            EventMessage msg = new EventMessage(contentType, resource, ProtocolType.WSN, e.Message, DateTime.UtcNow, metadata.Audit)
+            {
+                CacheKey = cacheKey
+            };
+
+            adapter.PublishAsync(msg, indexes).GetAwaiter();
         }
 
         //private async Task SubscribeAsync(string resource, SubscriptionMetadata metadata)
         //{
         //    await adapter.SubscribeAsync(resource, metadata);
         //}
-
-        private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
-        {
-            MessageAuditRecord record = null;
-            int length = 0;
-            DateTime sendTime = DateTime.UtcNow;
-            try
-            {
-                byte[] message = ProtocolTransition.ConvertToHttp(e.Message);
-                Send(message).LogExceptions();
-                OnObserve?.Invoke(this, new ChannelObserverEventArgs(Channel.Id, e.Message.ResourceUri, e.Message.ContentType, e.Message.Message));
-
-                length = message.Length;
-                record = new MessageAuditRecord(e.Message.MessageId, identity, this.Channel.TypeId, "WSN", length, MessageDirectionType.Out, true, sendTime);
-            }
-            catch (Exception ex)
-            {
-                string msg = String.Format("{0} - WSN adapter observe error on channel '{1}' with '{2}'", DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
-                logger?.LogError(ex, $"WSN adapter observe error on channel '{Channel.Id}'.");
-                record = new MessageAuditRecord(e.Message.MessageId, identity, this.Channel.TypeId, "WSN", length, MessageDirectionType.Out, true, sendTime, msg);
-            }
-            finally
-            {
-                if (e.Message.Audit)
-                {
-                    messageAuditor?.WriteAuditRecordAsync(record).Ignore();
-                }
-            }
-        }
-
         private async Task Send(byte[] message)
         {
             try
@@ -186,50 +234,17 @@ namespace Piraeus.Adapters
             }
         }
 
-        private void Channel_OnReceive(object sender, ChannelReceivedEventArgs e)
-        {
-            var metadata = graphManager.GetPiSystemMetadataAsync(resource).GetAwaiter().GetResult();
-
-            EventMessage msg = new EventMessage(contentType, resource, ProtocolType.WSN, e.Message, DateTime.UtcNow, metadata.Audit)
-            {
-                CacheKey = cacheKey
-            };
-
-            adapter.PublishAsync(msg, indexes).GetAwaiter();
-        }
-
-        private void Channel_OnError(object sender, ChannelErrorEventArgs e)
-        {
-            logger?.LogError(e.Error, $"WSN adapter Channel_OnError error on channel '{Channel.Id}'.");
-            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, e.Error));
-        }
-
-        private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
-        {
-            try
-            {
-                if (!closing)
-                {
-                    closing = true;
-                    UserAuditRecord record = new UserAuditRecord(Channel.Id, identity, DateTime.UtcNow);
-                    userAuditor?.UpdateAuditRecordAsync(record).IgnoreException();
-                }
-
-                OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(e.ChannelId));
-            }
-            catch
-            {
-
-            }
-        }
-
-
-
-
-
-        #endregion
+        #endregion channel events
 
         #region Dispose
+
+        public override void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -244,15 +259,6 @@ namespace Piraeus.Adapters
             }
         }
 
-        public override void Dispose()
-        {
-
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
+        #endregion Dispose
     }
 }

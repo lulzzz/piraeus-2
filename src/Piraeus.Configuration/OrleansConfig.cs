@@ -3,6 +3,15 @@ using System;
 
 namespace Piraeus.Configuration
 {
+    [Flags]
+    public enum LoggerType
+    {
+        None = 0,
+        Console = 1,
+        Debug = 2,
+        AppInsights = 4,
+        File = 8
+    }
 
     [Serializable]
     [JsonObject]
@@ -12,29 +21,39 @@ namespace Piraeus.Configuration
         {
         }
 
+        [JsonProperty("clusterId")]
+        public string ClusterId { get; set; }
+
+        [JsonProperty("dataConnectionString")]
+        public string DataConnectionString { get; set; }
+
         [JsonProperty("dockerized")]
         public bool Dockerized { get; set; }  //true for docker deployments; otherwise local deployment
 
-        [JsonProperty("clusterId")]
-        public string ClusterId { get; set; } //orleans cluster id
+        //orleans cluster id
+
+        [JsonProperty("instrumentationKey")]
+        public string InstrumentationKey { get; set; }
+
+        [JsonProperty("loggerTypes")]
+        public string LoggerTypes { get; set; } = "Console;Debug";
+
+        [JsonProperty("logLevel")]
+        public string LogLevel { get; set; } = "Warning";
 
         [JsonProperty("serviceId")]
         public string ServiceId { get; set; } //orleans service id
 
-        [JsonProperty("dataConnectionString")]
-        public string DataConnectionString { get; set; } //either azure storage connection string or redis connection string
+        //either azure storage connection string or redis connection string
 
         [JsonProperty("servicePointFactor")]
         public int ServicePointFactor { get; set; } = 24; //service point factor, e.g., 24 associated with Azure storage
 
-        [JsonProperty("loggerTypes")]
-        public string LoggerTypes { get; set; } = "Console;Debug"; //any of console, debug, file, appinsights, or none.
+        //any of console, debug, file, appinsights, or none.
 
-        [JsonProperty("logLevel")]
-        public string LogLevel { get; set; } = "Warning";  //one of warning, error, information, critical, verbose
+        //one of warning, error, information, critical, verbose
 
-        [JsonProperty("instrumentationKey")]
-        public string InstrumentationKey { get; set; }         //required when loggertypes as appinsights; otherwise omit             
+        //required when loggertypes as appinsights; otherwise omit
 
         public LoggerType GetLoggerTypes()
         {
@@ -46,15 +65,5 @@ namespace Piraeus.Configuration
             string loggerTypes = LoggerTypes.Replace(";", ",");
             return Enum.Parse<LoggerType>(loggerTypes, true);
         }
-    }
-
-    [Flags]
-    public enum LoggerType
-    {
-        None = 0,
-        Console = 1,
-        Debug = 2,
-        AppInsights = 4,
-        File = 8
     }
 }

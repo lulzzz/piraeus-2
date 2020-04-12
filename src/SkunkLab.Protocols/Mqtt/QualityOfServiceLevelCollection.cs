@@ -1,10 +1,11 @@
-﻿
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System.Collections.Generic;
 
     public class QualityOfServiceLevelCollection : IList<QualityOfServiceLevelType>
     {
+        private readonly List<QualityOfServiceLevelType> items;
+
         public QualityOfServiceLevelCollection()
         {
             this.items = new List<QualityOfServiceLevelType>();
@@ -15,27 +16,14 @@ namespace SkunkLab.Protocols.Mqtt
             this.items = new List<QualityOfServiceLevelType>(qosLevels);
         }
 
-        private List<QualityOfServiceLevelType> items;
+        public int Count => this.items.Count;
 
-        public int IndexOf(QualityOfServiceLevelType item)
-        {
-            return this.items.IndexOf(item);
-        }
-
-        public void Insert(int index, QualityOfServiceLevelType item)
-        {
-            this.items.Insert(index, item);
-        }
-
-        public void RemoveAt(int index)
-        {
-            this.items.RemoveAt(index);
-        }
+        public bool IsReadOnly => false;
 
         public QualityOfServiceLevelType this[int index]
         {
-            get { return this.items[index]; }
-            set { this.items[index] = value; }
+            get => this.items[index];
+            set => this.items[index] = value;
         }
 
         public void Add(QualityOfServiceLevelType item)
@@ -58,21 +46,6 @@ namespace SkunkLab.Protocols.Mqtt
             this.items.CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return this.items.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
-        public bool Remove(QualityOfServiceLevelType item)
-        {
-            return this.items.Remove(item);
-        }
-
         public IEnumerator<QualityOfServiceLevelType> GetEnumerator()
         {
             return this.items.GetEnumerator();
@@ -81,6 +54,26 @@ namespace SkunkLab.Protocols.Mqtt
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        public int IndexOf(QualityOfServiceLevelType item)
+        {
+            return this.items.IndexOf(item);
+        }
+
+        public void Insert(int index, QualityOfServiceLevelType item)
+        {
+            this.items.Insert(index, item);
+        }
+
+        public bool Remove(QualityOfServiceLevelType item)
+        {
+            return this.items.Remove(item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            this.items.RemoveAt(index);
         }
     }
 }

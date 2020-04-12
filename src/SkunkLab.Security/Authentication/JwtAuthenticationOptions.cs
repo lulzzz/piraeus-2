@@ -6,8 +6,8 @@ namespace SkunkLab.Security.Authentication
     {
         public JwtAuthenticationOptions()
         {
-
         }
+
         public JwtAuthenticationOptions(string signingKey, string issuer = null, string audience = null)
         {
             SigningKey = signingKey;
@@ -15,14 +15,11 @@ namespace SkunkLab.Security.Authentication
             Audience = audience == null ? null : audience.ToLowerInvariant();
         }
 
-        public string Scheme
-        {
-            get { return "SkunkLabJwt"; }
-        }
+        public string Audience { get; set; }
 
         public string Issuer { get; set; }
 
-        public string Audience { get; set; }
+        public string Scheme => "SkunkLabJwt";
 
         public string SigningKey { get; set; }
     }

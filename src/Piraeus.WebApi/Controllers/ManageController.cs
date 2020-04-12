@@ -16,14 +16,15 @@ namespace Piraeus.WebApi.Controllers
     [ApiController]
     public class ManageController : ControllerBase
     {
+        private readonly PiraeusConfig config;
+
+        private readonly ILogger logger;
+
         public ManageController(PiraeusConfig config, Logger logger = null)
         {
             this.config = config;
             this.logger = logger;
         }
-
-        private readonly ILogger logger;
-        private readonly PiraeusConfig config;
 
         [HttpGet]
         [Produces("application/json")]
@@ -32,19 +33,18 @@ namespace Piraeus.WebApi.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(code))
-                {
-                    throw new ArgumentNullException("code");
-                }
+                _ = code ?? throw new ArgumentNullException(nameof(code));
 
                 string codeString = HttpUtility.UrlDecode(code);
                 string[] codes = config.GetSecurityCodes();
 
                 if (codes.Contains(codeString))
                 {
-                    List<Claim> claims = new List<Claim>();
-                    claims.Add(new Claim($"{config.ManagementApiIssuer}/name", Guid.NewGuid().ToString()));
-                    claims.Add(new Claim($"{config.ManagementApiIssuer}/role", "manage"));
+                    List<Claim> claims = new List<Claim>
+                    {
+                        new Claim($"{config.ManagementApiIssuer}/name", Guid.NewGuid().ToString()),
+                        new Claim($"{config.ManagementApiIssuer}/role", "manage")
+                    };
                     JsonWebToken jwt = new JsonWebToken(config.ManagmentApiSymmetricKey, claims, 120.0, config.ManagementApiIssuer, config.ManagementApiAudience);
                     logger?.LogInformation("Returning security token.");
 

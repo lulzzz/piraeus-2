@@ -14,14 +14,12 @@ using Piraeus.HttpGateway.Formatters;
 using Piraeus.HttpGateway.Middleware;
 using System;
 
-
 namespace Piraeus.HttpGateway
 {
     public class Startup
-    {        
+    {
         public void Configure(IApplicationBuilder app)
         {
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -41,7 +39,6 @@ namespace Piraeus.HttpGateway
             });
 
             //app.UseMvc();
-
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -96,6 +93,5 @@ namespace Piraeus.HttpGateway
             services.AddRouting();
             services.AddMvcCore();
         }
-        
     }
 }

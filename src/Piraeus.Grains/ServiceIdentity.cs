@@ -11,27 +11,6 @@ namespace Piraeus.Grains
     [Serializable]
     public class ServiceIdentity : Grain<ServiceIdentityState>, IServiceIdentity
     {
-        public override Task OnActivateAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
-        }
-
-
-        public async Task<byte[]> GetCertificateAsync()
-        {
-            return await Task.FromResult<byte[]>(State.Certificate);
-        }
-
-        public async Task<List<KeyValuePair<string, string>>> GetClaimsAsync()
-        {
-            return await Task.FromResult<List<KeyValuePair<string, string>>>(State.Claims);
-        }
-
         public Task AddCertificateAsync(byte[] certificate)
         {
             State.Certificate = certificate;
@@ -54,6 +33,24 @@ namespace Piraeus.Grains
             await Task.CompletedTask;
         }
 
+        public async Task<byte[]> GetCertificateAsync()
+        {
+            return await Task.FromResult<byte[]>(State.Certificate);
+        }
 
+        public async Task<List<KeyValuePair<string, string>>> GetClaimsAsync()
+        {
+            return await Task.FromResult<List<KeyValuePair<string, string>>>(State.Claims);
+        }
+
+        public override Task OnActivateAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
+        }
     }
 }

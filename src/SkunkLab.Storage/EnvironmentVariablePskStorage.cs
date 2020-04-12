@@ -8,20 +8,10 @@ namespace SkunkLab.Storage
 {
     public class EnvironmentVariablePskStorage : PskStorageAdapter
     {
-        public static EnvironmentVariablePskStorage CreateSingleton(string keys, string values)
-        {
-            if (instance == null)
-            {
-                instance = new EnvironmentVariablePskStorage(keys, values);
-            }
-
-            return instance;
-        }
-
-
-
         private static EnvironmentVariablePskStorage instance;
-        private Dictionary<string, string> container;
+
+        private readonly Dictionary<string, string> container;
+
         protected EnvironmentVariablePskStorage(string keys, string values)
         {
             string[] keyParts = keys.Split(keys, StringSplitOptions.RemoveEmptyEntries);
@@ -39,17 +29,24 @@ namespace SkunkLab.Storage
                 container.Add(keyParts[index], valueParts[index]);
                 index++;
             }
-
         }
 
-        public override async Task SetSecretAsync(string key, string value)
+        public static EnvironmentVariablePskStorage CreateSingleton(string keys, string values)
         {
-            if (!container.ContainsKey(key))
+            if (instance == null)
             {
-                container.Add(key, value);
+                instance = new EnvironmentVariablePskStorage(keys, values);
             }
 
-            await Task.CompletedTask;
+            return instance;
+        }
+
+        public override async Task<string[]> GetKeys()
+        {
+            Dictionary<string, string>.KeyCollection coll = container.Keys;
+            string[] keys = new string[container.Count];
+            coll.CopyTo(keys, 0);
+            return await Task.FromResult<string[]>(keys);
         }
 
         public override async Task<string> GetSecretAsync(string key)
@@ -75,14 +72,14 @@ namespace SkunkLab.Storage
             await Task.CompletedTask;
         }
 
-
-
-        public override async Task<string[]> GetKeys()
+        public override async Task SetSecretAsync(string key, string value)
         {
-            Dictionary<string, string>.KeyCollection coll = container.Keys;
-            string[] keys = new string[container.Count];
-            coll.CopyTo(keys, 0);
-            return await Task.FromResult<string[]>(keys);
+            if (!container.ContainsKey(key))
+            {
+                container.Add(key, value);
+            }
+
+            await Task.CompletedTask;
         }
 
         private T DeepClone<T>(T obj)
@@ -101,7 +98,5 @@ namespace SkunkLab.Storage
                 return (T)formatter.Deserialize(ms);
             }
         }
-
-
     }
 }

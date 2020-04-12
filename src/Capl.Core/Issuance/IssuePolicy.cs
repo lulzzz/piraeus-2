@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -18,31 +18,30 @@ namespace Capl.Issuance
     [XmlSchemaProvider(null, IsAny = true)]
     public class IssuePolicy : IssuePolicyBase
     {
+        private IssueMode _mode;
+
+        private string _policyId;
+
+        private TransformCollection _transforms;
+
         public IssuePolicy()
         {
             this._transforms = new TransformCollection();
         }
 
-        private string _policyId;
-        private TransformCollection _transforms;
-        private IssueMode _mode;
+        public IssueMode Mode
+        {
+            get => this._mode;
+            set => this._mode = value;
+        }
 
         public string PolicyId
         {
-            get { return this._policyId; }
-            set { this._policyId = value; }
+            get => this._policyId;
+            set => this._policyId = value;
         }
 
-        public IssueMode Mode
-        {
-            get { return this._mode; }
-            set { this._mode = value; }
-        }
-
-        public TransformCollection Transforms
-        {
-            get { return this._transforms; }
-        }
+        public TransformCollection Transforms => this._transforms;
 
         public static IssuePolicy Load(XmlReader reader)
         {
@@ -54,20 +53,14 @@ namespace Capl.Issuance
 
         public ClaimsIdentity Issue(ClaimsIdentity identity)
         {
-            if (identity == null)
-            {
-                throw new ArgumentNullException("identity");
-            }
+            _ = identity ?? throw new ArgumentNullException(nameof(identity));
 
             return new ClaimsIdentity(Issue(identity.Claims));
         }
 
         public IEnumerable<Claim> Issue(IEnumerable<Claim> claims)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             ClaimsIdentity identity = new ClaimsIdentity(claims);
             List<Claim> clone = new List<Claim>(identity.Claims);
@@ -86,8 +79,6 @@ namespace Capl.Issuance
             {
                 clone = new List<Claim>(transform.TransformClaims(clone.ToArray()));
             }
-
-
 
             if (this._mode == IssueMode.Unique)
             {
@@ -118,10 +109,7 @@ namespace Capl.Issuance
 
         public override void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns);
             this._policyId = reader.GetOptionalAttribute(IssueConstants.Attributes.PolicyId);
@@ -160,13 +148,9 @@ namespace Capl.Issuance
             reader.Read();
         }
 
-
         public override void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns);
 

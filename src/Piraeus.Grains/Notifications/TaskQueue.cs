@@ -1,14 +1,12 @@
-﻿
-
-namespace Piraeus.Grains.Notifications
+﻿namespace Piraeus.Grains.Notifications
 {
     using System;
     using System.Threading.Tasks;
 
     internal sealed class TaskQueue
     {
-        private Task _lastQueuedTask = Task.FromResult<int>(0);
         private readonly object _lockObj = new object();
+        private Task _lastQueuedTask = Task.FromResult<int>(0);
 
         public Task Enqueue(Func<Task> taskFunc)
         {

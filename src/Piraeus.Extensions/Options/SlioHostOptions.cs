@@ -7,7 +7,5 @@
         }
 
         public string DataConnectionString { get; set; }
-
-
     }
 }

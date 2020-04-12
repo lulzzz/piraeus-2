@@ -7,6 +7,5 @@ namespace SkunkLab.Security.Authentication
         bool Authenticate(SecurityTokenType type, byte[] token);
 
         bool Authenticate(SecurityTokenType type, string token);
-
     }
 }

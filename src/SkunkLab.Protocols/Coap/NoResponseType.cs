@@ -42,9 +42,6 @@ namespace SkunkLab.Protocols.Coap
             {
                 return false;
             }
-
-
-
         }
     }
 }

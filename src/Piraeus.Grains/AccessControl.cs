@@ -42,6 +42,11 @@ namespace Piraeus.Grains
             return await Task.FromResult<AuthorizationPolicy>(policy);
         }
 
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
+        }
+
         public async Task UpsertPolicyAsync(AuthorizationPolicy policy)
         {
             //deserializing to byte array avoids issues with recursion deserialization
@@ -57,11 +62,6 @@ namespace Piraeus.Grains
             }
 
             State.Policy = Encoding.UTF8.GetBytes(builder.ToString());
-            await WriteStateAsync();
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
             await WriteStateAsync();
         }
     }

@@ -11,31 +11,26 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Web;
 
-
 namespace Piraeus.Grains.Notifications
 {
     public class EventHubSink : EventSink
     {
-
-        private Uri uri;
-        private IAuditor auditor;
-        private string keyName;
-        private string partitionId;
-        private string hubName;
-        private string connectionString;
-        private ConcurrentQueue<byte[]> queue;
-        private int delay;
-        private int clientCount;
-        private EventHubClient[] storageArray;
         private int arrayIndex;
-        private PartitionSender[] senderArray;
-
-
+        private readonly IAuditor auditor;
+        private readonly int clientCount;
+        private readonly string connectionString;
+        private readonly int delay;
+        private readonly string hubName;
+        private readonly string keyName;
+        private readonly string partitionId;
+        private readonly ConcurrentQueue<byte[]> queue;
+        private readonly PartitionSender[] senderArray;
+        private readonly EventHubClient[] storageArray;
+        private readonly Uri uri;
 
         public EventHubSink(SubscriptionMetadata metadata)
             : base(metadata)
         {
-
             queue = new ConcurrentQueue<byte[]>();
 
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
@@ -44,7 +39,7 @@ namespace Piraeus.Grains.Notifications
             keyName = nvc["keyname"];
             partitionId = nvc["partitionid"];
             hubName = nvc["hub"];
-            connectionString = String.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName, metadata.SymmetricKey);
+            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName, metadata.SymmetricKey);
 
             if (!int.TryParse(nvc["clients"], out clientCount))
             {
@@ -56,28 +51,22 @@ namespace Piraeus.Grains.Notifications
                 delay = 1000;
             }
 
-            if (!String.IsNullOrEmpty(partitionId))
+            if (!string.IsNullOrEmpty(partitionId))
             {
                 senderArray = new PartitionSender[clientCount];
             }
-
-
 
             storageArray = new EventHubClient[clientCount];
             for (int i = 0; i < clientCount; i++)
             {
                 storageArray[i] = EventHubClient.CreateFromConnectionString(connectionString);
 
-                if (!String.IsNullOrEmpty(partitionId))
+                if (!string.IsNullOrEmpty(partitionId))
                 {
                     senderArray[i] = storageArray[i].CreatePartitionSender(partitionId.ToString());
                 }
             }
-
         }
-
-
-
 
         public override async Task SendAsync(EventMessage message)
         {
@@ -86,7 +75,6 @@ namespace Piraeus.Grains.Notifications
 
             try
             {
-
                 byte[] msg = GetPayload(message);
                 queue.Enqueue(msg);
 
@@ -94,7 +82,6 @@ namespace Piraeus.Grains.Notifications
                 {
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     queue.TryDequeue(out payload);
-
 
                     if (payload == null)
                     {
@@ -105,7 +92,7 @@ namespace Piraeus.Grains.Notifications
                     EventData data = new EventData(payload);
                     data.Properties.Add("Content-Type", message.ContentType);
 
-                    if (String.IsNullOrEmpty(partitionId))
+                    if (string.IsNullOrEmpty(partitionId))
                     {
                         await storageArray[arrayIndex].SendAsync(data);
                     }
@@ -116,13 +103,13 @@ namespace Piraeus.Grains.Notifications
 
                     if (message.Audit)
                     {
-                        record = new MessageAuditRecord(message.MessageId, String.Format("sb://{0}/{1}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                        record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }
             }
             catch (Exception ex)
             {
-                record = new MessageAuditRecord(message.MessageId, String.Format("sb://{0}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
                 throw;
             }
             finally
@@ -141,17 +128,20 @@ namespace Piraeus.Grains.Notifications
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
+
                 case ProtocolType.MQTT:
                     MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                     return mqtt.Payload;
+
                 case ProtocolType.REST:
                     return message.Message;
+
                 case ProtocolType.WSN:
                     return message.Message;
+
                 default:
                     return null;
             }
         }
-
     }
 }

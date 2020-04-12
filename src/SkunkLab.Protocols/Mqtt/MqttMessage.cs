@@ -1,31 +1,24 @@
-﻿
-
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
     using System.Collections.Generic;
+
     public abstract class MqttMessage
     {
         #region Fixed Header
-        public virtual MqttMessageType MessageType { get; internal set; }
 
         public bool Dup { get; set; }
-
+        public virtual MqttMessageType MessageType { get; internal set; }
+        public byte[] Payload { get; set; }
         public QualityOfServiceLevelType QualityOfService { get; set; }
 
         protected bool Retain { get; set; }
 
-        public byte[] Payload { get; set; }
-
-        #endregion
+        #endregion Fixed Header
 
         public abstract bool HasAck { get; }
 
         public virtual ushort MessageId { get; set; }
-
-        public abstract byte[] Encode();
-
-        internal abstract MqttMessage Decode(byte[] message);
 
         public static MqttMessage DecodeMessage(byte[] message)
         {
@@ -45,6 +38,7 @@ namespace SkunkLab.Protocols.Mqtt
                 case MqttMessageType.CONNACK:
                     mqttMessage = new ConnectAckMessage();
                     break;
+
                 case MqttMessageType.PUBLISH:
                     mqttMessage = new PublishMessage();
                     break;
@@ -101,33 +95,9 @@ namespace SkunkLab.Protocols.Mqtt
             return mqttMessage;
         }
 
-        internal byte[] EncodeRemainingLength(int remainingLength)
-        {
-            //do digit = X MOD 128 X = X DIV 128 
-            // if there are more digits to encode, set the top bit of this digit if ( X > 0 ) digit = digit OR 0x80 endif 'output' digit while ( X> 0 )
-            List<byte> list = new List<byte>();
-            int digit = 0;
-            do
-            {
-                digit = remainingLength % 128;
-                remainingLength /= 128;
+        public abstract byte[] Encode();
 
-                if (remainingLength > 0)
-                {
-                    digit = digit | 0x80;
-                }
-
-                list.Add((byte)digit);
-
-            } while (remainingLength > 0);
-
-            if (list.Count > 4)
-            {
-                throw new InvalidOperationException("Invalid remaining length;");
-            }
-
-            return list.ToArray();
-        }
+        internal abstract MqttMessage Decode(byte[] message);
 
         internal void DecodeFixedHeader(byte fixedHeader)
         {
@@ -136,11 +106,10 @@ namespace SkunkLab.Protocols.Mqtt
             byte dupFlag = (byte)((fixedHeader & 0x08) >> 0x03);
             byte retainFlag = (byte)((fixedHeader & 0x01));
 
-            this.MessageType = (MqttMessageType)(int)msgType;
-            this.QualityOfService = (QualityOfServiceLevelType)(int)qosLevel;
+            this.MessageType = (MqttMessageType)msgType;
+            this.QualityOfService = (QualityOfServiceLevelType)qosLevel;
             this.Dup = dupFlag == 0 ? false : true;
             this.Retain = retainFlag == 0 ? false : true;
-
         }
 
         internal int DecodeRemainingLength(byte[] buffer)
@@ -160,7 +129,31 @@ namespace SkunkLab.Protocols.Mqtt
             return value;
         }
 
+        internal byte[] EncodeRemainingLength(int remainingLength)
+        {
+            //do digit = X MOD 128 X = X DIV 128
+            // if there are more digits to encode, set the top bit of this digit if ( X > 0 ) digit = digit OR 0x80 endif 'output' digit while ( X> 0 )
+            List<byte> list = new List<byte>();
+            int digit = 0;
+            do
+            {
+                digit = remainingLength % 128;
+                remainingLength /= 128;
 
+                if (remainingLength > 0)
+                {
+                    digit = digit | 0x80;
+                }
 
+                list.Add((byte)digit);
+            } while (remainingLength > 0);
+
+            if (list.Count > 4)
+            {
+                throw new InvalidOperationException("Invalid remaining length;");
+            }
+
+            return list.ToArray();
+        }
     }
 }

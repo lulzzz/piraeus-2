@@ -16,23 +16,18 @@ namespace Piraeus.WebSocketGateway
 {
     public class Startup
     {
-
-
         public void Configure(IApplicationBuilder app)
         {
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-
 
             app.UseAuthentication();
             app.UseWebSockets();
             app.UseMiddleware<PiraeusWebSocketMiddleware>();
 
             //app.UseMvc();
-
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -54,13 +49,13 @@ namespace Piraeus.WebSocketGateway
             }
             else
             {
-                if(!string.IsNullOrEmpty(config.InstrumentationKey))
+                if (!string.IsNullOrEmpty(config.InstrumentationKey))
                 {
                     services.AddApplicationInsightsTelemetry(config.InstrumentationKey);
                 }
             }
             services.AddLogging(builder => builder.AddLogging(config));
-            services.AddSingleton<Logger>();            
+            services.AddSingleton<Logger>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -83,7 +78,5 @@ namespace Piraeus.WebSocketGateway
             services.AddRouting();
             services.AddMvcCore();
         }
-
-
     }
 }

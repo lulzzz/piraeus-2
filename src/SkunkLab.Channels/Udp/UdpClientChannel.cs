@@ -9,6 +9,19 @@ namespace SkunkLab.Channels.Udp
 {
     public class UdpClientChannel : UdpChannel
     {
+        private ChannelState _state;
+
+        private UdpClient client;
+
+        private bool disposedValue;
+
+        private readonly string hostname;
+
+        private readonly int port;
+
+        private readonly IPEndPoint remoteEP;
+
+        private readonly CancellationToken token;
 
         public UdpClientChannel(int localPort, IPEndPoint remoteEP, CancellationToken token)
         {
@@ -27,23 +40,20 @@ namespace SkunkLab.Channels.Udp
             Id = "udp-" + Guid.NewGuid().ToString();
         }
 
-        private CancellationToken token;
-        private UdpClient client;
-        private IPEndPoint remoteEP;
-        private string hostname;
-        private int port;
-        private ChannelState _state;
-        private bool disposedValue;
+        public override event EventHandler<ChannelCloseEventArgs> OnClose;
 
+        public override event EventHandler<ChannelErrorEventArgs> OnError;
+
+        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
+
+        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
 
         public override string Id { get; internal set; }
 
-        public override bool RequireBlocking
-        {
-            get { return false; }
-        }
+        public override bool IsAuthenticated { get; internal set; }
 
-        public override string TypeId { get { return "UDP"; } }
         public override bool IsConnected
         {
             get
@@ -59,13 +69,15 @@ namespace SkunkLab.Channels.Udp
             }
         }
 
+        public override bool IsEncrypted { get; internal set; }
+
         public override int Port { get; internal set; }
+
+        public override bool RequireBlocking => false;
+
         public override ChannelState State
         {
-            get
-            {
-                return _state;
-            }
+            get => _state;
             internal set
             {
                 if (value != _state)
@@ -76,16 +88,8 @@ namespace SkunkLab.Channels.Udp
                 _state = value;
             }
         }
-        public override bool IsEncrypted { get; internal set; }
-        public override bool IsAuthenticated { get; internal set; }
 
-        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
-        public override event EventHandler<ChannelCloseEventArgs> OnClose;
-        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
-        public override event EventHandler<ChannelErrorEventArgs> OnError;
-        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
-
-
+        public override string TypeId => "UDP";
 
         public override async Task AddMessageAsync(byte[] message)
         {
@@ -100,20 +104,6 @@ namespace SkunkLab.Channels.Udp
             await Task.CompletedTask;
         }
 
-        protected void Disposing(bool dispose)
-        {
-            if (dispose & !disposedValue)
-            {
-                if (client != null && IsConnected)
-                {
-                    client.Close();
-                }
-
-                client.Dispose();
-                disposedValue = true;
-            }
-        }
-
         public override void Dispose()
         {
             Disposing(true);
@@ -123,12 +113,14 @@ namespace SkunkLab.Channels.Udp
         public override async Task OpenAsync()
         {
             State = ChannelState.Connecting;
-            client = new UdpClient(Port);
-            client.DontFragment = true;
+            client = new UdpClient(Port)
+            {
+                DontFragment = true
+            };
 
             try
             {
-                if (!String.IsNullOrEmpty(hostname))
+                if (!string.IsNullOrEmpty(hostname))
                 {
                     client.Connect(hostname, port);
                 }
@@ -153,7 +145,6 @@ namespace SkunkLab.Channels.Udp
 
         public override async Task ReceiveAsync()
         {
-
             while (IsConnected && !token.IsCancellationRequested)
             {
                 try
@@ -184,13 +175,25 @@ namespace SkunkLab.Channels.Udp
                 {
                     await client.SendAsync(message, message.Length);
                 }
-
-
             }
             catch (Exception ex)
             {
                 Trace.TraceError("UDP client channel {0} send error {1}", Id, ex.Message);
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
+            }
+        }
+
+        protected void Disposing(bool dispose)
+        {
+            if (dispose & !disposedValue)
+            {
+                if (client != null && IsConnected)
+                {
+                    client.Close();
+                }
+
+                client.Dispose();
+                disposedValue = true;
             }
         }
     }

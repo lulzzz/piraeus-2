@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -17,6 +17,12 @@ namespace Capl.Authorization
     [Serializable]
     public abstract class TransformBase : IXmlSerializable
     {
+        public virtual XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public abstract void ReadXml(XmlReader reader);
 
         /// <summary>
         /// Transforms a set of claims.
@@ -24,13 +30,6 @@ namespace Capl.Authorization
         /// <param name="claimSet">Set of claims to transform.</param>
         /// <returns>Transformed set of claims.</returns>
         public abstract IEnumerable<Claim> TransformClaims(IEnumerable<Claim> claims);
-
-        public virtual XmlSchema GetSchema()
-        {
-            return null;
-        }
-
-        public abstract void ReadXml(XmlReader reader);
 
         public abstract void WriteXml(XmlWriter writer);
     }

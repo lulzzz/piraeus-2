@@ -14,24 +14,23 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Web;
 
-
 namespace Piraeus.Grains.Notifications
 {
     public class CosmosDBSink : EventSink
     {
-        private Uri uri;
-        private Uri documentDBUri;
-        private string databaseId;
-        private string symmetricKey;
-        private string collectionId;
-        private Database database;
-        private DocumentCollection collection;
-        private IAuditor auditor;
-        private ConcurrentQueue<EventMessage> queue;
-        private int delay;
-        private int clientCount;
-        private DocumentClient[] storageArray;
         private int arrayIndex;
+        private readonly IAuditor auditor;
+        private readonly int clientCount;
+        private readonly DocumentCollection collection;
+        private readonly string collectionId;
+        private readonly Database database;
+        private readonly string databaseId;
+        private readonly int delay;
+        private readonly Uri documentDBUri;
+        private readonly ConcurrentQueue<EventMessage> queue;
+        private readonly DocumentClient[] storageArray;
+        private readonly string symmetricKey;
+        private readonly Uri uri;
 
         public CosmosDBSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -40,8 +39,8 @@ namespace Piraeus.Grains.Notifications
 
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);
-            string docDBUri = String.Format("https://{0}", uri.Authority);
-            documentDBUri = new Uri(String.Format("https://{0}", uri.Authority));
+            string docDBUri = string.Format("https://{0}", uri.Authority);
+            documentDBUri = new Uri(string.Format("https://{0}", uri.Authority));
 
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
             databaseId = nvc["database"];
@@ -75,18 +74,13 @@ namespace Piraeus.Grains.Notifications
 
             //Task<DocumentCollection> coltask = GetCollectionAsync(database.SelfLink, collectionId);
             //Task.WaitAll(coltask);
-            //collection = coltask.Result; 
+            //collection = coltask.Result;
         }
-
-
-
 
         public override async Task SendAsync(EventMessage message)
         {
             AuditRecord record = null;
             byte[] payload = null;
-            EventMessage msg = null;
-
             queue.Enqueue(message);
             //byte[] doc = GetPayload(message);
 
@@ -100,7 +94,7 @@ namespace Piraeus.Grains.Notifications
                 while (!queue.IsEmpty)
                 {
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
-                    bool isdequeued = queue.TryDequeue(out msg);
+                    bool isdequeued = queue.TryDequeue(out EventMessage msg);
 
                     if (isdequeued)
                     {
@@ -152,42 +146,22 @@ namespace Piraeus.Grains.Notifications
             }
         }
 
-        private byte[] GetPayload(EventMessage message)
+        private async Task<DocumentCollection> GetCollectionAsync(string dbLink, string id)
         {
-            switch (message.Protocol)
+            List<DocumentCollection> collections = await ReadCollectionsFeedAsync(dbLink);
+            if (collections != null)
             {
-                case ProtocolType.COAP:
-                    CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
-                    return coap.Payload;
-                case ProtocolType.MQTT:
-                    MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
-                    return mqtt.Payload;
-                case ProtocolType.REST:
-                    return message.Message;
-                case ProtocolType.WSN:
-                    return message.Message;
-                default:
-                    return null;
+                foreach (DocumentCollection collection in collections)
+                {
+                    if (collection.Id == id)
+                    {
+                        return collection;
+                    }
+                }
             }
+
+            return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection() { Id = id });
         }
-
-
-        private string GetSlug(string id, string contentType)
-        {
-            if (contentType.Contains("text"))
-            {
-                return id + ".txt";
-            }
-            else if (contentType.Contains("xml"))
-            {
-                return id + ".xml";
-            }
-            else
-            {
-                return id;
-            }
-        }
-
 
         private async Task<Database> GetDatabaseAsync()
         {
@@ -213,29 +187,77 @@ namespace Piraeus.Grains.Notifications
             }
         }
 
-        private async Task<DocumentCollection> GetCollectionAsync(string dbLink, string id)
+        private byte[] GetPayload(EventMessage message)
         {
-            List<DocumentCollection> collections = await ReadCollectionsFeedAsync(dbLink);
-            if (collections != null)
+            switch (message.Protocol)
             {
-                foreach (DocumentCollection collection in collections)
-                {
-                    if (collection.Id == id)
-                    {
-                        return collection;
-                    }
-                }
-            }
+                case ProtocolType.COAP:
+                    CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
+                    return coap.Payload;
 
-            return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection() { Id = id });
+                case ProtocolType.MQTT:
+                    MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
+                    return mqtt.Payload;
+
+                case ProtocolType.REST:
+                    return message.Message;
+
+                case ProtocolType.WSN:
+                    return message.Message;
+
+                default:
+                    return null;
+            }
+        }
+
+        private string GetSlug(string id, string contentType)
+        {
+            if (contentType.Contains("text"))
+            {
+                return id + ".txt";
+            }
+            else if (contentType.Contains("xml"))
+            {
+                return id + ".xml";
+            }
+            else
+            {
+                return id;
+            }
+        }
+
+        private async Task<List<Database>> ListDatabasesAsync()
+        {
+            string continuation = null;
+            List<Database> databases = new List<Database>();
+
+            do
+            {
+                FeedOptions options = new FeedOptions
+                {
+                    RequestContinuation = continuation,
+                    MaxItemCount = 50
+                };
+
+                FeedResponse<Database> response = await storageArray[0].ReadDatabaseFeedAsync(options);
+                foreach (Database db in response)
+                {
+                    databases.Add(db);
+                }
+
+                continuation = response.ResponseContinuation;
+            }
+            while (!string.IsNullOrEmpty(continuation));
+
+            return databases;
         }
 
         private async Task<List<DocumentCollection>> ReadCollectionsFeedAsync(string databaseSelfLink)
         {
-            Exception exception = null;
             string continuation = null;
             List<DocumentCollection> collections = new List<DocumentCollection>();
 
+            Exception exception;
             try
             {
                 do
@@ -246,7 +268,7 @@ namespace Piraeus.Grains.Notifications
                         MaxItemCount = 50
                     };
 
-                    FeedResponse<DocumentCollection> response = (FeedResponse<DocumentCollection>)await storageArray[0].ReadDocumentCollectionFeedAsync(databaseSelfLink, options);
+                    FeedResponse<DocumentCollection> response = await storageArray[0].ReadDocumentCollectionFeedAsync(databaseSelfLink, options);
 
                     foreach (DocumentCollection col in response)
                     {
@@ -254,8 +276,7 @@ namespace Piraeus.Grains.Notifications
                     }
 
                     continuation = response.ResponseContinuation;
-
-                } while (!String.IsNullOrEmpty(continuation));
+                } while (!string.IsNullOrEmpty(continuation));
 
                 return collections;
             }
@@ -282,34 +303,6 @@ namespace Piraeus.Grains.Notifications
             {
                 return null;
             }
-
         }
-
-        private async Task<List<Database>> ListDatabasesAsync()
-        {
-            string continuation = null;
-            List<Database> databases = new List<Database>();
-
-            do
-            {
-                FeedOptions options = new FeedOptions
-                {
-                    RequestContinuation = continuation,
-                    MaxItemCount = 50
-                };
-
-                FeedResponse<Database> response = await storageArray[0].ReadDatabaseFeedAsync(options);
-                foreach (Database db in response)
-                {
-                    databases.Add(db);
-                }
-
-                continuation = response.ResponseContinuation;
-            }
-            while (!String.IsNullOrEmpty(continuation));
-
-            return databases;
-        }
-
     }
 }

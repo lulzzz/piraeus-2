@@ -10,11 +10,7 @@ namespace SkunkLab.Protocols.Coap
 {
     public class CoapUri : Uri
     {
-        public static string Create(string hostname, string resource, bool encryptedChannel)
-        {
-            string scheme = encryptedChannel ? "coaps" : "coap";
-            return String.Format("{0}://{1}?r={2}", scheme, hostname.ToLower(CultureInfo.InvariantCulture), resource.ToLower(CultureInfo.InvariantCulture));
-        }
+        private readonly IEnumerable<KeyValuePair<string, string>> items;
 
         public CoapUri(string uriString)
             : base(uriString, UriKind.Absolute)
@@ -42,36 +38,28 @@ namespace SkunkLab.Protocols.Coap
             CacheKey = GetSingleParameter(QueryStringConstants.CACHE_KEY);
             //Subscriptions = GetEnumerableParameters(QueryStringConstants.SUBSCRIPTION);
             Indexes = BuildIndexes(GetEnumerableParameters(QueryStringConstants.INDEX));
-
         }
-
-        public string Resource { get; internal set; }
-        public string ContentType { get; internal set; }
-        public string MessageId { get; internal set; }
 
         public string CacheKey { get; internal set; }
+
+        public string ContentType { get; internal set; }
+
         public IEnumerable<KeyValuePair<string, string>> Indexes { get; internal set; }
-        public IEnumerable<string> Subscriptions { get; internal set; }
+
+        public string MessageId { get; internal set; }
+
+        public string Resource { get; internal set; }
+
         public string SecurityToken { get; internal set; }
+
+        public IEnumerable<string> Subscriptions { get; internal set; }
+
         public string TokenType { get; internal set; }
 
-        private IEnumerable<KeyValuePair<string, string>> items;
-
-        private IEnumerable<string> GetEnumerableParameters(string key)
+        public static string Create(string hostname, string resource, bool encryptedChannel)
         {
-            return from kv in items where kv.Key.ToLowerInvariant() == key.ToLowerInvariant() select kv.Value;
-        }
-
-        private string GetSingleParameter(string key)
-        {
-            IEnumerable<string> parameters = GetEnumerableParameters(key);
-
-            if (parameters.Count() > 1)
-            {
-                throw new IndexOutOfRangeException(key);
-            }
-
-            return parameters.Count() == 0 ? null : parameters.First();
+            string scheme = encryptedChannel ? "coaps" : "coap";
+            return string.Format("{0}://{1}?r={2}", scheme, hostname.ToLower(CultureInfo.InvariantCulture), resource.ToLower(CultureInfo.InvariantCulture));
         }
 
         private KeyValuePair<string, string>[] BuildIndexes(IEnumerable<string> indexes)
@@ -91,10 +79,23 @@ namespace SkunkLab.Protocols.Coap
             }
 
             return indexList.Count > 0 ? indexList.ToArray() : null;
-
         }
 
+        private IEnumerable<string> GetEnumerableParameters(string key)
+        {
+            return from kv in items where kv.Key.ToLowerInvariant() == key.ToLowerInvariant() select kv.Value;
+        }
 
+        private string GetSingleParameter(string key)
+        {
+            IEnumerable<string> parameters = GetEnumerableParameters(key);
 
+            if (parameters.Count() > 1)
+            {
+                throw new IndexOutOfRangeException(key);
+            }
+
+            return parameters.Count() == 0 ? null : parameters.First();
+        }
     }
 }

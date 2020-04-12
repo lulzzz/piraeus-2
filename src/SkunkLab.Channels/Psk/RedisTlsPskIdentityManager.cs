@@ -7,12 +7,12 @@ namespace SkunkLab.Channels.Psk
 {
     public class RedisTlsPskIdentityManager : TlsPskIdentityManager
     {
+        private readonly RedisPskStorage storage;
+
         public RedisTlsPskIdentityManager(string connectionString)
         {
             storage = RedisPskStorage.CreateSingleton(connectionString);
         }
-
-        private RedisPskStorage storage;
 
         public byte[] GetHint()
         {

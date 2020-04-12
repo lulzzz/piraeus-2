@@ -12,12 +12,15 @@ namespace Piraeus.Adapters.Utilities
 {
     public abstract class EventValidator
     {
-        private delegate ValidatorResult MetadataHandler(EventMetadata metadata, bool? encryptedChannel = null);
-        private delegate ValidatorResult PolicyHandler(AuthorizationPolicy policy, ClaimsIdentity identity = null);
-        private static List<MetadataHandler> metadataHandlers;
-        private static List<PolicyHandler> policyHandlers;
         private static bool initialized;
-        
+
+        private static List<MetadataHandler> metadataHandlers;
+
+        private static List<PolicyHandler> policyHandlers;
+
+        private delegate ValidatorResult MetadataHandler(EventMetadata metadata, bool? encryptedChannel = null);
+
+        private delegate ValidatorResult PolicyHandler(AuthorizationPolicy policy, ClaimsIdentity identity = null);
 
         public static ValidatorResult Validate(bool publish, string resourceUriString, IChannel channel, GraphManager graphManager, HttpContext context = null)
         {
@@ -27,8 +30,8 @@ namespace Piraeus.Adapters.Utilities
 
         public static ValidatorResult Validate(bool publish, EventMetadata metadata, IChannel channel, GraphManager graphManager, HttpContext context = null)
         {
-            metadataHandlers = metadataHandlers ?? new List<MetadataHandler>();
-            policyHandlers = policyHandlers ?? new List<PolicyHandler>();
+            metadataHandlers ??= new List<MetadataHandler>();
+            policyHandlers ??= new List<PolicyHandler>();
             Init();
 
             int index = 0;
@@ -58,7 +61,9 @@ namespace Piraeus.Adapters.Utilities
         private static void Init()
         {
             if (initialized)
+            {
                 return;
+            }
 
             metadataHandlers.Add(ValidateNotNullMetadata);
             metadataHandlers.Add(ValidateEncryptedChannel);
@@ -70,25 +75,10 @@ namespace Piraeus.Adapters.Utilities
 
             initialized = true;
         }
-        
-        private static ValidatorResult ValidateNotNullPolicy(AuthorizationPolicy policy, ClaimsIdentity identity = null)
-        {
-            return new ValidatorResult(policy != null, "Access control policy is null.");
-        }
 
         private static ValidatorResult ValidateAuthorizationPolicy(AuthorizationPolicy policy, ClaimsIdentity identity = null)
         {
             return new ValidatorResult(policy.Evaluate(identity), $"Access control check failed for {policy.PolicyId.ToString()}");
-        }
-
-        private static ValidatorResult ValidateNotNullMetadata(EventMetadata metadata, bool? encryptedChannel = null)
-        {
-            return new ValidatorResult(metadata != null, "Metadata is null");
-        }
-
-        private static ValidatorResult ValidateEncryptedChannel(EventMetadata metadata, bool? encryptedChannel = null)
-        {
-            return new ValidatorResult(!metadata.RequireEncryptedChannel || (metadata.RequireEncryptedChannel && encryptedChannel.Value), "Requires encrypted channel");
         }
 
         private static ValidatorResult ValidateEnabled(EventMetadata metadata, bool? encryptedChannel = null)
@@ -96,9 +86,24 @@ namespace Piraeus.Adapters.Utilities
             return new ValidatorResult(metadata.Enabled, "Metadata disabled.");
         }
 
+        private static ValidatorResult ValidateEncryptedChannel(EventMetadata metadata, bool? encryptedChannel = null)
+        {
+            return new ValidatorResult(!metadata.RequireEncryptedChannel || (metadata.RequireEncryptedChannel && encryptedChannel.Value), "Requires encrypted channel");
+        }
+
         private static ValidatorResult ValidateExpired(EventMetadata metadata, bool? encryptedChannel = null)
         {
             return new ValidatorResult(!(metadata.Expires.HasValue && metadata.Expires.Value < DateTime.UtcNow), "Metadata has expired.");
+        }
+
+        private static ValidatorResult ValidateNotNullMetadata(EventMetadata metadata, bool? encryptedChannel = null)
+        {
+            return new ValidatorResult(metadata != null, "Metadata is null");
+        }
+
+        private static ValidatorResult ValidateNotNullPolicy(AuthorizationPolicy policy, ClaimsIdentity identity = null)
+        {
+            return new ValidatorResult(policy != null, "Access control policy is null.");
         }
     }
 }

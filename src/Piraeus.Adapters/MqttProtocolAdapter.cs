@@ -24,6 +24,30 @@ namespace Piraeus.Adapters
 {
     public class MqttProtocolAdapter : ProtocolAdapter
     {
+        private readonly PiraeusConfig config;
+
+        private readonly HttpContext context;
+
+        private readonly GraphManager graphManager;
+
+        private readonly ILog logger;
+
+        private readonly MqttSession session;
+
+        private OrleansAdapter adapter;
+
+        private IAuditFactory auditFactory;
+
+        private bool closing;
+
+        private bool disposed;
+
+        private bool forcePerReceiveAuthn;
+
+        private IAuditor messageAuditor;
+
+        private IAuditor userAuditor;
+
         public MqttProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, IChannel channel, ILog logger, HttpContext context = null)
         {
             this.config = config;
@@ -32,11 +56,9 @@ namespace Piraeus.Adapters
 
             MqttConfig mqttConfig = new MqttConfig(config.KeepAliveSeconds, config.AckTimeoutSeconds, config.AckRandomFactor, config.MaxRetransmit, config.MaxLatencySeconds, authenticator, config.ClientIdentityNameClaimType, config.GetClientIndexes());
 
-
             this.context = context;
 
             InitializeAuditor(config);
-
 
             session = new MqttSession(mqttConfig);
 
@@ -48,22 +70,11 @@ namespace Piraeus.Adapters
             Channel.OnOpen += Channel_OnOpen;
         }
 
-        public override event System.EventHandler<ProtocolAdapterErrorEventArgs> OnError;
         public override event System.EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
-        public override event System.EventHandler<ChannelObserverEventArgs> OnObserve;
 
-        private readonly GraphManager graphManager;
-        private readonly ILog logger;
-        private readonly HttpContext context;
-        private readonly MqttSession session;
-        private bool disposed;
-        private OrleansAdapter adapter;
-        private readonly PiraeusConfig config;
-        private bool forcePerReceiveAuthn;
-        private bool closing;
-        private IAuditFactory auditFactory;
-        private IAuditor messageAuditor;
-        private IAuditor userAuditor;
+        public override event System.EventHandler<ProtocolAdapterErrorEventArgs> OnError;
+
+        public override event System.EventHandler<ChannelObserverEventArgs> OnObserve;
 
         public override IChannel Channel { get; set; }
 
@@ -95,6 +106,7 @@ namespace Piraeus.Adapters
         }
 
         #region Orleans Adapter Events
+
         private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
         {
             MessageAuditRecord record = null;
@@ -112,7 +124,7 @@ namespace Piraeus.Adapters
             }
             catch (Exception ex)
             {
-                string msg = String.Format("{0} - MQTT adapter observe error on channel '{1}' with '{2}'", DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
+                string msg = string.Format("{0} - MQTT adapter observe error on channel '{1}' with '{2}'", DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
                 logger?.LogErrorAsync(ex, $"MQTT adapter observe error on channel '{Channel.Id}'.").GetAwaiter();
                 record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.Channel.TypeId, "MQTT", length, MessageDirectionType.Out, true, sendTime, msg);
             }
@@ -138,144 +150,26 @@ namespace Piraeus.Adapters
             }
         }
 
-        #endregion
+        #endregion Orleans Adapter Events
 
         #region MQTT Session Events
-        private void Session_OnConnect(object sender, MqttConnectionArgs args)
-        {
-            try
-            {
-                logger?.LogDebugAsync($"MQTT adapter connnected on channel '{Channel.Id}'.").GetAwaiter();
-                adapter.LoadDurableSubscriptionsAsync(session.Identity).GetAwaiter();
-            }
-            catch (Exception ex)
-            {
-                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnConnect error on channel '{Channel.Id}'.").GetAwaiter();
-                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
-            }
-        }
 
-        private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)
+        private List<KeyValuePair<string, string>> GetIndexes(MqttUri mqttUri)
         {
-            logger?.LogDebugAsync($"MQTT adapter disconnected on channel '{Channel.Id}'.").GetAwaiter();
-            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, new DisconnectException(String.Format("MQTT adapter on channel {0} has been disconnected.", Channel.Id))));
-        }
+            List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>(mqttUri.Indexes);
 
-        private void Session_OnUnsubscribe(object sender, MqttMessageEventArgs args)
-        {
-            try
+            if (mqttUri.Indexes.Contains(new KeyValuePair<string, string>("~", "~")))
             {
-                UnsubscribeMessage msg = (UnsubscribeMessage)args.Message;
-                foreach (var item in msg.Topics)
+                list.Remove(new KeyValuePair<string, string>("~", "~"));
+                var query = config.GetClientIndexes().Where((ck) => ck.Key == session.Config.IdentityClaimType);
+                if (query.Count() == 1)
                 {
-                    MqttUri uri = new MqttUri(item.ToLowerInvariant());                   
-                    
-                    if (EventValidator.Validate(false, uri.Resource, Channel, graphManager, context).Validated)
-                    {
-                        adapter.UnsubscribeAsync(uri.Resource).GetAwaiter();
-                        logger?.LogInformationAsync($"MQTT adapter unsubscribed {uri.ToString()}");
-                    }
+                    query.GetEnumerator().MoveNext();
+                    list.Add(new KeyValuePair<string, string>(query.GetEnumerator().Current.Value, "~" + session.Identity));
                 }
             }
-            catch (Exception ex)
-            {
-                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnUnsubscribe error on channel '{Channel.Id}'.").GetAwaiter();
-                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
-            }
-        }
 
-        private List<string> Session_OnSubscribe(object sender, MqttMessageEventArgs args)
-        {
-            List<string> list = new List<string>();
-
-            try
-            {
-                SubscribeMessage message = args.Message as SubscribeMessage;
-
-                SubscriptionMetadata metadata = new SubscriptionMetadata()
-                {
-                    Identity = session.Identity,
-                    Indexes = session.Indexes,
-                    IsEphemeral = true
-                };
-
-                foreach (var item in message.Topics)
-                {
-                    MqttUri uri = new MqttUri(item.Key);
-                    string resourceUriString = uri.Resource;
-                    
-                    if(EventValidator.Validate(false, resourceUriString, Channel, graphManager, context).Validated)
-                    {
-                        Task<string> subTask = Subscribe(resourceUriString, metadata);
-                        string subscriptionUriString = subTask.Result;
-                        list.Add(resourceUriString);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnSubscribe error on channel '{Channel.Id}'.").GetAwaiter();
-                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
-            }
-
-            return list;
-        }
-
-        private Task<string> Subscribe(string resourceUriString, SubscriptionMetadata metadata)
-        {
-            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
-            Task t = Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    string id = await adapter.SubscribeAsync(resourceUriString, metadata);
-                    tcs.SetResult(id);
-                }
-                catch (Exception ex)
-                {
-                    await logger?.LogErrorAsync(ex, $"MQTT adapter Subscribe error on channel '{Channel.Id}'.");
-                    tcs.SetException(ex);
-                }
-            });
-
-            return tcs.Task;
-        }
-
-        //private Task<bool> CanSubscribe(string resourceUriString)
-        //{            
-        //    TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-
-        //    Task t = Task.Factory.StartNew(async () =>
-        //    {
-        //        try
-        //        {
-        //            bool r = await adapter.CanSubscribeAsync(resourceUriString, Channel.IsEncrypted);
-        //            tcs.SetResult(r);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            await logger?.LogErrorAsync(ex, $"MQTT adapter CanSubscribe error on channel '{Channel.Id}'.");
-        //            tcs.SetException(ex);
-        //        }
-        //    });
-
-        //    return tcs.Task;
-        //}
-
-        private void Session_OnPublish(object sender, MqttMessageEventArgs args)
-        {
-            try
-            {
-
-                PublishMessage message = args.Message as PublishMessage;
-                MqttUri muri = new MqttUri(message.Topic);
-                PublishAsync(message).GetAwaiter();
-            }
-            catch (Exception ex)
-            {
-                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnPublish  error on channel '{Channel.Id}'.").GetAwaiter();
-                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
-            }
+            return list.Count > 0 ? list : null;
         }
 
         private async Task PublishAsync(PublishMessage message)
@@ -287,7 +181,7 @@ namespace Piraeus.Adapters
             {
                 MqttUri mqttUri = new MqttUri(message.Topic);
                 metadata = await graphManager.GetPiSystemMetadataAsync(mqttUri.Resource);
-                if(EventValidator.Validate(true, metadata, Channel, graphManager, context).Validated)
+                if (EventValidator.Validate(true, metadata, Channel, graphManager, context).Validated)
                 //if (await adapter.CanPublishAsync(metadata, Channel.IsEncrypted))
                 {
                     EventMessage msg = new EventMessage(mqttUri.ContentType, mqttUri.Resource, ProtocolType.MQTT, message.Encode(), DateTime.UtcNow, metadata.Audit);
@@ -313,7 +207,7 @@ namespace Piraeus.Adapters
                         record = new MessageAuditRecord("XXXXXXXXXXXX", session.Identity, this.Channel.TypeId, "MQTT", message.Payload.Length, MessageDirectionType.In, false, DateTime.UtcNow, "Not authorized, missing resource metadata, or channel encryption requirements");
                     }
 
-                    throw new SecurityException(String.Format("'{0}' not authorized to publish to '{1}'", session.Identity, metadata.ResourceUriString));
+                    throw new SecurityException(string.Format("'{0}' not authorized to publish to '{1}'", session.Identity, metadata.ResourceUriString));
                 }
             }
             catch (Exception ex)
@@ -328,29 +222,172 @@ namespace Piraeus.Adapters
                     await messageAuditor?.WriteAuditRecordAsync(record);
                 }
             }
-
         }
-        private List<KeyValuePair<string, string>> GetIndexes(MqttUri mqttUri)
-        {
-            List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>(mqttUri.Indexes);
 
-            if (mqttUri.Indexes.Contains(new KeyValuePair<string, string>("~", "~")))
+        private void Session_OnConnect(object sender, MqttConnectionArgs args)
+        {
+            try
             {
-                list.Remove(new KeyValuePair<string, string>("~", "~"));
-                var query = config.GetClientIndexes().Where((ck) => ck.Key == session.Config.IdentityClaimType);
-                if (query.Count() == 1)
+                logger?.LogDebugAsync($"MQTT adapter connnected on channel '{Channel.Id}'.").GetAwaiter();
+                adapter.LoadDurableSubscriptionsAsync(session.Identity).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnConnect error on channel '{Channel.Id}'.").GetAwaiter();
+                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
+            }
+        }
+
+        private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)
+        {
+            logger?.LogDebugAsync($"MQTT adapter disconnected on channel '{Channel.Id}'.").GetAwaiter();
+            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, new DisconnectException(string.Format("MQTT adapter on channel {0} has been disconnected.", Channel.Id))));
+        }
+
+        private void Session_OnPublish(object sender, MqttMessageEventArgs args)
+        {
+            try
+            {
+                PublishMessage message = args.Message as PublishMessage;
+                MqttUri muri = new MqttUri(message.Topic);
+                PublishAsync(message).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnPublish  error on channel '{Channel.Id}'.").GetAwaiter();
+                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
+            }
+        }
+
+        private List<string> Session_OnSubscribe(object sender, MqttMessageEventArgs args)
+        {
+            List<string> list = new List<string>();
+
+            try
+            {
+                SubscribeMessage message = args.Message as SubscribeMessage;
+
+                SubscriptionMetadata metadata = new SubscriptionMetadata()
                 {
-                    query.GetEnumerator().MoveNext();
-                    list.Add(new KeyValuePair<string, string>(query.GetEnumerator().Current.Value, "~" + session.Identity));
+                    Identity = session.Identity,
+                    Indexes = session.Indexes,
+                    IsEphemeral = true
+                };
+
+                foreach (var item in message.Topics)
+                {
+                    MqttUri uri = new MqttUri(item.Key);
+                    string resourceUriString = uri.Resource;
+
+                    if (EventValidator.Validate(false, resourceUriString, Channel, graphManager, context).Validated)
+                    {
+                        Task<string> subTask = Subscribe(resourceUriString, metadata);
+                        string subscriptionUriString = subTask.Result;
+                        list.Add(resourceUriString);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnSubscribe error on channel '{Channel.Id}'.").GetAwaiter();
+                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
+            }
 
-            return list.Count > 0 ? list : null;
+            return list;
         }
 
-        #endregion
+        private void Session_OnUnsubscribe(object sender, MqttMessageEventArgs args)
+        {
+            try
+            {
+                UnsubscribeMessage msg = (UnsubscribeMessage)args.Message;
+                foreach (var item in msg.Topics)
+                {
+                    MqttUri uri = new MqttUri(item.ToLowerInvariant());
+
+                    if (EventValidator.Validate(false, uri.Resource, Channel, graphManager, context).Validated)
+                    {
+                        adapter.UnsubscribeAsync(uri.Resource).GetAwaiter();
+                        logger?.LogInformationAsync($"MQTT adapter unsubscribed {uri.ToString()}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogErrorAsync(ex, $"MQTT adapter Session_OnUnsubscribe error on channel '{Channel.Id}'.").GetAwaiter();
+                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
+            }
+        }
+
+        private Task<string> Subscribe(string resourceUriString, SubscriptionMetadata metadata)
+        {
+            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
+            Task t = Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    string id = await adapter.SubscribeAsync(resourceUriString, metadata);
+                    tcs.SetResult(id);
+                }
+                catch (Exception ex)
+                {
+                    await logger?.LogErrorAsync(ex, $"MQTT adapter Subscribe error on channel '{Channel.Id}'.");
+                    tcs.SetException(ex);
+                }
+            });
+
+            return tcs.Task;
+        }
+
+        //private Task<bool> CanSubscribe(string resourceUriString)
+        //{
+        //    TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+        //    Task t = Task.Factory.StartNew(async () =>
+        //    {
+        //        try
+        //        {
+        //            bool r = await adapter.CanSubscribeAsync(resourceUriString, Channel.IsEncrypted);
+        //            tcs.SetResult(r);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            await logger?.LogErrorAsync(ex, $"MQTT adapter CanSubscribe error on channel '{Channel.Id}'.");
+        //            tcs.SetException(ex);
+        //        }
+        //    });
+
+        //    return tcs.Task;
+        //}
+
+        #endregion MQTT Session Events
 
         #region Channel Events
+
+        private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
+        {
+            try
+            {
+                if (!closing)
+                {
+                    closing = true;
+                    UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, DateTime.UtcNow);
+                    userAuditor?.UpdateAuditRecordAsync(record).IgnoreException();
+                }
+
+                OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(e.ChannelId));
+            }
+            catch
+            {
+            }
+        }
+
+        private void Channel_OnError(object sender, ChannelErrorEventArgs e)
+        {
+            logger?.LogErrorAsync(e.Error, $"MQTT adapter Channel_OnError error on channel '{Channel.Id}'.").GetAwaiter();
+            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, e.Error));
+        }
+
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
             try
@@ -422,6 +459,11 @@ namespace Piraeus.Adapters
             }
         }
 
+        private void Channel_OnStateChange(object sender, ChannelStateEventArgs e)
+        {
+            logger?.LogInformationAsync($"MQTT adapter Channel_OnStateChange to '{e.State}' on channel '{Channel.Id}'.").GetAwaiter();
+        }
+
         private async Task ProcessMessageAsync(MqttMessage message)
         {
             try
@@ -441,39 +483,16 @@ namespace Piraeus.Adapters
             }
         }
 
-        private void Channel_OnStateChange(object sender, ChannelStateEventArgs e)
+        #endregion Channel Events
+
+        #region Dispose
+
+        public override void Dispose()
         {
-            logger?.LogInformationAsync($"MQTT adapter Channel_OnStateChange to '{e.State}' on channel '{Channel.Id}'.").GetAwaiter();
+            Disposing(true);
+            GC.SuppressFinalize(this);
         }
 
-        private void Channel_OnError(object sender, ChannelErrorEventArgs e)
-        {
-            logger?.LogErrorAsync(e.Error, $"MQTT adapter Channel_OnError error on channel '{Channel.Id}'.").GetAwaiter();
-            OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, e.Error));
-        }
-
-        private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
-        {
-            try
-            {
-                if (!closing)
-                {
-                    closing = true;
-                    UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, DateTime.UtcNow);
-                    userAuditor?.UpdateAuditRecordAsync(record).IgnoreException();
-                }
-
-                OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(e.ChannelId));
-            }
-            catch
-            {
-
-            }
-        }
-
-        #endregion
-
-        #region Dispose 
         protected void Disposing(bool disposing)
         {
             if (!disposed)
@@ -524,13 +543,7 @@ namespace Piraeus.Adapters
             }
         }
 
-        public override void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
+        #endregion Dispose
 
         private void InitializeAuditor(PiraeusConfig config)
         {
@@ -546,11 +559,10 @@ namespace Piraeus.Adapters
                 else
                 {
                     string pathString = config.AuditConnectionString.LastIndexOf("/") == config.AuditConnectionString.Length - 1 ? config.AuditConnectionString : config.AuditConnectionString + "/";
-                    auditFactory.Add(new FileAuditor(String.Format($"{pathString}messageaudit.txt")), AuditType.Message);
-                    auditFactory.Add(new FileAuditor(String.Format($"{pathString}useraudit.txt")), AuditType.User);
+                    auditFactory.Add(new FileAuditor(string.Format($"{pathString}messageaudit.txt")), AuditType.Message);
+                    auditFactory.Add(new FileAuditor(string.Format($"{pathString}useraudit.txt")), AuditType.User);
                 }
             }
         }
-
     }
 }

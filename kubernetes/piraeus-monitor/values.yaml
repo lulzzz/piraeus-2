@@ -1,0 +1,23 @@
+replicaCount: 1
+loggerTypes: "Console"
+port: 8087
+forward: "true"
+dockerized: true
+serviceId: "myservice"
+clusterId: "mycluster"
+
+image1:
+  registry: docker.io
+  ## Image location, NOT including the tag
+  repository: skunklab/piraeus-monitor
+  ## Image tag
+  tag: v3.0.2
+  pullPolicy: IfNotPresent
+  
+
+service: 
+  type: ClusterIP
+
+
+
+

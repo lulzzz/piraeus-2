@@ -9,8 +9,23 @@ namespace Piraeus.SiloHost.Core
 {
     public class Program
     {
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+.ConfigureLogging((builder) =>
+{
+    builder.AddConsole();
+    builder.SetMinimumLevel(LogLevel.Debug);
+})
+.ConfigureServices((hostContext, services) =>
+{
+    services.AddOrleansConfiguration();
+    services.AddSingleton<Logger>();    //add the logger
+    services.AddHostedService<SiloHostService>(); //start the silo host
+});
+        }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WriteLine("  ******** **  **            **      **                    **");
             Console.WriteLine(" **////// //  /**           /**     /**                   /**");
@@ -25,19 +40,6 @@ namespace Piraeus.SiloHost.Core
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-                .ConfigureLogging((builder) =>
-                {
-                    builder.AddConsole();
-                    builder.SetMinimumLevel(LogLevel.Debug);
-                })
-                .ConfigureServices((hostContext, services) =>
-                {
-                    services.AddOrleansConfiguration();
-                    services.AddSingleton<Logger>();    //add the logger
-                    services.AddHostedService<SiloHostService>(); //start the silo host
-                });
         //private static ManualResetEventSlim done;
 
         //static void Main(string[] args)
@@ -51,7 +53,6 @@ namespace Piraeus.SiloHost.Core
 
         //    //Console.CancelKeyPress += (sender, eventArgs) =>
         //    //{
-
         //    //    done.Set();
         //    //    eventArgs.Cancel = true;
         //    //};

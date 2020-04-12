@@ -21,31 +21,7 @@ namespace SkunkLab.Channels.Tcp
             }
             catch (AggregateException ae)
             {
-                string msg = String.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
-                Console.WriteLine(msg);
-                throw new Exception(msg, ae.Flatten().InnerException);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception in TLS protocol connnection '{0}'", ex.Message);
-                throw ex;
-            }
-        }
-
-
-
-        public static TlsServerProtocol ConnectPskTlsServer(this TcpClient client, TlsPskIdentityManager pskManager, Stream stream)
-        {
-            try
-            {
-                PskTlsServer server = new PskTlsServer2(pskManager);
-                TlsServerProtocol protocol = new TlsServerProtocol(stream, new SecureRandom());
-                protocol.Accept(server);
-                return protocol;
-            }
-            catch (AggregateException ae)
-            {
-                string msg = String.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
+                string msg = string.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
                 Console.WriteLine(msg);
                 throw new Exception(msg, ae.Flatten().InnerException);
             }
@@ -68,7 +44,29 @@ namespace SkunkLab.Channels.Tcp
             }
             catch (AggregateException ae)
             {
-                string msg = String.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
+                string msg = string.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
+                Console.WriteLine(msg);
+                throw new Exception(msg, ae.Flatten().InnerException);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception in TLS protocol connnection '{0}'", ex.Message);
+                throw ex;
+            }
+        }
+
+        public static TlsServerProtocol ConnectPskTlsServer(this TcpClient client, TlsPskIdentityManager pskManager, Stream stream)
+        {
+            try
+            {
+                PskTlsServer server = new PskTlsServer2(pskManager);
+                TlsServerProtocol protocol = new TlsServerProtocol(stream, new SecureRandom());
+                protocol.Accept(server);
+                return protocol;
+            }
+            catch (AggregateException ae)
+            {
+                string msg = string.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
                 Console.WriteLine(msg);
                 throw new Exception(msg, ae.Flatten().InnerException);
             }
@@ -92,7 +90,7 @@ namespace SkunkLab.Channels.Tcp
             }
             catch (AggregateException ae)
             {
-                string msg = String.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
+                string msg = string.Format("AggregateException in TLS protocol connnection '{0}'", ae.Flatten().InnerException.Message);
                 Console.WriteLine(msg);
                 throw new Exception(msg, ae.Flatten().InnerException);
             }
@@ -101,8 +99,6 @@ namespace SkunkLab.Channels.Tcp
                 Console.WriteLine("Exception in TLS protocol connnection '{0}'", ex.Message);
                 throw ex;
             }
-
         }
-
     }
 }

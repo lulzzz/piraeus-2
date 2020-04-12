@@ -6,11 +6,17 @@ namespace Piraeus.Core.Logging
 {
     public class Logger : ILog
     {
+        private readonly ILogger<Logger> logger;
+
         public Logger(ILogger<Logger> logger)
         {
             this.logger = logger;
         }
-        private ILogger<Logger> logger;
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            return logger.BeginScope<TState>(state);
+        }
 
         public bool IsEnabled(LogLevel logLevel)
         {
@@ -22,16 +28,10 @@ namespace Piraeus.Core.Logging
             logger.Log<TState>(logLevel, eventId, state, exception, formatter);
         }
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return logger.BeginScope<TState>(state);
-        }
-
-
-        public async Task LogTraceAsync(string message, params object[] args)
+        public async Task LogCriticalAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = new Action(() => logger.LogTrace(msg, args));
+            Action action = new Action(() => logger.LogCritical(msg, args));
             await Task.Run(action);
         }
 
@@ -42,6 +42,20 @@ namespace Piraeus.Core.Logging
             await Task.Run(action);
         }
 
+        public async Task LogErrorAsync(string message, params object[] args)
+        {
+            string msg = AppendTimestamp(message);
+            Action action = new Action(() => logger.LogError(msg, args));
+            await Task.Run(action);
+        }
+
+        public async Task LogErrorAsync(Exception error, string message, params object[] args)
+        {
+            string msg = AppendTimestamp(message);
+            Action action = new Action(() => logger.LogError(error, msg, args));
+            await Task.Run(action);
+        }
+
         public async Task LogInformationAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
@@ -49,29 +63,17 @@ namespace Piraeus.Core.Logging
             await Task.Run(action);
         }
 
+        public async Task LogTraceAsync(string message, params object[] args)
+        {
+            string msg = AppendTimestamp(message);
+            Action action = new Action(() => logger.LogTrace(msg, args));
+            await Task.Run(action);
+        }
+
         public async Task LogWarningAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
             Action action = new Action(() => logger.LogWarning(msg, args));
-            await Task.Run(action);
-        }
-
-        public async Task LogErrorAsync(string message, params object[] args)
-        {
-            string msg = AppendTimestamp(message);
-            Action action = new Action(() => logger.LogError(msg, args));
-            await Task.Run(action);
-        }
-        public async Task LogErrorAsync(Exception error, string message, params object[] args)
-        {
-            string msg = AppendTimestamp(message);
-            Action action = new Action(() => logger.LogError(error, msg, args));
-            await Task.Run(action);
-        }
-        public async Task LogCriticalAsync(string message, params object[] args)
-        {
-            string msg = AppendTimestamp(message);
-            Action action = new Action(() => logger.LogCritical(msg, args));
             await Task.Run(action);
         }
 

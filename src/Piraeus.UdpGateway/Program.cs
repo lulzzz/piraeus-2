@@ -7,37 +7,35 @@ using Piraeus.Extensions.Logging;
 
 namespace Piraeus.UdpGateway
 {
-    class Program
+    internal class Program
     {
-        
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+.ConfigureServices((hostContext, services) =>
+{
+    //PiraeusConfig config = null;
+    services.AddPiraeusConfiguration(out PiraeusConfig config);
+    if (!string.IsNullOrEmpty(config.InstrumentationKey))
+    {
+        services.AddApplicationInsightsTelemetry(op =>
+        {
+            op.InstrumentationKey = config.InstrumentationKey;
+            op.AddAutoCollectedMetricExtractor = true;
+            op.EnableHeartbeat = true;
+        });
+    }
 
-        static void Main(string[] args)
+    services.AddOrleansConfiguration(); //add orleans config as singleton
+    services.AddLogging(builder => builder.AddLogging(config));
+    services.AddSingleton<Logger>();    //add the logger
+    services.AddHostedService<UdpGatewayHost>(); //start the service
+});
+        }
+
+        private static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
         }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
-                {
-                    //PiraeusConfig config = null;
-                    services.AddPiraeusConfiguration(out PiraeusConfig config);
-                    if (!string.IsNullOrEmpty(config.InstrumentationKey))
-                    {
-                        services.AddApplicationInsightsTelemetry(op =>
-                        {
-                            op.InstrumentationKey = config.InstrumentationKey;
-                            op.AddAutoCollectedMetricExtractor = true;
-                            op.EnableHeartbeat = true;
-                        });
-                    }
-
-                    services.AddOrleansConfiguration(); //add orleans config as singleton
-                    services.AddLogging(builder => builder.AddLogging(config));
-                    services.AddSingleton<Logger>();    //add the logger
-                    services.AddHostedService<UdpGatewayHost>(); //start the service
-                });
-
-
     }
 }

@@ -9,13 +9,13 @@ namespace SkunkLab.Channels.Http
             ResourceUri = resourceUri;
         }
 
-        public override Uri ResourceUri { get; set; }
         public override event ObserverEventHandler OnNotify;
+
+        public override Uri ResourceUri { get; set; }
 
         public override void Update(Uri resourceUri, string contentType, byte[] message)
         {
             OnNotify?.Invoke(this, new ObserverEventArgs(resourceUri, contentType, message));
         }
-
     }
 }

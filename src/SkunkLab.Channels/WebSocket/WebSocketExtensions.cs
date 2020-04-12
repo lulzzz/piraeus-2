@@ -1,6 +1,5 @@
 ﻿namespace SkunkLab.Channels.WebSocket
 {
-
     using Microsoft.AspNetCore.Http;
     using System.Net.WebSockets;
     using System.Threading.Tasks;
@@ -29,11 +28,8 @@
 
         //}
 
-
-
         //public static void AcceptWebSocketRequest(this HttpContext httpContext, WebSocketHandler webSocketHandler)
         //{
-
         //    if (httpContext == null)
         //    {
         //        throw new ArgumentNullException("httpContext");
@@ -43,14 +39,8 @@
         //        throw new ArgumentNullException("webSocketHandler");
         //    }
 
-
-
         //    //httpContext.AcceptWebSocketRequest(new Func<WebSocketContext, Task>(webSocketHandler.ProcessWebSocketRequestAsync));
         //}
-
-
-
-
 
         //public static void AcceptWebSocketRequest(this HttpContext httpContext, WebSocketHandler webSocketHandler)
         //{
@@ -66,5 +56,4 @@
         //    httpContext.AcceptWebSocketRequest(new Func<WebSocketContext, Task>(webSocketHandler.ProcessWebSocketRequestAsync));
         //}
     }
-
 }

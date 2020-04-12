@@ -14,8 +14,10 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            LogicalAndCollection lac = new LogicalAndCollection();
-            lac.Evaluates = this.Evaluates;
+            LogicalAndCollection lac = new LogicalAndCollection
+            {
+                Evaluates = this.Evaluates
+            };
             foreach (Term term in this.Terms)
             {
                 lac.Add(term);

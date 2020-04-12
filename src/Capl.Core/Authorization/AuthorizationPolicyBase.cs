@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -23,14 +23,14 @@ namespace Capl.Authorization
     public abstract class AuthorizationPolicyBase : IXmlSerializable
     {
         /// <summary>
-        /// Gets or sets a transform collection.
-        /// </summary>
-        public abstract TransformCollection Transforms { get; internal set; }
-
-        /// <summary>
         /// Gets or sets an evaluation expression.
         /// </summary>
         public abstract Term Expression { get; set; }
+
+        /// <summary>
+        /// Gets or sets a transform collection.
+        /// </summary>
+        public abstract TransformCollection Transforms { get; internal set; }
 
         /// <summary>
         /// Provides a schema for an authorization policy.
@@ -39,10 +39,7 @@ namespace Capl.Authorization
         /// <returns>Qualified name of an authorization policy type for a schema.</returns>
         public static XmlQualifiedName GetSchema(XmlSchemaSet schemaSet)
         {
-            if (schemaSet == null)
-            {
-                throw new ArgumentNullException("schemaSet");
-            }
+            _ = schemaSet ?? throw new ArgumentNullException(nameof(schemaSet));
 
             using (StringReader reader = new StringReader(Capl.Properties.Resources.AuthorizationPolicySchema))
             {
@@ -77,6 +74,7 @@ namespace Capl.Authorization
         /// <param name="writer">An XmlWriter for the authorization policy.</param>
         public abstract void WriteXml(XmlWriter writer);
 
-        #endregion        
+        #endregion IXmlSerializable Members
+
     }
 }

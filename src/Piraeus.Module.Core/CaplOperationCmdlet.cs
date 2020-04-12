@@ -8,15 +8,15 @@ namespace Piraeus.Module
     [OutputType(typeof(Capl.Authorization.EvaluationOperation))]
     public class CaplOperationCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Value of Operation (optional)", Mandatory = false)]
-        public string Value;
-
         [Parameter(HelpMessage = "Type of operation", Mandatory = true)]
         public OperationType Type;
 
+        [Parameter(HelpMessage = "Value of Operation (optional)", Mandatory = false)]
+        public string Value;
+
         protected override void ProcessRecord()
         {
-            Uri operationUri = null;
+            Uri operationUri;
             if (this.Type == OperationType.BetweenDateTime)
             {
                 operationUri = BetweenDateTimeOperation.OperationUri;

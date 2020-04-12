@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace Piraeus.Module
 {
@@ -22,22 +21,20 @@ namespace Piraeus.Module
             this.IsZeroContentLength = true;
             this.SecurityKey = securityKey;
         }
-        public string ContentType { get; internal set; }
-        public string Method { get; internal set; }
+
         public string BaseUrl { get; internal set; }
+        public string ContentType { get; internal set; }
         public bool IsZeroContentLength { get; internal set; }
-
-        public string SecurityToken { get; internal set; }
-
+        public string Method { get; internal set; }
         public string SecurityKey { get; internal set; }
+        public string SecurityToken { get; internal set; }
 
         public HttpWebRequest BuildRequest()
         {
-            HttpWebRequest request = null;
-
+            HttpWebRequest request;
             if (!string.IsNullOrEmpty(this.SecurityKey))
             {
-                string url = String.Format("{0}?key={1}", this.BaseUrl, this.SecurityKey);
+                string url = string.Format("{0}?key={1}", this.BaseUrl, this.SecurityKey);
                 request = (HttpWebRequest)HttpWebRequest.Create(url);
             }
             else
@@ -55,7 +52,7 @@ namespace Piraeus.Module
 
             if (!string.IsNullOrEmpty(this.SecurityToken))
             {
-                request.Headers.Add("Authorization", String.Format("Bearer {0}", this.SecurityToken));
+                request.Headers.Add("Authorization", string.Format("Bearer {0}", this.SecurityToken));
             }
 
             return request;

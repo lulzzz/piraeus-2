@@ -17,16 +17,16 @@ namespace Piraeus.Grains.Notifications
 {
     public class RedisSink : EventSink
     {
-        private readonly string connectionString;
+        private readonly IAuditor auditor;
         private readonly string cacheClaimType;
+        private readonly string connectionString;
+        private readonly ConcurrentQueueManager cqm;
+        private readonly TimeSpan? expiry;
+        private readonly TaskQueue tqueue;
+        private readonly Uri uri;
         private ConnectionMultiplexer connection;
         private IDatabase database;
         private int dbNumber;
-        private readonly TimeSpan? expiry;
-        private readonly IAuditor auditor;
-        private readonly Uri uri;
-        private readonly TaskQueue tqueue;
-        private readonly ConcurrentQueueManager cqm;
 
         public RedisSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -38,7 +38,7 @@ namespace Piraeus.Grains.Notifications
 
             uri = new Uri(metadata.NotifyAddress);
 
-            connectionString = String.Format("{0}:6380,password={1},ssl=True,abortConnect=False", uri.Authority, metadata.SymmetricKey);
+            connectionString = string.Format("{0}:6380,password={1},ssl=True,abortConnect=False", uri.Authority, metadata.SymmetricKey);
 
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
 
@@ -47,8 +47,7 @@ namespace Piraeus.Grains.Notifications
                 dbNumber = -1;
             }
 
-            TimeSpan expiration;
-            if (TimeSpan.TryParse(nvc["expiry"], out expiration))
+            if (TimeSpan.TryParse(nvc["expiry"], out TimeSpan expiration))
             {
                 expiry = expiration;
             }
@@ -63,6 +62,41 @@ namespace Piraeus.Grains.Notifications
             //Task<ConnectionMultiplexer> task = ConnectionMultiplexer.ConnectAsync(connectionString);
             //Task.WaitAll(task);
             //connection = task.Result;
+        }
+
+        public string GetKey(EventMessage message)
+        {
+            //if the cache key is sent on the message URI use it.  Otherwise, look for a matching claim type and return the value.
+            if (!string.IsNullOrEmpty(message.CacheKey))
+            {
+                return message.CacheKey;
+            }
+            else if (!string.IsNullOrEmpty(cacheClaimType))
+            {
+                var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
+                var identity = new ClaimsIdentity(principal.Claims);
+                if (identity.HasClaim((c) =>
+                 {
+                     return cacheClaimType.ToLowerInvariant() == c.Type.ToLowerInvariant();
+                 }))
+                {
+                    Claim claim =
+                    identity.FindFirst(
+                        c =>
+                            c.Type.ToLowerInvariant() ==
+                            cacheClaimType.ToLowerInvariant());
+
+                    return claim == null ? null : claim.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public override async Task SendAsync(EventMessage message)
@@ -98,7 +132,6 @@ namespace Piraeus.Grains.Notifications
                         throw new InvalidOperationException("Payload length is 0.");
                     }
 
-
                     if (msg.ContentType != "application/octet-stream")
                     {
                         Task task = database.StringSetAsync(cacheKey, Encoding.UTF8.GetString(payload), expiry);
@@ -112,20 +145,36 @@ namespace Piraeus.Grains.Notifications
                         await Task.WhenAll(task);
                     }
 
-                    record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), String.Format("Redis({0})", dbNumber), String.Format("Redis({0})", dbNumber), payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-
+                    record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), string.Format("Redis({0})", dbNumber), string.Format("Redis({0})", dbNumber), payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
             }
             catch (Exception ex)
             {
                 Trace.TraceWarning("Initial Redis write error {0}", ex.Message);
-                record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), String.Format("Redis({0})", dbNumber), String.Format("Redis({0})", dbNumber), payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), string.Format("Redis({0})", dbNumber), string.Format("Redis({0})", dbNumber), payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
                 if (message.Audit && record != null)
                 {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
+            }
+        }
+
+        private async Task ConnectAsync()
+        {
+            if (connection == null || !connection.IsConnected)
+            {
+                connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+                if (dbNumber < 1)
+                {
+                    database = connection.GetDatabase();
+                    dbNumber = database.Database;
+                }
+                else
+                {
+                    database = connection.GetDatabase(dbNumber);
                 }
             }
         }
@@ -163,12 +212,12 @@ namespace Piraeus.Grains.Notifications
                     await db.StringSetAsync(cacheKey, payload, expiry);
                 }
 
-                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), String.Format("Redis({0})", db.Database), String.Format("Redis({0})", db.Database), payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), string.Format("Redis({0})", db.Database), string.Format("Redis({0})", db.Database), payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
             catch (Exception ex)
             {
                 Trace.TraceError(ex.Message);
-                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), String.Format("Redis({0})", db.Database), String.Format("Redis({0})", db.Database), payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), string.Format("Redis({0})", db.Database), string.Format("Redis({0})", db.Database), payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
@@ -184,42 +233,6 @@ namespace Piraeus.Grains.Notifications
             }
         }
 
-
-        public string GetKey(EventMessage message)
-        {
-            //if the cache key is sent on the message URI use it.  Otherwise, look for a matching claim type and return the value.
-            if (!string.IsNullOrEmpty(message.CacheKey))
-            {
-                return message.CacheKey;
-            }
-            else if (!string.IsNullOrEmpty(cacheClaimType))
-            {
-                var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
-                var identity = new ClaimsIdentity(principal.Claims);
-                if (identity.HasClaim((c) =>
-                 {
-                     return cacheClaimType.ToLowerInvariant() == c.Type.ToLowerInvariant();
-                 }))
-                {
-                    Claim claim =
-                    identity.FindFirst(
-                        c =>
-                            c.Type.ToLowerInvariant() ==
-                            cacheClaimType.ToLowerInvariant());
-
-                    return claim == null ? null : claim.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         private byte[] GetPayload(EventMessage message)
         {
             switch (message.Protocol)
@@ -227,41 +240,25 @@ namespace Piraeus.Grains.Notifications
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
+
                 case ProtocolType.MQTT:
                     MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                     return mqtt.Payload;
+
                 case ProtocolType.REST:
                     return message.Message;
+
                 case ProtocolType.WSN:
                     return message.Message;
+
                 default:
                     return null;
             }
         }
 
-        private async Task ConnectAsync()
-        {
-            if (connection == null || !connection.IsConnected)
-            {
-                connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
-                if (dbNumber < 1)
-                {
-                    database = connection.GetDatabase();
-                    dbNumber = database.Database;
-                }
-                else
-                {
-                    database = connection.GetDatabase(dbNumber);
-                }
-            }
-        }
-
-
         private async Task<ConnectionMultiplexer> NewConnection()
         {
             return await ConnectionMultiplexer.ConnectAsync(connectionString);
         }
-
-
     }
 }

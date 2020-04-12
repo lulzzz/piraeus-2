@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -21,14 +21,14 @@ namespace Capl.Authorization
     public class EvaluationOperation : IXmlSerializable
     {
         /// <summary>
-        /// The URI that identifies an operation.
-        /// </summary>
-        private Uri _operationType;
-
-        /// <summary>
         /// The claim value defined by the operation.
         /// </summary>
         private string _claimValue;
+
+        /// <summary>
+        /// The URI that identifies an operation.
+        /// </summary>
+        private Uri _operationType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EvaluationOperation"/> class.
@@ -49,22 +49,22 @@ namespace Capl.Authorization
         }
 
         /// <summary>
-        /// Gets or sets the URI that identifies the operation.
-        /// </summary>
-        public Uri Type
-        {
-            get { return this._operationType; }
-            set { this._operationType = value; }
-        }
-
-        /// <summary>
         /// Gets or sets the claim value defined by the operation.
         /// </summary>
         /// <remarks>If the claim value is null, it implies a unary operation.</remarks>
         public string ClaimValue
         {
-            get { return this._claimValue; }
-            set { this._claimValue = value; }
+            get => this._claimValue;
+            set => this._claimValue = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the URI that identifies the operation.
+        /// </summary>
+        public Uri Type
+        {
+            get => this._operationType;
+            set => this._operationType = value;
         }
 
         public static EvaluationOperation Load(XmlReader reader)
@@ -74,7 +74,6 @@ namespace Capl.Authorization
 
             return evalOperation;
         }
-
 
         #region IXmlSerializable Members
 
@@ -94,10 +93,7 @@ namespace Capl.Authorization
         /// <param name="reader">An XmlReader for the operation.</param>
         public void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Operation);
             this._operationType = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
@@ -115,10 +111,7 @@ namespace Capl.Authorization
         /// <param name="writer">An XmlWriter for the operation.</param>
         public void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(AuthorizationConstants.Elements.Operation, AuthorizationConstants.Namespaces.Xmlns);
             writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, this._operationType.ToString());
@@ -126,6 +119,6 @@ namespace Capl.Authorization
             writer.WriteEndElement();
         }
 
-        #endregion
+        #endregion IXmlSerializable Members
     }
 }

@@ -6,8 +6,15 @@ using System.Timers;
 namespace SkunkLab.Protocols.Mqtt
 {
     public delegate void ExpiredExchangeEventHandler(object sender, LifetimeEventArgs args);
+
     public class ExchangeLifetime
     {
+        private readonly Dictionary<ushort, DateTime> container;
+
+        private readonly TimeSpan lifetime;
+
+        private readonly Timer timer;
+
         public ExchangeLifetime(TimeSpan interval, TimeSpan lifetime)
         {
             this.lifetime = lifetime;
@@ -18,14 +25,6 @@ namespace SkunkLab.Protocols.Mqtt
         }
 
         public event ExpiredExchangeEventHandler OnExpired;
-        private TimeSpan lifetime;
-        private Timer timer;
-        private Dictionary<ushort, DateTime> container;
-
-        public bool IsProcessed(ushort id)
-        {
-            return container.ContainsKey(id);
-        }
 
         public void Add(ushort id)
         {
@@ -38,6 +37,11 @@ namespace SkunkLab.Protocols.Mqtt
             {
                 timer.Enabled = true;
             }
+        }
+
+        public bool IsProcessed(ushort id)
+        {
+            return container.ContainsKey(id);
         }
 
         public void Remove(ushort id)
@@ -79,7 +83,6 @@ namespace SkunkLab.Protocols.Mqtt
                     //signal to remove items.
                     OnExpired?.Invoke(this, new LifetimeEventArgs(ids));
                 }
-
             }
 
             if (container.Count == 0)

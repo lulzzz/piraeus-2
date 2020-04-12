@@ -5,13 +5,14 @@ namespace SkunkLab.Storage
 {
     public class SkunkLabBufferManager : IBufferManager
     {
+        private readonly int defaultBufferSize = 0;
+
         public SkunkLabBufferManager(BufferManager manager, int defaultBufferSize)
         {
             this.Manager = manager;
             this.defaultBufferSize = defaultBufferSize;
         }
 
-        private int defaultBufferSize = 0;
         public BufferManager Manager { get; internal set; }
 
         public int GetDefaultBufferSize()

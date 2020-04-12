@@ -9,6 +9,9 @@ namespace Piraeus.Clients.Rest
 {
     public class RestClient
     {
+        private readonly IChannel receiveChannel;
+
+        private readonly HttpClientChannel sendChannel;
 
         public RestClient(string endpoint, string securityToken, IEnumerable<Observer> observers = null, CancellationToken token = default(CancellationToken))
         {
@@ -19,9 +22,11 @@ namespace Piraeus.Clients.Rest
                 foreach (var ob in observers)
                 {
                     if (endpoint.Contains("?"))
+                    {
                         endpoint = endpoint + $"&sub={ob.ResourceUri.ToString().ToLowerInvariant()}";
+                    }
                 }
-                receiveChannel = ChannelFactory.Create(endpoint, securityToken, observers, token);                
+                receiveChannel = ChannelFactory.Create(endpoint, securityToken, observers, token);
                 Task openTask = receiveChannel.OpenAsync();
                 Task.WaitAll(openTask);
 
@@ -43,15 +48,6 @@ namespace Piraeus.Clients.Rest
             }
         }
 
-        private IChannel receiveChannel;
-        private HttpClientChannel sendChannel;
-
-        public async Task SendAsync(string resourceUriString, string contentType, byte[] message, string cacheKey = null, List<KeyValuePair<string, string>> indexes = null)
-        {
-            await sendChannel.SendAsync(resourceUriString, contentType, message, cacheKey, indexes);
-        }
-
-
         public async Task ReceiveAsync()
         {
             if (!receiveChannel.IsConnected)
@@ -60,6 +56,11 @@ namespace Piraeus.Clients.Rest
             }
 
             await receiveChannel.ReceiveAsync();
+        }
+
+        public async Task SendAsync(string resourceUriString, string contentType, byte[] message, string cacheKey = null, List<KeyValuePair<string, string>> indexes = null)
+        {
+            await sendChannel.SendAsync(resourceUriString, contentType, message, cacheKey, indexes);
         }
     }
 }

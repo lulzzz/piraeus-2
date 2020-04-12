@@ -10,6 +10,7 @@ namespace Piraeus.Auditing
         public MessageAuditRecord()
         {
         }
+
         public MessageAuditRecord(string messageId, string identity, string channel, string protocol, int length, MessageDirectionType direction, bool success, DateTime messageTime, string error = null)
         {
             MessageId = messageId;
@@ -24,58 +25,47 @@ namespace Piraeus.Auditing
             Key = Guid.NewGuid().ToString();
         }
 
-
-        [JsonProperty("key")]
-        public string Key
-        {
-            get
-            {
-                return PartitionKey;
-            }
-            set
-            {
-                PartitionKey = value;
-            }
-
-        }
-
-        [JsonProperty("messageId")]
-        public string MessageId
-        {
-            get { return RowKey; }
-            set
-            {
-                RowKey = value;
-            }
-        }
-
-        [JsonProperty("identity")]
-        public string Identity { get; set; }
+        [JsonProperty("channel")]
+        public string Channel { get; set; }
 
         [JsonProperty("direction")]
         public string Direction { get; set; }
 
-        [JsonProperty("channel")]
-        public string Channel { get; set; }
+        [JsonProperty("error")]
+        public string Error { get; set; }
 
-        [JsonProperty("protocol")]
-        public string Protocol { get; set; }
+        [JsonProperty("identity")]
+        public string Identity { get; set; }
+
+        [JsonProperty("key")]
+        public string Key
+        {
+            get => PartitionKey;
+            set => PartitionKey = value;
+        }
 
         [JsonProperty("length")]
         public int Length { get; set; }
 
-        [JsonProperty("error")]
-        public string Error { get; set; }
-
-        [JsonProperty("success")]
-        public bool Success { get; set; }
+        [JsonProperty("messageId")]
+        public string MessageId
+        {
+            get => RowKey;
+            set => RowKey = value;
+        }
 
         [JsonProperty("messageTimestamp")]
         public DateTime MessageTime { get; set; }
 
+        [JsonProperty("protocol")]
+        public string Protocol { get; set; }
+
+        [JsonProperty("success")]
+        public bool Success { get; set; }
+
         public override string ConvertToCsv()
         {
-            return String.Format($"{Key},{MessageId},{Identity},{Direction},{Channel},{Protocol},{Length},{Error},{Success},{Error},{MessageTime}");
+            return string.Format($"{Key},{MessageId},{Identity},{Direction},{Channel},{Protocol},{Length},{Error},{Success},{Error},{MessageTime}");
         }
 
         public override string ConvertToJson()

@@ -5,15 +5,15 @@ namespace SkunkLab.Channels.Tcp
 {
     public class SimplePskIdentity : TlsPskIdentity
     {
+        private readonly string hint;
+
+        private readonly byte[] psk;
+
         public SimplePskIdentity(string hint, byte[] psk)
         {
             this.hint = hint;
             this.psk = psk;
         }
-
-        private string hint;
-        private byte[] psk;
-
 
         public byte[] GetPsk()
         {

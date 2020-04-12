@@ -6,12 +6,20 @@ namespace Piraeus.Clients.Mqtt
 {
     public class GenericMqttDispatcher : IMqttDispatch
     {
+        private readonly Dictionary<string, Action<string, string, byte[]>> register;
+
         public GenericMqttDispatcher()
         {
             register = new Dictionary<string, Action<string, string, byte[]>>();
         }
 
-        private Dictionary<string, Action<string, string, byte[]>> register;
+        public void Dispatch(string key, string contentType, byte[] data)
+        {
+            if (register.ContainsKey(key))
+            {
+                register[key](key, contentType, data);
+            }
+        }
 
         public void Register(string key, Action<string, string, byte[]> action)
         {
@@ -24,14 +32,6 @@ namespace Piraeus.Clients.Mqtt
         public void Unregister(string key)
         {
             register.Remove(key);
-        }
-
-        public void Dispatch(string key, string contentType, byte[] data)
-        {
-            if (register.ContainsKey(key))
-            {
-                register[key](key, contentType, data);
-            }
         }
     }
 }

@@ -8,6 +8,32 @@ namespace SkunkLab.Channels.Udp
 {
     public abstract class UdpChannel : IChannel
     {
+        public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
+
+        public abstract event EventHandler<ChannelErrorEventArgs> OnError;
+
+        public abstract event EventHandler<ChannelOpenEventArgs> OnOpen;
+
+        public abstract event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        public abstract event EventHandler<ChannelStateEventArgs> OnStateChange;
+
+        public abstract string Id { get; internal set; }
+
+        public abstract bool IsAuthenticated { get; internal set; }
+
+        public abstract bool IsConnected { get; }
+
+        public abstract bool IsEncrypted { get; internal set; }
+
+        public abstract int Port { get; internal set; }
+
+        public abstract bool RequireBlocking { get; }
+
+        public abstract ChannelState State { get; internal set; }
+
+        public abstract string TypeId { get; }
+
         /// <summary>
         /// Create a UDP server-side connection to send/receive.
         /// </summary>
@@ -44,30 +70,7 @@ namespace SkunkLab.Channels.Udp
             return new UdpClientChannel(localPort, remoteEP, token);
         }
 
-
-        public abstract string Id { get; internal set; }
-
-        public abstract bool RequireBlocking { get; }
-
-        public abstract string TypeId { get; }
-
-        public abstract bool IsConnected { get; }
-
-        public abstract int Port { get; internal set; }
-
-        public abstract ChannelState State { get; internal set; }
-
-        public abstract bool IsEncrypted { get; internal set; }
-
-        public abstract bool IsAuthenticated { get; internal set; }
-
-        public abstract event EventHandler<ChannelReceivedEventArgs> OnReceive;
-        public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
-        public abstract event EventHandler<ChannelOpenEventArgs> OnOpen;
-        public abstract event EventHandler<ChannelErrorEventArgs> OnError;
-        public abstract event EventHandler<ChannelStateEventArgs> OnStateChange;
-
-
+        public abstract Task AddMessageAsync(byte[] message);
 
         public abstract Task CloseAsync();
 
@@ -78,8 +81,5 @@ namespace SkunkLab.Channels.Udp
         public abstract Task ReceiveAsync();
 
         public abstract Task SendAsync(byte[] message);
-
-
-        public abstract Task AddMessageAsync(byte[] message);
     }
 }

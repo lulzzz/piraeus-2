@@ -17,27 +17,25 @@ namespace Piraeus.Grains.Notifications
 {
     public class EventGridSink : EventSink
     {
-
-        private string topicKey;
-        private string topicHostname;
-        private int clientCount;
-        private EventGridClient[] clients;
-        private string resourceUriString;
         private int arrayIndex;
-        private IAuditor auditor;
-        private Uri uri;
+        private readonly IAuditor auditor;
+        private readonly int clientCount;
+        private readonly EventGridClient[] clients;
+        private readonly string resourceUriString;
+        private readonly string topicHostname;
+        private readonly string topicKey;
+        private readonly Uri uri;
 
         public EventGridSink(SubscriptionMetadata metadata)
             : base(metadata)
         {
-
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
             topicHostname = uri.Authority;
             topicKey = metadata.SymmetricKey;
             string uriString = new Uri(metadata.SubscriptionUriString).ToString();
-            resourceUriString = uriString.Replace("/" + uri.Segments[uri.Segments.Length - 1], "");
+            resourceUriString = uriString.Replace("/" + uri.Segments[^1], "");
             if (!int.TryParse(nvc["clients"], out clientCount))
             {
                 clientCount = 1;
@@ -52,14 +50,10 @@ namespace Piraeus.Grains.Notifications
             }
         }
 
-
-
-
         public override async Task SendAsync(EventMessage message)
         {
             AuditRecord record = null;
             byte[] payload = null;
-
 
             try
             {
@@ -78,7 +72,6 @@ namespace Piraeus.Grains.Notifications
                 await Task.WhenAll(task);
 
                 record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-
             }
             catch (Exception ex)
             {
@@ -128,13 +121,17 @@ namespace Piraeus.Grains.Notifications
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
+
                 case ProtocolType.MQTT:
                     MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                     return mqtt.Payload;
+
                 case ProtocolType.REST:
                     return message.Message;
+
                 case ProtocolType.WSN:
                     return message.Message;
+
                 default:
                     return null;
             }

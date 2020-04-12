@@ -20,8 +20,25 @@ namespace Piraeus.Grains.Notifications
 {
     public class RestWebServiceSink : EventSink
     {
+        private readonly string address;
+
+        private readonly string audience;
+
+        private readonly IAuditor auditor;
+
+        private readonly X509Certificate2 certificate;
+
+        private readonly List<Claim> claims;
+
+        //private readonly Piraeus.Core.Metadata.SecurityTokenType? tokenType;
+        //private readonly string symmetricKey;
+        private readonly string issuer;
+
+        //private DateTime tokenExpiration;
+        private string token;
+
         public RestWebServiceSink(SubscriptionMetadata metadata, List<Claim> claimset = null, X509Certificate2 certificate = null)
-            : base(metadata)
+                                                                    : base(metadata)
         {
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             //tokenType = metadata.TokenType;
@@ -30,15 +47,14 @@ namespace Piraeus.Grains.Notifications
 
             Uri uri = new Uri(metadata.NotifyAddress);
 
-
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
             issuer = nvc["issuer"];
             audience = nvc["audience"];
             nvc.Remove("issuer");
             nvc.Remove("audience");
 
-            string uriString = nvc.Count == 0 ? String.Format("{0}{1}{2}{3}", uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.LocalPath) :
-                String.Format("{0}{1}{2}{3}?", uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.LocalPath);
+            string uriString = nvc.Count == 0 ? string.Format("{0}{1}{2}{3}", uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.LocalPath) :
+                string.Format("{0}{1}{2}{3}?", uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.LocalPath);
 
             StringBuilder builder = new StringBuilder();
             builder.Append(uriString);
@@ -46,60 +62,15 @@ namespace Piraeus.Grains.Notifications
             {
                 string key = nvc.GetKey(i);
                 string value = nvc[key];
-                builder.Append(String.Format("{0}={1}", key, value));
+                builder.Append(string.Format("{0}={1}", key, value));
                 if (i < nvc.Count - 1)
+                {
                     builder.Append("&");
-
+                }
             }
 
             address = builder.ToString();
             claims = claimset;
-        }
-
-        //private readonly Piraeus.Core.Metadata.SecurityTokenType? tokenType;
-        //private readonly string symmetricKey;
-        private readonly string issuer;
-        private readonly string audience;
-        private readonly string address;
-        //private DateTime tokenExpiration;
-        private string token;
-        private readonly X509Certificate2 certificate;
-        private readonly List<Claim> claims;
-        private readonly IAuditor auditor;
-
-
-        private void SetSecurityToken(HttpWebRequest request)
-        {
-            if (!metadata.TokenType.HasValue || metadata.TokenType.Value == Piraeus.Core.Metadata.SecurityTokenType.None)
-                return;
-
-            if (metadata.TokenType.Value == Piraeus.Core.Metadata.SecurityTokenType.X509)
-            {
-
-
-                if (certificate == null)
-                {
-                    throw new InvalidOperationException("X509 client certificates not available to use for REST call.");
-                }
-                else
-                {
-                    request.ClientCertificates.Add(certificate);
-                }
-            }
-            else if (metadata.TokenType.Value == Piraeus.Core.Metadata.SecurityTokenType.Jwt)
-            {
-
-                JsonWebToken jwt = new JsonWebToken(metadata.SymmetricKey, claims, 20.0, issuer, audience);
-                token = jwt.ToString();
-
-                request.Headers.Add("Authorization", String.Format("Bearer {0}", token.ToString()));
-
-                request.Headers.Add("Authorization", String.Format("Bearer {0}", token));
-            }
-            else
-            {
-                throw new InvalidOperationException("No security token type resolved.");
-            }
         }
 
         public override async Task SendAsync(EventMessage message)
@@ -141,17 +112,16 @@ namespace Piraeus.Grains.Notifications
                     {
                         Trace.TraceInformation("Rest request is success.");
                         record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-
                     }
                     else
                     {
                         Trace.TraceInformation("Rest request returned an expected status code.");
-                        record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, String.Format("Rest request returned an expected status code {0}", response.StatusCode));
+                        record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, string.Format("Rest request returned an expected status code {0}", response.StatusCode));
                     }
                 }
                 catch (WebException we)
                 {
-                    string faultMessage = String.Format("subscription '{0}' with status code '{1}' and error message '{2}'", metadata.SubscriptionUriString, we.Status.ToString(), we.Message);
+                    string faultMessage = string.Format("subscription '{0}' with status code '{1}' and error message '{2}'", metadata.SubscriptionUriString, we.Status.ToString(), we.Message);
                     Trace.TraceError(faultMessage);
                     record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
                 }
@@ -176,17 +146,53 @@ namespace Piraeus.Grains.Notifications
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
+
                 case ProtocolType.MQTT:
                     MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                     return mqtt.Payload;
+
                 case ProtocolType.REST:
                     return message.Message;
+
                 case ProtocolType.WSN:
                     return message.Message;
+
                 default:
                     return null;
             }
         }
 
+        private void SetSecurityToken(HttpWebRequest request)
+        {
+            if (!metadata.TokenType.HasValue || metadata.TokenType.Value == Piraeus.Core.Metadata.SecurityTokenType.None)
+            {
+                return;
+            }
+
+            if (metadata.TokenType.Value == Piraeus.Core.Metadata.SecurityTokenType.X509)
+            {
+                if (certificate == null)
+                {
+                    throw new InvalidOperationException("X509 client certificates not available to use for REST call.");
+                }
+                else
+                {
+                    request.ClientCertificates.Add(certificate);
+                }
+            }
+            else if (metadata.TokenType.Value == Piraeus.Core.Metadata.SecurityTokenType.Jwt)
+            {
+                JsonWebToken jwt = new JsonWebToken(metadata.SymmetricKey, claims, 20.0, issuer, audience);
+                token = jwt.ToString();
+
+                request.Headers.Add("Authorization", string.Format("Bearer {0}", token.ToString()));
+
+                request.Headers.Add("Authorization", string.Format("Bearer {0}", token));
+            }
+            else
+            {
+                throw new InvalidOperationException("No security token type resolved.");
+            }
+        }
     }
 }

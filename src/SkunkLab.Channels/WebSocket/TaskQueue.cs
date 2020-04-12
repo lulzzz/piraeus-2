@@ -1,14 +1,12 @@
-﻿
-namespace SkunkLab.Channels.WebSocket
+﻿namespace SkunkLab.Channels.WebSocket
 {
-
     using System;
     using System.Threading.Tasks;
 
     internal sealed class TaskQueue
     {
-        private Task _lastQueuedTask = Task.FromResult<int>(0);
         private readonly object _lockObj = new object();
+        private Task _lastQueuedTask = Task.FromResult<int>(0);
 
         public Task Enqueue(Func<Task> taskFunc)
         {
@@ -25,6 +23,4 @@ namespace SkunkLab.Channels.WebSocket
             }
         }
     }
-
-
 }

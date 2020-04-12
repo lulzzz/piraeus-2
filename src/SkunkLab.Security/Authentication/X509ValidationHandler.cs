@@ -1,6 +1,4 @@
-﻿
-
-//namespace SkunkLab.Security.Authentication
+﻿//namespace SkunkLab.Security.Authentication
 //{
 //    using Microsoft.AspNetCore.Http;
 //    using System;
@@ -21,9 +19,7 @@
 
 //        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 //        {
-
 //            //Microsoft.IdentityModel.Tokens.X509SecurityKey key = new Microsoft.IdentityModel.Tokens.X509SecurityKey(null);
-
 
 //            HttpStatusCode statusCode;
 
@@ -31,7 +27,7 @@
 //            {
 //                X509Certificate2 cert = request.GetClientCertificate();
 //                X509SecurityTokenHandler handler = new X509SecurityTokenHandler(X509CertificateValidator.PeerOrChainTrust);
-//                X509SecurityToken token = new X509SecurityToken(cert);                
+//                X509SecurityToken token = new X509SecurityToken(cert);
 
 //                ReadOnlyCollection<ClaimsIdentity> col = handler.ValidateToken(token);
 //                ClaimsPrincipal principal = new ClaimsPrincipal(col[0]);

@@ -4,12 +4,11 @@ using System.Management.Automation;
 
 namespace Piraeus.Module
 {
-
     [Cmdlet(VerbsCommon.New, "CaplTransform")]
     public class CaplTransformCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Type of transform", Mandatory = true)]
-        public TransformType Type;
+        [Parameter(HelpMessage = "An evaluation expression that determines if the transform is applied (optional).", Mandatory = false)]
+        public Term EvaluationExpression;
 
         [Parameter(HelpMessage = "Match expression.", Mandatory = true)]
         public Match MatchExpression;
@@ -17,13 +16,12 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Required claim for 'add' and 'replace' transforms. Not used for 'remove' transform.", Mandatory = false)]
         public LiteralClaim TargetClaim;
 
-        [Parameter(HelpMessage = "An evaluation expression that determines if the transform is applied (optional).", Mandatory = false)]
-        public Term EvaluationExpression;
+        [Parameter(HelpMessage = "Type of transform", Mandatory = true)]
+        public TransformType Type;
 
         protected override void ProcessRecord()
         {
-            Uri uri = null;
-
+            Uri uri;
             if (this.Type == TransformType.Add)
             {
                 uri = new Uri(AuthorizationConstants.TransformUris.Add);
@@ -41,11 +39,12 @@ namespace Piraeus.Module
                 throw new ArgumentOutOfRangeException("Type");
             }
 
-            ClaimTransform transform = new ClaimTransform(uri, this.MatchExpression, this.TargetClaim);
-            transform.Expression = this.EvaluationExpression;
+            ClaimTransform transform = new ClaimTransform(uri, this.MatchExpression, this.TargetClaim)
+            {
+                Expression = this.EvaluationExpression
+            };
 
             WriteObject(transform);
         }
-
     }
 }

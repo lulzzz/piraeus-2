@@ -29,31 +29,25 @@ namespace Piraeus.Auditing
             LogoutTime = logoutTime;
         }
 
-        [JsonProperty("channelId")]
-        public string ChannelId
-        {
-            get { return PartitionKey; }
-            set { PartitionKey = value; }
-        }
-
-        [JsonProperty("identity")]
-        public string Identity
-        {
-            get { return RowKey; }
-            set { RowKey = value; }
-        }
-
         [JsonProperty("channel")]
         public string Channel { get; set; }
 
-        [JsonProperty("protocol")]
-        public string Protocol { get; set; }
+        [JsonProperty("channelId")]
+        public string ChannelId
+        {
+            get => PartitionKey;
+            set => PartitionKey = value;
+        }
 
         [JsonProperty("claimType")]
         public string ClaimType { get; set; }
 
-        [JsonProperty("status")]
-        public string Status { get; set; }
+        [JsonProperty("identity")]
+        public string Identity
+        {
+            get => RowKey;
+            set => RowKey = value;
+        }
 
         [JsonProperty("loginTime")]
         public DateTime? LoginTime { get; set; }
@@ -61,10 +55,15 @@ namespace Piraeus.Auditing
         [JsonProperty("logoutTime")]
         public DateTime? LogoutTime { get; set; }
 
+        [JsonProperty("protocol")]
+        public string Protocol { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
 
         public override string ConvertToCsv()
         {
-            return String.Format($"{ChannelId},{Identity},{Channel},{Protocol},{ClaimType},{Status},{LoginTime},{LogoutTime}");
+            return string.Format($"{ChannelId},{Identity},{Channel},{Protocol},{ClaimType},{Status},{LoginTime},{LogoutTime}");
         }
 
         public override string ConvertToJson()

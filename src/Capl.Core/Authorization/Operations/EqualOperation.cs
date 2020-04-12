@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -21,18 +21,12 @@ namespace Capl.Authorization.Operations
         {
         }
 
-        public static Uri OperationUri
-        {
-            get { return new Uri(AuthorizationConstants.OperationUris.Equal); }
-        }
+        public static Uri OperationUri => new Uri(AuthorizationConstants.OperationUris.Equal);
 
         /// <summary>
         /// Gets the URI that identifies the operation.
         /// </summary>
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.OperationUris.Equal); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.OperationUris.Equal);
 
         /// <summary>
         /// Executes the comparsion.

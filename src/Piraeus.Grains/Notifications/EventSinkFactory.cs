@@ -12,18 +12,13 @@ namespace Piraeus.Grains.Notifications
         private static List<Claim> claims;
         private static bool initialized;
 
-        public static bool IsInitialized
-        {
-            get { return initialized; }
-        }
+        public static bool IsInitialized => initialized;
+
         public static EventSink Create(SubscriptionMetadata metadata, List<Claim> claimset = null, X509Certificate2 certificate = null)
         {
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata");
-            }
+            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
-            if (String.IsNullOrEmpty(metadata.NotifyAddress))
+            if (string.IsNullOrEmpty(metadata.NotifyAddress))
             {
                 throw new NullReferenceException("Subscription metadata has no NotifyAddress for passive event sink.");
             }
@@ -78,7 +73,7 @@ namespace Piraeus.Grains.Notifications
             }
             else
             {
-                throw new InvalidOperationException(String.Format("EventSinkFactory cannot find concrete type for {0}", metadata.NotifyAddress));
+                throw new InvalidOperationException(string.Format("EventSinkFactory cannot find concrete type for {0}", metadata.NotifyAddress));
             }
 
             throw new Exception("ouch!");

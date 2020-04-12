@@ -8,6 +8,22 @@ namespace SkunkLab.Storage
 {
     public class KeyVaultPskStorage : PskStorageAdapter
     {
+        internal KeyVaultClient client;
+
+        private static string Authority;
+
+        private static string ClientId;
+
+        private static string ClientSecret;
+
+        private static DateTime expiry;
+
+        private static KeyVaultPskStorage instance;
+
+        protected KeyVaultPskStorage()
+        {
+        }
+
         public static KeyVaultPskStorage CreateSingleton(string authority, string clientId, string clientSecret)
         {
             if (instance == null)
@@ -15,25 +31,19 @@ namespace SkunkLab.Storage
                 Authority = authority;
                 ClientId = clientId;
                 ClientSecret = clientSecret;
-                instance = new KeyVaultPskStorage();
-                instance.client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetAccessToken));
+                instance = new KeyVaultPskStorage
+                {
+                    client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetAccessToken))
+                };
             }
 
             return instance;
         }
 
-
-
-        protected KeyVaultPskStorage()
+        public override async Task<string[]> GetKeys()
         {
+            return await Task.FromResult<string[]>(null);
         }
-
-        private static KeyVaultPskStorage instance;
-        internal KeyVaultClient client;
-        private static string Authority;
-        private static string ClientId;
-        private static string ClientSecret;
-        private static DateTime expiry;
 
         public override async Task<string> GetSecretAsync(string secretIdentifier)
         {
@@ -46,17 +56,6 @@ namespace SkunkLab.Storage
             return sec.Value;
         }
 
-        public override async Task SetSecretAsync(string secretName, string value)
-        {
-            if (DateTime.Now > expiry)
-            {
-                client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetAccessToken));
-            }
-
-
-            SecretBundle bundle = await client.SetSecretAsync(String.Format("https://{0}.vault.azure.net:443/", Authority), secretName, value);
-        }
-
         public override async Task RemoveSecretAsync(string key)
         {
             if (DateTime.Now > expiry)
@@ -64,14 +63,18 @@ namespace SkunkLab.Storage
                 client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetAccessToken));
             }
 
-            await client.DeleteKeyAsync(String.Format("https://{0}.vault.azure.net:443/", Authority), key);
+            await client.DeleteKeyAsync(string.Format("https://{0}.vault.azure.net:443/", Authority), key);
         }
 
-        public override async Task<string[]> GetKeys()
+        public override async Task SetSecretAsync(string secretName, string value)
         {
-            return await Task.FromResult<string[]>(null);
-        }
+            if (DateTime.Now > expiry)
+            {
+                client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetAccessToken));
+            }
 
+            SecretBundle bundle = await client.SetSecretAsync(string.Format("https://{0}.vault.azure.net:443/", Authority), secretName, value);
+        }
 
         internal static async Task<string> GetAccessToken(string authority, string resource, string scope)
         {
@@ -80,12 +83,12 @@ namespace SkunkLab.Storage
             AuthenticationResult result = await authContext.AcquireTokenAsync(resource, clientCred);
 
             if (result == null)
+            {
                 throw new InvalidOperationException("Failed to obtain the JWT token");
+            }
 
             expiry = result.ExpiresOn.DateTime;
             return result.AccessToken;
         }
-
-
     }
 }

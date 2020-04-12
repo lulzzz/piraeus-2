@@ -1,8 +1,7 @@
-﻿
-
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
+
     public class PublishAckMessage : MqttMessage
     {
         public PublishAckMessage()
@@ -15,12 +14,9 @@ namespace SkunkLab.Protocols.Mqtt
             this.MessageId = messageId;
         }
 
-        public override bool HasAck
-        {
-            get { return (this.AckType == PublishAckType.PUBREC || this.AckType == PublishAckType.PUBREL); }
-        }
-
         public PublishAckType AckType { get; set; }
+
+        public override bool HasAck => (this.AckType == PublishAckType.PUBREC || this.AckType == PublishAckType.PUBREL);
 
         //public ushort MessageId { get; set; }
 
@@ -31,10 +27,9 @@ namespace SkunkLab.Protocols.Mqtt
 
             byte reserved = this.AckType != PublishAckType.PUBREL ? (byte)0x00 : (byte)0x02;
             fixedHeader = (byte)((ackType << Constants.Header.MessageTypeOffset) |
-                        (byte)(0x00) |
+                        0x00 |
                         reserved |
-                        (byte)(0x00));
-
+                        0x00);
 
             byte[] remainingLength = base.EncodeRemainingLength(2);
 

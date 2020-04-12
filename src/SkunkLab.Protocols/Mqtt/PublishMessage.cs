@@ -1,14 +1,12 @@
-﻿
-
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
+
     public class PublishMessage : MqttMessage
     {
         public PublishMessage()
         {
         }
-
 
         public PublishMessage(bool dupFlag, QualityOfServiceLevelType qosLevel, bool retainFlag, ushort messageId, string topic, byte[] data)
         {
@@ -21,43 +19,35 @@ namespace SkunkLab.Protocols.Mqtt
             this.Payload = data;
         }
 
-        public override MqttMessageType MessageType
-        {
-            get
-            {
-                return MqttMessageType.PUBLISH;
-            }
-            internal set
-            {
-                base.MessageType = value;
-            }
-        }
-
-        public override bool HasAck
-        {
-            get { return this.QualityOfServiceLevel != QualityOfServiceLevelType.AtMostOnce; }
-        }
-
         public bool DupFlag
         {
-            get { return base.Dup; }
-            set { base.Dup = value; }
+            get => base.Dup;
+            set => base.Dup = value;
+        }
+
+        public override bool HasAck => this.QualityOfServiceLevel != QualityOfServiceLevelType.AtMostOnce;
+
+        public override MqttMessageType MessageType
+        {
+            get => MqttMessageType.PUBLISH;
+            internal set => base.MessageType = value;
         }
 
         public QualityOfServiceLevelType QualityOfServiceLevel
         {
-            get { return base.QualityOfService; }
-            set { base.QualityOfService = value; }
+            get => base.QualityOfService;
+            set => base.QualityOfService = value;
         }
 
         public bool RetainFlag
         {
-            get { return base.Retain; }
-            set { base.Retain = value; }
+            get => base.Retain;
+            set => base.Retain = value;
         }
 
         //public ushort MessageId { get; set; }
         public string Topic { get; set; }
+
         //public byte[] Data { get; set; }
 
         public override byte[] Encode()
@@ -66,8 +56,8 @@ namespace SkunkLab.Protocols.Mqtt
 
             byte fixedHeader = (byte)((0x03 << Constants.Header.MessageTypeOffset) |
                    (byte)(qos << Constants.Header.QosLevelOffset) |
-                   (byte)(this.Dup ? (byte)(0x01 << Constants.Header.DupFlagOffset) : (byte)0x00) |
-                   (byte)(this.Retain ? (byte)(0x01) : (byte)0x00));
+                   (this.Dup ? 0x01 << Constants.Header.DupFlagOffset : 0x00) |
+                   (this.Retain ? 0x01 : 0x00));
 
             //PublishVariableHeader variableHeader = this.VariableHeader as PublishVariableHeader;
             //PublishPayload payload = this.Payload as PublishPayload;
@@ -84,7 +74,6 @@ namespace SkunkLab.Protocols.Mqtt
             }
 
             byte[] variableHeaderBytes = vhContainer.ToBytes();
-
 
             //byte[] variableHeaderBytes = variableHeader.Encode();
             //byte[] payloadBytes = payload.Encode();
@@ -136,11 +125,10 @@ namespace SkunkLab.Protocols.Mqtt
             //base.VariableHeader = new PublishVariableHeader();
 
             index = 0;
-            int length = 0;
-            this.Topic = ByteContainer.DecodeString(buffer, index, out length);
+            this.Topic = ByteContainer.DecodeString(buffer, index, out int length);
             index += length;
 
-            if ((int)QualityOfServiceLevel > 0)
+            if (QualityOfServiceLevel > 0)
             {
                 ushort messageId = (ushort)((buffer[index++] << 8) & 0xFF00);
                 messageId |= buffer[index++];
@@ -151,8 +139,6 @@ namespace SkunkLab.Protocols.Mqtt
 
             //length = ((buffer[index++] << 8) & 0xFF00);
             //length |= buffer[index++];
-
-
 
             byte[] data = new byte[remainingLength - length];
             Buffer.BlockCopy(buffer, index, data, 0, data.Length);

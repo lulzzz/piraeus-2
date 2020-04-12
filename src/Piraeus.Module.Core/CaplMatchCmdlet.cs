@@ -22,7 +22,7 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            Uri matchUri = null;
+            Uri matchUri;
             if (this.Type == MatchType.Literal)
             {
                 matchUri = Capl.Authorization.Matching.LiteralMatchExpression.MatchUri;

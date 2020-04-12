@@ -1,8 +1,5 @@
-﻿
-
-namespace SkunkLab.Channels.WebSocket
+﻿namespace SkunkLab.Channels.WebSocket
 {
-
     using System.Net.WebSockets;
 
     internal sealed class WebSocketMessage
@@ -16,6 +13,4 @@ namespace SkunkLab.Channels.WebSocket
             this.MessageType = messageType;
         }
     }
-
-
 }

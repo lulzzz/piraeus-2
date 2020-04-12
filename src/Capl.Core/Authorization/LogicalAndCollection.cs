@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -16,7 +16,7 @@ namespace Capl.Authorization
     /// <summary>
     /// Performs a logical conjunction (Logical AND) on a collection of objects implementing IEvaluate.
     /// </summary>
-    /// <remarks>The collection of objects all implement the IEvaluate interface. Therefore, the collection 
+    /// <remarks>The collection of objects all implement the IEvaluate interface. Therefore, the collection
     /// of objects must also inherit one of the abstract classes Scope or LogicalConnectiveCollection.
     /// </remarks>
     [Serializable]
@@ -31,14 +31,12 @@ namespace Capl.Authorization
         {
         }
 
-        new public static LogicalConnectiveCollection Load(XmlReader reader)
+        public static new LogicalConnectiveCollection Load(XmlReader reader)
         {
             LogicalAndCollection lac = new LogicalAndCollection();
             lac.ReadXml(reader);
 
             return lac;
-
-
 
             //Adds an object to the end of the Capl.Authorization.LogicalAndCollection
             //Removes all element from the Capl.Authorization.LogicalAndCollection
@@ -58,17 +56,11 @@ namespace Capl.Authorization
         /// <returns>True, if the evaluation is true; otherwise false.</returns>
         public override bool Evaluate(IEnumerable<Claim> claims)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
-
-            bool eval = false;
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             foreach (Term item in this)
             {
-                eval = item.Evaluate(claims);
-
+                bool eval = item.Evaluate(claims);
                 if (!eval)
                 {
                     if (!this.Evaluates)
@@ -85,17 +77,13 @@ namespace Capl.Authorization
             return this.Evaluates;
         }
 
-
         /// <summary>
         /// Reads the Xml of a logical AND.
         /// </summary>
         /// <param name="reader">An XmlReader for a logical AND.</param>
         public override void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd);
             string evaluates = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Evaluates);
@@ -144,10 +132,7 @@ namespace Capl.Authorization
         /// <param name="writer">An XmlWriter for a logical AND.</param>
         public override void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(AuthorizationConstants.Elements.LogicalAnd, AuthorizationConstants.Namespaces.Xmlns);
 

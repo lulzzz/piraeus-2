@@ -1,5 +1,4 @@
 ﻿using Capl.Authorization;
-using System;
 using System.Management.Automation;
 
 namespace Piraeus.Module
@@ -7,18 +6,18 @@ namespace Piraeus.Module
     [Cmdlet(VerbsCommon.Get, "CaplPolicy")]
     public class GetCaplPolicyCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
-        public string ServiceUrl;
+        [Parameter(HelpMessage = "Access control policy URI string that identifies the policy.", Mandatory = true)]
+        public string PolicyId;
 
         [Parameter(HelpMessage = "Security token used to access the REST service.", Mandatory = true)]
         public string SecurityToken;
 
-        [Parameter(HelpMessage = "Access control policy URI string that identifies the policy.", Mandatory = true)]
-        public string PolicyId;
+        [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
+        public string ServiceUrl;
 
         protected override void ProcessRecord()
         {
-            string url = String.Format("{0}/api/accesscontrol/getaccesscontrolpolicy?policyuristring={1}", ServiceUrl, PolicyId);
+            string url = string.Format("{0}/api/accesscontrol/getaccesscontrolpolicy?policyuristring={1}", ServiceUrl, PolicyId);
             RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Xml, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
@@ -26,7 +25,5 @@ namespace Piraeus.Module
 
             WriteObject(policy);
         }
-
-
     }
 }

@@ -12,64 +12,51 @@ using System.Threading.Tasks;
 
 namespace Samples.Http.Client
 {
-    class Program
+    internal class Program
     {
-        static CancellationTokenSource cts;
-        static RestClient restClient;
-        static int index;
-        static IChannel channel;
-        static string name;
-        static string role;
-        static bool send;
-        static int channelNum;
-        static string hostname;
-        static string resourceA = "http://localhost/resource-a";
-        static string resourceB = "http://localhost/resource-b";
-        static readonly string pubResource = null;
-        static readonly string subResource = null;
-        static string issuer = "http://localhost/";
-        static string audience = issuer;
-        static string nameClaimType = "http://localhost/name";
-        static string roleClaimType = "http://localhost/role";
-        static string symmetricKey = "//////////////////////////////////////////8=";
-        static DateTime startTime;
+        private static readonly string pubResource = null;
+        private static readonly string subResource = null;
+        private static string audience = issuer;
+        private static CancellationTokenSource cts;
+        private static string hostname;
+        private static readonly int index;
+        private static string issuer = "http://localhost/";
+        private static string name;
+        private static string nameClaimType = "http://localhost/name";
+        private static string resourceA = "http://localhost/resource-a";
+        private static string resourceB = "http://localhost/resource-b";
+        private static RestClient restClient;
+        private static string role;
+        private static string roleClaimType = "http://localhost/role";
+        private static readonly bool send;
+        private static DateTime startTime;
+        private static string symmetricKey = "//////////////////////////////////////////8=";
 
-        static void Main(string[] args)
+        private static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey, double lifetimeMinutes)
         {
-            
-            cts = new CancellationTokenSource();
+            SkunkLab.Security.Tokens.JsonWebToken jwt = new SkunkLab.Security.Tokens.JsonWebToken(new Uri(audience), symmetricKey, issuer, claims, lifetimeMinutes);
+            return jwt.ToString();
+        }
 
-            if (args == null || args.Length == 0)
+        private static string GetSecurityToken(string name, string role)
+        {
+            //Normally a security token would be obtained externally
+            //For the sample we are going to build a token that can
+            //be authn'd and authz'd for this sample
+
+            //string issuer = "http://skunklab.io/";
+            //string audience = issuer;
+            //string nameClaimType = "http://skunklab.io/name";
+            //string roleClaimType = "http://skunklab.io/role";
+            //string symmetricKey = "//////////////////////////////////////////8=";
+
+            List<Claim> claims = new List<Claim>()
             {
-                UseUserInput();
-            }
-            else
-            {
-                Console.WriteLine("Invalid user input");
-                Console.ReadKey();
-                return;
-            }
+                new Claim(nameClaimType, name),
+                new Claim(roleClaimType, role)
+            };
 
-            string endpoint = hostname == "localhost" ? $"http://{hostname}:8088/api/connect" : $"https://{hostname}/api/connect";
-            string qs = role.ToUpperInvariant() == "A" ? resourceA : resourceB;
-            string requestUriString = $"{endpoint}?r={qs}";
-            string sub = role.ToUpperInvariant() == "A" ? resourceB : resourceA;
-            string pollUriString = $"{endpoint}?sub={sub}";
-            string token = GetSecurityToken(name, role);
-           
-
-            Uri observableResource = role.ToUpperInvariant() == "A" ? new Uri(resourceB) : new Uri(resourceA);
-            Observer observer = new HttpObserver(observableResource);
-            observer.OnNotify += Observer_OnNotify;
-            restClient = new RestClient(endpoint, token, new Observer[] { observer }, cts.Token);
-
-
-            RunAsync().Wait();
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-            cts.Cancel();
-
-
+            return CreateJwt(audience, issuer, claims, symmetricKey, 60.0);
         }
 
         private static async Task LongPollAsync(string requestUri)
@@ -96,7 +83,7 @@ namespace Samples.Http.Client
 
                         Console.WriteLine($"Latency {latency.TotalMilliseconds} ms - Received message '{messageText}'");
                     }
-                    catch(Exception ex)
+                    catch (Exception)
                     {
                         Console.WriteLine("Cannot read message");
                     }
@@ -107,48 +94,39 @@ namespace Samples.Http.Client
                 }
             }
         }
-        
 
-        private static async Task RunAsync()
+        private static void Main(string[] args)
         {
-            int index = 0;
-            bool running = true;
-            while(running)
+            cts = new CancellationTokenSource();
+
+            if (args == null || args.Length == 0)
             {
-                PrintMessage("Do you want to send messages (Y/N) ? ", ConsoleColor.Cyan, false, true);
-                string sendVal = Console.ReadLine().Trim();
-                if (sendVal.ToUpperInvariant() != "Y")
-                    break;
-
-                PrintMessage("Enter # of messages to send ? ", ConsoleColor.Cyan, false, true);
-                string nstring = Console.ReadLine();
-                int num = 0;
-                if(Int32.TryParse(nstring, out num))
-                {
-                    PrintMessage("Enter delay between messages in milliseconds ? ", ConsoleColor.Cyan, false, true);
-                    string dstring = Console.ReadLine().Trim();
-                    int delay = 0;
-                    if(Int32.TryParse(dstring, out delay))
-                    {
-                        startTime = DateTime.Now;
-                        
-                        for (int i = 0; i < num; i++)
-                        {
-                            string payloadString = String.Format($"{DateTime.Now.Ticks}:{name}-message {index++}");
-                            byte[] payload = Encoding.UTF8.GetBytes(payloadString);
-                            string publishEvent = role == "A" ? resourceA : resourceB;
-                            restClient.SendAsync(publishEvent, "text/plain", payload).GetAwaiter();
-
-                            await Task.Delay(delay);
-                        }
-
-                        DateTime endTime = DateTime.Now;
-                        PrintMessage($"Total send time {endTime.Subtract(startTime).TotalMilliseconds} ms", ConsoleColor.White);
-                    }
-                }                
+                UseUserInput();
             }
-        }
+            else
+            {
+                Console.WriteLine("Invalid user input");
+                Console.ReadKey();
+                return;
+            }
 
+            string endpoint = hostname == "localhost" ? $"http://{hostname}:8088/api/connect" : $"https://{hostname}/api/connect";
+            string qs = role.ToUpperInvariant() == "A" ? resourceA : resourceB;
+            string requestUriString = $"{endpoint}?r={qs}";
+            string sub = role.ToUpperInvariant() == "A" ? resourceB : resourceA;
+            string pollUriString = $"{endpoint}?sub={sub}";
+            string token = GetSecurityToken(name, role);
+
+            Uri observableResource = role.ToUpperInvariant() == "A" ? new Uri(resourceB) : new Uri(resourceA);
+            Observer observer = new HttpObserver(observableResource);
+            observer.OnNotify += Observer_OnNotify;
+            restClient = new RestClient(endpoint, token, new Observer[] { observer }, cts.Token);
+
+            RunAsync().Wait();
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+            cts.Cancel();
+        }
 
         private static void Observer_OnNotify(object sender, ObserverEventArgs args)
         {
@@ -165,53 +143,7 @@ namespace Samples.Http.Client
             Console.WriteLine($"Latency {latency.TotalMilliseconds} ms - Received message '{messageText}'");
         }
 
-        
-        static void UseUserInput()
-        {
-            WriteHeader();
-            if (File.Exists("config.json"))
-            {
-                Console.Write("Use config.json file [y/n] ? ");
-                if (Console.ReadLine().ToLowerInvariant() == "y")
-                {
-                    JObject jobj = JObject.Parse(Encoding.UTF8.GetString(File.ReadAllBytes("config.json")));
-                    string dnsName = jobj.Value<string>("dnsName");
-                    string loc = jobj.Value<string>("location");
-                    hostname = String.Format($"{dnsName}.{loc}.cloudapp.azure.com");
-                    issuer = String.Format($"http://{hostname}/");
-                    audience = issuer;
-                    nameClaimType = jobj.Value<string>("identityClaimType");
-                    roleClaimType = String.Format($"http://{hostname}/role");
-                    symmetricKey = jobj.Value<string>("symmetricKey");
-                    resourceA = $"http://{hostname}/resource-a";
-                    resourceB = $"http://{hostname}/resource-b";
-                }
-                else
-                {
-                    hostname = SelectHostname();
-                }
-
-            }
-            else
-            {
-                hostname = SelectHostname();
-            }
-
-            name = SelectName();
-            role = SelectRole();
-
-        }
-
-        static void WriteHeader()
-        {
-            PrintMessage("-------------------------------------------------------------------", ConsoleColor.White);
-            PrintMessage("                       HTTP Sample Client", ConsoleColor.Cyan);
-            PrintMessage("-------------------------------------------------------------------", ConsoleColor.White);
-            PrintMessage("press any key to continue...", ConsoleColor.White);
-            Console.ReadKey();
-        }
-
-        static void PrintMessage(string message, ConsoleColor color, bool section = false, bool input = false)
+        private static void PrintMessage(string message, ConsoleColor color, bool section = false, bool input = false)
         {
             Console.ForegroundColor = color;
             if (section)
@@ -230,11 +162,50 @@ namespace Samples.Http.Client
                 }
             }
 
-
             Console.ResetColor();
         }
 
-        static string SelectHostname()
+        private static async Task RunAsync()
+        {
+            int index = 0;
+            bool running = true;
+            while (running)
+            {
+                PrintMessage("Do you want to send messages (Y/N) ? ", ConsoleColor.Cyan, false, true);
+                string sendVal = Console.ReadLine().Trim();
+                if (sendVal.ToUpperInvariant() != "Y")
+                {
+                    break;
+                }
+
+                PrintMessage("Enter # of messages to send ? ", ConsoleColor.Cyan, false, true);
+                string nstring = Console.ReadLine();
+                if (int.TryParse(nstring, out int num))
+                {
+                    PrintMessage("Enter delay between messages in milliseconds ? ", ConsoleColor.Cyan, false, true);
+                    string dstring = Console.ReadLine().Trim();
+                    if (int.TryParse(dstring, out int delay))
+                    {
+                        startTime = DateTime.Now;
+
+                        for (int i = 0; i < num; i++)
+                        {
+                            string payloadString = string.Format($"{DateTime.Now.Ticks}:{name}-message {index++}");
+                            byte[] payload = Encoding.UTF8.GetBytes(payloadString);
+                            string publishEvent = role == "A" ? resourceA : resourceB;
+                            restClient.SendAsync(publishEvent, "text/plain", payload).GetAwaiter();
+
+                            await Task.Delay(delay);
+                        }
+
+                        DateTime endTime = DateTime.Now;
+                        PrintMessage($"Total send time {endTime.Subtract(startTime).TotalMilliseconds} ms", ConsoleColor.White);
+                    }
+                }
+            }
+        }
+
+        private static string SelectHostname()
         {
             Console.Write("Enter hostname, IP, or Enter for localhost ? ");
             string hostname = Console.ReadLine();
@@ -248,49 +219,67 @@ namespace Samples.Http.Client
             }
         }
 
-        static string SelectName()
+        private static string SelectName()
         {
             Console.Write("Enter name for this client ? ");
             return Console.ReadLine();
         }
 
-        static string SelectRole()
+        private static string SelectRole()
         {
             Console.Write("Enter role for the client (A/B) ? ");
             string role = Console.ReadLine().ToUpperInvariant();
             if (role == "A" || role == "B")
-                return role;
-            else
-                return SelectRole();
-        }
-
-        static string GetSecurityToken(string name, string role)
-        {
-            //Normally a security token would be obtained externally
-            //For the sample we are going to build a token that can
-            //be authn'd and authz'd for this sample
-
-            //string issuer = "http://skunklab.io/";
-            //string audience = issuer;
-            //string nameClaimType = "http://skunklab.io/name";
-            //string roleClaimType = "http://skunklab.io/role";
-            //string symmetricKey = "//////////////////////////////////////////8=";
-
-
-            List<Claim> claims = new List<Claim>()
             {
-                new Claim(nameClaimType, name),
-                new Claim(roleClaimType, role)
-            };
-
-            return CreateJwt(audience, issuer, claims, symmetricKey, 60.0);
+                return role;
+            }
+            else
+            {
+                return SelectRole();
+            }
         }
 
-        static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey, double lifetimeMinutes)
+        private static void UseUserInput()
         {
-            SkunkLab.Security.Tokens.JsonWebToken jwt = new SkunkLab.Security.Tokens.JsonWebToken(new Uri(audience), symmetricKey, issuer, claims, lifetimeMinutes);
-            return jwt.ToString();
+            WriteHeader();
+            if (File.Exists("config.json"))
+            {
+                Console.Write("Use config.json file [y/n] ? ");
+                if (Console.ReadLine().ToLowerInvariant() == "y")
+                {
+                    JObject jobj = JObject.Parse(Encoding.UTF8.GetString(File.ReadAllBytes("config.json")));
+                    string dnsName = jobj.Value<string>("dnsName");
+                    string loc = jobj.Value<string>("location");
+                    hostname = string.Format($"{dnsName}.{loc}.cloudapp.azure.com");
+                    issuer = string.Format($"http://{hostname}/");
+                    audience = issuer;
+                    nameClaimType = jobj.Value<string>("identityClaimType");
+                    roleClaimType = string.Format($"http://{hostname}/role");
+                    symmetricKey = jobj.Value<string>("symmetricKey");
+                    resourceA = $"http://{hostname}/resource-a";
+                    resourceB = $"http://{hostname}/resource-b";
+                }
+                else
+                {
+                    hostname = SelectHostname();
+                }
+            }
+            else
+            {
+                hostname = SelectHostname();
+            }
+
+            name = SelectName();
+            role = SelectRole();
         }
 
+        private static void WriteHeader()
+        {
+            PrintMessage("-------------------------------------------------------------------", ConsoleColor.White);
+            PrintMessage("                       HTTP Sample Client", ConsoleColor.Cyan);
+            PrintMessage("-------------------------------------------------------------------", ConsoleColor.White);
+            PrintMessage("press any key to continue...", ConsoleColor.White);
+            Console.ReadKey();
+        }
     }
 }

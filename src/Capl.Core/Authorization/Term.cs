@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -27,15 +27,12 @@ namespace Capl.Authorization
         /// Get or sets the truthful evaluation.
         /// </summary>
         public abstract bool Evaluates { get; set; }
+
         public abstract Uri TermId { get; set; }
-        public abstract bool Evaluate(IEnumerable<Claim> claims);
 
         public static Term Load(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             Term evalExp = null;
 
@@ -55,7 +52,6 @@ namespace Capl.Authorization
                 evalExp = logicalAnd;
             }
 
-
             if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr))
             {
                 LogicalOrCollection logicalOr = new LogicalOrCollection();
@@ -72,6 +68,8 @@ namespace Capl.Authorization
                 throw new SerializationException("Invalid evaluation expression element.");
             }
         }
+
+        public abstract bool Evaluate(IEnumerable<Claim> claims);
 
         public virtual XmlSchema GetSchema()
         {

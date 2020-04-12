@@ -1,11 +1,12 @@
-﻿
-
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
     using System.Collections.Generic;
+
     public class SubscriptionAckMessage : MqttMessage
     {
+        private readonly QualityOfServiceLevelCollection _qosLevels;
+
         public SubscriptionAckMessage()
         {
             this._qosLevels = new QualityOfServiceLevelCollection();
@@ -17,39 +18,25 @@ namespace SkunkLab.Protocols.Mqtt
             this._qosLevels = new QualityOfServiceLevelCollection(qosLevels);
         }
 
-        private QualityOfServiceLevelCollection _qosLevels;
-
         //public ushort MessageId { get; set; }
 
-        public override bool HasAck
-        {
-            get { return false; }
-        }
+        public override bool HasAck => false;
 
         public override MqttMessageType MessageType
         {
-            get
-            {
-                return MqttMessageType.SUBACK;
-            }
+            get => MqttMessageType.SUBACK;
 
-            internal set
-            {
-                base.MessageType = value;
-            }
+            internal set => base.MessageType = value;
         }
 
-        public QualityOfServiceLevelCollection QualityOfServiceLevels
-        {
-            get { return this._qosLevels; }
-        }
+        public QualityOfServiceLevelCollection QualityOfServiceLevels => this._qosLevels;
 
         public override byte[] Encode()
         {
-            byte fixedHeader = (byte)((0x09 << Constants.Header.MessageTypeOffset) |
-                   (byte)(0x00) |
-                   (byte)(0x00) |
-                   (byte)(0x00));
+            byte fixedHeader = (0x09 << Constants.Header.MessageTypeOffset) |
+                   0x00 |
+                   0x00 |
+                   0x00;
 
             byte[] messageId = new byte[2];
             messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF); //MSB
@@ -109,7 +96,6 @@ namespace SkunkLab.Protocols.Mqtt
                 QualityOfServiceLevelType qosLevel = (QualityOfServiceLevelType)buffer[index++];
                 this._qosLevels.Add(qosLevel);
             }
-
 
             return subackMessage;
         }

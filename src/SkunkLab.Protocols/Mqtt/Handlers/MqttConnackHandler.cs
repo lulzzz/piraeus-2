@@ -7,7 +7,6 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
         public MqttConnackHandler(MqttSession session, MqttMessage message)
             : base(session, message)
         {
-
         }
 
         public override async Task<MqttMessage> ProcessAsync()

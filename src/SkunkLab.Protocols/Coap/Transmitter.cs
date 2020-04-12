@@ -7,6 +7,24 @@ namespace SkunkLab.Protocols.Coap
 {
     public class Transmitter : IDisposable
     {
+        private readonly Dictionary<ushort, Tuple<string, DateTime, Action<CodeType, string, byte[]>>> container;
+
+        private ushort currentId;
+
+        private bool disposedValue;
+
+        private readonly double lifetimeMilliseconds;
+
+        private readonly int maxAttempts;
+
+        private readonly Dictionary<string, Action<CodeType, string, byte[]>> observeContainer;
+
+        private readonly Dictionary<ushort, Tuple<DateTime, int, CoapMessage>> retryContainer;
+
+        private readonly double retryMilliseconds;
+
+        private readonly Timer timer;
+
         public Transmitter(double lifetimeMilliseconds, double retryMilliseconds, int maxRetryAttempts)
         {
             this.lifetimeMilliseconds = lifetimeMilliseconds;
@@ -19,55 +37,7 @@ namespace SkunkLab.Protocols.Coap
             observeContainer = new Dictionary<string, Action<CodeType, string, byte[]>>();
         }
 
-        private double lifetimeMilliseconds;
-        private double retryMilliseconds;
-        private int maxAttempts;
-        private ushort currentId;
-        private Timer timer;
-        private bool disposedValue;
-
-        private Dictionary<string, Action<CodeType, string, byte[]>> observeContainer;
-        private Dictionary<ushort, Tuple<string, DateTime, Action<CodeType, string, byte[]>>> container;
-        private Dictionary<ushort, Tuple<DateTime, int, CoapMessage>> retryContainer;
         public event EventHandler<CoapMessageEventArgs> OnRetry;
-
-        public void Unobserve(byte[] token)
-        {
-            string tokenString = Convert.ToBase64String(token);
-            if (observeContainer.ContainsKey(tokenString))
-            {
-                observeContainer.Remove(tokenString);
-            }
-        }
-
-        public ushort NewId(byte[] token, bool? observe = null, Action<CodeType, string, byte[]> action = null)
-        {
-            if (observe.HasValue && observe.Value && action == null)
-            {
-                throw new ArgumentNullException("action");
-            }
-
-            currentId++;
-            currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
-
-            while (container.ContainsKey(currentId))
-            {
-                currentId++;
-                currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
-            }
-
-            if (observe.HasValue && observe.Value)
-            {
-                observeContainer.Add(Convert.ToBase64String(token), action);
-            }
-
-            Tuple<string, DateTime, Action<CodeType, string, byte[]>> tuple = new Tuple<string, DateTime, Action<CodeType, string, byte[]>>(Convert.ToBase64String(token), DateTime.UtcNow.AddMilliseconds(lifetimeMilliseconds), action);
-            container.Add(currentId, tuple);
-
-            timer.Enabled = true;
-
-            return currentId;
-        }
 
         public void AddMessage(CoapMessage message)
         {
@@ -78,6 +48,13 @@ namespace SkunkLab.Protocols.Coap
                     retryContainer.Add(message.MessageId, new Tuple<DateTime, int, CoapMessage>(DateTime.UtcNow.AddMilliseconds(retryMilliseconds), 0, message));
                 }
             }
+        }
+
+        public void Clear()
+        {
+            container.Clear();
+            retryContainer.Clear();
+            timer.Enabled = false;
         }
 
         public void DispatchResponse(CoapMessage message)
@@ -113,6 +90,43 @@ namespace SkunkLab.Protocols.Coap
             timer.Enabled = container.Count() > 0;
         }
 
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+
+        public ushort NewId(byte[] token, bool? observe = null, Action<CodeType, string, byte[]> action = null)
+        {
+            if (observe.HasValue && observe.Value && action == null)
+            {
+                throw new ArgumentNullException("action");
+            }
+
+            currentId++;
+            currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
+
+            while (container.ContainsKey(currentId))
+            {
+                currentId++;
+                currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
+            }
+
+            if (observe.HasValue && observe.Value)
+            {
+                observeContainer.Add(Convert.ToBase64String(token), action);
+            }
+
+            Tuple<string, DateTime, Action<CodeType, string, byte[]>> tuple = new Tuple<string, DateTime, Action<CodeType, string, byte[]>>(Convert.ToBase64String(token), DateTime.UtcNow.AddMilliseconds(lifetimeMilliseconds), action);
+            container.Add(currentId, tuple);
+
+            timer.Enabled = true;
+
+            return currentId;
+        }
+
         public void Remove(ushort id)
         {
             container.Remove(id);
@@ -121,38 +135,34 @@ namespace SkunkLab.Protocols.Coap
             timer.Enabled = container.Count > 0;
         }
 
-        public void Clear()
+        public void Unobserve(byte[] token)
         {
-            container.Clear();
-            retryContainer.Clear();
-            timer.Enabled = false;
+            string tokenString = Convert.ToBase64String(token);
+            if (observeContainer.ContainsKey(tokenString))
+            {
+                observeContainer.Remove(tokenString);
+            }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        protected virtual void Dispose(bool disposing)
         {
-            var query = container.Where((c) => c.Value.Item2 < DateTime.UtcNow);
-
-            List<ushort> list = new List<ushort>();
-            if (query != null && query.Count() > 0)
+            if (!disposedValue)
             {
-                foreach (var item in query)
+                if (disposing)
                 {
-                    list.Add(item.Key);
+                    if (timer != null)
+                    {
+                        timer.Stop();
+                        timer.Dispose();
+                    }
+
+                    observeContainer.Clear();
+                    retryContainer.Clear();
+                    container.Clear();
                 }
+
+                disposedValue = true;
             }
-
-            foreach (var item in list)
-            {
-                container.Remove(item);
-                if (retryContainer.ContainsKey(item))
-                {
-                    retryContainer.Remove(item);
-                }
-            }
-
-            ManageRetries();
-
-            timer.Enabled = container.Count() > 0;
         }
 
         private void ManageRetries()
@@ -196,33 +206,31 @@ namespace SkunkLab.Protocols.Coap
             }
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!disposedValue)
+            var query = container.Where((c) => c.Value.Item2 < DateTime.UtcNow);
+
+            List<ushort> list = new List<ushort>();
+            if (query != null && query.Count() > 0)
             {
-                if (disposing)
+                foreach (var item in query)
                 {
-                    if (timer != null)
-                    {
-                        timer.Stop();
-                        timer.Dispose();
-                    }
-
-                    observeContainer.Clear();
-                    retryContainer.Clear();
-                    container.Clear();
+                    list.Add(item.Key);
                 }
-
-                disposedValue = true;
             }
-        }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            GC.SuppressFinalize(this);
+            foreach (var item in list)
+            {
+                container.Remove(item);
+                if (retryContainer.ContainsKey(item))
+                {
+                    retryContainer.Remove(item);
+                }
+            }
+
+            ManageRetries();
+
+            timer.Enabled = container.Count() > 0;
         }
     }
 }

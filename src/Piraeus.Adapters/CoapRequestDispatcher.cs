@@ -11,7 +11,6 @@ using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Coap.Handlers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,6 +18,26 @@ namespace Piraeus.Adapters
 {
     public class CoapRequestDispatcher : ICoapRequestDispatch
     {
+        private readonly OrleansAdapter adapter;
+
+        private readonly IAuditor auditor;
+
+        private readonly IChannel channel;
+
+        private readonly PiraeusConfig config;
+
+        private readonly GraphManager graphManager;
+
+        private readonly ILog logger;
+
+        private readonly CoapSession session;
+
+        private Dictionary<string, byte[]> coapObserved;
+
+        private HashSet<string> coapUnobserved;
+
+        private bool disposedValue = false;
+
         public CoapRequestDispatcher(CoapSession session, IChannel channel, PiraeusConfig config, GraphManager graphManager, ILog logger = null)
         {
             this.channel = channel;
@@ -34,20 +53,10 @@ namespace Piraeus.Adapters
             LoadDurablesAsync().LogExceptions(logger);
         }
 
-        private readonly GraphManager graphManager;
-        private readonly IAuditor auditor;
-        private readonly OrleansAdapter adapter;
-        private readonly IChannel channel;
-        private readonly CoapSession session;
-        private HashSet<string> coapUnobserved;
-        private Dictionary<string, byte[]> coapObserved;
-        private bool disposedValue = false; // To detect redundant calls
-        private readonly PiraeusConfig config;
-        private readonly ILog logger;
-
+        // To detect redundant calls
         public string Identity
         {
-            set { adapter.Identity = value; }
+            set => adapter.Identity = value;
         }
 
         public async Task<CoapMessage> DeleteAsync(CoapMessage message)
@@ -81,7 +90,6 @@ namespace Piraeus.Adapters
             }
         }
 
-
         public async Task<CoapMessage> GetAsync(CoapMessage message)
         {
             await logger?.LogDebugAsync($"CoAP get with RST and empty message for {session.Identity}.");
@@ -106,7 +114,7 @@ namespace Piraeus.Adapters
             ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
 
             ValidatorResult result = EventValidator.Validate(false, uri.Resource, channel, graphManager);
-            if(!result.Validated)
+            if (!result.Validated)
             {
                 await logger?.LogErrorAsync($"{result.ErrorMessage} for {session.Identity}");
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Unauthorized, message.Token);
@@ -115,7 +123,7 @@ namespace Piraeus.Adapters
             if (!message.Observe.Value)
             {
                 //unsubscribe
-                await logger?.LogInformationAsync($"CoAP unobserve '{message.ResourceUri.ToString()}' for {session.Identity}.");                
+                await logger?.LogInformationAsync($"CoAP unobserve '{message.ResourceUri.ToString()}' for {session.Identity}.");
                 await adapter.UnsubscribeAsync(uri.Resource);
                 await logger?.LogDebugAsync($"CoAP unsubscribed '{message.ResourceUri.ToString()} for {session.Identity}'.");
                 coapObserved.Remove(uri.Resource);
@@ -131,8 +139,7 @@ namespace Piraeus.Adapters
                 };
 
                 await logger?.LogInformationAsync($"CoAP subscribed '{message.ResourceUri.ToString()}' for {session.Identity}");
-                string subscriptionUriString = await adapter.SubscribeAsync(uri.Resource, metadata);
-
+                _ = await adapter.SubscribeAsync(uri.Resource, metadata);
 
                 if (!coapObserved.ContainsKey(uri.Resource)) //add resource to observed list
                 {
@@ -144,51 +151,6 @@ namespace Piraeus.Adapters
             return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Valid, message.Token);
         }
 
-        private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
-        {
-            
-            byte[] message = null;
-
-            if (coapObserved.ContainsKey(e.Message.ResourceUri))
-            {
-                message = ProtocolTransition.ConvertToCoap(session, e.Message, coapObserved[e.Message.ResourceUri]);
-            }
-            else
-            {
-                message = ProtocolTransition.ConvertToCoap(session, e.Message);
-            }
-
-            logger?.LogDebugAsync($"Converted observed CoAP message '{e.Message.ResourceUri}'.");
-
-            Send(message, e).LogExceptions(logger).GetAwaiter();
-        }
-
-        private async Task Send(byte[] message, ObserveMessageEventArgs e)
-        {
-            AuditRecord record = null;
-            try
-            {
-                await channel.SendAsync(message);
-                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-            }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Fault sending message on channel for {session.Identity}");
-                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
-            }
-            finally
-            {
-                if (e.Message.Audit)
-                {
-                    await auditor?.WriteAuditRecordAsync(record).LogExceptions(logger);
-                }
-            }
-
-
-
-        }
-
-
         public async Task<CoapMessage> PostAsync(CoapMessage message)
         {
             try
@@ -196,7 +158,7 @@ namespace Piraeus.Adapters
                 CoapUri uri = new CoapUri(message.ResourceUri.ToString());
                 ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
                 EventMetadata metadata = await graphManager.GetPiSystemMetadataAsync(uri.Resource);
-             
+
                 ValidatorResult result = EventValidator.Validate(true, metadata, null, graphManager);
 
                 if (!result.Validated)
@@ -238,6 +200,58 @@ namespace Piraeus.Adapters
             }
         }
 
+        public async Task<CoapMessage> PutAsync(CoapMessage message)
+        {
+            CoapUri uri = new CoapUri(message.ResourceUri.ToString());
+            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
+
+            //EventValidator.Validate(false, resourceUriString, Channel, graphManager, context).Validated
+            //if (!await adapter.CanSubscribeAsync(uri.Resource, channel.IsEncrypted))
+            if (EventValidator.Validate(false, uri.Resource, channel, graphManager).Validated)
+            {
+                return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Unauthorized, message.Token);
+            }
+
+            if (coapObserved.ContainsKey(uri.Resource) || coapUnobserved.Contains(uri.Resource))
+            {
+                //resource previously subscribed
+                return new CoapResponse(message.MessageId, rmt, ResponseCodeType.NotAcceptable, message.Token);
+            }
+
+            //this point the resource is not being observed, so we can
+            // #1 subscribe to it
+            // #2 add to unobserved resources (means not coap observed)
+
+            SubscriptionMetadata metadata = new SubscriptionMetadata()
+            {
+                IsEphemeral = true,
+                Identity = session.Identity,
+                Indexes = session.Indexes
+            };
+            _ = await adapter.SubscribeAsync(uri.Resource, metadata);
+
+            coapUnobserved.Add(uri.Resource);
+
+            return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Created, message.Token);
+        }
+
+        private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
+        {
+            byte[] message;
+            if (coapObserved.ContainsKey(e.Message.ResourceUri))
+            {
+                message = ProtocolTransition.ConvertToCoap(session, e.Message, coapObserved[e.Message.ResourceUri]);
+            }
+            else
+            {
+                message = ProtocolTransition.ConvertToCoap(session, e.Message);
+            }
+
+            logger?.LogDebugAsync($"Converted observed CoAP message '{e.Message.ResourceUri}'.");
+
+            Send(message, e).LogExceptions(logger).GetAwaiter();
+        }
+
         private List<KeyValuePair<string, string>> GetIndexes(CoapUri coapUri)
         {
             List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>(coapUri.Indexes);
@@ -256,42 +270,6 @@ namespace Piraeus.Adapters
             return list.Count > 0 ? list : null;
         }
 
-        public async Task<CoapMessage> PutAsync(CoapMessage message)
-        {
-            CoapUri uri = new CoapUri(message.ResourceUri.ToString());
-            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
-
-            //EventValidator.Validate(false, resourceUriString, Channel, graphManager, context).Validated
-            //if (!await adapter.CanSubscribeAsync(uri.Resource, channel.IsEncrypted))
-            if (EventValidator.Validate(false, uri.Resource, channel, graphManager).Validated)
-            {
-                return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Unauthorized, message.Token);
-            }
-
-            if (coapObserved.ContainsKey(uri.Resource) || coapUnobserved.Contains(uri.Resource))
-            {
-                //resource previously subscribed 
-                return new CoapResponse(message.MessageId, rmt, ResponseCodeType.NotAcceptable, message.Token);
-            }
-
-            //this point the resource is not being observed, so we can
-            // #1 subscribe to it
-            // #2 add to unobserved resources (means not coap observed)
-
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
-                IsEphemeral = true,
-                Identity = session.Identity,
-                Indexes = session.Indexes
-            };
-
-            string subscriptionUriString = await adapter.SubscribeAsync(uri.Resource, metadata);
-
-            coapUnobserved.Add(uri.Resource);
-
-            return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Created, message.Token);
-        }
-
         private async Task LoadDurablesAsync()
         {
             List<string> list = await adapter.LoadDurableSubscriptionsAsync(session.Identity);
@@ -302,8 +280,35 @@ namespace Piraeus.Adapters
             }
         }
 
+        private async Task Send(byte[] message, ObserveMessageEventArgs e)
+        {
+            AuditRecord record = null;
+            try
+            {
+                await channel.SendAsync(message);
+                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, $"Fault sending message on channel for {session.Identity}");
+                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+            }
+            finally
+            {
+                if (e.Message.Audit)
+                {
+                    await auditor?.WriteAuditRecordAsync(record).LogExceptions(logger);
+                }
+            }
+        }
+
         #region IDisposable Support
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -316,7 +321,7 @@ namespace Piraeus.Adapters
                         adapter.OnObserve -= Adapter_OnObserve;
                         adapter.Dispose();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         logger?.LogErrorAsync(ex, $"Disposing Orleans adapter fault for {session.Identity}");
                     }
@@ -331,11 +336,6 @@ namespace Piraeus.Adapters
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
+        #endregion IDisposable Support
     }
 }

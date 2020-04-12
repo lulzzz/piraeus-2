@@ -14,8 +14,10 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            LogicalOrCollection loc = new LogicalOrCollection();
-            loc.Evaluates = this.Evaluates;
+            LogicalOrCollection loc = new LogicalOrCollection
+            {
+                Evaluates = this.Evaluates
+            };
             foreach (Term term in this.Terms)
             {
                 loc.Add(term);

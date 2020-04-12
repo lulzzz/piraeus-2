@@ -1,0 +1,84 @@
+﻿@page
+@using Piraeus.GrainInterfaces
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+    int cnt = 0;
+}
+
+<link href="~/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="~/jqueryui/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+<script src="~/jquery/jquery.js"></script>
+<script src="~/jqueryui/jquery-ui.js"></script>
+<script>
+    function goMonitor(parameter) {
+        var url = window.location.href.split('?')[0];
+        window.location.href = url + "charts?r=" + parameter;
+    }
+</script>
+<div class="container">
+    <div class="container-fluid">
+        <a href="?index=@Model.Index&quantity=@Model.Quantity">
+            <span title="Page Forward" id="pagefwd" class="glyphicon glyphicon-arrow-right" style="float:right;padding-right:20px;"></span>
+        </a>
+    </div>
+</div>
+<div class="accordion" id="accordion" aria-multiselectable="true">
+
+    @foreach (var item in Model.Container)
+    {
+        cnt++;
+
+        <div class="card">
+            <div class="card-header" role="tab" id="heading-@cnt">
+                <span title="Live Monitor PI-System" id="monitor" class="glyphicon glyphicon-circle-arrow-right" style="float:right;padding-right:20px;" onclick="goMonitor('@item.Key')"></span>
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse-@cnt" aria-expanded="true"
+                   aria-controls="collapse-@cnt">@item.Key</a>
+            </div>
+            <div id="collapse-@cnt" class="collapse" role="tabpanel" aria-labelledby="heading-@cnt" data-parent="#accordion">
+                <div class="card-body">
+                    <table>
+                        <tr>
+                            <td width="300">Description</td>
+                            <td width="600">@item.Value.Description</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Enabled</td>
+                            <td width="600">@item.Value.Enabled</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Expires</td>
+                            <td width="600">@item.Value.Expires</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Audit</td>
+                            <td width="600">@item.Value.Audit</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Discovery Url</td>
+                            <td width="600">@item.Value.DiscoveryUrl</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Max Subscription Duration</td>
+                            <td width="600">@item.Value.MaxSubscriptionDuration</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Encrypted Channel Required</td>
+                            <td width="600">@item.Value.RequireEncryptedChannel</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Publish Policy</td>
+                            <td width="600">@item.Value.PublishPolicyUriString</td>
+                        </tr>
+                        <tr>
+                            <td width="300">Subscribe Policy</td>
+                            <td width="600">@item.Value.SubscribePolicyUriString</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    }
+</div>

@@ -1,17 +1,16 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Orleans;
 using Piraeus.Configuration;
+using Piraeus.Core;
 using Piraeus.Core.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using Piraeus.Core;
-using Orleans;
 
 namespace Piraeus.UdpGateway
 {
@@ -83,7 +82,6 @@ namespace Piraeus.UdpGateway
 
             logger?.LogInformation("TCP server started.");
             return Task.CompletedTask;
-
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -96,7 +94,6 @@ namespace Piraeus.UdpGateway
 
             return Task.CompletedTask;
         }
-                
 
         private IPAddress GetIPAddress(string hostname)
         {

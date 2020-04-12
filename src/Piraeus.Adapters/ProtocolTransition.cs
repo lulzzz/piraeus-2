@@ -11,43 +11,6 @@ namespace Piraeus.Adapters
     {
         public static bool IsEncryptedChannel { get; set; }
 
-        public static byte[] ConvertToMqtt(MqttSession session, EventMessage message)
-        {
-            if (message.Protocol == ProtocolType.MQTT)
-            {
-                return MqttConversion(session, message.Message);
-            }
-            else if (message.Protocol == ProtocolType.COAP)
-            {
-                CoapMessage msg = CoapMessage.DecodeMessage(message.Message);
-                CoapUri curi = new CoapUri(msg.ResourceUri.ToString());
-                QualityOfServiceLevelType qos = QualityOfServiceLevelType.AtLeastOnce;
-
-                try
-                {
-                    QualityOfServiceLevelType? qosType = session.GetQoS(curi.Resource);
-                    qos = qosType.HasValue ? qosType.Value : QualityOfServiceLevelType.AtLeastOnce;
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceWarning("{0} - Fault in ProtocolTransition.ConvertToMqtt", DateTime.UtcNow.ToString());
-                    Trace.TraceError("{0} - {1} - {2}", DateTime.UtcNow.ToString(""), "ProtocolTransition", ex.Message);
-                }
-
-                PublishMessage pub = new PublishMessage(false, qos, false, session.NewId(), curi.Resource, msg.Payload);
-                return pub.Encode();
-            }
-            else if (message.Protocol == ProtocolType.REST)
-            {
-                PublishMessage pubm = new PublishMessage(false, session.GetQoS(message.ResourceUri).Value, false, session.NewId(), message.ResourceUri, message.Message);
-                return pubm.Encode();
-            }
-            else
-            {
-                return MqttConversion(session, message.Message, message.ContentType);
-            }
-        }
-
         public static byte[] ConvertToCoap(CoapSession session, EventMessage message, byte[] observableToken = null)
         {
             CoapMessage coapMessage = null;
@@ -120,6 +83,43 @@ namespace Piraeus.Adapters
             else
             {
                 return message.Message;
+            }
+        }
+
+        public static byte[] ConvertToMqtt(MqttSession session, EventMessage message)
+        {
+            if (message.Protocol == ProtocolType.MQTT)
+            {
+                return MqttConversion(session, message.Message);
+            }
+            else if (message.Protocol == ProtocolType.COAP)
+            {
+                CoapMessage msg = CoapMessage.DecodeMessage(message.Message);
+                CoapUri curi = new CoapUri(msg.ResourceUri.ToString());
+                QualityOfServiceLevelType qos = QualityOfServiceLevelType.AtLeastOnce;
+
+                try
+                {
+                    QualityOfServiceLevelType? qosType = session.GetQoS(curi.Resource);
+                    qos = qosType.HasValue ? qosType.Value : QualityOfServiceLevelType.AtLeastOnce;
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning("{0} - Fault in ProtocolTransition.ConvertToMqtt", DateTime.UtcNow.ToString());
+                    Trace.TraceError("{0} - {1} - {2}", DateTime.UtcNow.ToString(""), "ProtocolTransition", ex.Message);
+                }
+
+                PublishMessage pub = new PublishMessage(false, qos, false, session.NewId(), curi.Resource, msg.Payload);
+                return pub.Encode();
+            }
+            else if (message.Protocol == ProtocolType.REST)
+            {
+                PublishMessage pubm = new PublishMessage(false, session.GetQoS(message.ResourceUri).Value, false, session.NewId(), message.ResourceUri, message.Message);
+                return pubm.Encode();
+            }
+            else
+            {
+                return MqttConversion(session, message.Message, message.ContentType);
             }
         }
 

@@ -1,0 +1,24 @@
+{
+    "version": "1.0",
+    "defaultProvider": "unpkg",
+    "libraries": [
+        {
+            "library": "@microsoft/signalr@3.1.2",
+            "destination": "wwwroot/js/signalr/"
+        },
+        {
+            "library": "moment@2.24.0",
+            "destination": "wwwroot/js/moment/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "jquery@3.4.1",
+            "destination": "wwwroot/jquery/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "jqueryui@1.12.1",
+            "destination": "wwwroot/jqueryui/"
+        }
+    ]
+}

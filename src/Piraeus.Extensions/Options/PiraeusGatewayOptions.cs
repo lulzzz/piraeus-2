@@ -4,6 +4,13 @@ using System;
 
 namespace Piraeus.Extensions.Options
 {
+    public enum OrleansStorageType
+    {
+        Memory = 0,
+        AzureStorage = 1,
+        Redis = 2
+    }
+
     public class PiraeusGatewayOptions
     {
         public PiraeusGatewayOptions()
@@ -22,20 +29,13 @@ namespace Piraeus.Extensions.Options
             SetStorageType();
         }
 
-        public bool Dockerized { get; set; } = false;
-
-        public string ClusterId { get; set; }
-
-        public string ServiceId { get; set; }
-
-        public string DataConnectionString { get; set; }
-
         public string AppInsightKey { get; set; }
-
+        public string ClusterId { get; set; }
+        public string DataConnectionString { get; set; }
+        public bool Dockerized { get; set; } = false;
         public LoggerType LoggerTypes { get; set; }
-
         public LogLevel LoggingLevel { get; set; }
-
+        public string ServiceId { get; set; }
         public OrleansStorageType StorageType { get; set; }
 
         private OrleansStorageType SetStorageType()
@@ -58,14 +58,6 @@ namespace Piraeus.Extensions.Options
             {
                 throw new ArgumentException("Invalid connection string");
             }
-
         }
-    }
-
-    public enum OrleansStorageType
-    {
-        Memory = 0,
-        AzureStorage = 1,
-        Redis = 2
     }
 }

@@ -6,6 +6,10 @@ namespace Piraeus.Auditing
 {
     public class AzureTableAuditor : IAuditor
     {
+        private readonly TableStorage storage;
+
+        private readonly string tableName;
+
         public AzureTableAuditor(string connectionString, string tableName, long? maxBufferSize = null, int? defaultBufferSize = null)
         {
             if (!maxBufferSize.HasValue)
@@ -18,16 +22,6 @@ namespace Piraeus.Auditing
             }
 
             this.tableName = tableName;
-        }
-
-        private string tableName;
-        private TableStorage storage;
-
-
-        public async Task WriteAuditRecordAsync(AuditRecord record)
-        {
-            storage.WriteAsync(tableName, record).IgnoreException();
-            await Task.CompletedTask;
         }
 
         public async Task UpdateAuditRecordAsync(AuditRecord record)
@@ -43,7 +37,12 @@ namespace Piraeus.Auditing
                     storage.WriteAsync(tableName, updateRecord).IgnoreException();
                 }
             }
+        }
 
+        public async Task WriteAuditRecordAsync(AuditRecord record)
+        {
+            storage.WriteAsync(tableName, record).IgnoreException();
+            await Task.CompletedTask;
         }
     }
 }

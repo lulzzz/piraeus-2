@@ -1,6 +1,4 @@
-﻿
-
-namespace Piraeus.Grains.Notifications
+﻿namespace Piraeus.Grains.Notifications
 {
     using StackExchange.Redis;
     using System.IO;
@@ -10,7 +8,7 @@ namespace Piraeus.Grains.Notifications
     {
         public static T Get<T>(this IDatabase database, string key)
         {
-            byte[] stream = (byte[])database.StringGet(key);
+            byte[] stream = database.StringGet(key);
             return Deserialize<T>(stream);
         }
 
@@ -25,23 +23,7 @@ namespace Piraeus.Grains.Notifications
             database.StringSet(key, serializedValue);
         }
 
-        static byte[] Serialize(object o)
-        {
-            if (o == null)
-            {
-                return null;
-            }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, o);
-                byte[] objectDataAsStream = memoryStream.ToArray();
-                return objectDataAsStream;
-            }
-        }
-
-        static T Deserialize<T>(byte[] stream)
+        private static T Deserialize<T>(byte[] stream)
         {
             if (stream == null)
             {
@@ -54,6 +36,22 @@ namespace Piraeus.Grains.Notifications
             {
                 T result = (T)binaryFormatter.Deserialize(memoryStream);
                 return result;
+            }
+        }
+
+        private static byte[] Serialize(object o)
+        {
+            if (o == null)
+            {
+                return null;
+            }
+
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                binaryFormatter.Serialize(memoryStream, o);
+                byte[] objectDataAsStream = memoryStream.ToArray();
+                return objectDataAsStream;
             }
         }
     }

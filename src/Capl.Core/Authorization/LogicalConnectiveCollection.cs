@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -18,14 +18,14 @@ namespace Capl.Authorization
     public abstract class LogicalConnectiveCollection : Term, IList<Term>
     {
         /// <summary>
-        /// A list of terms.
-        /// </summary>
-        private List<Term> list;
-
-        /// <summary>
         /// Truthful evaluation of the logical connective.
         /// </summary>
         private bool _evaluates;
+
+        /// <summary>
+        /// A list of terms.
+        /// </summary>
+        private readonly List<Term> list;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogicalConnectiveCollection"/> class.
@@ -37,34 +37,28 @@ namespace Capl.Authorization
         }
 
         /// <summary>
+        /// Gets the number of element actually contained in the Capl.Authorization.LogicalConectiveCollection.
+        /// </summary>
+        public int Count => this.list.Count;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the truthful evaluation of the logical connective is true or false.
         /// </summary>
         public override bool Evaluates
         {
-            get { return this._evaluates; }
-            set { this._evaluates = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets and option id for the term.
-        /// </summary>
-        public override Uri TermId { get; set; }
-
-        /// <summary>
-        /// Gets the number of element actually contained in the Capl.Authorization.LogicalConectiveCollection.
-        /// </summary>
-        public int Count
-        {
-            get { return this.list.Count; }
+            get => this._evaluates;
+            set => this._evaluates = value;
         }
 
         /// <summary>
         /// Gets a value indicating whether the collection is read-only.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
+
+        /// <summary>
+        /// Gets or sets and option id for the term.
+        /// </summary>
+        public override Uri TermId { get; set; }
 
         /// <summary>
         /// Gets or sets the terms to be evaluated by the logical connective.
@@ -73,8 +67,8 @@ namespace Capl.Authorization
         /// <returns>A term of the logical connective.</returns>
         public Term this[int index]
         {
-            get { return this.list[index]; }
-            set { this.list[index] = value; }
+            get => this.list[index];
+            set => this.list[index] = value;
         }
 
         ///// <summary>
@@ -83,36 +77,6 @@ namespace Capl.Authorization
         ///// <param name="claimSet">The set of claims to evaluate.</param>
         ///// <returns>True, if the evaluation is true; otherwise false.</returns>
         //public abstract bool Evaluate(ClaimCollection claims);
-
-
-        /// <summary>
-        /// Index of a term.
-        /// </summary>
-        /// <param name="item">Term to return for the index.</param>
-        /// <returns>Index of the term.</returns>
-        public int IndexOf(Term item)
-        {
-            return this.list.IndexOf(item);
-        }
-
-        /// <summary>
-        /// Inserts an elmenent into the Capl.Authorization.LogicalConnectiveCollection at the specified location.
-        /// </summary>
-        /// <param name="index">Index to insert.</param>
-        /// <param name="item">Term to insert.</param>
-        public void Insert(int index, Term item)
-        {
-            this.list.Insert(index, item);
-        }
-
-        /// <summary>
-        /// Removes the element at a specified index from the Capl.Authorization.LogicalConectiveCollection
-        /// </summary>
-        /// <param name="index">Index of the term to remove.</param>
-        public void RemoveAt(int index)
-        {
-            this.list.RemoveAt(index);
-        }
 
         /// <summary>
         /// Adds an object to the end of the Capl.Authorization.LogicalConnectiveCollection.
@@ -152,16 +116,6 @@ namespace Capl.Authorization
         }
 
         /// <summary>
-        /// Remmoves the first occurrence of a specifed object from the Capl.Authorization.LogicalConectiveCollection
-        /// </summary>
-        /// <param name="item">Term to remove.</param>
-        /// <returns>True, if the term is removed; otherwise false.</returns>
-        public bool Remove(Term item)
-        {
-            return this.list.Remove(item);
-        }
-
-        /// <summary>
         /// Returns an enumerator that iterates through the Capl.Authorization.LogicalAndCollection
         /// </summary>
         /// <returns>Returns an IEnumerator</returns>
@@ -176,7 +130,46 @@ namespace Capl.Authorization
         /// <returns>Returns an IEnumerator</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator)this.GetEnumerator();
+            return this.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Index of a term.
+        /// </summary>
+        /// <param name="item">Term to return for the index.</param>
+        /// <returns>Index of the term.</returns>
+        public int IndexOf(Term item)
+        {
+            return this.list.IndexOf(item);
+        }
+
+        /// <summary>
+        /// Inserts an elmenent into the Capl.Authorization.LogicalConnectiveCollection at the specified location.
+        /// </summary>
+        /// <param name="index">Index to insert.</param>
+        /// <param name="item">Term to insert.</param>
+        public void Insert(int index, Term item)
+        {
+            this.list.Insert(index, item);
+        }
+
+        /// <summary>
+        /// Remmoves the first occurrence of a specifed object from the Capl.Authorization.LogicalConectiveCollection
+        /// </summary>
+        /// <param name="item">Term to remove.</param>
+        /// <returns>True, if the term is removed; otherwise false.</returns>
+        public bool Remove(Term item)
+        {
+            return this.list.Remove(item);
+        }
+
+        /// <summary>
+        /// Removes the element at a specified index from the Capl.Authorization.LogicalConectiveCollection
+        /// </summary>
+        /// <param name="index">Index of the term to remove.</param>
+        public void RemoveAt(int index)
+        {
+            this.list.RemoveAt(index);
         }
     }
 }

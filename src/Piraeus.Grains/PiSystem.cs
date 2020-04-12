@@ -18,10 +18,10 @@ namespace Piraeus.Grains
     public class PiSystem : Grain<PiSystemState>, IPiSystem
     {
         [NonSerialized]
-        IDisposable leaseTimer;
-
+        private IDisposable leaseTimer;
 
         #region Activation/Deactivation
+
         public override Task OnActivateAsync()
         {
             if (State.Subscriptions == null)
@@ -55,20 +55,30 @@ namespace Piraeus.Grains
         {
             await WriteStateAsync();
         }
-        #endregion
+
+        #endregion Activation/Deactivation
 
         #region Resource Metadata
+
+        public async Task<EventMetadata> GetMetadataAsync()
+        {
+            return await Task.FromResult<EventMetadata>(State.Metadata);
+        }
+
+        public async Task<CommunicationMetrics> GetMetricsAsync()
+        {
+            CommunicationMetrics metrics = new CommunicationMetrics(State.Metadata.ResourceUriString, State.MessageCount, State.ByteCount, State.ErrorCount, State.LastMessageTimestamp, State.LastErrorTimestamp);
+            return await Task.FromResult<CommunicationMetrics>(metrics);
+        }
+
         public async Task UpsertMetadataAsync(EventMetadata metadata)
         {
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata");
-            }
+            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
             if (State.Metadata != null && metadata.ResourceUriString != this.GetPrimaryKeyString())
             {
                 Trace.TraceWarning("Resource metadata identifier mismatch failed for resource metadata upsert.");
-                Exception ex = new ResourceIdentityMismatchException(String.Format("Resource metadata {0} does not match grain identity {1}", State.Metadata.ResourceUriString, this.GetPrimaryKeyString()));
+                Exception ex = new ResourceIdentityMismatchException(string.Format("Resource metadata {0} does not match grain identity {1}", State.Metadata.ResourceUriString, this.GetPrimaryKeyString()));
                 await NotifyErrorAsync(ex);
                 throw ex;
             }
@@ -81,19 +91,23 @@ namespace Piraeus.Grains
             await WriteStateAsync();
         }
 
-        public async Task<CommunicationMetrics> GetMetricsAsync()
-        {
-            CommunicationMetrics metrics = new CommunicationMetrics(State.Metadata.ResourceUriString, State.MessageCount, State.ByteCount, State.ErrorCount, State.LastMessageTimestamp, State.LastErrorTimestamp);
-            return await Task.FromResult<CommunicationMetrics>(metrics);
-        }
-
-        public async Task<EventMetadata> GetMetadataAsync()
-        {
-            return await Task.FromResult<EventMetadata>(State.Metadata);
-        }
-        #endregion
+        #endregion Resource Metadata
 
         #region Subscribe/Unsubscribe
+
+        public async Task<IEnumerable<string>> GetSubscriptionListAsync()
+        {
+            if (State.Subscriptions == null || State.Subscriptions.Count == 0)
+            {
+                return null;
+            }
+            else
+            {
+                string[] result = State.Subscriptions.Keys.ToArray();
+
+                return await Task.FromResult<IEnumerable<string>>(result);
+            }
+        }
 
         public async Task SubscribeAsync(ISubscription subscription)
         {
@@ -109,14 +123,14 @@ namespace Piraeus.Grains
             string id = await subscription.GetIdAsync();
             Uri uri = new Uri(id);
 
-            //test for match with resource 
+            //test for match with resource
             //if(id == null || State.Metadata.ResourceUriString != id.Replace("/" + uri.Segments[uri.Segments.Length - 1], ""))
             //{
             //    Exception ex = new SubscriptionIdentityMismatchException(String.Format("Subscription identity is mismatched with resource. Subscription {0}, Resource {1}", id, State.Metadata.ResourceUriString));
             //    //GetLogger().Log(1010, Orleans.Runtime.Severity.Error, ex.Message, null, ex);
             //    await NotifyErrorAsync(ex);
             //    return;
-            //}          
+            //}
 
             //get the subscription into resource state
             if (State.Subscriptions.ContainsKey(id))
@@ -148,15 +162,8 @@ namespace Piraeus.Grains
 
         public async Task UnsubscribeAsync(string subscriptionUriString, string identity)
         {
-            if (subscriptionUriString == null)
-            {
-                throw new ArgumentNullException("subscriptionUriString");
-            }
-
-            if (identity == null)
-            {
-                throw new ArgumentNullException("identity");
-            }
+            _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
+            _ = identity ?? throw new ArgumentNullException(nameof(identity));
 
             await UnsubscribeAsync(subscriptionUriString);
 
@@ -167,10 +174,7 @@ namespace Piraeus.Grains
 
         public async Task UnsubscribeAsync(string subscriptionUriString)
         {
-            if (subscriptionUriString == null)
-            {
-                throw new ArgumentNullException("subscriptionUriString");
-            }
+            _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
 
             if (State.Subscriptions.ContainsKey(subscriptionUriString))
             {
@@ -178,24 +182,9 @@ namespace Piraeus.Grains
             }
 
             await WriteStateAsync();
-
         }
 
-        public async Task<IEnumerable<string>> GetSubscriptionListAsync()
-        {
-            if (State.Subscriptions == null || State.Subscriptions.Count == 0)
-            {
-                return null;
-            }
-            else
-            {
-                string[] result = State.Subscriptions.Keys.ToArray();
-
-                return await Task.FromResult<IEnumerable<string>>(result);
-            }
-        }
-
-        #endregion
+        #endregion Subscribe/Unsubscribe
 
         #region Publish
 
@@ -299,13 +288,9 @@ namespace Piraeus.Grains
                 //GetLogger().Log(1008, Orleans.Runtime.Severity.Error, "Resource publish with index error {0}", new object[] { State.Metadata.ResourceUriString }, error);
                 await NotifyErrorAsync(error);
             }
-
-
         }
 
-        #endregion
-
-
+        #endregion Publish
 
         #region Clear
 
@@ -329,9 +314,10 @@ namespace Piraeus.Grains
             await ClearStateAsync();
         }
 
-        #endregion
+        #endregion Clear
 
         #region Observers
+
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IMetricObserver observer)
         {
             if (observer == null)
@@ -340,7 +326,6 @@ namespace Piraeus.Grains
                 await NotifyErrorAsync(ex);
                 return await Task.FromResult<string>(null);
             }
-
 
             Exception error = null;
             string leaseKey = null;
@@ -359,7 +344,7 @@ namespace Piraeus.Grains
             catch (Exception ex)
             {
                 error = ex;
-                //GetLogger().Log(1001, Orleans.Runtime.Severity.Error, "Resource add metric observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);                
+                //GetLogger().Log(1001, Orleans.Runtime.Severity.Error, "Resource add metric observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);
             }
 
             if (error != null)
@@ -396,7 +381,7 @@ namespace Piraeus.Grains
             catch (Exception ex)
             {
                 error = ex;
-                //GetLogger().Log(1002, Orleans.Runtime.Severity.Error, "Resource add error observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);                
+                //GetLogger().Log(1002, Orleans.Runtime.Severity.Error, "Resource add error observer {0}", new object[] { State.Metadata.ResourceUriString }, ex);
             }
 
             if (error != null)
@@ -462,35 +447,9 @@ namespace Piraeus.Grains
             return await Task.FromResult<bool>(result);
         }
 
-        #endregion
-
+        #endregion Observers
 
         #region private methods
-        private async Task NotifyMetricsAsync()
-        {
-            if (State.MetricLeases.Count > 0)
-            {
-                foreach (var item in State.MetricLeases.Values)
-                {
-                    item.NotifyMetrics(new CommunicationMetrics(State.Metadata.ResourceUriString, State.MessageCount, State.ByteCount, State.ErrorCount, State.LastMessageTimestamp.Value, State.LastErrorTimestamp));
-                }
-            }
-
-            await Task.CompletedTask;
-        }
-
-        private async Task NotifyErrorAsync(Exception ex)
-        {
-            if (State.ErrorLeases.Count > 0)
-            {
-                foreach (var item in State.ErrorLeases.Values)
-                {
-                    item.NotifyError(State.Metadata.ResourceUriString, ex);
-                }
-            }
-
-            await Task.CompletedTask;
-        }
 
         private async Task CheckLeaseExpiryAsync(object args)
         {
@@ -519,6 +478,33 @@ namespace Piraeus.Grains
 
             await Task.CompletedTask;
         }
-        #endregion
+
+        private async Task NotifyErrorAsync(Exception ex)
+        {
+            if (State.ErrorLeases.Count > 0)
+            {
+                foreach (var item in State.ErrorLeases.Values)
+                {
+                    item.NotifyError(State.Metadata.ResourceUriString, ex);
+                }
+            }
+
+            await Task.CompletedTask;
+        }
+
+        private async Task NotifyMetricsAsync()
+        {
+            if (State.MetricLeases.Count > 0)
+            {
+                foreach (var item in State.MetricLeases.Values)
+                {
+                    item.NotifyMetrics(new CommunicationMetrics(State.Metadata.ResourceUriString, State.MessageCount, State.ByteCount, State.ErrorCount, State.LastMessageTimestamp.Value, State.LastErrorTimestamp));
+                }
+            }
+
+            await Task.CompletedTask;
+        }
+
+        #endregion private methods
     }
 }

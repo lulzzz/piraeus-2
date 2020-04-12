@@ -1,11 +1,9 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
-
-
 
 namespace Capl.Authorization.Operations
 {
@@ -14,16 +12,9 @@ namespace Capl.Authorization.Operations
 
     public class BetweenDateTimeOperation : Operation
     {
+        public static Uri OperationUri => new Uri(AuthorizationConstants.OperationUris.BetweenDateTime);
 
-        public static Uri OperationUri
-        {
-            get { return new Uri(AuthorizationConstants.OperationUris.BetweenDateTime); }
-        }
-
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.OperationUris.BetweenDateTime); }
-        }
+        public override Uri Uri => new Uri(AuthorizationConstants.OperationUris.BetweenDateTime);
 
         public override bool Execute(string left, string right)
         {

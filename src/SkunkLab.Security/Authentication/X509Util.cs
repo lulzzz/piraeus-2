@@ -7,7 +7,6 @@ namespace SkunkLab.Security.Authentication
 {
     public class X509Util
     {
-
         public static X509Certificate2 GetCertificate(StoreName name, StoreLocation location, string thumbprint)
         {
             X509Store store = new X509Store(name, location);
@@ -32,6 +31,26 @@ namespace SkunkLab.Security.Authentication
             }
         }
 
+        public static List<Claim> GetClaimSet(X509Certificate2 certificate)
+        {
+            List<Claim> list = new List<Claim>
+            {
+                new Claim(System.Security.Claims.ClaimTypes.SerialNumber, certificate.SerialNumber, null, certificate.Issuer),
+                new Claim(System.Security.Claims.ClaimTypes.Thumbprint, certificate.Thumbprint, null, certificate.Issuer),
+                new Claim(System.Security.Claims.ClaimTypes.X500DistinguishedName, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer),
+                new Claim(System.Security.Claims.ClaimTypes.Name, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer),
+                new Claim(System.Security.Claims.ClaimTypes.Dns, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer)
+            };
+
+            return list;
+        }
+
+        public static string GetParsedClaimValue(char delimiter1, char delimiter2, string value)
+        {
+            string[] parts = value.Split(new char[] { ',' });
+            string[] item = parts[0].Split(new char[] { '=' });
+            return item[1];
+        }
 
         public static bool Validate(StoreName name, StoreLocation location, X509RevocationMode mode, X509RevocationFlag flag, X509Certificate2 clientCertificate, string thumbprint)
         {
@@ -41,7 +60,6 @@ namespace SkunkLab.Security.Authentication
             {
                 return false;
             }
-
 
             X509Store store = new X509Store(name, location);
 
@@ -70,7 +88,6 @@ namespace SkunkLab.Security.Authentication
 
                     foreach (X509Certificate2 cert in certs)
                     {
-
                         if (cert.Thumbprint == chainedCertificate.Thumbprint && cert.NotAfter < DateTime.Now && cert.NotBefore > DateTime.Now)
                         {
                             return true;
@@ -84,26 +101,6 @@ namespace SkunkLab.Security.Authentication
             {
                 store.Close();
             }
-        }
-
-
-        public static List<Claim> GetClaimSet(X509Certificate2 certificate)
-        {
-            List<Claim> list = new List<Claim>();
-            list.Add(new Claim(System.Security.Claims.ClaimTypes.SerialNumber, certificate.SerialNumber, null, certificate.Issuer));
-            list.Add(new Claim(System.Security.Claims.ClaimTypes.Thumbprint, certificate.Thumbprint, null, certificate.Issuer));
-            list.Add(new Claim(System.Security.Claims.ClaimTypes.X500DistinguishedName, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer));
-            list.Add(new Claim(System.Security.Claims.ClaimTypes.Name, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer));
-            list.Add(new Claim(System.Security.Claims.ClaimTypes.Dns, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer));
-
-            return list;
-        }
-
-        public static string GetParsedClaimValue(char delimiter1, char delimiter2, string value)
-        {
-            string[] parts = value.Split(new char[] { ',' });
-            string[] item = parts[0].Split(new char[] { '=' });
-            return item[1];
         }
     }
 }

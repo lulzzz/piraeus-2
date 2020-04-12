@@ -4,7 +4,7 @@ using System;
 namespace Piraeus.Grains
 {
     [Serializable]
-    public class MessageNotificationArgs 
+    public class MessageNotificationArgs
     {
         public MessageNotificationArgs(EventMessage message)
         {

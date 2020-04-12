@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -27,13 +27,9 @@ namespace Capl.Authorization.Operations
         /// <returns>An AuthorizationOperation to compare values.</returns>
         public static Operation Create(Uri operationUri, OperationsDictionary operations)
         {
-            if (operationUri == null)
-            {
-                throw new ArgumentNullException("operationUri");
-            }
+            _ = operationUri ?? throw new ArgumentNullException(nameof(operationUri));
 
-            Operation operation = null;
-
+            Operation operation;
             if (operations == null)
             {
                 operation = OperationsDictionary.Default[operationUri.ToString()];    //CaplConfigurationManager.Operations[operationUri.ToString()];

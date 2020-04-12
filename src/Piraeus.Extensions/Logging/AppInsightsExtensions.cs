@@ -6,7 +6,6 @@
 //{
 //    public static class AppInsightsExtensions
 //    {
-
 //        public static ILoggerFactory AddAppInsights(
 //        this ILoggerFactory factory,
 //        Func<string, LogLevel, bool> filter,

@@ -1,6 +1,4 @@
-﻿
-
-//namespace SkunkLab.Security.Authentication
+﻿//namespace SkunkLab.Security.Authentication
 //{
 //    using System;
 //    using System.Collections.Generic;
@@ -18,8 +16,6 @@
 
 //    public class JwtValidationHandler : DelegatingHandler
 //    {
-
-
 //        public JwtValidationHandler(string signingKey, string issuer = null, string audience = null)
 //        {
 //            this.signingKey = signingKey;
@@ -31,7 +27,6 @@
 //        private string signingKey;
 //        private string audience;
 //        private string issuer;
-
 
 //        private static bool TryRetrieveToken(HttpRequestMessage request, out string token)
 //        {
@@ -60,17 +55,16 @@
 
 //            try
 //            {
-
-//                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();   
+//                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
 //                TokenValidationParameters validationParameters = new TokenValidationParameters()
-//                {                  
+//                {
 //                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(signingKey)),
 //                    ValidIssuer = issuer,
 //                    ValidAudience = audience,
 //                    ValidateAudience = audience != null,
 //                    ValidateIssuer = issuer != null,
-//                    ValidateIssuerSigningKey = true                    
+//                    ValidateIssuerSigningKey = true
 //                };
 
 //                Microsoft.IdentityModel.Tokens.SecurityToken stoken = null;

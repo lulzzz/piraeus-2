@@ -9,6 +9,15 @@ namespace SkunkLab.Channels.Udp
 {
     public class UdpServerChannel : UdpChannel
     {
+        private ChannelState _state;
+
+        private readonly UdpClient client;
+
+        private bool disposedValue;
+
+        private readonly IPEndPoint remoteEP;
+
+        private readonly CancellationToken token;
 
         public UdpServerChannel(UdpClient listener, IPEndPoint remoteEP, CancellationToken token)
         {
@@ -16,52 +25,33 @@ namespace SkunkLab.Channels.Udp
             this.client = listener;
             this.remoteEP = remoteEP;
             this.token = token;
-
         }
 
+        public override event EventHandler<ChannelCloseEventArgs> OnClose;
 
-        private IPEndPoint remoteEP;
-        private UdpClient client;
-        private ChannelState _state;
-        private CancellationToken token;
-        private bool disposedValue;
+        public override event EventHandler<ChannelErrorEventArgs> OnError;
+
+        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
 
         public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
-        public override event EventHandler<ChannelCloseEventArgs> OnClose;
-        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
-        public override event EventHandler<ChannelErrorEventArgs> OnError;
-        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
 
+        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
 
         public override string Id { get; internal set; }
 
-        public override bool RequireBlocking
-        {
-            get { return false; }
-        }
+        public override bool IsAuthenticated { get; internal set; }
 
-        public override string TypeId { get { return "UDP"; } }
-
-        public override int Port { get; internal set; }
+        public override bool IsConnected => ChannelState.Open == State;
 
         public override bool IsEncrypted { get; internal set; }
 
-        public override bool IsAuthenticated { get; internal set; }
+        public override int Port { get; internal set; }
 
-        public override bool IsConnected
-        {
-            get
-            {
-                return ChannelState.Open == State;
-            }
-        }
+        public override bool RequireBlocking => false;
 
         public override ChannelState State
         {
-            get
-            {
-                return _state;
-            }
+            get => _state;
             internal set
             {
                 if (value != _state)
@@ -71,6 +61,30 @@ namespace SkunkLab.Channels.Udp
 
                 _state = value;
             }
+        }
+
+        public override string TypeId => "UDP";
+
+        public override async Task AddMessageAsync(byte[] message)
+        {
+            //Raise the event received from the Protocol Adapter on the gateway
+            OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, message));
+            await Task.CompletedTask;
+        }
+
+        public override async Task CloseAsync()
+        {
+            //nothing to do here because closing the client is closing the listener to all channels
+            //connected to the listener.
+            State = ChannelState.Closed;
+            OnClose?.Invoke(this, new ChannelCloseEventArgs(Id)); //listener is closing
+            await Task.CompletedTask;
+        }
+
+        public override void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
         }
 
         public override async Task OpenAsync()
@@ -89,49 +103,14 @@ namespace SkunkLab.Channels.Udp
             }
 
             await Task.CompletedTask;
-
         }
 
         public override async Task ReceiveAsync()
         {
-
             //nothing implemented here because the listener will call AddMessageAsync and raise OnReceive
             //We do bind the remote endpoint to call SendAsync to the connected UDP client.
 
             await Task.CompletedTask;
-
-        }
-
-        public override async Task AddMessageAsync(byte[] message)
-        {
-            //Raise the event received from the Protocol Adapter on the gateway
-            OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, message));
-            await Task.CompletedTask;
-        }
-
-        public override async Task CloseAsync()
-        {
-            //nothing to do here because closing the client is closing the listener to all channels 
-            //connected to the listener.
-            State = ChannelState.Closed;
-            OnClose?.Invoke(this, new ChannelCloseEventArgs(Id)); //listener is closing
-            await Task.CompletedTask;
-        }
-
-        protected void Disposing(bool dispose)
-        {
-            if (dispose & !disposedValue)
-            {
-                //client.Close(); cannot close client because is universal listener.
-                //put need this because of  IChannel interface
-                disposedValue = true;
-            }
-        }
-
-        public override void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
         }
 
         public override async Task SendAsync(byte[] message)
@@ -144,6 +123,16 @@ namespace SkunkLab.Channels.Udp
             {
                 Trace.TraceError("UDP server channel {0} send error {1}", Id, ex.Message);
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
+            }
+        }
+
+        protected void Disposing(bool dispose)
+        {
+            if (dispose & !disposedValue)
+            {
+                //client.Close(); cannot close client because is universal listener.
+                //put need this because of  IChannel interface
+                disposedValue = true;
             }
         }
     }

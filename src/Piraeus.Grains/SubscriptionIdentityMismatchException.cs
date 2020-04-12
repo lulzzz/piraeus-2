@@ -8,25 +8,21 @@ namespace Piraeus.Grains
     {
         public SubscriptionIdentityMismatchException()
         {
-
         }
 
         public SubscriptionIdentityMismatchException(string message)
             : base(message)
         {
-
         }
 
         public SubscriptionIdentityMismatchException(string message, Exception innerException)
             : base(message, innerException)
         {
-
         }
 
         protected SubscriptionIdentityMismatchException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-
         }
     }
 }

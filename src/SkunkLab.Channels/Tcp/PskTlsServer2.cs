@@ -15,10 +15,7 @@ namespace SkunkLab.Channels.Tcp
 
         public bool IsHandshakeComplete { get; set; }
 
-        protected override ProtocolVersion MaximumVersion
-        {
-            get { return ProtocolVersion.TLSv12; }
-        }
+        protected override ProtocolVersion MaximumVersion => ProtocolVersion.TLSv12;
 
         public override void NotifyAlertRaised(byte alertLevel, byte alertDescription, string message, Exception cause)
         {
@@ -26,15 +23,10 @@ namespace SkunkLab.Channels.Tcp
             base.NotifyAlertRaised(alertLevel, alertDescription, message, cause);
         }
 
-
         public override void NotifyHandshakeComplete()
         {
             IsHandshakeComplete = true;
             base.NotifyHandshakeComplete();
         }
-
-
-
-
     }
 }

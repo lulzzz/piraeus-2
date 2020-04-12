@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     public enum MqttMessageType
     {
@@ -17,6 +16,5 @@ namespace SkunkLab.Protocols.Mqtt
         PINGREQ = 12,
         PINGRESP = 13,
         DISCONNECT = 14
-
     }
 }

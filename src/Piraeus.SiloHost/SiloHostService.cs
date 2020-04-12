@@ -80,7 +80,6 @@ namespace Piraeus.SiloHost
                     options.ServiceId = orleansConfig.ServiceId;
                 });
 
-
             if (string.IsNullOrEmpty(orleansConfig.DataConnectionString))
             {
                 silo.AddMemoryGrainStorage("store");
@@ -104,17 +103,24 @@ namespace Piraeus.SiloHost
             silo.ConfigureLogging(builder =>
             {
                 if (loggers.HasFlag(LoggerType.Console))
+                {
                     builder.AddConsole();
+                }
+
                 if (loggers.HasFlag(LoggerType.Debug))
+                {
                     builder.AddDebug();
+                }
+
                 builder.SetMinimumLevel(orleansLogLevel);
             });
 
             if (!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+            {
                 silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.InstrumentationKey);
+            }
 
             return silo.Build();
-
         }
     }
 }

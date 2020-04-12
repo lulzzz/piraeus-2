@@ -14,20 +14,18 @@ namespace Orleans.Clustering.Redis
 {
     public class RedisMembershipTable : IMembershipTable
     {
+        public static readonly TableVersion _tableVersion = new TableVersion(0, "0");
+        private readonly string clusterId;
         private readonly ConnectionMultiplexer connection;
         private readonly IDatabase database;
-        private readonly BinarySerializer serializer;
-        private readonly string clusterId;
-        public static readonly TableVersion _tableVersion = new TableVersion(0, "0");
         private readonly ILogger<RedisMembershipTable> logger;
+        private readonly BinarySerializer serializer;
 
         public RedisMembershipTable(ILogger<RedisMembershipTable> logger, IOptions<RedisClusteringOptions> membershipTableOptions, IOptions<ClusterOptions> clusterOptions)
         {
-
             this.logger = logger;
-            ConfigurationOptions configOptions = null;
-
-            if (!String.IsNullOrEmpty(membershipTableOptions.Value.ConnectionString))
+            ConfigurationOptions configOptions;
+            if (!string.IsNullOrEmpty(membershipTableOptions.Value.ConnectionString))
             {
                 configOptions = ConfigurationOptions.Parse(membershipTableOptions.Value.ConnectionString);
             }
@@ -65,6 +63,13 @@ namespace Orleans.Clustering.Redis
 
             logger?.LogInformation("It worked !!! :-)");
         }
+
+        public async Task CleanupDefunctSiloEntries(DateTimeOffset beforeDate)
+        {
+            await Task.CompletedTask;
+            //throw new NotImplementedException();
+        }
+
         public async Task DeleteMembershipTableEntries(string clusterId)
         {
             try
@@ -85,10 +90,9 @@ namespace Orleans.Clustering.Redis
 
         public async Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
         {
-            bool ret = false;
-
             try
             {
+                bool ret;
                 while (true)
                 {
                     long ticks = DateTime.UtcNow.Ticks;
@@ -106,8 +110,10 @@ namespace Orleans.Clustering.Redis
                     }
                     else
                     {
-                        collection = new RedisMembershipCollection();
-                        collection.Add(rentry);
+                        collection = new RedisMembershipCollection
+                        {
+                            rentry
+                        };
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");
@@ -133,10 +139,9 @@ namespace Orleans.Clustering.Redis
         public async Task<MembershipTableData> ReadAll()
         {
             logger?.LogInformation("It worked !!! :-)");
-            MembershipTableData data = null;
-
             try
             {
+                MembershipTableData data;
                 while (true)
                 {
                     long ticks = DateTime.UtcNow.Ticks;
@@ -176,10 +181,9 @@ namespace Orleans.Clustering.Redis
 
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            MembershipTableData data = null;
-
             try
             {
+                MembershipTableData data;
                 while (true)
                 {
                     long ticks = DateTime.UtcNow.Ticks;
@@ -238,8 +242,6 @@ namespace Orleans.Clustering.Redis
                 logger?.LogError(ex, "Redis membership table key '{0}' failed update i-am-alive.", clusterId);
                 throw ex;
             }
-
-
         }
 
         public async Task<bool> UpdateRow(MembershipEntry entry, string etag, TableVersion tableVersion)
@@ -257,7 +259,6 @@ namespace Orleans.Clustering.Redis
                     {
                         etag = "0";
                     }
-
 
                     var rentry = RedisMembershipEntry.Create(clusterId, entry, etag);
                     var val = await database.StringGetAsync(clusterId);
@@ -310,28 +311,19 @@ namespace Orleans.Clustering.Redis
             return null;
         }
 
-
         private IPAddress GetIPAddress(EndPoint endpoint)
         {
-            DnsEndPoint dnsEndpoint = endpoint as DnsEndPoint;
-            if (dnsEndpoint != null)
+            if (endpoint is DnsEndPoint dnsEndpoint)
             {
                 return GetIPAddress(dnsEndpoint.Host);
             }
 
-            IPEndPoint ipEndpoint = endpoint as IPEndPoint;
-            if (ipEndpoint != null)
+            if (endpoint is IPEndPoint ipEndpoint)
             {
                 return ipEndpoint.Address;
             }
 
             return null;
-        }
-
-        public async Task CleanupDefunctSiloEntries(DateTimeOffset beforeDate)
-        {
-            await Task.CompletedTask;
-            //throw new NotImplementedException();
         }
     }
 }

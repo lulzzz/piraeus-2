@@ -6,18 +6,27 @@ namespace Piraeus.Grains.Notifications
 {
     public class ConcurrentQueueManager
     {
-        private ConcurrentQueue<EventMessage> queue;
+        private readonly ConcurrentQueue<EventMessage> queue;
 
         public ConcurrentQueueManager()
         {
             queue = new ConcurrentQueue<EventMessage>();
         }
 
-        public bool IsEmpty
-        {
-            get { return queue.IsEmpty; }
-        }
+        public bool IsEmpty => queue.IsEmpty;
 
+        public Task<EventMessage> DequeueAsync()
+        {
+            TaskCompletionSource<EventMessage> tcs = new TaskCompletionSource<EventMessage>();
+            if (!queue.IsEmpty)
+            {
+                bool result = queue.TryDequeue(out EventMessage message);
+
+                tcs.SetResult(result ? message : null);
+            }
+
+            return tcs.Task;
+        }
 
         public Task EnqueueAsync(EventMessage message)
         {
@@ -26,21 +35,5 @@ namespace Piraeus.Grains.Notifications
             tcs.SetResult(null);
             return tcs.Task;
         }
-
-        public Task<EventMessage> DequeueAsync()
-        {
-            TaskCompletionSource<EventMessage> tcs = new TaskCompletionSource<EventMessage>();
-            if (!queue.IsEmpty)
-            {
-                EventMessage message = null;
-                bool result = queue.TryDequeue(out message);
-
-                tcs.SetResult(result ? message : null);
-            }
-
-            return tcs.Task;
-        }
-
-
     }
 }

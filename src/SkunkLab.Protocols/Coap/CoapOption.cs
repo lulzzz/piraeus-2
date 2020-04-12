@@ -1,14 +1,13 @@
-﻿
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
 
     public class CoapOption
     {
+        private OptionType _type;
+
         public CoapOption()
         {
-
         }
 
         public CoapOption(OptionType type, object value)
@@ -17,11 +16,15 @@ namespace SkunkLab.Protocols.Coap
             this.Value = value;
         }
 
-        private OptionType _type;
+        public bool CacheKey { get; internal set; }
+
+        public bool Critial { get; internal set; }
+
+        public bool Safe { get; internal set; }
 
         public OptionType Type
         {
-            get { return this._type; }
+            get => this._type;
             set
             {
                 byte t = (byte)value;
@@ -31,6 +34,8 @@ namespace SkunkLab.Protocols.Coap
                 this._type = value;
             }
         }
+
+        public object Value { get; set; }
 
         public System.Type ValueType
         {
@@ -56,17 +61,31 @@ namespace SkunkLab.Protocols.Coap
             }
         }
 
-        public object Value { get; set; }
+        public static CoapOption Decode(byte[] buffer, int index, int previousDelta, out int newIndex)
+        {
+            int deltaPart = buffer[index] >> 0x04;
+            int deltaExtendedLength = deltaPart <= 12 ? 0 : deltaPart == 13 ? 1 : 2;
+            int valuePart = buffer[index] & 0x0F;
+            int valueExtendedLength = valuePart <= 12 ? 0 : valuePart == 13 ? 1 : 2;
 
-        public bool Critial { get; internal set; }
+            index++;
 
-        public bool Safe { get; internal set; }
+            int optionTypeValue = deltaExtendedLength == 0 ? deltaPart + previousDelta : deltaExtendedLength == 1 ? (deltaPart + previousDelta) + buffer[index++] : (deltaPart + 255 + previousDelta) + (buffer[index++] | buffer[index++]);
+            OptionType option = (OptionType)optionTypeValue;
 
-        public bool CacheKey { get; internal set; }
+            int valueLength = valueExtendedLength == 0 ? valuePart : valueExtendedLength == 1 ? valuePart + buffer[index++] : (valuePart + 255) + (buffer[index++] | buffer[index++]);
+            byte[] encodedValue = new byte[valueLength];
+            Buffer.BlockCopy(buffer, index, encodedValue, 0, valueLength);
+
+            newIndex = index + valueLength;
+
+            object value = option.DecodeOptionValue(encodedValue);
+            return new CoapOption(option, value);
+        }
 
         public byte[] Encode(int previousDelta)
         {
-            int delta = (int)this.Type - previousDelta;  //the delta 
+            int delta = (int)this.Type - previousDelta;  //the delta
             byte[] encodedValue = this.Type.EncodeOptionValue(this.Value); //the encoded option value
             int valueLength = encodedValue.Length; //total length of the option value
 
@@ -109,29 +128,6 @@ namespace SkunkLab.Protocols.Coap
             Buffer.BlockCopy(encodedValue, 0, buffer, index, encodedValue.Length);
 
             return buffer;
-        }
-
-        public static CoapOption Decode(byte[] buffer, int index, int previousDelta, out int newIndex)
-        {
-            int deltaPart = buffer[index] >> 0x04;
-            int deltaExtendedLength = deltaPart <= 12 ? 0 : deltaPart == 13 ? 1 : 2;
-            int valuePart = buffer[index] & 0x0F;
-            int valueExtendedLength = valuePart <= 12 ? 0 : valuePart == 13 ? 1 : 2;
-
-            index++;
-
-            int optionTypeValue = deltaExtendedLength == 0 ? deltaPart + previousDelta : deltaExtendedLength == 1 ? (deltaPart + previousDelta) + (int)buffer[index++] : (deltaPart + 255 + previousDelta) + (int)(buffer[index++] | buffer[index++]);
-            OptionType option = (OptionType)optionTypeValue;
-
-            int valueLength = valueExtendedLength == 0 ? valuePart : valueExtendedLength == 1 ? valuePart + (int)buffer[index++] : (valuePart + 255) + (int)(buffer[index++] | buffer[index++]);
-            byte[] encodedValue = new byte[valueLength];
-            Buffer.BlockCopy(buffer, index, encodedValue, 0, valueLength);
-
-            newIndex = index + valueLength;
-
-            object value = option.DecodeOptionValue(encodedValue);
-            return new CoapOption(option, value);
-
         }
     }
 }

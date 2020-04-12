@@ -19,7 +19,6 @@ namespace SkunkLab.Channels
 
         #region TCP Server Channels
 
-
         /// <summary>
         /// Creates TCP server channel
         /// </summary>
@@ -57,9 +56,10 @@ namespace SkunkLab.Channels
             return TcpChannel.Create(usePrefixLength, client, pskManager, blockSize, maxBufferSize, token);
         }
 
-        #endregion
+        #endregion TCP Server Channels
 
         #region TCP Client Channels
+
         /// <summary>
         /// Creates TCP client channel
         /// </summary>
@@ -95,8 +95,6 @@ namespace SkunkLab.Channels
         {
             return TcpChannel.Create(usePrefixLength, remoteEndpoint, localEP, blockSize, maxBufferSize, token);
         }
-
-
 
         /// <summary>
         /// Creates TCP client channel
@@ -170,7 +168,6 @@ namespace SkunkLab.Channels
             return TcpChannel.Create(usePrefixLength, address, port, localEP, certificate, blockSize, maxBufferSize, token);
         }
 
-
         /// <summary>
         /// Creates TCP client channel
         /// </summary>
@@ -205,7 +202,6 @@ namespace SkunkLab.Channels
         {
             return TcpChannel.Create(usePrefixLength, address, port, pskIdentity, psk, blockSize, maxBufferSize, token);
         }
-
 
         /// <summary>
         /// Creates TCP client channel
@@ -275,14 +271,9 @@ namespace SkunkLab.Channels
             return TcpChannel.Create(usePrefixLength, remoteEP, pskIdentity, psk, blockSize, maxBufferSize, token);
         }
 
+        #endregion TCP Client Channels
 
-
-
-
-
-
-        #endregion
-        #endregion
+        #endregion TCP Channels
 
         #region HTTP Channels
 
@@ -324,10 +315,9 @@ namespace SkunkLab.Channels
             return HttpChannel.Create(endpoint, resourceUriString, contentType, securityToken);
         }
 
-        #endregion
+        #endregion HTTP Server Channels
 
         #region HTTP Client Channels
-
 
         /// <summary>
         /// Creates HTTP send-only channel
@@ -360,7 +350,6 @@ namespace SkunkLab.Channels
         /// <param name="token"></param>
         /// <returns></returns>
 
-
         public static IChannel Create(string endpoint, string securityToken, IEnumerable<Observer> observers, CancellationToken token = default(CancellationToken))
         {
             return HttpChannel.Create(endpoint, securityToken, observers, token);
@@ -379,9 +368,9 @@ namespace SkunkLab.Channels
             return HttpChannel.Create(endpoint, certificate, observers, token);
         }
 
-        #endregion
+        #endregion HTTP Client Channels
 
-        #endregion
+        #endregion HTTP Channels
 
         #region Web Socket Channels
 
@@ -409,7 +398,7 @@ namespace SkunkLab.Channels
         //    return WebSocketChannel.Create(request, config, token);
         //}
 
-        #endregion
+        #endregion Web Socket Server Channels
 
         #region Web Socket Client Channels
 
@@ -452,7 +441,6 @@ namespace SkunkLab.Channels
             return WebSocketChannel.Create(endpointUri, securityToken, subProtocol, config, token);
         }
 
-
         /// <summary>
         /// Creates Web socket client channel
         /// </summary>
@@ -466,8 +454,10 @@ namespace SkunkLab.Channels
         {
             return WebSocketChannel.Create(endpointUri, certificate, subProtocol, config, token);
         }
-        #endregion
-        #endregion
+
+        #endregion Web Socket Client Channels
+
+        #endregion Web Socket Channels
 
         #region UDP Channels
 
@@ -487,7 +477,7 @@ namespace SkunkLab.Channels
             return UdpChannel.Create(client, remoteEP, token);
         }
 
-        #endregion
+        #endregion UDP Server Channels
 
         #region UDP Client Channels
 
@@ -517,9 +507,8 @@ namespace SkunkLab.Channels
             return UdpChannel.Create(localPort, remoteEP, token);
         }
 
-        #endregion
+        #endregion UDP Client Channels
 
-        #endregion
-
+        #endregion UDP Channels
     }
 }

@@ -18,8 +18,7 @@ namespace Piraeus.Adapters
 {
     public class ProtocolAdapterFactory
     {
-
-        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, HttpContext context, WebSocket socket, ILog logger = null, IAuthenticator authenticator = null, CancellationToken token = default(CancellationToken))
+        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, HttpContext context, WebSocket socket, ILog logger = null, IAuthenticator authenticator = null, CancellationToken token = default)
         {
             WebSocketConfig webSocketConfig = GetWebSocketConfig(config);
             IChannel channel = ChannelFactory.Create(webSocketConfig, context, socket, token);
@@ -36,7 +35,6 @@ namespace Piraeus.Adapters
             {
                 throw new InvalidOperationException("invalid web socket subprotocol");
             }
-
         }
 
         /// <summary>
@@ -47,10 +45,9 @@ namespace Piraeus.Adapters
         /// <param name="token"></param>
         /// <param name="authenticator"></param>
         /// <returns></returns>
-        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, HttpContext context, ILog logger = null, IAuthenticator authenticator = null, CancellationToken token = default(CancellationToken))
+        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, HttpContext context, ILog logger = null, IAuthenticator authenticator = null, CancellationToken token = default)
         {
-            IChannel channel = null;
-
+            IChannel channel;
             if (context.WebSockets.IsWebSocketRequest)
             {
                 WebSocketConfig webSocketConfig = new WebSocketConfig(config.MaxBufferSize, config.BlockSize, config.BlockSize);
@@ -82,7 +79,6 @@ namespace Piraeus.Adapters
                 channel = ChannelFactory.Create(context);
                 return new RestProtocolAdapter(config, graphManager, channel, context, logger);
             }
-
         }
 
         /// <summary>
@@ -91,9 +87,8 @@ namespace Piraeus.Adapters
         /// <param name="client">TCP client initialized by TCP Listener on server.</param>
         /// <param name="token">Cancellation token</param>
         /// <returns></returns>
-        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, TcpClient client, ILog logger = null, CancellationToken token = default(CancellationToken))
+        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, TcpClient client, ILog logger = null, CancellationToken token = default)
         {
-            IChannel channel = null;
             TlsPskIdentityManager pskManager = null;
 
             if (!string.IsNullOrEmpty(config.PskStorageType))
@@ -112,9 +107,9 @@ namespace Piraeus.Adapters
                 {
                     pskManager = TlsPskIdentityManagerFactory.Create(config.PskIdentities, config.PskKeys);
                 }
-
             }
 
+            IChannel channel;
             if (pskManager != null)
             {
                 channel = ChannelFactory.Create(config.UsePrefixLength, client, pskManager, config.BlockSize, config.MaxBufferSize, token);
@@ -140,10 +135,9 @@ namespace Piraeus.Adapters
             {
                 throw new ProtocolAdapterPortException("TcpClient port does not map to a supported protocol.");
             }
-
         }
 
-        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, UdpClient client, IPEndPoint remoteEP, ILog logger = null, CancellationToken token = default(CancellationToken))
+        public static ProtocolAdapter Create(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, UdpClient client, IPEndPoint remoteEP, ILog logger = null, CancellationToken token = default)
         {
             IPEndPoint endpoint = client.Client.LocalEndPoint as IPEndPoint;
 
@@ -160,10 +154,10 @@ namespace Piraeus.Adapters
             {
                 throw new ProtocolAdapterPortException("UDP port does not map to a supported protocol.");
             }
-
         }
 
         #region configurations
+
         private static WebSocketConfig GetWebSocketConfig(PiraeusConfig config)
         {
             return new WebSocketConfig(config.MaxBufferSize,
@@ -189,6 +183,6 @@ namespace Piraeus.Adapters
         //    return mqttConfig;
         //}
 
-        #endregion
+        #endregion configurations
     }
 }

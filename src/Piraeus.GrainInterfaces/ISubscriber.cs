@@ -8,10 +8,10 @@ namespace Piraeus.GrainInterfaces
     {
         Task AddSubscriptionAsync(string subscriptionUriString);
 
-        Task RemoveSubscriptionAsync(string subscriptionUriString);
+        Task ClearAsync();
 
         Task<IEnumerable<string>> GetSubscriptionsAsync();
 
-        Task ClearAsync();
+        Task RemoveSubscriptionAsync(string subscriptionUriString);
     }
 }

@@ -9,6 +9,5 @@ namespace Piraeus.Core.Messaging
         COAP,
         MQTT,
         WSN
-
     }
 }

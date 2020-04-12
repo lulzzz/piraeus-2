@@ -13,7 +13,11 @@ namespace SkunkLab.Storage
 {
     public class TableStorage
     {
-        private HashSet<string> tableNames;
+        private static SkunkLabBufferManager bufferManager;
+        private static TableStorage instance;
+        private readonly CloudTableClient client;
+        private readonly HashSet<string> tableNames;
+
         protected TableStorage(string connectionString)
         {
             tableNames = new HashSet<string>();
@@ -30,8 +34,6 @@ namespace SkunkLab.Storage
                 client.BufferManager = bufferManager;
             }
         }
-
-        private static SkunkLabBufferManager bufferManager;
 
         public static TableStorage CreateSingleton(string connectionString)
         {
@@ -62,10 +64,6 @@ namespace SkunkLab.Storage
             return new TableStorage(connectionString);
         }
 
-
-        private static TableStorage instance;
-        private CloudTableClient client;
-
         #region Write Table
 
         public async Task WriteAsync(string tableName, ITableEntity entity)
@@ -90,9 +88,9 @@ namespace SkunkLab.Storage
             }
         }
 
-        #endregion
+        #endregion Write Table
 
-        #region Read Table       
+        #region Read Table
 
         public async Task<List<T>> ReadAsync<T>(string tableName) where T : ITableEntity, new()
         {
@@ -166,10 +164,6 @@ namespace SkunkLab.Storage
             }
         }
 
-        #endregion
-
-
-
-
+        #endregion Read Table
     }
 }

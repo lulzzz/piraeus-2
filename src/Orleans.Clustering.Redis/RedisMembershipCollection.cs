@@ -9,23 +9,23 @@ namespace Orleans.Clustering.Redis
     [Serializable]
     public class RedisMembershipCollection : IList<RedisMembershipEntry>
     {
-        private List<RedisMembershipEntry> list;
         public static readonly TableVersion _tableVersion = new TableVersion(0, "0");
+        private readonly List<RedisMembershipEntry> list;
 
         public RedisMembershipCollection()
         {
             list = new List<RedisMembershipEntry>();
         }
 
-        public RedisMembershipEntry this[int index]
-        {
-            get { return list[index]; }
-            set { list[index] = value; }
-        }
-
         public int Count => list.Count();
 
         public bool IsReadOnly => false;
+
+        public RedisMembershipEntry this[int index]
+        {
+            get => list[index];
+            set => list[index] = value;
+        }
 
         public void Add(RedisMembershipEntry item)
         {
@@ -55,6 +55,17 @@ namespace Orleans.Clustering.Redis
             return list.GetEnumerator();
         }
 
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return list.GetEnumerator();
+        }
+
+        public bool HasEntry(RedisMembershipEntry entry)
+        {
+            var items = list.Where((x) => x.DeploymentId == entry.DeploymentId && x.Address.ToParsableString() == entry.Address.ToParsableString());
+            return items.Count() > 0;
+        }
+
         public int IndexOf(RedisMembershipEntry item)
         {
             return list.IndexOf(item);
@@ -75,23 +86,10 @@ namespace Orleans.Clustering.Redis
             list.RemoveAt(index);
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return list.GetEnumerator();
-        }
-
-
-        public bool HasEntry(RedisMembershipEntry entry)
-        {
-            var items = list.Where((x) => x.DeploymentId == entry.DeploymentId && x.Address.ToParsableString() == entry.Address.ToParsableString());
-            return items.Count() > 0;
-        }
-
         public MembershipTableData ToMembershipTableData()
         {
             try
             {
-
                 var data = list.ToArray().Where((x) => x != null)
                     .Select(x => x.ToMembershipEntryTuple())
                     .ToList();
@@ -128,7 +126,6 @@ namespace Orleans.Clustering.Redis
             return ret;
         }
 
-
         //public Tuple<MembershipEntry, string> UpdateIAmAlive(string clusterId, SiloAddress address, DateTime iAmAlivetime)
         //{
         //    try
@@ -144,7 +141,6 @@ namespace Orleans.Clustering.Redis
         //        //var items = data.TakeWhile((x) => x.Item1.SiloAddress.ToParsableString() == address.ToParsableString()).ToList();
         //        if (items == null || items.Count != 1)
         //        {
-
         //            return null;
         //        }
         //        else
@@ -159,6 +155,5 @@ namespace Orleans.Clustering.Redis
         //    }
 
         //}
-
     }
 }

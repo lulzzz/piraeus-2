@@ -8,7 +8,6 @@ namespace SkunkLab.Channels
         {
             ChannelId = channelId;
             MessageId = messageId;
-
         }
 
         public string ChannelId { get; internal set; }

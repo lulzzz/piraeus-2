@@ -14,8 +14,20 @@ namespace Piraeus.Grains.Notifications
 {
     public class ServiceBusTopicSink : EventSink
     {
+        private readonly IAuditor auditor;
+
+        private TopicClient client;
+
+        private readonly string connectionString;
+
+        private readonly string keyName;
+
+        private readonly string topic;
+
+        private readonly Uri uri;
+
         public ServiceBusTopicSink(SubscriptionMetadata metadata)
-            : base(metadata)
+                                                            : base(metadata)
         {
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);
@@ -23,16 +35,8 @@ namespace Piraeus.Grains.Notifications
             keyName = nvc["keyname"];
             topic = nvc["topic"];
             string symmetricKey = metadata.SymmetricKey;
-            connectionString = String.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName, symmetricKey);
+            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName, symmetricKey);
         }
-
-        private string keyName;
-        private string topic;
-        private string connectionString;
-        private TopicClient client;
-        private IAuditor auditor;
-        private Uri uri;
-
 
         public override async Task SendAsync(EventMessage message)
         {
@@ -53,16 +57,18 @@ namespace Piraeus.Grains.Notifications
                     client = new TopicClient(connectionString, topic);
                 }
 
-                Message brokerMessage = new Message(payload);
-                brokerMessage.ContentType = message.ContentType;
-                brokerMessage.MessageId = message.MessageId;
+                Message brokerMessage = new Message(payload)
+                {
+                    ContentType = message.ContentType,
+                    MessageId = message.MessageId
+                };
                 await client.SendAsync(brokerMessage);
-                record = new MessageAuditRecord(message.MessageId, String.Format("sb://{0}/{1}", uri.Authority, topic), "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic), "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
             catch (Exception ex)
             {
                 Trace.TraceError("Service bus failed to send to topic with error {0}", ex.Message);
-                record = new MessageAuditRecord(message.MessageId, String.Format("sb://{0}/{1}", uri.Authority, topic), "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic), "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
@@ -80,20 +86,20 @@ namespace Piraeus.Grains.Notifications
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
+
                 case ProtocolType.MQTT:
                     MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                     return mqtt.Payload;
+
                 case ProtocolType.REST:
                     return message.Message;
+
                 case ProtocolType.WSN:
                     return message.Message;
+
                 default:
                     return null;
             }
         }
-
-
-
-
     }
 }

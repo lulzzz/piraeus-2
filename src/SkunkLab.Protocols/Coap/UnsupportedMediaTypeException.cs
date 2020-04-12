@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Runtime.Serialization;

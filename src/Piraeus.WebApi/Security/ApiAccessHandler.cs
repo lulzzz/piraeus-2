@@ -8,7 +8,6 @@ namespace Piraeus.WebApi.Security
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ApiAccessRequirement requirement)
         {
-
             ClaimsPrincipal prin = context.User;
             ClaimsIdentity identity = new ClaimsIdentity(prin.Identity);
 

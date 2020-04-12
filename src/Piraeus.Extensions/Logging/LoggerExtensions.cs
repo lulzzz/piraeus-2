@@ -17,7 +17,6 @@ namespace Piraeus.Extensions.Logging
 
             LogLevel logLevel = Enum.Parse<LogLevel>(config.LogLevel, true);
 
-
             if (loggerTypes.HasFlag(LoggerType.Console))
             {
                 builder.AddConsole();
@@ -27,8 +26,6 @@ namespace Piraeus.Extensions.Logging
             {
                 builder.AddDebug();
             }
-
-
 
             builder.SetMinimumLevel(logLevel);
 

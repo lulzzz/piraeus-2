@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Mqtt
+﻿namespace SkunkLab.Protocols.Mqtt
 {
     using System;
 
@@ -7,43 +6,36 @@ namespace SkunkLab.Protocols.Mqtt
     {
         public ConnectAckMessage()
         {
-
         }
+
         public ConnectAckMessage(bool sessionPresent, ConnectAckCode returnCode)
         {
             this.SessionPresent = sessionPresent;
             this.ReturnCode = returnCode;
         }
 
-        public override bool HasAck
-        {
-            get { return false; }
-        }
-
-        public bool SessionPresent { get; set; }
+        public override bool HasAck => false;
 
         public ConnectAckCode ReturnCode { get; set; }
+        public bool SessionPresent { get; set; }
 
         public override byte[] Encode()
         {
             int index = 0;
             byte[] buffer = new byte[4];
 
-            buffer[index++] = (byte)((0x02 << Constants.Header.MessageTypeOffset) |
-                   (byte)(0x00) |
-                   (byte)(0x00) |
-                   (byte)(0x00));
+            buffer[index++] = (0x02 << Constants.Header.MessageTypeOffset) |
+                   0x00 |
+                   0x00 |
+                   0x00;
 
-
-
-            buffer[index++] = (byte)0x02; //2 remaining bytes
+            buffer[index++] = 0x02; //2 remaining bytes
 
             //byte[] remainingLengthBytes = base.EncodeRemainingLength(2);
             buffer[index++] = this.SessionPresent ? (byte)0x01 : (byte)0x00;
             buffer[index++] = (byte)(int)this.ReturnCode;
 
             //Buffer.BlockCopy(remainingLengthBytes, 0, buffer, 2, remainingLengthBytes.Length);
-
 
             return buffer;
         }
@@ -85,7 +77,6 @@ namespace SkunkLab.Protocols.Mqtt
             byte code = buffer[index++];
 
             this.ReturnCode = (ConnectAckCode)code;
-
 
             return connackMessage;
         }

@@ -4,6 +4,19 @@ namespace SkunkLab.Protocols.Coap.Handlers
 {
     public abstract class CoapMessageHandler
     {
+        protected CoapMessageHandler(CoapSession session, CoapMessage message, ICoapRequestDispatch dispatcher = null)
+        {
+            Session = session;
+            Message = message;
+            Dispatcher = dispatcher;
+        }
+
+        protected ICoapRequestDispatch Dispatcher { get; set; }
+
+        protected CoapMessage Message { get; set; }
+
+        protected CoapSession Session { get; set; }
+
         public static CoapMessageHandler Create(CoapSession session, CoapMessage message, ICoapRequestDispatch dispatcher = null)
         {
             if (message.Code == CodeType.EmptyMessage && message.MessageType == CoapMessageType.Confirmable)
@@ -36,21 +49,6 @@ namespace SkunkLab.Protocols.Coap.Handlers
             }
         }
 
-        protected CoapMessageHandler(CoapSession session, CoapMessage message, ICoapRequestDispatch dispatcher = null)
-        {
-            Session = session;
-            Message = message;
-            Dispatcher = dispatcher;
-        }
-
-        protected ICoapRequestDispatch Dispatcher { get; set; }
-
-        protected CoapSession Session { get; set; }
-
-        protected CoapMessage Message { get; set; }
-
         public abstract Task<CoapMessage> ProcessAsync();
-
-
     }
 }

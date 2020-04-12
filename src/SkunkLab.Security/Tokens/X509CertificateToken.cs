@@ -1,5 +1,4 @@
-﻿
-//namespace SkunkLab.Security.Tokens
+﻿//namespace SkunkLab.Security.Tokens
 //{
 //    using System;
 //    using System.Collections.ObjectModel;
@@ -10,13 +9,13 @@
 //    {
 //        public X509CertificateToken(X509Certificate2 certificate)
 //        {
-//            this.certificate = certificate;   
+//            this.certificate = certificate;
 //        }
 
 //        private X509Certificate2 certificate;
 
 //        public void SetSecurityToken(HttpWebRequest request)
-//        {            
+//        {
 //            request.ClientCertificates.Add(this.certificate);
 //        }
 

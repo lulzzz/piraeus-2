@@ -1,26 +1,24 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Orleans.Clustering.Redis;
-using Orleans.Configuration;
 using Orleans.Hosting;
 using Piraeus.Configuration;
 using Piraeus.GrainInterfaces;
 using System;
 using System.Threading.Tasks;
 
-
 namespace Piraeus.Extensions.Orleans
 {
     public static class OrleansExtensions
     {
         #region Cluster Client
+
         public static void AddSingletonOrleansClusterClient(this IServiceCollection services, OrleansConfig config)
         {
             services.AddSingleton<IClusterClient>(serviceProvider =>
             {
                 var builder = new ClientBuilder();
-                if(!string.IsNullOrEmpty(config.InstrumentationKey))
+                if (!string.IsNullOrEmpty(config.InstrumentationKey))
                 {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
@@ -52,7 +50,7 @@ namespace Piraeus.Extensions.Orleans
                 builder.AddOrleansClusterClient(config);
                 IClusterClient client = builder.Build();
                 client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
-                if(!string.IsNullOrEmpty(config.InstrumentationKey))
+                if (!string.IsNullOrEmpty(config.InstrumentationKey))
                 {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
@@ -100,7 +98,7 @@ namespace Piraeus.Extensions.Orleans
             //        builder.UseRedisGatewayListProvider(options => options.ConnectionString = config.DataConnectionString);
             //    }
             //    else
-            //    {   
+            //    {
             //        builder.UseAzureStorageClustering(options => options.ConnectionString = config.DataConnectionString);
             //    }
             //}
@@ -154,6 +152,7 @@ namespace Piraeus.Extensions.Orleans
                 return true;
             }
         }
-#endregion
+
+        #endregion Cluster Client
     }
 }

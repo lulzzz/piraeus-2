@@ -7,8 +7,8 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
         public MqttPubRelHandler(MqttSession session, MqttMessage message, IMqttDispatch dispatcher)
             : base(session, message, dispatcher)
         {
-
         }
+
         public override async Task<MqttMessage> ProcessAsync()
         {
             Session.IncrementKeepAlive();

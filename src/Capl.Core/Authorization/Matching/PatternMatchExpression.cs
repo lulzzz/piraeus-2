@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -17,21 +17,13 @@ namespace Capl.Authorization.Matching
     /// </summary>
     public class PatternMatchExpression : MatchExpression
     {
-        public static Uri MatchUri
-        {
-            get { return new Uri(AuthorizationConstants.MatchUris.Pattern); }
-        }
-        public override Uri Uri
-        {
-            get { return new Uri(AuthorizationConstants.MatchUris.Pattern); }
-        }
+        public static Uri MatchUri => new Uri(AuthorizationConstants.MatchUris.Pattern);
+
+        public override Uri Uri => new Uri(AuthorizationConstants.MatchUris.Pattern);
 
         public override IList<Claim> MatchClaims(IEnumerable<Claim> claims, string claimType, string pattern)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             Regex regex = new Regex(pattern);
 
@@ -40,7 +32,6 @@ namespace Capl.Authorization.Matching
             {
                 return (claimType == claim.Type);
             });
-
 
             if (pattern == null)
             {

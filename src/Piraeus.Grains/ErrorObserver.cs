@@ -10,6 +10,7 @@ namespace Piraeus.Grains
         }
 
         public event EventHandler<ErrorNotificationEventArgs> OnNotify;
+
         public void NotifyError(string grainId, Exception error)
         {
             OnNotify?.Invoke(this, new ErrorNotificationEventArgs(grainId, error));

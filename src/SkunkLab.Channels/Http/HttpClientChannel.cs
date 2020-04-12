@@ -13,6 +13,31 @@ namespace SkunkLab.Channels.Http
 {
     public class HttpClientChannel : HttpChannel
     {
+        private readonly CancellationToken internalToken;
+
+        private readonly Uri requestUri;
+
+        private readonly CancellationToken token;
+
+        private readonly CancellationTokenSource tokenSource;
+
+        private ChannelState _state;
+
+        private string cacheKey;
+
+        private X509Certificate2 certificate;
+
+        private string contentType;
+
+        private bool disposed;
+
+        private IEnumerable<KeyValuePair<string, string>> indexes;
+
+        private IEnumerable<Observer> observers;
+
+        private string resourceUriString;
+
+        private string securityToken;
 
         public HttpClientChannel(string endpoint, string securityToken)
         {
@@ -38,7 +63,7 @@ namespace SkunkLab.Channels.Http
             this.cacheKey = cacheKey;
             this.indexes = indexes;
         }
-        
+
         public HttpClientChannel(string endpoint, string resourceUriString, string contentType, X509Certificate2 certificate, string cacheKey = null, List<KeyValuePair<string, string>> indexes = null)
         {
             Id = "http-" + Guid.NewGuid().ToString();
@@ -88,43 +113,31 @@ namespace SkunkLab.Channels.Http
             this.token.Register(() => this.tokenSource.Cancel());
         }
 
+        public override event EventHandler<ChannelCloseEventArgs> OnClose;
 
-        private IEnumerable<KeyValuePair<string, string>> indexes;
-        private readonly CancellationTokenSource tokenSource;
-        private IEnumerable<Observer> observers;
-        private X509Certificate2 certificate;
-        private string securityToken;
-        private string contentType;
-        private readonly Uri requestUri;
-        private string resourceUriString;
-        private readonly CancellationToken internalToken;
-        private readonly CancellationToken token;
-        private bool disposed;
-        private ChannelState _state;
-        private string cacheKey;
+        public override event EventHandler<ChannelErrorEventArgs> OnError;
 
-        public override bool RequireBlocking
-        {
-            get { return false; }
-        }
+        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
 
+        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
+
+        public override string Id { get; internal set; }
 
         public override bool IsAuthenticated { get; internal set; }
 
+        public override bool IsConnected => State == ChannelState.Open;
+
         public override bool IsEncrypted { get; internal set; }
+
         public override int Port { get; internal set; }
 
-        public override string TypeId { get { return "HTTP"; } }
+        public override bool RequireBlocking => false;
 
-        public override bool IsConnected
-        {
-            get { return State == ChannelState.Open; }
-        }
-
-        public override string Id { get; internal set; }
         public override ChannelState State
         {
-            get { return _state; }
+            get => _state;
             internal set
             {
                 if (value != _state)
@@ -136,11 +149,7 @@ namespace SkunkLab.Channels.Http
             }
         }
 
-        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
-        public override event EventHandler<ChannelCloseEventArgs> OnClose;
-        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
-        public override event EventHandler<ChannelErrorEventArgs> OnError;
-        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
+        public override string TypeId => "HTTP";
 
         public override async Task AddMessageAsync(byte[] message)
         {
@@ -162,13 +171,18 @@ namespace SkunkLab.Channels.Http
             await Task.CompletedTask;
         }
 
+        public override void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
+        }
+
         public override async Task OpenAsync()
         {
             OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
             State = ChannelState.None;
 
             await Task.CompletedTask;
-
         }
 
         public override async Task ReceiveAsync()
@@ -179,7 +193,7 @@ namespace SkunkLab.Channels.Http
                 HttpWebRequest request = GetRequest(HttpMethod.Get);
                 Port = request.RequestUri.Port;
                 IsEncrypted = request.RequestUri.Scheme == "https";
-                foreach(var item in observers)
+                foreach (var item in observers)
                 {
                     request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER, item.ResourceUri.ToString().ToLowerInvariant());
                 }
@@ -198,8 +212,8 @@ namespace SkunkLab.Channels.Http
                                 await stream.ReadAsync(buffer, 0, buffer.Length);
 
                                 string resourceHeader = response.Headers.Get(HttpChannelConstants.RESOURCE_HEADER);
-                                
-                                if(resourceHeader == null)
+
+                                if (resourceHeader == null)
                                 {
                                     continue;
                                 }
@@ -214,16 +228,18 @@ namespace SkunkLab.Channels.Http
                                     }
                                 }
 
-                                List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
-                                list.Add(new KeyValuePair<string, string>("Resource", resourceUriString));
-                                list.Add(new KeyValuePair<string, string>("Content-Type", response.ContentType));
+                                List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>
+                                {
+                                    new KeyValuePair<string, string>("Resource", resourceUriString),
+                                    new KeyValuePair<string, string>("Content-Type", response.ContentType)
+                                };
                                 OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, buffer, list));
                             }
                         }
                         else
                         {
                             //unexpected status code
-                            OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(String.Format("Unexpected status code {0}", response.StatusCode))));
+                            OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(string.Format("Unexpected status code {0}", response.StatusCode))));
                         }
 
                         State = ChannelState.Closed;
@@ -242,7 +258,6 @@ namespace SkunkLab.Channels.Http
                 }
                 catch (Exception ex)
                 {
-                    
                     Trace.TraceError("Http client channel '{0}' receive error '{1}'", Id, ex.Message);
                     State = ChannelState.Closed;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
@@ -268,12 +283,10 @@ namespace SkunkLab.Channels.Http
                 Port = request.RequestUri.Port;
                 IsEncrypted = request.RequestUri.Scheme == "https";
 
-
                 using (Stream stream = await request.GetRequestStreamAsync().WithCancellation(internalToken))
                 {
                     await stream.WriteAsync(message, 0, message.Length);
                 }
-
 
                 using (HttpWebResponse response = await request.GetResponseAsync().WithCancellation(internalToken) as HttpWebResponse)
                 {
@@ -288,11 +301,9 @@ namespace SkunkLab.Channels.Http
                     {
                         State = ChannelState.Aborted;
                         OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(
-                            String.Format("Invalid HTTP response status code {0}", response.StatusCode))));
+                            string.Format("Invalid HTTP response status code {0}", response.StatusCode))));
                     }
                 }
-
-
             }
             catch (OperationCanceledException oce)
             {
@@ -319,6 +330,26 @@ namespace SkunkLab.Channels.Http
             }
         }
 
+        protected void Disposing(bool dispose)
+        {
+            if (dispose & !disposed)
+            {
+                if (internalToken.CanBeCanceled)
+                {
+                    this.tokenSource.Cancel();
+                }
+
+                IsAuthenticated = false;
+                IsEncrypted = false;
+                State = ChannelState.Closed;
+                Port = 0;
+
+                certificate = null;
+                securityToken = null;
+                observers = null;
+                disposed = true;
+            }
+        }
 
         private HttpWebRequest GetRequest(HttpMethod method)
         {
@@ -336,7 +367,7 @@ namespace SkunkLab.Channels.Http
                 request.Method = "GET";
                 //request.ContentType = contentType;
                 request.KeepAlive = true;
-                request.Timeout = Int32.MaxValue;
+                request.Timeout = int.MaxValue;
                 //if (observers != null)
                 //{
                 //    foreach (Observer observer in observers)
@@ -369,12 +400,12 @@ namespace SkunkLab.Channels.Http
             }
             else
             {
-                throw new HttpRequestException(String.Format("Invalid request verb {0}", method.ToString()));
+                throw new HttpRequestException(string.Format("Invalid request verb {0}", method.ToString()));
             }
 
             if (!string.IsNullOrEmpty(securityToken))
             {
-                request.Headers.Add("Authorization", String.Format("Bearer {0}", securityToken));
+                request.Headers.Add("Authorization", string.Format("Bearer {0}", securityToken));
             }
 
             if (certificate != null)
@@ -383,33 +414,6 @@ namespace SkunkLab.Channels.Http
             }
 
             return request;
-        }
-
-        protected void Disposing(bool dispose)
-        {
-            if (dispose & !disposed)
-            {
-                if (internalToken.CanBeCanceled)
-                {
-                    this.tokenSource.Cancel();
-                }
-
-                IsAuthenticated = false;
-                IsEncrypted = false;
-                State = ChannelState.Closed;
-                Port = 0;
-
-                certificate = null;
-                securityToken = null;
-                observers = null;
-                disposed = true;
-            }
-        }
-
-        public override void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

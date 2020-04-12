@@ -8,13 +8,14 @@ namespace SkunkLab.Security.Authentication
 {
     public class BasicAuthenticator : IAuthenticator
     {
+        private readonly Dictionary<string, Tuple<string, string, string>> container;
+
+        private HttpContext context;
+
         public BasicAuthenticator()
         {
             container = new Dictionary<string, Tuple<string, string, string>>();
         }
-
-        private HttpContext context;
-        private Dictionary<string, Tuple<string, string, string>> container;
 
         public void Add(SecurityTokenType type, string signingKey, string issuer = null, string audience = null, HttpContext context = null)
         {
@@ -26,19 +27,8 @@ namespace SkunkLab.Security.Authentication
             }
         }
 
-        public bool Remove(SecurityTokenType type)
-        {
-            return container.Remove(type.ToString());
-        }
-
-        public void Clear()
-        {
-            container.Clear();
-        }
-
         public bool Authenticate(SecurityTokenType type, byte[] token)
         {
-
             if (token != null)
             {
                 return Authenticate(type, type == SecurityTokenType.X509 ? Convert.ToBase64String(token) : Encoding.UTF8.GetString(token));
@@ -64,6 +54,16 @@ namespace SkunkLab.Security.Authentication
             {
                 return false;
             }
+        }
+
+        public void Clear()
+        {
+            container.Clear();
+        }
+
+        public bool Remove(SecurityTokenType type)
+        {
+            return container.Remove(type.ToString());
         }
     }
 }

@@ -13,6 +13,10 @@ namespace Piraeus.WebApi.Controllers
     [ApiController]
     public class AccessControlController : ControllerBase
     {
+        private readonly GraphManager graphManager;
+
+        private readonly ILogger logger;
+
         public AccessControlController(IClusterClient clusterClient, Logger logger = null)
         {
             if (!GraphManager.IsInitialized)
@@ -27,9 +31,23 @@ namespace Piraeus.WebApi.Controllers
             this.logger = logger;
         }
 
-        private readonly GraphManager graphManager;
-        private readonly ILogger logger;
+        [HttpDelete("DeleteAccessControlPolicy")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccessControlPolicy(string policyUriString)
+        {
+            try
+            {
+                _ = policyUriString ?? throw new ArgumentNullException(nameof(policyUriString));
 
+                await graphManager.ClearAccessControlPolicyAsync(policyUriString);
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, $"Error deleting CAPL policy.");
+                return StatusCode(500, ex.Message);
+            }
+        }
 
         [HttpGet("GetAccessControlPolicy")]
         [Authorize]
@@ -38,10 +56,7 @@ namespace Piraeus.WebApi.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(policyUriString))
-                {
-                    throw new ArgumentNullException("policyUriString");
-                }
+                _ = policyUriString ?? throw new ArgumentNullException(nameof(policyUriString));
 
                 Capl.Authorization.AuthorizationPolicy policy = await graphManager.GetAccessControlPolicyAsync(policyUriString);
                 return StatusCode(200, policy);
@@ -59,10 +74,7 @@ namespace Piraeus.WebApi.Controllers
         {
             try
             {
-                if (policy == null)
-                {
-                    throw new ArgumentNullException("policy");
-                }
+                _ = policy ?? throw new ArgumentNullException(nameof(policy));
 
                 await graphManager.UpsertAcessControlPolicyAsync(policy.PolicyId.ToString(), policy);
                 return StatusCode(200);
@@ -73,27 +85,5 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        [HttpDelete("DeleteAccessControlPolicy")]
-        [Authorize]
-        public async Task<IActionResult> DeleteAccessControlPolicy(string policyUriString)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(policyUriString))
-                {
-                    throw new ArgumentNullException("policyUriString");
-                }
-                await graphManager.ClearAccessControlPolicyAsync(policyUriString);
-                return StatusCode(200);
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, $"Error deleting CAPL policy.");
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-
     }
 }

@@ -1,6 +1,4 @@
-﻿
-
-namespace Piraeus.Module
+﻿namespace Piraeus.Module
 {
     public enum TransformType
     {

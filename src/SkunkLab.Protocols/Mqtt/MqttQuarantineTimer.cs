@@ -7,10 +7,18 @@ using System.Timers;
 
 namespace SkunkLab.Protocols.Mqtt
 {
-
-
     public class MqttQuarantineTimer : IDisposable
     {
+        private readonly MqttConfig config;
+
+        private Dictionary<ushort, RetryMessageData> container;
+
+        private ushort currentId;
+
+        private bool disposed;
+
+        private readonly Timer timer;
+
         public MqttQuarantineTimer(MqttConfig config)
         {
             this.config = config;
@@ -22,30 +30,6 @@ namespace SkunkLab.Protocols.Mqtt
         }
 
         public event EventHandler<MqttMessageEventArgs> OnRetry;
-        private MqttConfig config;
-        private Dictionary<ushort, RetryMessageData> container;
-        private Timer timer;
-        private ushort currentId;
-        private bool disposed;
-
-        public ushort NewId()
-        {
-            currentId++;
-            currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
-
-            while (container.ContainsKey(currentId))
-            {
-                currentId++;
-                currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
-            }
-
-            return currentId;
-        }
-
-        public bool ContainsKey(ushort id)
-        {
-            return container.ContainsKey(id);
-        }
 
         public void Add(MqttMessage message, DirectionType direction)
         {
@@ -70,9 +54,51 @@ namespace SkunkLab.Protocols.Mqtt
             }
         }
 
+        public bool ContainsKey(ushort id)
+        {
+            return container.ContainsKey(id);
+        }
+
+        public void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public ushort NewId()
+        {
+            currentId++;
+            currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
+
+            while (container.ContainsKey(currentId))
+            {
+                currentId++;
+                currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
+            }
+
+            return currentId;
+        }
+
         public void Remove(ushort id)
         {
             container.Remove(id);
+        }
+
+        protected void Disposing(bool dispose)
+        {
+            if (dispose & !disposed)
+            {
+                disposed = true;
+
+                container.Clear();
+                container = null;
+
+                if (timer != null)
+                {
+                    timer.Stop();
+                    timer.Dispose();
+                }
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -81,12 +107,10 @@ namespace SkunkLab.Protocols.Mqtt
             {
                 List<ushort> list = new List<ushort>();
 
-
                 //IEnumerable<KeyValuePair<ushort, RetryMessageData>> items = container.Where((c) => c.Value.NextRetryTime < DateTime.UtcNow
                 //                                && c.Value.Direction == DirectionType.Out);
 
                 //KeyValuePair<ushort, RetryMessageData>[] kvps = items?.ToArray();
-
 
                 KeyValuePair<ushort, RetryMessageData>[] kvps = container.Where((c) => c.Value.NextRetryTime < DateTime.UtcNow
                                                         && c.Value.Direction == DirectionType.Out).ToArray();
@@ -118,30 +142,6 @@ namespace SkunkLab.Protocols.Mqtt
                 }
             }
             catch { }
-
-        }
-
-        public void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected void Disposing(bool dispose)
-        {
-            if (dispose & !disposed)
-            {
-                disposed = true;
-
-                container.Clear();
-                container = null;
-
-                if (timer != null)
-                {
-                    timer.Stop();
-                    timer.Dispose();
-                }
-            }
         }
     }
 }

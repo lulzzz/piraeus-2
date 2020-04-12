@@ -7,12 +7,9 @@ namespace Piraeus.Core
     {
         public Lease()
         {
-
         }
 
-        public string Key { get; set; }
-
         public TimeSpan Duration { get; set; }
-
+        public string Key { get; set; }
     }
 }

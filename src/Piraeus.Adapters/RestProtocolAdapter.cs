@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.WindowsAzure.Storage.Blob.Protocol;
-using Org.BouncyCastle.Bcpg.OpenPgp;
 using Orleans;
 using Piraeus.Auditing;
 using Piraeus.Configuration;
@@ -19,6 +17,38 @@ namespace Piraeus.Adapters
 {
     public class RestProtocolAdapter : ProtocolAdapter
     {
+        //private readonly GraphManager graphManager;
+        private readonly OrleansAdapter adapter;
+
+        private readonly IAuditFactory auditFactory;
+
+        private readonly PiraeusConfig config;
+
+        private readonly string contentType;
+
+        private readonly string identity;
+
+        private readonly List<KeyValuePair<string, string>> indexes;
+
+        private readonly ILog logger;
+
+        private readonly IAuditor messageAuditor;
+
+        private readonly MessageUri messageUri;
+
+        private readonly string method;
+
+        private readonly ProtocolType protocolType;
+
+        private readonly string resource;
+
+        private readonly IEnumerable<string> subscriptions;
+
+        private readonly IAuditor userAuditor;
+
+        private IChannel channel;
+
+        private bool disposed;
 
         public RestProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IChannel channel, HttpContext context, ILog logger = null)
         {
@@ -58,41 +88,68 @@ namespace Piraeus.Adapters
             userAuditor = auditFactory.GetAuditor(AuditType.User);
         }
 
-        private readonly PiraeusConfig config;
-        private readonly IAuditFactory auditFactory;
-        private readonly IAuditor userAuditor;
-        private readonly IAuditor messageAuditor;
-        private readonly IEnumerable<string> subscriptions;
-        private readonly List<KeyValuePair<string, string>> indexes;
-        private readonly string contentType;
-        private readonly string resource;
-        private readonly ProtocolType protocolType;
-        private readonly string identity;
-        private readonly MessageUri messageUri;
-        private readonly string method;
-        private IChannel channel;
-        private readonly ILog logger;
-        //private readonly GraphManager graphManager;
-        private readonly OrleansAdapter adapter;
-        private bool disposed;
+        public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
+
+        public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
+
+        public override event EventHandler<ChannelObserverEventArgs> OnObserve;
 
         public override IChannel Channel
         {
-            get { return channel; }
-            set { channel = value; }
+            get => channel;
+            set => channel = value;
         }
 
-        public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
-        public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
-        public override event EventHandler<ChannelObserverEventArgs> OnObserve;
+        public override void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
+        }
 
         public override void Init()
         {
             channel.OnOpen += Channel_OnOpen;
             channel.OnReceive += Channel_OnReceive;
             channel.ReceiveAsync().GetAwaiter();
-
         }
+
+        protected void Disposing(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    try
+                    {
+                        if (adapter != null)
+                        {
+                            adapter.Dispose();
+                            logger?.LogDebugAsync($"HTTP orleans adapter disposed on channel {Channel.Id}").GetAwaiter();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogErrorAsync(ex, $"REST adapter disposing orleans adapter error on channel '{Channel.Id}'.").GetAwaiter();
+                    }
+
+                    try
+                    {
+                        if (Channel != null)
+                        {
+                            string channelId = Channel.Id;
+                            Channel.Dispose();
+                            logger?.LogDebugAsync($"REST adapter channel {channelId} disposed").GetAwaiter();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogErrorAsync(ex, $"REST adapter Disposing channel on channel '{Channel.Id}'.").GetAwaiter();
+                    }
+                }
+                disposed = true;
+            }
+        }
+
         private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
         {
             logger?.LogDebugAsync("REST adapter received observed message");
@@ -101,6 +158,14 @@ namespace Piraeus.Adapters
             userAuditor?.UpdateAuditRecordAsync(record).Ignore();
             AuditRecord messageRecord = new MessageAuditRecord(e.Message.MessageId, identity, channel.TypeId, protocolType.ToString(), e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             messageAuditor?.WriteAuditRecordAsync(messageRecord);
+        }
+
+        private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
+        {
+            AuditRecord record = new UserAuditRecord(Channel.Id, identity, config.ClientIdentityNameClaimType, Channel.TypeId, $"REST-{method}", "Granted", DateTime.UtcNow);
+            userAuditor?.WriteAuditRecordAsync(record).Ignore();
+
+            logger?.LogDebugAsync("REST adapter channel is open.").GetAwaiter();
         }
 
         private void Channel_OnReceive(object sender, ChannelReceivedEventArgs e)
@@ -171,63 +236,6 @@ namespace Piraeus.Adapters
                 logger?.LogErrorAsync($"REST adapter processing error on receive - {ex.Message}");
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(channel.Id, ex));
             }
-
-
         }
-
-        private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
-        {
-            AuditRecord record = new UserAuditRecord(Channel.Id, identity, config.ClientIdentityNameClaimType, Channel.TypeId, $"REST-{method}", "Granted", DateTime.UtcNow);
-            userAuditor?.WriteAuditRecordAsync(record).Ignore();
-
-            logger?.LogDebugAsync("REST adapter channel is open.").GetAwaiter();
-        }
-
-
-        protected void Disposing(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    try
-                    {
-                        if (adapter != null)
-                        {
-                            adapter.Dispose();
-                            logger?.LogDebugAsync($"HTTP orleans adapter disposed on channel {Channel.Id}").GetAwaiter();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger?.LogErrorAsync(ex, $"REST adapter disposing orleans adapter error on channel '{Channel.Id}'.").GetAwaiter();
-                    }
-
-                    try
-                    {
-                        if (Channel != null)
-                        {
-                            string channelId = Channel.Id;
-                            Channel.Dispose();
-                            logger?.LogDebugAsync($"REST adapter channel {channelId} disposed").GetAwaiter();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger?.LogErrorAsync(ex, $"REST adapter Disposing channel on channel '{Channel.Id}'.").GetAwaiter();
-                    }
-
-                }
-                disposed = true;
-            }
-        }
-
-        public override void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
-        }
-
-
     }
 }

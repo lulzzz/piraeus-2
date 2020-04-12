@@ -6,12 +6,13 @@ namespace SkunkLab.Clients.Coap
 {
     public class CoapClientRequestRegistry
     {
+        private readonly Dictionary<string, Action<string, byte[]>> container;
+
         public CoapClientRequestRegistry()
         {
             container = new Dictionary<string, Action<string, byte[]>>();
         }
 
-        private Dictionary<string, Action<string, byte[]>> container;
         public void Add(string verb, string resourceUriString, Action<string, byte[]> action)
         {
             Uri uri = new Uri(resourceUriString);
@@ -23,11 +24,9 @@ namespace SkunkLab.Clients.Coap
             }
         }
 
-        public void Remove(string verb, string resourceUriString)
+        public void Clear()
         {
-            Uri uri = new Uri(resourceUriString);
-            string key = verb.ToUpperInvariant() + uri.ToCanonicalString(false);
-            container.Remove(key);
+            container.Clear();
         }
 
         public Action<string, byte[]> GetAction(string verb, string resourceUriString)
@@ -45,10 +44,11 @@ namespace SkunkLab.Clients.Coap
             }
         }
 
-        public void Clear()
+        public void Remove(string verb, string resourceUriString)
         {
-            container.Clear();
+            Uri uri = new Uri(resourceUriString);
+            string key = verb.ToUpperInvariant() + uri.ToCanonicalString(false);
+            container.Remove(key);
         }
-
     }
 }

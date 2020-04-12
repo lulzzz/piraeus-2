@@ -22,19 +22,16 @@
 //        public AppInsightsLogger(AppInsightsOptions configOptions)
 //            : this(null, null, configOptions)
 //        {
-
 //        }
 
 //        public AppInsightsLogger(string name, AppInsightsOptions configOptions)
 //            : this(name, null, configOptions)
 //        {
-
 //        }
 
 //        public AppInsightsLogger(Func<string, LogLevel, bool> filter, AppInsightsOptions configOptions)
 //            : this(null, filter, configOptions)
 //        {
-
 //        }
 
 //        public AppInsightsLogger(string name, Func<string, LogLevel, bool> filter, AppInsightsOptions configOptions)
@@ -46,8 +43,8 @@
 //            TelemetryConfiguration.Active.TelemetryChannel.DeveloperMode = configOptions.DeveloperMode;
 //            TelemetryConfiguration.Active.InstrumentationKey = configOptions.InstrumentationKey;
 
-//            client = new TelemetryClient();            
-//            client.InstrumentationKey = configOptions.InstrumentationKey;           
+//            client = new TelemetryClient();
+//            client.InstrumentationKey = configOptions.InstrumentationKey;
 //        }
 
 //        public IDisposable BeginScope<TState>(TState state)
@@ -98,7 +95,6 @@
 //                client.Flush();
 //            }
 //        }
-
 
 //        private static SeverityLevel GetSeverityLevel(LogLevel logLevel)
 //        {

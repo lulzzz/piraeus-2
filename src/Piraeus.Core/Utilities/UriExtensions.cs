@@ -7,8 +7,7 @@ namespace Piraeus.Core.Utilities
         public static string ToCanonicalString(this Uri uri, bool trailingWhack, bool removeLastSegment = false)
         {
             string uriString = uri.ToString().ToLowerInvariant();
-            string result = null;
-
+            string result;
             if (string.IsNullOrEmpty(uri.Query))
             {
                 result = GetBase(uriString, uri, trailingWhack);
@@ -25,24 +24,13 @@ namespace Piraeus.Core.Utilities
             else
             {
                 Uri uri2 = new Uri(result);
-                return result.Replace("/" + uri2.Segments[uri2.Segments.Length - 1], "");
+                return result.Replace("/" + uri2.Segments[^1], "");
             }
-
-
         }
-
-        private static string GetFromQuery(string uriString, Uri uri)
-        {
-            string resourceString = uriString.Replace(uri.Query, "");
-            return GetBase(resourceString, new Uri(resourceString), false);
-            //string canonicalResourceString = GetBase(resourceString, new Uri(resourceString), false);
-            //return canonicalResourceString + uri.Query;
-        }
-
 
         private static string GetBase(string uriString, Uri uri, bool trailingWhack)
         {
-            bool isTrailing = uri.Segments[uri.Segments.Length - 1] == "/";
+            bool isTrailing = uri.Segments[^1] == "/";
 
             if (trailingWhack)
             {
@@ -52,6 +40,14 @@ namespace Piraeus.Core.Utilities
             {
                 return !isTrailing ? uriString : uriString.Remove(uriString.Length - 1, 1);
             }
+        }
+
+        private static string GetFromQuery(string uriString, Uri uri)
+        {
+            string resourceString = uriString.Replace(uri.Query, "");
+            return GetBase(resourceString, new Uri(resourceString), false);
+            //string canonicalResourceString = GetBase(resourceString, new Uri(resourceString), false);
+            //return canonicalResourceString + uri.Query;
         }
     }
 }

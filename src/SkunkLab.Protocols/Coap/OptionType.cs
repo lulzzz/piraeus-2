@@ -1,5 +1,4 @@
-﻿
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     public enum OptionType
     {
@@ -21,11 +20,9 @@ namespace SkunkLab.Protocols.Coap
         Size1 = 60,         //uint
         NoResponse = 258    //uint
 
-
         //opaque = 1,4
         //empty = 5
         //string = 2,8,11,15,20,35,39
         //uint = 7,12,14,17,60
-
     }
 }

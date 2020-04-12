@@ -1,6 +1,4 @@
-﻿
-
-namespace SkunkLab.Protocols.Coap
+﻿namespace SkunkLab.Protocols.Coap
 {
     using System;
     using System.Collections.Generic;
@@ -9,21 +7,19 @@ namespace SkunkLab.Protocols.Coap
 
     internal class OptionBuilder
     {
+        private readonly SortedList<int, CoapOption> list;
+
+        private readonly Dictionary<int, int> optionDict;
+
         public OptionBuilder()
         {
             list = new SortedList<int, CoapOption>();
             optionDict = new Dictionary<int, int>();
         }
 
-        private Dictionary<int, int> optionDict;
-        private SortedList<int, CoapOption> list;
-
         public OptionBuilder(IEnumerable<CoapOption> options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException("options");
-            }
+            _ = options ?? throw new ArgumentNullException(nameof(options));
 
             optionDict = new Dictionary<int, int>();
 
@@ -31,7 +27,6 @@ namespace SkunkLab.Protocols.Coap
             IEnumerator<CoapOption> en = options.GetEnumerator();
             while (en.MoveNext())
             {
-
                 int typeInt = (int)en.Current.Type;
 
                 if (optionDict.ContainsKey(typeInt))
@@ -46,7 +41,6 @@ namespace SkunkLab.Protocols.Coap
                 list.Add(((int)en.Current.Type * 1000) + optionDict[typeInt], en.Current);
             }
         }
-
 
         public void Append(CoapOption option)
         {
@@ -86,8 +80,5 @@ namespace SkunkLab.Protocols.Coap
 
             return options;
         }
-
-
-
     }
 }

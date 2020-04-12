@@ -12,6 +12,7 @@ namespace Piraeus.Grains
     public class Subscriber : Grain<SubscriberState>, ISubscriber
     {
         #region Activate/Deactivate
+
         public override Task OnActivateAsync()
         {
             if (State.Container == null)
@@ -28,13 +29,9 @@ namespace Piraeus.Grains
             await WriteStateAsync();
         }
 
-        #endregion
+        #endregion Activate/Deactivate
 
         #region List/Add/Remove Subscriptions
-        public async Task<IEnumerable<string>> GetSubscriptionsAsync()
-        {
-            return await Task.FromResult<IEnumerable<string>>(State.Container);
-        }
 
         public async Task AddSubscriptionAsync(string subscriptionUriString)
         {
@@ -46,20 +43,26 @@ namespace Piraeus.Grains
             await WriteStateAsync();
         }
 
+        public async Task<IEnumerable<string>> GetSubscriptionsAsync()
+        {
+            return await Task.FromResult<IEnumerable<string>>(State.Container);
+        }
+
         public async Task RemoveSubscriptionAsync(string subscriptionUriString)
         {
             State.Container.Remove(subscriptionUriString);
             await WriteStateAsync();
         }
 
-        #endregion
+        #endregion List/Add/Remove Subscriptions
 
         #region Clear
+
         public async Task ClearAsync()
         {
             await ClearStateAsync();
         }
 
-        #endregion
+        #endregion Clear
     }
 }

@@ -6,12 +6,9 @@ namespace SkunkLab.Protocols.Mqtt
 {
     public sealed class MqttConfig
     {
-
         public MqttConfig()
         {
-
         }
-
 
         public MqttConfig(double keepAliveSeconds = 180.0, double ackTimeout = 2.0, double ackRandomFactor = 1.5, int maxRetransmit = 4, double maxLatency = 100.0, IAuthenticator authenticator = null, string identityClaimType = null, List<KeyValuePair<string, string>> indexes = null)
         {
@@ -25,13 +22,21 @@ namespace SkunkLab.Protocols.Mqtt
             Indexes = indexes;
         }
 
+        public double AckRandomFactor { get; internal set; }
+
+        public TimeSpan AckTimeout { get; internal set; }
+
+        public IAuthenticator Authenticator { get; set; }
+
+        public TimeSpan ExchangeLifetime =>
+                //MAX_TRANSMIT_SPAN + (2 * MAX_LATENCY) + PROCESSING_DELAY
+                TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + (2 * MaxLatency.TotalSeconds) + AckTimeout.TotalSeconds);
+
         /// <summary>
         /// Claim type that uniquely identifies the an identity.
         /// </summary>
         /// <remarks>Used only on server.</remarks>
         public string IdentityClaimType { get; set; }
-
-        public IAuthenticator Authenticator { get; set; }
 
         /// <summary>
         /// List of claim type and index name used to associated indexes with an ephemeral subscription.
@@ -41,9 +46,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         //public IAuthenticator Authenticator { get; set; }
         public double KeepAliveSeconds { get; internal set; }
-        public TimeSpan AckTimeout { get; internal set; }
-        public double AckRandomFactor { get; internal set; }
 
+        public TimeSpan MaxLatency { get; internal set; }
         public int MaxRetransmit { get; internal set; }
 
         public TimeSpan MaxTransmitSpan
@@ -56,36 +60,12 @@ namespace SkunkLab.Protocols.Mqtt
             }
         }
 
-        public TimeSpan MaxTransmitWait
-        {
-            get
-            {
+        public TimeSpan MaxTransmitWait =>
                 //ACK_TIMEOUT * (( 2 ** (MAX_RETRANSMIT + 1)) - 1) * ACK_RANDOM_FACTOR
-                return TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) * AckRandomFactor);
-            }
-        }
+                TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) * AckRandomFactor);
 
-        public TimeSpan MaxLatency { get; internal set; }
-
-
-        public TimeSpan ExchangeLifetime
-        {
-            get
-            {
-                //MAX_TRANSMIT_SPAN + (2 * MAX_LATENCY) + PROCESSING_DELAY
-                return TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + (2 * MaxLatency.TotalSeconds) + AckTimeout.TotalSeconds);
-            }
-        }
-
-        public TimeSpan NonLifetime
-        {
-            get
-            {
+        public TimeSpan NonLifetime =>
                 //MAX_TRANSMIT_SPAN + MAX_LATENCY
-                return TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
-            }
-        }
-
-
+                TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
     }
 }

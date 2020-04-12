@@ -58,7 +58,6 @@ namespace SkunkLab.Security.Authentication
                 Trace.TraceError(ex.Message);
                 return Task.FromResult<AuthenticateResult>(AuthenticateResult.Fail("Not authenticated."));
             }
-
         }
     }
 }

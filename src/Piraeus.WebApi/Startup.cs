@@ -14,20 +14,44 @@ using Piraeus.Extensions.Orleans;
 using SkunkLab.Storage;
 using System;
 
-
 namespace Piraeus.WebApi
 {
     public class Startup
     {
+        private readonly PiraeusConfig pconfig;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
             pconfig = WebApiHelpers.GetPiraeusConfig();
         }
 
-        private readonly PiraeusConfig pconfig;
-
         public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute("Manage", "{controller=Manage}/{id}");
+                endpoints.MapControllerRoute("AccessControl", "accesscontrol/{controller=AccessControl}/{action}");
+                endpoints.MapControllerRoute("Resource", "resource/{controller=Resource}/{action}");
+                endpoints.MapControllerRoute("Subscription", "subscription/{controller=Subscription}/{action}");
+                endpoints.MapControllerRoute("Psk", "psk/{controller=Psk}/{action}");
+            });
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -69,8 +93,8 @@ namespace Piraeus.WebApi
                 log.AddConsole();
                 log.SetMinimumLevel(Enum.Parse<LogLevel>(pconfig.LogLevel));
             });
-            
-            if(!string.IsNullOrEmpty(pconfig.InstrumentationKey))
+
+            if (!string.IsNullOrEmpty(pconfig.InstrumentationKey))
             {
                 services.AddApplicationInsightsTelemetry(pconfig.InstrumentationKey);
             }
@@ -79,34 +103,6 @@ namespace Piraeus.WebApi
             services.AddSingletonOrleansClusterClient(WebApiHelpers.GetOrleansConfig());
             services.AddRouting();
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute("Manage", "{controller=Manage}/{id}");
-                endpoints.MapControllerRoute("AccessControl", "accesscontrol/{controller=AccessControl}/{action}");
-                endpoints.MapControllerRoute("Resource", "resource/{controller=Resource}/{action}");
-                endpoints.MapControllerRoute("Subscription", "subscription/{controller=Subscription}/{action}");
-                endpoints.MapControllerRoute("Psk", "psk/{controller=Psk}/{action}");
-            });
-
-
-        }
-
 
         private PskStorageAdapter GetPskAdapter()
         {
@@ -127,7 +123,5 @@ namespace Piraeus.WebApi
 
             return null;
         }
-
-
     }
 }

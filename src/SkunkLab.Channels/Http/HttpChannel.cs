@@ -9,7 +9,6 @@ namespace SkunkLab.Channels.Http
 {
     public abstract class HttpChannel : IChannel
     {
-
         #region Client Channels
 
         public static HttpChannel Create(string endpoint, string securityToken)
@@ -72,10 +71,7 @@ namespace SkunkLab.Channels.Http
             return new HttpClientChannel(endpoint, certificate, observers, token);
         }
 
-
-
-        #endregion
-
+        #endregion Client Channels
 
         #region Server Channels
 
@@ -98,32 +94,32 @@ namespace SkunkLab.Channels.Http
 
         public static HttpChannel Create(string endpoint, string resourceUriString, string contentType, X509Certificate2 certificate)
         {
-
             return new HttpServerChannel(endpoint, resourceUriString, contentType, certificate);
         }
 
-        #endregion
+        #endregion Server Channels
 
+        public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
 
-        public abstract bool RequireBlocking { get; }
+        public abstract event EventHandler<ChannelErrorEventArgs> OnError;
 
-        public abstract string TypeId { get; }
-        public abstract int Port { get; internal set; }
-        public abstract bool IsConnected { get; }
-        public abstract string Id { get; internal set; }
-
-        public abstract bool IsEncrypted { get; internal set; }
-
-        public abstract bool IsAuthenticated { get; internal set; }
-
-        public abstract ChannelState State { get; internal set; }
+        public abstract event EventHandler<ChannelOpenEventArgs> OnOpen;
 
         public abstract event EventHandler<ChannelReceivedEventArgs> OnReceive;
-        public abstract event EventHandler<ChannelCloseEventArgs> OnClose;
-        public abstract event EventHandler<ChannelOpenEventArgs> OnOpen;
-        public abstract event EventHandler<ChannelErrorEventArgs> OnError;
+
         public abstract event EventHandler<ChannelStateEventArgs> OnStateChange;
 
+        public abstract string Id { get; internal set; }
+        public abstract bool IsAuthenticated { get; internal set; }
+        public abstract bool IsConnected { get; }
+        public abstract bool IsEncrypted { get; internal set; }
+        public abstract int Port { get; internal set; }
+        public abstract bool RequireBlocking { get; }
+
+        public abstract ChannelState State { get; internal set; }
+        public abstract string TypeId { get; }
+
+        public abstract Task AddMessageAsync(byte[] message);
 
         public abstract Task CloseAsync();
 
@@ -134,7 +130,5 @@ namespace SkunkLab.Channels.Http
         public abstract Task ReceiveAsync();
 
         public abstract Task SendAsync(byte[] message);
-
-        public abstract Task AddMessageAsync(byte[] message);
     }
 }

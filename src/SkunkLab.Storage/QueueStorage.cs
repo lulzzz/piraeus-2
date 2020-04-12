@@ -10,6 +10,14 @@ namespace SkunkLab.Storage
 {
     public class QueueStorage
     {
+        private static SkunkLabBufferManager bufferManager;
+
+        private static QueueStorage instance;
+
+        private readonly CloudQueueClient client;
+
+        private readonly Dictionary<string, CloudQueue> container;
+
         protected QueueStorage(string connectionString)
         {
             CloudStorageAccount account = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(connectionString);
@@ -24,8 +32,6 @@ namespace SkunkLab.Storage
                 client.BufferManager = bufferManager;
             }
         }
-
-        private static SkunkLabBufferManager bufferManager;
 
         public static QueueStorage CreateSingleton(string connectionString)
         {
@@ -44,12 +50,10 @@ namespace SkunkLab.Storage
             return CreateSingleton(connectionString);
         }
 
-
         public static QueueStorage New(string connectionString)
         {
             return new QueueStorage(connectionString);
         }
-
 
         public static QueueStorage New(string connectionString, long maxBufferPoolSize, int defaultBufferSize)
         {
@@ -58,25 +62,10 @@ namespace SkunkLab.Storage
             return new QueueStorage(connectionString);
         }
 
-
-        private static QueueStorage instance;
-        private CloudQueueClient client;
-        private Dictionary<string, CloudQueue> container;
-
-        private CloudQueue GetQueue(string queueName)
+        public async Task ClearQueueAsync(string queueName)
         {
-            CloudQueue queue = null;
-
-            if (container.ContainsKey(queueName))
-            {
-                queue = container[queueName];
-            }
-            else
-            {
-                queue = client.GetQueueReference(queueName);
-                container.Add(queueName, queue);
-            }
-            return queue;
+            CloudQueue queue = GetQueue(queueName);
+            await queue.ClearAsync();
         }
 
         public async Task CreateQueueAsync(string queueName)
@@ -90,29 +79,6 @@ namespace SkunkLab.Storage
             CloudQueue queue = GetQueue(queueName);
             await queue.DeleteIfExistsAsync();
         }
-
-
-        public async Task ClearQueueAsync(string queueName)
-        {
-            CloudQueue queue = GetQueue(queueName);
-            await queue.ClearAsync();
-        }
-
-
-        public async Task EnqueueAsync(string queueName, byte[] source, TimeSpan? ttl = null, TimeSpan? initialVisibilityDelay = null)
-        {
-
-            CloudQueue queue = GetQueue(queueName);
-
-            if (!await queue.ExistsAsync())
-            {
-                throw new InvalidOperationException("Cloud queue does not exist.");
-            }
-
-            CloudQueueMessage message = CloudQueueMessage.CreateCloudQueueMessageFromByteArray(source);
-            await queue.AddMessageAsync(message, ttl, initialVisibilityDelay, new QueueRequestOptions(), null);
-        }
-
 
         public async Task<List<CloudQueueMessage>> DequeueAsync(string queueName, int? numberOfMessages)
         {
@@ -148,6 +114,33 @@ namespace SkunkLab.Storage
             return list;
         }
 
+        public async Task EnqueueAsync(string queueName, byte[] source, TimeSpan? ttl = null, TimeSpan? initialVisibilityDelay = null)
+        {
+            CloudQueue queue = GetQueue(queueName);
 
+            if (!await queue.ExistsAsync())
+            {
+                throw new InvalidOperationException("Cloud queue does not exist.");
+            }
+
+            CloudQueueMessage message = CloudQueueMessage.CreateCloudQueueMessageFromByteArray(source);
+            await queue.AddMessageAsync(message, ttl, initialVisibilityDelay, new QueueRequestOptions(), null);
+        }
+
+        private CloudQueue GetQueue(string queueName)
+        {
+            CloudQueue queue = null;
+
+            if (container.ContainsKey(queueName))
+            {
+                queue = container[queueName];
+            }
+            else
+            {
+                queue = client.GetQueueReference(queueName);
+                container.Add(queueName, queue);
+            }
+            return queue;
+        }
     }
 }

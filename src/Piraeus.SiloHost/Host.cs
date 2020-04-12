@@ -39,7 +39,6 @@ namespace Piraeus.SiloHost
             //}
 
             host.StartAsync().GetAwaiter();
-
         }
 
         private void CreateLocalSiloHost()
@@ -96,9 +95,15 @@ namespace Piraeus.SiloHost
             silo.ConfigureLogging(builder =>
             {
                 if (loggers.HasFlag(LoggerType.Console))
+                {
                     builder.AddConsole();
+                }
+
                 if (loggers.HasFlag(LoggerType.Debug))
+                {
                     builder.AddDebug();
+                }
+
                 builder.SetMinimumLevel(orleansLogLevel);
             });
 
@@ -108,15 +113,14 @@ namespace Piraeus.SiloHost
             }
             else
             {
-                if(!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                if (!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
                 {
                     silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.InstrumentationKey);
                 }
             }
-                host = silo.Build();
+            host = silo.Build();
 
             //var clusterClient = (IClusterClient)host.Services.GetService(typeof(IClusterClient));
-
         }
 
         private LogLevel GetLogLevel()
@@ -139,7 +143,6 @@ namespace Piraeus.SiloHost
             {
                 throw new ArgumentException("Invalid connection string");
             }
-
         }
 
         private OrleansConfig GetOrleansConfiguration()

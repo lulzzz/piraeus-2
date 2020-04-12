@@ -6,9 +6,9 @@
         {
             this.Validated = validated;
             this.ErrorMessage = error;
-        }   
-        public bool Validated { get; internal set; }
+        }
 
         public string ErrorMessage { get; set; }
+        public bool Validated { get; internal set; }
     }
 }

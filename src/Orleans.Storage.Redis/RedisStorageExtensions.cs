@@ -54,6 +54,5 @@ namespace Orleans.Storage.Redis
             return services.AddSingletonNamedService<IGrainStorage>(name, RedisGrainStorageFactory.Create)
                            .AddSingletonNamedService<ILifecycleParticipant<ISiloLifecycle>>(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
         }
-
     }
 }

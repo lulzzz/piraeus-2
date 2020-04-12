@@ -8,14 +8,15 @@ namespace Piraeus.HttpGateway.Formatters
     public class BinaryInputFormatter : InputFormatter
     {
         private const string CONTENT_TYPE = "application/octet-stream";
+
         public BinaryInputFormatter()
         {
-            SupportedMediaTypes.Add(CONTENT_TYPE);            
+            SupportedMediaTypes.Add(CONTENT_TYPE);
         }
 
-        public override Boolean CanRead(InputFormatterContext context)
+        public override bool CanRead(InputFormatterContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
 
             return context.HttpContext.Request.ContentType == CONTENT_TYPE;
         }
@@ -24,7 +25,6 @@ namespace Piraeus.HttpGateway.Formatters
         {
             var request = context.HttpContext.Request;
             var contentType = context.HttpContext.Request.ContentType;
-
 
             if (contentType == CONTENT_TYPE)
             {
@@ -36,7 +36,5 @@ namespace Piraeus.HttpGateway.Formatters
 
             return await InputFormatterResult.FailureAsync();
         }
-
-
     }
 }

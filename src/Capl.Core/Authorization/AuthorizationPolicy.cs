@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -20,7 +20,6 @@ namespace Capl.Authorization
     [XmlSchemaProvider(null, IsAny = true)]
     public class AuthorizationPolicy : AuthorizationPolicyBase
     {
-
         /// </summary>
         public AuthorizationPolicy()
             : this(null)
@@ -67,23 +66,22 @@ namespace Capl.Authorization
             }
         }
 
+        public bool Delegation { get; set; }
+
+        /// <summary>
+        /// Gets and sets an evaluation expression.
+        /// </summary>
+        public override Term Expression { get; set; }
+
         /// <summary>
         /// Gets or sets an operation URI that identifies the policy.
         /// </summary>
         public Uri PolicyId { get; set; }
 
-        public bool Delegation { get; set; }
-
-
         /// <summary>
         /// Gets transforms for the authorization policy.
         /// </summary>
         public override TransformCollection Transforms { get; internal set; }
-
-        /// <summary>
-        /// Gets and sets an evaluation expression.
-        /// </summary> 
-        public override Term Expression { get; set; }
 
         /// <summary>
         /// Loads an authorization policy.
@@ -100,13 +98,9 @@ namespace Capl.Authorization
 
         public bool Evaluate(ClaimsIdentity identity)
         {
-            List<Claim> claims = null;
+            _ = identity ?? throw new ArgumentNullException(nameof(identity));
 
-            if (identity == null)
-            {
-                throw new ArgumentNullException("identity");
-            }
-
+            List<Claim> claims;
             if (!this.Delegation)
             {
                 claims = new List<Claim>(identity.Claims);
@@ -136,10 +130,7 @@ namespace Capl.Authorization
         /// <param name="reader">XmlReader instance of the authorization policy.</param>
         public override void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.AuthorizationPolicy);
             this.PolicyId = new Uri(reader.GetOptionalAttribute(AuthorizationConstants.Attributes.PolicyId));
@@ -179,10 +170,7 @@ namespace Capl.Authorization
         /// <param name="writer">Writer to write the authorization policy.</param>
         public override void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(AuthorizationConstants.Elements.AuthorizationPolicy, AuthorizationConstants.Namespaces.Xmlns);
 
@@ -203,6 +191,6 @@ namespace Capl.Authorization
             writer.WriteEndElement();
         }
 
-        #endregion
+        #endregion IXmlSerializable Members
     }
 }

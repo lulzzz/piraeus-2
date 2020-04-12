@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -19,19 +19,9 @@ namespace Capl.Issuance
     [KnownType(typeof(IssuePolicy))]
     public abstract class IssuePolicyBase : IXmlSerializable
     {
-        public abstract void ReadXml(XmlReader reader);
-
-        public abstract void WriteXml(XmlWriter writer);
-
-
-
         public static XmlQualifiedName GetSchema(XmlSchemaSet schemaSet)
         {
-            if (schemaSet == null)
-            {
-                throw new ArgumentNullException("schemaSet");
-            }
-
+            _ = schemaSet ?? throw new ArgumentNullException(nameof(schemaSet));
 
             using (StringReader reader = new StringReader(Capl.Properties.Resources.IssuePolicySchema))
             {
@@ -52,5 +42,9 @@ namespace Capl.Issuance
         {
             return null;
         }
+
+        public abstract void ReadXml(XmlReader reader);
+
+        public abstract void WriteXml(XmlWriter writer);
     }
 }

@@ -25,7 +25,7 @@
 //        public static IServiceCollection AddGatewayService(this IServiceCollection services, Type serviceType,
 //           Action<Microsoft.Extensions.Options.OptionsBuilder<PiraeusGatewayOptions>> configureOptions)
 //        {
-//            configureOptions?.Invoke(services.AddOptions<PiraeusGatewayOptions>());    
+//            configureOptions?.Invoke(services.AddOptions<PiraeusGatewayOptions>());
 
 //            return services;
 //        }
@@ -42,7 +42,7 @@
 
 //        private static IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
 //        {
-//            PiraeusGatewayOptions options = serviceProvider.GetOptionsByName<PiraeusGatewayOptions>("PiraeusGatewayOptions");           
+//            PiraeusGatewayOptions options = serviceProvider.GetOptionsByName<PiraeusGatewayOptions>("PiraeusGatewayOptions");
 
 //            if (!options.Dockerized)
 //            {

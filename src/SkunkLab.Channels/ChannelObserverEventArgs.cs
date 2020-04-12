@@ -13,9 +13,8 @@ namespace SkunkLab.Channels
         }
 
         public string ChannelId { get; internal set; }
-        public string ResourceUriString { get; internal set; }
         public string ContentType { get; internal set; }
-
         public byte[] Message { get; internal set; }
+        public string ResourceUriString { get; internal set; }
     }
 }

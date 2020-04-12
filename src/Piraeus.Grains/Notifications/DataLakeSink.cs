@@ -17,7 +17,6 @@
 //using System.Threading.Tasks;
 //using System.Web;
 
-
 //namespace Piraeus.Grains.Notifications
 //{
 //    public class DataLakeSink : EventSink
@@ -42,7 +41,7 @@
 //        private ConcurrentQueueManager cqm;
 
 //        /// <summary>
-//        /// Creates Azure Data Lake notification 
+//        /// Creates Azure Data Lake notification
 //        /// </summary>
 //        /// <param name="contentType"></param>
 //        /// <param name="messageId"></param>
@@ -68,14 +67,12 @@
 //                folder = nvc["folder"];
 //                filename = nvc["file"];
 
-
 //                if (!int.TryParse(nvc["clients"], out clientCount))
 //                {
 //                    clientCount = 1;
 //                }
 
 //                secret = metadata.SymmetricKey;
-
 
 //            }
 //            catch (Exception ex)
@@ -84,7 +81,6 @@
 //                Trace.TraceError("Azure data lake subscription {0} ctor error {1}", subscriptionUriString, ex.Message);
 //            }
 //        }
-
 
 //        public override async Task SendAsync(EventMessage message)
 //        {
@@ -150,7 +146,7 @@
 //                    }
 
 //                    if (message.Audit)
-//                    {                        
+//                    {
 //                        record = new MessageAuditRecord(message.MessageId, String.Format($"{uri.Scheme}://{uri.Authority}/{domain}/{folder}"), "AzureDataLake", "AzureDataLake", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
 //                    }
 //                }
@@ -168,7 +164,6 @@
 //                }
 //            }
 //        }
-
 
 //        private async Task WriteDiscreteAsync(int index, string path, byte[] payload)
 //        {
@@ -261,7 +256,6 @@
 //                }
 //            }
 
-
 //        }
 
 //        private string GetFilename(string contentType, bool microseconds = false)
@@ -295,7 +289,6 @@
 //            return suffix == null ? filename : String.Format("{0}.{1}", name, suffix);
 //        }
 
-
 //        private byte[] GetPayload(EventMessage message)
 //        {
 //            switch (message.Protocol)
@@ -315,8 +308,6 @@
 //            }
 //        }
 
-
-
 //        private string GetPath(string contentType, bool microseconds = false)
 //        {
 //            if (filename != null)
@@ -328,7 +319,6 @@
 //                return String.Format("/{0}/{1}", folder, GetFilename(contentType, microseconds));
 //            }
 //        }
-
 
 //        private async Task CreateClientsAsync()
 //        {
@@ -351,9 +341,7 @@
 //                clients[i] = AdlsClient.CreateClient(String.Format("{0}.azuredatalakestore.net", account), creds);
 //            }
 
-
 //        }
-
 
 //        private async Task<ServiceClientCredentials> GetCreds_SPI_SecretKeyAsync(string tenant, Uri tokenAudience, string clientId, string secretKey)
 //        {
@@ -373,9 +361,5 @@
 //            }
 //        }
 
-
-
-
 //    }
 //}
-

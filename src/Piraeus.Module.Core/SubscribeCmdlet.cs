@@ -8,20 +8,17 @@ namespace Piraeus.Module
     [Cmdlet(VerbsCommon.Add, "PiraeusSubscription")]
     public class SubscribeCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
-        public string ServiceUrl;
+        [Parameter(HelpMessage = "Optional description of the subsription.", Mandatory = false)]
+        public string Description;
 
-        [Parameter(HelpMessage = "Security token used to access the REST service.", Mandatory = true)]
-        public string SecurityToken;
+        [Parameter(HelpMessage = "Durably persist messages for the TTL when the subsystem is disconnected.", Mandatory = false)]
+        public bool DurableMessaging;
 
-        [Parameter(HelpMessage = "Unique URI identifier of resource to subscribe.", Mandatory = true)]
-        public string ResourceUriString;
+        [Parameter(HelpMessage = "Expiration of the subscription.", Mandatory = false)]
+        public DateTime? Expires;
 
         [Parameter(HelpMessage = "Security identity from claims; required for actively connected subsystems; otherwise omit.", Mandatory = false)]
         public string Identity;
-
-        [Parameter(HelpMessage = "Optional description of the subsription.", Mandatory = false)]
-        public string Description;
 
         [Parameter(HelpMessage = "List of key/value indexes for the subscription.", Mandatory = false)]
         public List<KeyValuePair<string, string>> Indexes;
@@ -29,24 +26,26 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Required for passively connected subsystems; otherwise omit.", Mandatory = false)]
         public string NotifyAddress;
 
-        [Parameter(HelpMessage = "Type of security token used for passively connected subsystem; otherwise omit.", Mandatory = false)]
-        public SecurityTokenType? TokenType;
+        [Parameter(HelpMessage = "Unique URI identifier of resource to subscribe.", Mandatory = true)]
+        public string ResourceUriString;
 
-        [Parameter(HelpMessage = "Symmetric key if a passively connection subsystem that uses SWT or JWT tokens; otherwise omit.", Mandatory = false)]
-        public string SymmetricKey;
+        [Parameter(HelpMessage = "Security token used to access the REST service.", Mandatory = true)]
+        public string SecurityToken;
 
-        [Parameter(HelpMessage = "Expiration of the subscription.", Mandatory = false)]
-        public DateTime? Expires;
-
-        [Parameter(HelpMessage = "Time-To-Live for retained messages.", Mandatory = false)]
-        public TimeSpan? TTL;
+        [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
+        public string ServiceUrl;
 
         [Parameter(HelpMessage = "The rate retained messages are sent when the subsystem reconnects.", Mandatory = false)]
         public TimeSpan? SpoolRate;
 
-        [Parameter(HelpMessage = "Durably persist messages for the TTL when the subsystem is disconnected.", Mandatory = false)]
-        public bool DurableMessaging;
+        [Parameter(HelpMessage = "Symmetric key if a passively connection subsystem that uses SWT or JWT tokens; otherwise omit.", Mandatory = false)]
+        public string SymmetricKey;
 
+        [Parameter(HelpMessage = "Type of security token used for passively connected subsystem; otherwise omit.", Mandatory = false)]
+        public SecurityTokenType? TokenType;
+
+        [Parameter(HelpMessage = "Time-To-Live for retained messages.", Mandatory = false)]
+        public TimeSpan? TTL;
 
         protected override void ProcessRecord()
         {
@@ -63,7 +62,7 @@ namespace Piraeus.Module
                 DurableMessaging = this.DurableMessaging
             };
 
-            string url = String.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
             RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 

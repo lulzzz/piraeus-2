@@ -1,6 +1,4 @@
-﻿
-
-namespace SkunkLab.Channels
+﻿namespace SkunkLab.Channels
 {
     public enum ChannelState
     {

@@ -7,12 +7,12 @@ namespace SkunkLab.Channels.Psk
 {
     public class KeyVaultTlsPskIdentityManager : TlsPskIdentityManager
     {
+        private readonly KeyVaultPskStorage storage;
+
         public KeyVaultTlsPskIdentityManager(string authority, string clientId, string clientSecret)
         {
             storage = KeyVaultPskStorage.CreateSingleton(authority, clientId, clientSecret);
         }
-
-        private KeyVaultPskStorage storage;
 
         public byte[] GetHint()
         {

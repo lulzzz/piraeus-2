@@ -12,6 +12,12 @@ namespace SkunkLab.Security.Authentication
 {
     public class SwtValidationHandler : DelegatingHandler
     {
+        private readonly string audience;
+
+        private readonly string issuer;
+
+        private readonly string signingKey;
+
         public SwtValidationHandler(string signingKey, string issuer = null, string audience = null)
         {
             this.signingKey = signingKey;
@@ -19,29 +25,11 @@ namespace SkunkLab.Security.Authentication
             this.issuer = issuer;
         }
 
-        private string signingKey;
-        private string audience;
-        private string issuer;
-
-        private static bool TryRetrieveToken(HttpRequestMessage request, out string token)
-        {
-            token = null;
-            IEnumerable<string> authzHeaders = null;
-            if (!request.Headers.TryGetValues("Authorization", out authzHeaders) || authzHeaders.Count() > 1)
-            {
-                return false;
-            }
-            var bearerToken = authzHeaders.ElementAt(0);
-            token = bearerToken.StartsWith("Bearer ") ? bearerToken.Substring(7) : bearerToken;
-            return true;
-        }
-
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             HttpStatusCode statusCode;
-            string token = null;
 
-            if (!TryRetrieveToken(request, out token))
+            if (!TryRetrieveToken(request, out string token))
             {
                 statusCode = HttpStatusCode.Unauthorized;
                 return Task<HttpResponseMessage>.Factory.StartNew(() =>
@@ -50,7 +38,6 @@ namespace SkunkLab.Security.Authentication
 
             try
             {
-
                 if (SecurityTokenValidator.Validate(token, SecurityTokenType.SWT, signingKey, issuer, audience))
                 {
                     //HttpContext.Current.User = Thread.CurrentPrincipal;
@@ -67,6 +54,18 @@ namespace SkunkLab.Security.Authentication
 
             return Task<HttpResponseMessage>.Factory.StartNew(() =>
                   new HttpResponseMessage(statusCode));
+        }
+
+        private static bool TryRetrieveToken(HttpRequestMessage request, out string token)
+        {
+            token = null;
+            if (!request.Headers.TryGetValues("Authorization", out IEnumerable<string> authzHeaders) || authzHeaders.Count() > 1)
+            {
+                return false;
+            }
+            var bearerToken = authzHeaders.ElementAt(0);
+            token = bearerToken.StartsWith("Bearer ") ? bearerToken.Substring(7) : bearerToken;
+            return true;
         }
     }
 }

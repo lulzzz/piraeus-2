@@ -11,22 +11,6 @@ namespace Piraeus.Grains
     [Serializable]
     public class SigmaAlgebra : Grain<SigmaAlgebraState>, ISigmaAlgebra
     {
-        public override Task OnActivateAsync()
-        {
-            if (State.Container == null)
-            {
-                List<string> list = new List<string>();
-                State.Container = list;
-            }
-
-            return Task.CompletedTask;
-        }
-
-        public async override Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
-        }
-
         public async Task AddAsync(string resourceUriString)
         {
             if (!State.Container.Contains(resourceUriString))
@@ -51,6 +35,22 @@ namespace Piraeus.Grains
         {
             //return await Task.FromResult<IEnumerable<string>>(State.Container.ToArray());
             return await Task.FromResult<List<string>>(State.Container);
+        }
+
+        public override Task OnActivateAsync()
+        {
+            if (State.Container == null)
+            {
+                List<string> list = new List<string>();
+                State.Container = list;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
         }
 
         public async Task RemoveAsync(string resourceUriString)

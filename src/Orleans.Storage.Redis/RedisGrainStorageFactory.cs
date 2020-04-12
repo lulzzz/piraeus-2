@@ -4,7 +4,6 @@ using System;
 
 namespace Orleans.Storage.Redis
 {
-
     public static class RedisGrainStorageFactory
     {
         public static IGrainStorage Create(IServiceProvider services, string name)

@@ -1,7 +1,7 @@
 ﻿/*
-Claims Authorization Policy Langugage SDK ver. 3.0 
-Copyright (c) Matt Long labskunk@gmail.com 
-All rights reserved. 
+Claims Authorization Policy Langugage SDK ver. 3.0
+Copyright (c) Matt Long labskunk@gmail.com
+All rights reserved.
 MIT License
 */
 
@@ -20,7 +20,6 @@ namespace Capl.Authorization
     [Serializable]
     public class ClaimTransform : Transform
     {
-
         public ClaimTransform()
             : this(null, null, null, null, null)
         {
@@ -50,16 +49,12 @@ namespace Capl.Authorization
             this.Expression = evaluationExpression;
         }
 
-
+        public override Term Expression { get; set; }
+        public override Match MatchExpression { get; set; }
+        public override LiteralClaim TargetClaim { get; set; }
         public override Uri TransformID { get; set; }
 
         public override Uri Type { get; set; }
-
-        public override Term Expression { get; set; }
-
-        public override Match MatchExpression { get; set; }
-
-        public override LiteralClaim TargetClaim { get; set; }
 
         public static ClaimTransform Load(XmlReader reader)
         {
@@ -71,7 +66,6 @@ namespace Capl.Authorization
 
         #region ITransform Members
 
-
         /// <summary>
         /// Executes the transform.
         /// </summary>
@@ -79,17 +73,11 @@ namespace Capl.Authorization
         /// <returns>Transformed set of claims.</returns>
         public override IEnumerable<Claim> TransformClaims(IEnumerable<Claim> claims)
         {
-            if (claims == null)
-            {
-                throw new ArgumentNullException("claims");
-            }
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
-            TransformAction action = null;
             IList<Claim> matchedClaims = null;
             IEnumerable<Claim> transformedClaims = null;
-            bool eval = false;
-
-            action = TransformAction.Create(this.Type, null);
+            TransformAction action = TransformAction.Create(Type, null);
 
             if (this.MatchExpression != null)
             {
@@ -97,6 +85,7 @@ namespace Capl.Authorization
                 matchedClaims = matcher.MatchClaims(claims, this.MatchExpression.ClaimType, this.MatchExpression.Value);
             }
 
+            bool eval;
             if (this.Expression == null)
             {
                 eval = true;
@@ -121,10 +110,9 @@ namespace Capl.Authorization
             }
         }
 
-        #endregion
+        #endregion ITransform Members
 
         #region IXmlSerializable Members
-
 
         /// <summary>
         /// Reads the Xml of a scope transform.
@@ -132,10 +120,7 @@ namespace Capl.Authorization
         /// <param name="reader">An XmlReader for a scope transform.</param>
         public override void ReadXml(XmlReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+            _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Transform);
 
@@ -150,8 +135,10 @@ namespace Capl.Authorization
 
                 if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim))
                 {
-                    this.TargetClaim = new LiteralClaim();
-                    this.TargetClaim.ClaimType = reader.GetRequiredAttribute(AuthorizationConstants.Attributes.ClaimType);
+                    this.TargetClaim = new LiteralClaim
+                    {
+                        ClaimType = reader.GetRequiredAttribute(AuthorizationConstants.Attributes.ClaimType)
+                    };
 
                     if (!reader.IsEmptyElement)
                     {
@@ -179,10 +166,7 @@ namespace Capl.Authorization
         /// <param name="writer">An XmlWriter for the scope transform.</param>
         public override void WriteXml(XmlWriter writer)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+            _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
             writer.WriteStartElement(AuthorizationConstants.Elements.Transform, AuthorizationConstants.Namespaces.Xmlns);
 
@@ -192,8 +176,6 @@ namespace Capl.Authorization
             }
 
             writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, this.Type.ToString());
-
-
 
             if (this.MatchExpression != null)
             {
@@ -221,7 +203,6 @@ namespace Capl.Authorization
             writer.WriteEndElement();
         }
 
-        #endregion
-
+        #endregion IXmlSerializable Members
     }
 }

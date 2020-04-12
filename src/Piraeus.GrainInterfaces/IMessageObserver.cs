@@ -10,6 +10,5 @@ namespace Piraeus.GrainInterfaces
         /// </summary>
         /// <param name="message">Notification message.</param>
         void Notify(EventMessage message);
-
     }
 }
