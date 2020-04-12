@@ -41,7 +41,6 @@ namespace Orleans.Clustering.Redis
                     ConnectRetry = membershipTableOptions.Value.ConnectRetry ?? 4,
                     DefaultDatabase = membershipTableOptions.Value.DatabaseNo ?? 2,
                     SyncTimeout = membershipTableOptions.Value.SyncTimeout ?? 10000,
-                    ResponseTimeout = membershipTableOptions.Value.ResponseTimeout ?? 10000,
                     EndPoints =    {
                                             { membershipTableOptions.Value.Hostname, 6380 }
                                        },

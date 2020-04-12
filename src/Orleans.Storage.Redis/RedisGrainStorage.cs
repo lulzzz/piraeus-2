@@ -162,7 +162,6 @@ namespace Orleans.Storage.Redis
                     ConnectRetry = options.ConnectRetry ?? 4,
                     DefaultDatabase = options.DatabaseNo ?? 1,
                     SyncTimeout = options.SyncTimeout ?? 10000,
-                    ResponseTimeout = options.ResponseTimeout ?? 10000,
                     EndPoints =    {
                                     { options.Hostname, 6380 }
                                },

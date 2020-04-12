@@ -125,7 +125,6 @@ namespace Orleans.Clustering.Redis
                     ConnectRetry = options.ConnectRetry ?? 4,
                     DefaultDatabase = options.DatabaseNo ?? 2,
                     SyncTimeout = options.SyncTimeout ?? 10000,
-                    ResponseTimeout = options.ResponseTimeout ?? 10000,
                     EndPoints =    {
                                     { options.Hostname, 6380 }
                                },
