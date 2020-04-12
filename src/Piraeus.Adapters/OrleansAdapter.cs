@@ -7,7 +7,6 @@ using Piraeus.GrainInterfaces;
 using Piraeus.Grains;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -64,9 +63,7 @@ namespace Piraeus.Adapters
             IEnumerable<string> subscriptionUriStrings = await graphManager.GetSubscriberSubscriptionsListAsync(identity);
 
             if (subscriptionUriStrings == null || subscriptionUriStrings.Count() == 0)
-            {
                 return null;
-            }
 
             foreach (var item in subscriptionUriStrings)
             {
@@ -80,7 +77,6 @@ namespace Piraeus.Adapters
                     string leaseKey = await graphManager.AddSubscriptionObserverAsync(item, leaseTime, observer);
 
                     durableObservers.Add(item, observer);
-                    Console.WriteLine($"Durable observer added - '{item}' - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
 
                     Uri uri = new Uri(item);
                     string resourceUriString = item.Replace(uri.Segments[^1], "");
@@ -88,17 +84,12 @@ namespace Piraeus.Adapters
                     list.Add(resourceUriString);
 
                     if (!container.ContainsKey(resourceUriString))
-                    {
                         container.Add(resourceUriString, new Tuple<string, string>(item, leaseKey));
-                        Console.WriteLine($"Resource, subscriptioon and lease key added to container {resourceUriString}, {item}, and {leaseKey} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
-                    }
                 }
             }
 
             if (subscriptionUriStrings.Count() > 0)
-            {
                 EnsureLeaseTimer();
-            }
 
             return list.Count == 0 ? null : list;
         }
@@ -131,9 +122,7 @@ namespace Piraeus.Adapters
             finally
             {
                 if (message.Audit)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 
@@ -175,8 +164,6 @@ namespace Piraeus.Adapters
             {
                 if (container.ContainsKey(resourceUriString))
                 {
-                    Console.WriteLine($"Container has '{resourceUriString}' needed to unsubscribe - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
-
                     if (ephemeralObservers.ContainsKey(container[resourceUriString].Item1))
                     {
                         await graphManager.RemoveSubscriptionObserverAsync(container[resourceUriString].Item1, container[resourceUriString].Item2);
@@ -252,9 +239,7 @@ namespace Piraeus.Adapters
                 if (kvps != null && kvps.Length > 0)
                 {
                     foreach (var kvp in kvps)
-                    {
                         await graphManager.RenewObserverLeaseAsync(kvp.Value.Item1, kvp.Value.Item2, TimeSpan.FromSeconds(60.0));
-                    }
                 }
             });
 
@@ -273,7 +258,6 @@ namespace Piraeus.Adapters
             int cnt = durableObservers.Count;
             if (durableObservers.Count > 0)
             {
-                Console.WriteLine($"Durable subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 List<Task> taskList = new List<Task>();
                 KeyValuePair<string, IMessageObserver>[] kvps = durableObservers.ToArray();
                 foreach (var item in kvps)
@@ -298,12 +282,10 @@ namespace Piraeus.Adapters
 
                 durableObservers.Clear();
                 RemoveFromContainer(list);
-                Console.WriteLine($"Durable subscription observers removed for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 await logger?.LogInformationAsync("'{0}' - Durable observers removed by Orleans Adapter for identity '{1}'", cnt, identity);
             }
             else
             {
-                Console.WriteLine($"No durable subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 await logger?.LogInformationAsync("No Durable observers found by Orleans Adapter to be removed for identity '{0}'", identity);
             }
         }
@@ -315,7 +297,6 @@ namespace Piraeus.Adapters
 
             if (ephemeralObservers.Count > 0)
             {
-                Console.WriteLine($"Ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 KeyValuePair<string, IMessageObserver>[] kvps = ephemeralObservers.ToArray();
                 List<Task> unobserveTaskList = new List<Task>();
                 foreach (var item in kvps)
@@ -340,12 +321,10 @@ namespace Piraeus.Adapters
 
                 ephemeralObservers.Clear();
                 RemoveFromContainer(list);
-                Console.WriteLine($"Ephemeral subscription observers removed for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 await logger?.LogInformationAsync("'{0}' - Ephemeral observers removed by Orleans Adapter for identity '{1}'", cnt, identity);
             }
             else
             {
-                Console.WriteLine($"No ephemeral subscription observers found to remove for {identity} - {DateTime.UtcNow:yyyy-MM-ddTHH-MM-ss.fffff}");
                 await logger?.LogInformationAsync("No Ephemeral observers found by Orleans Adapter to be removed for identity '{0}'", identity);
             }
         }

@@ -14,7 +14,6 @@ namespace Piraeus.Core
                 var aggException = t.Exception.Flatten();
                 foreach (var exception in aggException.InnerExceptions)
                 {
-                    Trace.TraceError(exception.Message);
                     Console.WriteLine(exception.Message);
                 }
             },

@@ -122,9 +122,7 @@ namespace Piraeus.Extensions.Orleans
                 attempt++;
                 Console.WriteLine($"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
                 if (attempt > maxAttempts)
-                {
                     return false;
-                }
 
                 await Task.Delay(TimeSpan.FromSeconds(4));
                 return true;
