@@ -58,6 +58,8 @@ namespace Piraeus.Adapters
 
         public async Task<List<string>> LoadDurableSubscriptionsAsync(string identity)
         {
+            _ = identity ?? throw new ArgumentNullException(nameof(identity));
+
             List<string> list = new List<string>();
 
             IEnumerable<string> subscriptionUriStrings = await graphManager.GetSubscriberSubscriptionsListAsync(identity);
@@ -96,6 +98,8 @@ namespace Piraeus.Adapters
 
         public async Task PublishAsync(EventMessage message, List<KeyValuePair<string, string>> indexes = null)
         {
+            _ = message ?? throw new ArgumentNullException(nameof(message));
+
             AuditRecord record = null;
             DateTime receiveTime = DateTime.UtcNow;
 
@@ -128,6 +132,9 @@ namespace Piraeus.Adapters
 
         public async Task<string> SubscribeAsync(string resourceUriString, SubscriptionMetadata metadata)
         {
+            _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
+            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+
             try
             {
                 metadata.IsEphemeral = true;
@@ -143,9 +150,7 @@ namespace Piraeus.Adapters
                 ephemeralObservers.Add(subscriptionUriString, observer);
 
                 if (!container.ContainsKey(resourceUriString))
-                {
                     container.Add(resourceUriString, new Tuple<string, string>(subscriptionUriString, leaseKey));
-                }
 
                 EnsureLeaseTimer();
                 logger?.LogDebugAsync($"Subscribed to '{resourceUriString}' with '{subscriptionUriString}' for {identity}.");
@@ -160,6 +165,8 @@ namespace Piraeus.Adapters
 
         public async Task UnsubscribeAsync(string resourceUriString)
         {
+            _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
+
             try
             {
                 if (container.ContainsKey(resourceUriString))
@@ -335,22 +342,16 @@ namespace Piraeus.Adapters
             var query = container.Where((c) => c.Value.Item1 == subscriptionUriString);
 
             foreach (var item in query)
-            {
                 list.Add(item.Key);
-            }
 
             foreach (string item in list)
-            {
                 container.Remove(item);
-            }
         }
 
         private void RemoveFromContainer(List<string> subscriptionUriStrings)
         {
             foreach (var item in subscriptionUriStrings)
-            {
                 RemoveFromContainer(item);
-            }
         }
 
         #endregion private methods
