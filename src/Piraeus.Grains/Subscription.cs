@@ -1,6 +1,7 @@
 ﻿using Orleans;
 using Orleans.Concurrency;
 using Orleans.Providers;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using Piraeus.GrainInterfaces;
@@ -32,41 +33,24 @@ namespace Piraeus.Grains
         [NonSerialized]
         private EventSink sink;
 
+        [NonSerialized]
+        private readonly ILog logger;
+
+        public Subscription(ILog logger = null)
+        {
+            this.logger = logger;
+        }
+
         #region Activatio/Deactivation
 
         public override Task OnActivateAsync()
         {
-            if (State.ErrorLeases == null)
-            {
-                Dictionary<string, IErrorObserver> errorLeases = new Dictionary<string, IErrorObserver>();
-                State.ErrorLeases = errorLeases;
-            }
-
-            if (State.LeaseExpiry == null)
-            {
-                Dictionary<string, Tuple<DateTime, string>> leaseExpiry = new Dictionary<string, Tuple<DateTime, string>>();
-                State.LeaseExpiry = leaseExpiry;
-            }
-
-            if (State.MessageLeases == null)
-            {
-                Dictionary<string, IMessageObserver> messageLeases = new Dictionary<string, IMessageObserver>();
-                State.MessageLeases = messageLeases;
-            }
-
-            if (State.MessageQueue == null)
-            {
-                Queue<EventMessage> queueEvents = new Queue<EventMessage>();
-                State.MessageQueue = queueEvents;
-            }
-
+            State.ErrorLeases ??= new Dictionary<string, IErrorObserver>();
+            State.LeaseExpiry ??= new Dictionary<string, Tuple<DateTime, string>>();
+            State.MessageLeases ??= new Dictionary<string, IMessageObserver>();
+            State.MessageQueue ??= new Queue<EventMessage>();
+            State.MetricLeases ??= new Dictionary<string, IMetricObserver>();
             memoryMessageQueue = new Queue<EventMessage>();
-
-            if (State.MetricLeases == null)
-            {
-                Dictionary<string, IMetricObserver> metricObs = new Dictionary<string, IMetricObserver>();
-                State.MetricLeases = metricObs;
-            }
 
             DequeueAsync(State.MessageQueue).Ignore();
 
@@ -75,7 +59,6 @@ namespace Piraeus.Grains
 
         public override async Task OnDeactivateAsync()
         {
-            Trace.TraceInformation("Subscription deactivation '{0}'", State.Metadata.SubscriptionUriString);
             await WriteStateAsync();
         }
 
@@ -96,9 +79,7 @@ namespace Piraeus.Grains
         public async Task<string> GetIdAsync()
         {
             if (State.Metadata == null)
-            {
                 return null;
-            }
 
             return await Task.FromResult<string>(State.Metadata.SubscriptionUriString);
         }
@@ -118,22 +99,25 @@ namespace Piraeus.Grains
 
         public async Task<SubscriptionMetadata> GetMetadataAsync()
         {
-            SubscriptionMetadata metadata = null;
-
-            try
-            {
-                metadata = State.Metadata;
-            }
-            catch
-            { }
-
-            return await Task.FromResult<SubscriptionMetadata>(metadata);
+            return await Task.FromResult<SubscriptionMetadata>(State.Metadata);
         }
 
         public async Task UpsertMetadataAsync(SubscriptionMetadata metadata)
         {
-            State.Metadata = metadata;
-            await WriteStateAsync();
+            try
+            {
+                _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+
+                State.Metadata = metadata;
+                await WriteStateAsync();
+            }
+            catch(Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription get metadata.");
+                await NotifyErrorAsync(ex);
+                throw;
+            }
+
         }
 
         #endregion Metadata
@@ -142,14 +126,14 @@ namespace Piraeus.Grains
 
         public async Task NotifyAsync(EventMessage message)
         {
-            Exception error = null;
-
-            State.MessageCount++;
-            State.ByteCount += message.Message.LongLength;
-            State.LastMessageTimestamp = DateTime.UtcNow;
-
             try
             {
+                _ = message ?? throw new ArgumentNullException(nameof(message));
+
+                State.MessageCount++;
+                State.ByteCount += message.Message.LongLength;
+                State.LastMessageTimestamp = DateTime.UtcNow;
+
                 if (!string.IsNullOrEmpty(State.Metadata.NotifyAddress))
                 {
                     if (sink == null)
@@ -175,34 +159,23 @@ namespace Piraeus.Grains
                 else if (State.MessageLeases.Count > 0)
                 {
                     foreach (var observer in State.MessageLeases.Values)
-                    {
                         observer.Notify(message);
-                    }
                 }
                 else
                 {
                     if (State.Metadata.DurableMessaging && State.Metadata.TTL.HasValue)
-                    {
                         await QueueDurableMessageAsync(message);
-                    }
                     else
-                    {
                         await QueueInMemoryMessageAsync(message);
-                    }
                 }
+
+                await NotifyMetricsAsync();
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription publish failed to complete.");
-                Trace.TraceError("Subscription publish error {0}", ex.Message);
-                error = ex;
-            }
-
-            await NotifyMetricsAsync();
-
-            if (error != null)
-            {
-                await NotifyErrorAsync(error);
+                await logger?.LogErrorAsync(ex, "Subscription notify.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
         }
 
@@ -210,6 +183,8 @@ namespace Piraeus.Grains
         {
             try
             {
+                _ = message ?? throw new ArgumentNullException(nameof(message));
+
                 if (indexes == null)
                 {
                     await NotifyAsync(message);
@@ -227,12 +202,14 @@ namespace Piraeus.Grains
                     State.MessageCount++;
                     State.ByteCount += message.Message.LongLength;
                     State.LastMessageTimestamp = DateTime.UtcNow;
+                    await NotifyMetricsAsync();
                 }
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription publish with indexes failed to complete.");
-                Trace.TraceError("Subscription publish with indexes error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription notify with indexes.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
         }
 
@@ -243,9 +220,7 @@ namespace Piraeus.Grains
             {
                 list = new List<Claim>();
                 foreach (var kvp in kvps)
-                {
                     list.Add(new Claim(kvp.Key, kvp.Value));
-                }
             }
 
             return list;
@@ -257,115 +232,118 @@ namespace Piraeus.Grains
 
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IMessageObserver observer)
         {
-            if (observer == null)
+            try
             {
-                Exception ex = new ArgumentNullException("subscription message observer");
+                _ = observer ?? throw new ArgumentNullException(nameof(observer));
+
+                string leaseKey = Guid.NewGuid().ToString();
+                State.MessageLeases.Add(leaseKey, observer);
+                State.LeaseExpiry.Add(leaseKey, new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), "Message"));
+
+                leaseTimer ??= RegisterTimer(CheckLeaseExpiryAsync, null, TimeSpan.FromSeconds(10.0), TimeSpan.FromSeconds(60.0));
+
+                await DequeueAsync(State.MessageQueue);
+                await WriteStateAsync();
+
+                return await Task.FromResult<string>(leaseKey);
+            }
+            catch(Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription add message observer.");
                 await NotifyErrorAsync(ex);
-                return await Task.FromResult<string>(null);
+                throw;
             }
-
-            string leaseKey = Guid.NewGuid().ToString();
-            State.MessageLeases.Add(leaseKey, observer);
-            State.LeaseExpiry.Add(leaseKey, new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), "Message"));
-
-            if (leaseTimer == null)
-            {
-                leaseTimer = RegisterTimer(CheckLeaseExpiryAsync, null, TimeSpan.FromSeconds(10.0), TimeSpan.FromSeconds(60.0));
-            }
-
-            await DequeueAsync(State.MessageQueue);
-            await WriteStateAsync();
-
-            return await Task.FromResult<string>(leaseKey);
         }
 
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IMetricObserver observer)
         {
-            if (observer == null)
+            try
             {
-                Exception ex = new ArgumentNullException("subscription metric observer");
+                _ = observer ?? throw new ArgumentNullException(nameof(observer));
+
+                string leaseKey = Guid.NewGuid().ToString();
+                State.MetricLeases.Add(leaseKey, observer);
+                State.LeaseExpiry.Add(leaseKey, new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), "Metric"));
+
+                leaseTimer ??= RegisterTimer(CheckLeaseExpiryAsync, null, TimeSpan.FromSeconds(10.0), TimeSpan.FromSeconds(60.0));
+
+                await WriteStateAsync();
+                return await Task.FromResult<string>(leaseKey);
+            }
+            catch (Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription add metric observer.");
                 await NotifyErrorAsync(ex);
-                return await Task.FromResult<string>(null);
+                throw;
             }
-
-            string leaseKey = Guid.NewGuid().ToString();
-            State.MetricLeases.Add(leaseKey, observer);
-            State.LeaseExpiry.Add(leaseKey, new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), "Metric"));
-
-            if (leaseTimer == null)
-            {
-                leaseTimer = RegisterTimer(CheckLeaseExpiryAsync, null, TimeSpan.FromSeconds(10.0), TimeSpan.FromSeconds(60.0));
-            }
-
-            await WriteStateAsync();
-            return await Task.FromResult<string>(leaseKey);
         }
 
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IErrorObserver observer)
         {
-            if (observer == null)
+            try
             {
-                Exception ex = new ArgumentNullException("subscription error observer");
+                _ = observer ?? throw new ArgumentNullException(nameof(observer));
+
+                string leaseKey = Guid.NewGuid().ToString();
+                State.ErrorLeases.Add(leaseKey, observer);
+                State.LeaseExpiry.Add(leaseKey, new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), "Error"));
+
+                leaseTimer ??= RegisterTimer(CheckLeaseExpiryAsync, null, TimeSpan.FromSeconds(10.0), TimeSpan.FromSeconds(60.0));
+
+                await WriteStateAsync();
+                return await Task.FromResult<string>(leaseKey);
+            }
+            catch (Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription add error observer.");
                 await NotifyErrorAsync(ex);
-                return await Task.FromResult<string>(null);
+                throw;
             }
-
-            string leaseKey = Guid.NewGuid().ToString();
-            State.ErrorLeases.Add(leaseKey, observer);
-            State.LeaseExpiry.Add(leaseKey, new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), "Error"));
-
-            if (leaseTimer == null)
-            {
-                leaseTimer = RegisterTimer(CheckLeaseExpiryAsync, null, TimeSpan.FromSeconds(10.0), TimeSpan.FromSeconds(60.0));
-            }
-
-            await WriteStateAsync();
-            return await Task.FromResult<string>(leaseKey);
         }
 
         public async Task RemoveObserverAsync(string leaseKey)
         {
-            var messageQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Message");
-            var metricQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Metric");
-            var errorQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Error");
-
-            if (messageQuery.Count() == 1)
+            try
             {
-                State.MessageLeases.Remove(leaseKey);
+                _ = leaseKey ?? throw new ArgumentNullException(nameof(leaseKey));
 
-                if (State.MessageLeases.Count == 0 && State.Metadata.IsEphemeral)
-                {
-                    await UnsubscribeFromResourceAsync();
-                }
-            }
-
-            if (metricQuery.Count() == 1)
-            {
                 State.MetricLeases.Remove(leaseKey);
-            }
-
-            if (errorQuery.Count() == 1)
-            {
                 State.ErrorLeases.Remove(leaseKey);
+                State.LeaseExpiry.Remove(leaseKey);
+
+                await WriteStateAsync();
             }
-
-            State.LeaseExpiry.Remove(leaseKey);
-
-            await WriteStateAsync();
+            catch (Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription remove observer.");
+                await NotifyErrorAsync(ex);
+                throw;
+            }
         }
 
         public async Task<bool> RenewObserverLeaseAsync(string leaseKey, TimeSpan lifetime)
         {
-            if (State.LeaseExpiry.ContainsKey(leaseKey))
+            try
             {
-                Tuple<DateTime, string> value = State.LeaseExpiry[leaseKey];
-                Tuple<DateTime, string> newValue = new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), value.Item2);
-                State.LeaseExpiry[leaseKey] = newValue;
-                await WriteStateAsync();
-                return await Task.FromResult<bool>(true);
-            }
+                _ = leaseKey ?? throw new ArgumentNullException(nameof(leaseKey));
 
-            return await Task.FromResult<bool>(false);
+                if (State.LeaseExpiry.ContainsKey(leaseKey))
+                {
+                    Tuple<DateTime, string> value = State.LeaseExpiry[leaseKey];
+                    Tuple<DateTime, string> newValue = new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), value.Item2);
+                    State.LeaseExpiry[leaseKey] = newValue;
+                    await WriteStateAsync();
+                    return await Task.FromResult<bool>(true);
+                }
+
+                return await Task.FromResult<bool>(false);
+            }
+            catch (Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription renew observer lease.");
+                await NotifyErrorAsync(ex);
+                throw;
+            }
         }
 
         #endregion Observers
@@ -388,10 +366,9 @@ namespace Piraeus.Grains
                 {
                     State.MessageLeases.Remove(item);
                     State.LeaseExpiry.Remove(item);
+
                     if (State.Metadata.IsEphemeral)
-                    {
                         await UnsubscribeFromResourceAsync();
-                    }
                 }
 
                 foreach (var item in metricLeaseKeyList)
@@ -408,8 +385,9 @@ namespace Piraeus.Grains
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription check lease expiry failed.");
-                Trace.TraceError("Subscription check lease expiry with error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription check lease expiry.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
         }
 
@@ -424,21 +402,18 @@ namespace Piraeus.Grains
                         await DequeueAsync(memoryMessageQueue);
 
                         if (memoryMessageQueue.Count > 0)
-                        {
                             DelayDeactivation(State.Metadata.TTL.Value);
-                        }
                     }
 
                     if (State.MessageQueue != null)
-                    {
                         await DequeueAsync(State.MessageQueue);
-                    }
                 }
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription check queue failed.");
-                Trace.TraceError("Subscription check queue with error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription check queue.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
         }
 
@@ -458,17 +433,16 @@ namespace Piraeus.Grains
                             await NotifyAsync(msg);
 
                             if (State.Metadata.SpoolRate.HasValue)
-                            {
                                 await Task.Delay(State.Metadata.SpoolRate.Value);
-                            }
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription dequeue failed.");
-                Trace.TraceError("Subscription dequeue with error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription dequeue.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
         }
 
@@ -477,21 +451,15 @@ namespace Piraeus.Grains
             try
             {
                 if (State.ErrorLeases.Count == 0)
-                {
                     return;
-                }
 
                 foreach (var item in State.ErrorLeases.Values)
-                {
                     item.NotifyError(State.Metadata.SubscriptionUriString, ex);
-                }
             }
             catch (Exception ex1)
             {
-                Trace.TraceWarning("Subscription notify error failed to complete.");
-                Trace.TraceError("Subscription notify error with error {0}", ex1.Message);
+                await logger?.LogErrorAsync(ex1, "Subscription notify errors.");
             }
-            await Task.CompletedTask;
         }
 
         private async Task NotifyMetricsAsync()
@@ -499,21 +467,17 @@ namespace Piraeus.Grains
             try
             {
                 if (State.MetricLeases.Count == 0)
-                {
                     return;
-                }
 
                 foreach (var item in State.MetricLeases.Values)
-                {
                     item.NotifyMetrics(new CommunicationMetrics(State.Metadata.SubscriptionUriString, State.MessageCount, State.ByteCount, State.ErrorCount, State.LastMessageTimestamp.Value, State.LastErrorTimestamp));
-                }
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription notify metrics failed to complete.");
-                Trace.TraceError("Subscription notify metrics with error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription notify metrics.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
-            await Task.CompletedTask;
         }
 
         private async Task QueueDurableMessageAsync(EventMessage message)
@@ -523,25 +487,21 @@ namespace Piraeus.Grains
                 if (State.MessageQueue.Count > 0)
                 {
                     while (State.MessageQueue.Peek().Timestamp.Add(State.Metadata.TTL.Value) < DateTime.UtcNow)
-                    {
                         State.MessageQueue.Dequeue();
-                    }
                 }
 
                 State.MessageQueue.Enqueue(message);
 
-                if (messageQueueTimer == null)
-                {
-                    messageQueueTimer = RegisterTimer(CheckQueueAsync, null, TimeSpan.FromSeconds(1.0), TimeSpan.FromSeconds(5.0));
-                }
+                messageQueueTimer ??= RegisterTimer(CheckQueueAsync, null, TimeSpan.FromSeconds(1.0), TimeSpan.FromSeconds(5.0));
+
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription queue durable message failed.");
-                Trace.TraceError("Subscription queue durable message with error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription queue durable message.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
-
-            await Task.CompletedTask;
         }
 
         private async Task QueueInMemoryMessageAsync(EventMessage message)
@@ -549,33 +509,37 @@ namespace Piraeus.Grains
             try
             {
                 memoryMessageQueue.Enqueue(message);
+                messageQueueTimer ??= RegisterTimer(CheckQueueAsync, null, TimeSpan.FromSeconds(1.0), TimeSpan.FromSeconds(5.0));
 
-                if (messageQueueTimer == null)
-                {
-                    messageQueueTimer = RegisterTimer(CheckQueueAsync, null, TimeSpan.FromSeconds(1.0), TimeSpan.FromSeconds(5.0));
-                }
-
-                DelayDeactivation(TimeSpan.FromSeconds(60.0));
+                DelayDeactivation(State.Metadata.TTL.Value);
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Subscription queue in-memorty message failed.");
-                Trace.TraceError("Subscription queue in-memory message with error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, "Subscription queue in-memory message.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
-            await Task.CompletedTask;
         }
 
         private async Task UnsubscribeFromResourceAsync()
         {
-            string uriString = State.Metadata.SubscriptionUriString;
-            Uri uri = new Uri(uriString);
-
-            string resourceUriString = uriString.Replace("/" + uri.Segments[^1], "");
-            IPiSystem resource = GrainFactory.GetGrain<IPiSystem>(resourceUriString);
-
-            if (State.Metadata != null && !string.IsNullOrEmpty(State.Metadata.SubscriptionUriString))
+            try
             {
-                await resource.UnsubscribeAsync(State.Metadata.SubscriptionUriString);
+                string uriString = State.Metadata.SubscriptionUriString;
+                Uri uri = new Uri(uriString);
+
+                string resourceUriString = uriString.Replace("/" + uri.Segments[^1], "");
+                IPiSystem resource = GrainFactory.GetGrain<IPiSystem>(resourceUriString);
+
+                if (State.Metadata != null && !string.IsNullOrEmpty(State.Metadata.SubscriptionUriString))
+                    await resource.UnsubscribeAsync(State.Metadata.SubscriptionUriString);
+            }
+            catch (Exception ex)
+            {
+                await logger?.LogErrorAsync(ex, "Subscription unsubscribe from resource.");
+                await NotifyErrorAsync(ex);
+                throw;
             }
         }
 

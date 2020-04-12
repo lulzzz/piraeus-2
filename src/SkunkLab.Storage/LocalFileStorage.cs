@@ -39,7 +39,6 @@ namespace SkunkLab.Storage
             string folder = path.Replace("/" + srcInfo.Name, "");
             string ext = srcInfo.Extension;
 
-            long ticks = DateTime.UtcNow.Ticks;
             DateTimeOffset dto = new DateTimeOffset(DateTime.UtcNow);
             long unix = dto.ToUnixTimeMilliseconds();
             string epoch = unix.ToString();

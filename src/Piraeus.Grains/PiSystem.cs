@@ -23,7 +23,7 @@ namespace Piraeus.Grains
         private IDisposable leaseTimer;
 
         [NonSerialized]
-        private ILog logger;
+        private readonly ILog logger;
 
         public PiSystem(ILog logger = null)
         {
@@ -340,16 +340,9 @@ namespace Piraeus.Grains
             {
                 _ = leaseKey ?? throw new ArgumentNullException(nameof(leaseKey));
 
-                var metricQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Metric");
-                var errorQuery = State.LeaseExpiry.Where((c) => c.Key == leaseKey && c.Value.Item2 == "Error");
-
                 State.LeaseExpiry.Remove(leaseKey);
-
-                if (metricQuery.Count() == 1)
-                    State.MetricLeases.Remove(leaseKey);
-
-                if (errorQuery.Count() == 1)
-                    State.ErrorLeases.Remove(leaseKey);
+                State.MetricLeases.Remove(leaseKey);
+                State.ErrorLeases.Remove(leaseKey);
             }
             catch (Exception ex)
             {
