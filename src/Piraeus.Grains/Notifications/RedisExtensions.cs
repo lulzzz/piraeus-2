@@ -26,17 +26,13 @@
         private static T Deserialize<T>(byte[] stream)
         {
             if (stream == null)
-            {
-                return default(T);
-            }
+                return default;
 
             BinaryFormatter binaryFormatter = new BinaryFormatter();
 
-            using (MemoryStream memoryStream = new MemoryStream(stream))
-            {
-                T result = (T)binaryFormatter.Deserialize(memoryStream);
-                return result;
-            }
+            using MemoryStream memoryStream = new MemoryStream(stream);
+            T result = (T)binaryFormatter.Deserialize(memoryStream);
+            return result;
         }
 
         private static byte[] Serialize(object o)
@@ -47,12 +43,10 @@
             }
 
             BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, o);
-                byte[] objectDataAsStream = memoryStream.ToArray();
-                return objectDataAsStream;
-            }
+            using MemoryStream memoryStream = new MemoryStream();
+            binaryFormatter.Serialize(memoryStream, o);
+            byte[] objectDataAsStream = memoryStream.ToArray();
+            return objectDataAsStream;
         }
     }
 }

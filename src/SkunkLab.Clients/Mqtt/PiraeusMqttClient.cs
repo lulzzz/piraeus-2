@@ -77,11 +77,6 @@ namespace Piraeus.Clients.Mqtt
             await Task.CompletedTask;
         }
 
-        public Task<ConnectAckCode> ConnectAsync(string v1, string v2, object securityToken)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ConnectAckCode> ConnectAsync(string clientId, string username, string password, int keepaliveSeconds)
         {
             code = null;

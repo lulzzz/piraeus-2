@@ -20,19 +20,16 @@ namespace Orleans.Storage.Redis
 
         private readonly RedisStorageOptions options;
 
-        private readonly SerializationManager serializationManager;
-
         private ConnectionMultiplexer connection;
 
         private IDatabase database;
 
         private BinarySerializer serializer;
 
-        public RedisGrainStorage(string name, RedisStorageOptions options, SerializationManager serializationManager, ILogger logger)
+        public RedisGrainStorage(string name, RedisStorageOptions options, ILogger logger = null)
         {
             this.name = name;
             this.options = options;
-            this.serializationManager = serializationManager;
             this.logger = logger;
         }
 

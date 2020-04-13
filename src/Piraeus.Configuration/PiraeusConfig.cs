@@ -372,21 +372,6 @@ namespace Piraeus.Configuration
             }
         }
 
-        private T DeepClone<T>(T obj)
-        {
-            if (obj == null)
-            {
-                return default;
-            }
-
-            using var ms = new MemoryStream();
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(ms, obj);
-            ms.Position = 0;
-
-            return (T)formatter.Deserialize(ms);
-        }
-
         private X509Certificate2 GetCertificateFromStore(string store, string location, string thumbprint)
         {
             StoreName storeName = Enum.Parse<StoreName>(store, true);

@@ -184,7 +184,7 @@ response.StatusCode == HttpStatusCode.NoContent)
 
         protected void Disposing(bool dispose)
         {
-            if (!disposed)
+            if (!disposed && dispose)
             {
                 this.request = null;
                 this.indexes = null;

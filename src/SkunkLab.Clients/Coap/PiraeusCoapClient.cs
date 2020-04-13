@@ -73,7 +73,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token, true, action);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
             CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.GET, token, new Uri(coapUriString), null)
             {
                 Observe = true
@@ -95,7 +95,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token, null, action);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
             RequestMessageType mtype = confirmable ? RequestMessageType.Confirmable : RequestMessageType.NonConfirmable;
             CoapRequest cr = new CoapRequest(id, mtype, MethodType.POST, token, new Uri(coapUriString), MediaTypeConverter.ConvertToMediaType(contentType), payload);
@@ -123,7 +123,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
             CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.POST, new Uri(coapUriString), MediaTypeConverter.ConvertToMediaType(contentType), payload)
             {
@@ -144,7 +144,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token, null, action);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
             RequestMessageType mtype = confirmable ? RequestMessageType.Confirmable : RequestMessageType.NonConfirmable;
             CoapRequest cr = new CoapRequest(id, mtype, MethodType.PUT, token, new Uri(coapUriString), null);
@@ -163,7 +163,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
             CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.PUT, token, new Uri(coapUriString), null)
             {
                 NoResponse = nrt
@@ -186,7 +186,7 @@ namespace SkunkLab.Clients.Coap
                 byte[] token = Convert.FromBase64String(tokenString);
                 ushort id = session.CoapSender.NewId(token, false, null);
                 string scheme = channel.IsEncrypted ? "coaps" : "coap";
-                string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+                string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
                 CoapRequest request = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.GET, new Uri(coapUriString), null)
                 {
@@ -210,7 +210,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token, null, action);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
             RequestMessageType mtype = confirmable ? RequestMessageType.Confirmable : RequestMessageType.NonConfirmable;
             CoapRequest cr = new CoapRequest(id, mtype, MethodType.DELETE, token, new Uri(coapUriString), null);
             await channel.SendAsync(cr.Encode());
@@ -228,7 +228,7 @@ namespace SkunkLab.Clients.Coap
             byte[] token = CoapToken.Create().TokenBytes;
             ushort id = session.CoapSender.NewId(token);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
-            string coapUriString = GetCoapUriString(scheme, config.Authority, resourceUriString);
+            string coapUriString = GetCoapUriString(scheme, resourceUriString);
             CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.DELETE, token, new Uri(coapUriString), null)
             {
                 NoResponse = nrt
@@ -289,7 +289,7 @@ namespace SkunkLab.Clients.Coap
             }
         }
 
-        private string GetCoapUriString(string scheme, string authority, string resourceUriString)
+        private string GetCoapUriString(string scheme, string resourceUriString)
         {
             if (!usedToken && securityToken != null && (tokenType != SecurityTokenType.NONE || tokenType != SecurityTokenType.X509))
             {

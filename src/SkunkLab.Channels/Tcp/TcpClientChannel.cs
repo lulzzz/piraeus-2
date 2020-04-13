@@ -144,6 +144,7 @@ namespace SkunkLab.Channels.Tcp
         {
             this.address = address;
             this.port = port;
+            this.localEP = localEP;
             this.pskIdentity = pskIdentity;
             this.psk = psk;
             this.token = token;

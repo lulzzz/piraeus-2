@@ -31,11 +31,11 @@ namespace Piraeus.Grains.Notifications
 
         private readonly Uri uri;
 
+        private readonly int dbNumber;
+
         private ConnectionMultiplexer connection;
 
         private IDatabase database;
-
-        private int dbNumber;
 
         public RedisSink(SubscriptionMetadata metadata)
             : base(metadata)
@@ -67,6 +67,7 @@ namespace Piraeus.Grains.Notifications
             }
 
             connection = ConnectionMultiplexer.ConnectAsync(connectionString).GetAwaiter().GetResult();
+            database = connection.GetDatabase(dbNumber);
         }
 
         public string GetKey(EventMessage message)
@@ -112,6 +113,7 @@ namespace Piraeus.Grains.Notifications
             if (connection == null || !connection.IsConnected)
             {
                 connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+                database = connection.GetDatabase(dbNumber);
             }
 
             await tqueue.Enqueue(() => cqm.EnqueueAsync(message));
@@ -160,26 +162,7 @@ namespace Piraeus.Grains.Notifications
             finally
             {
                 if (message.Audit && record != null)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
-            }
-        }
-
-        private async Task ConnectAsync()
-        {
-            if (connection == null || !connection.IsConnected)
-            {
-                connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
-                if (dbNumber < 1)
-                {
-                    database = connection.GetDatabase();
-                    dbNumber = database.Database;
-                }
-                else
-                {
-                    database = connection.GetDatabase(dbNumber);
-                }
             }
         }
 
@@ -197,24 +180,16 @@ namespace Piraeus.Grains.Notifications
                 conn = await NewConnection();
 
                 if (dbNumber < 1)
-                {
                     db = connection.GetDatabase();
-                }
                 else
-                {
                     db = connection.GetDatabase(dbNumber);
-                }
 
                 payload = GetPayload(message);
 
                 if (message.ContentType != "application/octet-stream")
-                {
                     await db.StringSetAsync(cacheKey, Encoding.UTF8.GetString(payload), expiry);
-                }
                 else
-                {
                     await db.StringSetAsync(cacheKey, payload, expiry);
-                }
 
                 record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), string.Format("Redis({0})", db.Database), string.Format("Redis({0})", db.Database), payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
@@ -226,14 +201,10 @@ namespace Piraeus.Grains.Notifications
             finally
             {
                 if (canAudit)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
 
                 if (conn != null)
-                {
                     conn.Dispose();
-                }
             }
         }
 

@@ -19,11 +19,8 @@ namespace SkunkLab.Storage
 
         private readonly CloudTableClient client;
 
-        private readonly HashSet<string> tableNames;
-
         protected TableStorage(string connectionString)
         {
-            tableNames = new HashSet<string>();
             CloudStorageAccount account = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(connectionString);
             StorageCredentials credentials = new StorageCredentials(account.Credentials.AccountName, Convert.ToBase64String(account.Credentials.ExportKey()));
 

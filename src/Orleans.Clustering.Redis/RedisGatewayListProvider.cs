@@ -62,13 +62,15 @@ namespace Orleans.Clustering.Redis
                             return gatewayAddress.ToGatewayUri();
                         }).ToList());
                 }
-                catch
+                catch (Exception ex)
                 {
+                    logger?.LogErrorAsync(ex, "Redis Gateway List Provider - GetGateways").GetAwaiter();
                     return Task.FromResult<IList<Uri>>(null);
                 }
             }
             else
             {
+                logger?.LogWarningAsync("Redis Gateway List Provider - No Cluster ID exists.").GetAwaiter();
                 return Task.FromResult<IList<Uri>>(null);
             }
         }
@@ -89,6 +91,7 @@ namespace Orleans.Clustering.Redis
                 }
             }
 
+            logger?.LogWarningAsync("Redis Gateway List Provider - No IP address found for host name.").GetAwaiter();
             return null;
         }
 
@@ -104,6 +107,7 @@ namespace Orleans.Clustering.Redis
                 return ipEndpoint.Address;
             }
 
+            logger?.LogWarningAsync("Redis Gateway List Provider - No IP address found for endpoint.").GetAwaiter();
             return null;
         }
 

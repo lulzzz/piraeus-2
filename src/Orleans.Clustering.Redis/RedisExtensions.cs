@@ -24,19 +24,12 @@ namespace Orleans.Clustering.Redis
             return builder.ConfigureServices(services => services.UseRedisMembership(configureOptions));
         }
 
-        public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder, ILogger<RedisMembershipTable> logger,
-            Action<OptionsBuilder<RedisClusteringOptions>> configureOptions)
-        {
-            return builder.ConfigureServices(services => services.UseRedisMembership(configureOptions));
-        }
-
-        public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder, ILogger<RedisMembershipTable> logger)
+        public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder)
         {
             return builder.ConfigureServices(services =>
             {
                 services.AddOptions<RedisClusteringOptions>();
                 services.AddSingleton<IMembershipTable, RedisMembershipTable>();
-                services.TryAddSingleton<ILogger<RedisMembershipTable>>(logger);
             });
         }
 

@@ -600,53 +600,6 @@ namespace SkunkLab.Storage
             }
         }
 
-        private async Task AppendAsync(CloudAppendBlob blob, Stream stream)
-        {
-            try
-            {
-                await blob.AppendBlockAsync(stream);
-                await stream.FlushAsync();
-                stream.Close();
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceWarning("Blob append failed.");
-                Trace.TraceError(ex.Message);
-                throw ex;
-            }
-        }
-
-        private async Task UploadAsync(ICloudBlob blob, byte[] buffer)
-        {
-            try
-            {
-                using MemoryStream stream = new MemoryStream(buffer);
-                await blob.UploadFromStreamAsync(stream);
-                await stream.FlushAsync();
-                stream.Close();
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceWarning("Blob upload failed with {0}", ex.Message);
-                throw ex;
-            }
-        }
-
-        private async Task UploadAsync(ICloudBlob blob, Stream stream)
-        {
-            try
-            {
-                await blob.UploadFromStreamAsync(stream);
-            }
-            catch (Exception ex)
-            {
-                stream.Close();
-                Trace.TraceWarning("Blob write failed.");
-                Trace.TraceError(ex.Message);
-                throw ex;
-            }
-        }
-
         #endregion Utilities
     }
 }

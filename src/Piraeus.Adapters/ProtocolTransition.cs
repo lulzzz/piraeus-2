@@ -113,11 +113,11 @@ namespace Piraeus.Adapters
             }
             else
             {
-                return MqttConversion(session, message.Message, message.ContentType);
+                return MqttConversion(session, message.Message);
             }
         }
 
-        private static byte[] MqttConversion(MqttSession session, byte[] message, string contentType = null)
+        private static byte[] MqttConversion(MqttSession session, byte[] message)
         {
             PublishMessage msg = MqttMessage.DecodeMessage(message) as PublishMessage;
             MqttUri uri = new MqttUri(msg.Topic);
