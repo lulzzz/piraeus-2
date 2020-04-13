@@ -21,9 +21,7 @@ namespace Piraeus.Grains.Notifications
             _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
             if (string.IsNullOrEmpty(metadata.NotifyAddress))
-            {
                 throw new NullReferenceException("Subscription metadata has no NotifyAddress for passive event sink.");
-            }
 
             if (!initialized)
             {

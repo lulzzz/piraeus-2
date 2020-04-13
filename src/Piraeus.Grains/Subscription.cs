@@ -110,6 +110,10 @@ namespace Piraeus.Grains
 
                 State.Metadata = metadata;
                 await WriteStateAsync();
+
+                if(sink != null)
+                    sink = EventSinkFactory.Create(State.Metadata);
+
             }
             catch(Exception ex)
             {
@@ -147,10 +151,7 @@ namespace Piraeus.Grains
                             List<Claim> claims = GetClaims(kvps);
 
                             sink = EventSinkFactory.Create(State.Metadata, claims, certificate);
-                        }
-                        else
-                        {
-                            sink = EventSinkFactory.Create(State.Metadata);
+                            sink.OnResponse += Sink_OnResponse;
                         }
                     }
 
@@ -177,6 +178,12 @@ namespace Piraeus.Grains
                 await NotifyErrorAsync(ex);
                 throw;
             }
+        }
+
+        private async void Sink_OnResponse(object sender, EventSinkResponseArgs e)
+        {
+            IPiSystem pisystem = GrainFactory.GetGrain<IPiSystem>(e.Message.ResourceUri);
+            await pisystem.PublishAsync(e.Message);
         }
 
         public async Task NotifyAsync(EventMessage message, List<KeyValuePair<string, string>> indexes)
