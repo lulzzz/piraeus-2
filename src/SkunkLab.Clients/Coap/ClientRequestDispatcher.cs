@@ -8,18 +8,11 @@ namespace SkunkLab.Clients.Coap
     {
         private bool disposedValue;
 
-        private string identity;
-
         private CoapClientRequestRegistry registry;
 
         public ClientRequestDispatcher(CoapClientRequestRegistry registry)
         {
             this.registry = registry;
-        }
-
-        public string Identity
-        {
-            set => this.identity = value;
         }
 
         public Task<CoapMessage> DeleteAsync(CoapMessage message)

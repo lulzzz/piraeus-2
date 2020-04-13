@@ -307,7 +307,7 @@ namespace SkunkLab.Storage
 
         #region Append Blob Writers
 
-        public async Task WriteAppendBlobAsync(string containerName, string filename, Stream source, string contentType = "application/octet-stream", CancellationToken token = default)
+        public async Task WriteAppendBlobAsync(string containerName, string filename, Stream source, CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -353,7 +353,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task WriteAppendBlobAsync(string containerName, string filename, byte[] source, string contentType = "application/octet-stream", CancellationToken token = default)
+        public async Task WriteAppendBlobAsync(string containerName, string filename, byte[] source, CancellationToken token = default)
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
             _ = source ?? throw new ArgumentNullException(nameof(source));
@@ -521,7 +521,7 @@ namespace SkunkLab.Storage
             }
         }
 
-        public async Task UploadFileToBlockBlob(string filePath, string containerName, string blobFilename, string contentType = "application/octet-stream", CancellationToken token = default)
+        public async Task UploadFileToBlockBlob(string filePath, string containerName, string blobFilename, CancellationToken token = default)
         {
             _ = filePath ?? throw new ArgumentNullException(nameof(filePath));
             _ = containerName ?? throw new ArgumentNullException(nameof(containerName));

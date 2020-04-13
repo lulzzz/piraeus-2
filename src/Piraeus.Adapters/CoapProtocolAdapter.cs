@@ -174,7 +174,6 @@ namespace Piraeus.Adapters
                 if (!session.IsAuthenticated || forcePerReceiveAuthn)
                 {
                     session.EnsureAuthentication(message, forcePerReceiveAuthn);
-                    dispatcher.Identity = session.Identity;
 
                     UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, session.Config.IdentityClaimType, Channel.TypeId, "COAP", "Granted", DateTime.UtcNow);
                     userAuditor?.WriteAuditRecordAsync(record).Ignore();

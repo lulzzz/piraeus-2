@@ -17,7 +17,7 @@ namespace SkunkLab.Channels.Udp
 
         private readonly CancellationToken token;
 
-        private ChannelState _state;
+        private ChannelState state;
 
         private UdpClient client;
 
@@ -77,15 +77,15 @@ namespace SkunkLab.Channels.Udp
 
         public override ChannelState State
         {
-            get => _state;
+            get => state;
             internal set
             {
-                if (value != _state)
+                if (value != state)
                 {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
-                _state = value;
+                state = value;
             }
         }
 

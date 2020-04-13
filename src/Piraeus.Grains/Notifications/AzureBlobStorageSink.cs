@@ -161,7 +161,7 @@ namespace Piraeus.Grains.Notifications
                             Buffer.BlockCopy(payload, 0, buffer, 0, payload.Length);
                             Buffer.BlockCopy(suffix, 0, buffer, payload.Length, suffix.Length);
 
-                            Task task = storageArray[arrayIndex].WriteAppendBlobAsync(container, appendFilename, buffer, msg.ContentType);
+                            Task task = storageArray[arrayIndex].WriteAppendBlobAsync(container, appendFilename, buffer);
                             Task innerTask = task.ContinueWith(async (a) => { await FaultTask(msg.MessageId, container, appendFilename, buffer, msg.ContentType, msg.Audit); }, TaskContinuationOptions.OnlyOnFaulted);
                             await Task.WhenAll(task);
                         }
@@ -208,7 +208,7 @@ namespace Piraeus.Grains.Notifications
                 }
                 else
                 {
-                    await storage.WriteAppendBlobAsync(container, filename, payload, contentType);
+                    await storage.WriteAppendBlobAsync(container, filename, payload);
                 }
 
                 record = new MessageAuditRecord(id, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob", "AzureBlob", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);

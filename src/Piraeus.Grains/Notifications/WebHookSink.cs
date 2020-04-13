@@ -32,72 +32,57 @@ namespace Piraeus.Grains.Notifications
         public override async Task SendAsync(EventMessage message)
         {
             AuditRecord record = null;
-            HttpWebRequest request = null;
-            byte[] payload = null;
 
             try
             {
-                try
+                byte[] payload = GetPayload(message);
+                if (payload == null)
                 {
-                    payload = GetPayload(message);
-                    if (payload == null)
-                    {
-                        await logger?.LogWarningAsync("Subscription {0} could not write to web hook sink because payload was null.");
-                        return;
-                    }
-
-                    request = HttpWebRequest.Create(address) as HttpWebRequest;
-                    request.ContentType = message.ContentType;
-                    request.Method = "POST";
-
-                    byte[] signature = SignPayload(payload);
-                    request.Headers.Add("Authorization", $"Bearer {Convert.ToBase64String(signature)}");
-
-                    request.ContentLength = payload.Length;
-                    Stream stream = await request.GetRequestStreamAsync();
-                    await stream.WriteAsync(payload, 0, payload.Length);
-                }
-                catch (Exception ex)
-                {
-                    await logger?.LogErrorAsync(ex, $"Subscription {metadata.SubscriptionUriString} Web hook event sink.");
-                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                    await logger?.LogWarningAsync("Subscription {0} could not write to web hook sink because payload was null.");
+                    return;
                 }
 
-                try
-                {
-                    using HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+                HttpWebRequest request = HttpWebRequest.Create(address) as HttpWebRequest;
+                request.ContentType = message.ContentType;
+                request.Method = "POST";
 
-                    if (response.StatusCode == HttpStatusCode.Accepted ||
-                        response.StatusCode == HttpStatusCode.OK ||
-                        response.StatusCode == HttpStatusCode.NoContent ||
-                        response.StatusCode == HttpStatusCode.Created)
-                    {
-                        await logger?.LogInformationAsync($"Subscription {metadata.SubscriptionUriString} web hook request is success.");
-                        record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-                    }
-                    else
-                    {
-                        await logger?.LogWarningAsync($"Subscription {metadata.SubscriptionUriString} web hook request returned an expected status code {response.StatusCode}");
-                        record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, string.Format("Rest request returned an expected status code {0}", response.StatusCode));
-                    }
-                }
-                catch (WebException we)
+                byte[] signature = SignPayload(payload);
+                request.Headers.Add("Authorization", $"Bearer {Convert.ToBase64String(signature)}");
+
+                request.ContentLength = payload.Length;
+                Stream stream = await request.GetRequestStreamAsync();
+                await stream.WriteAsync(payload, 0, payload.Length);
+
+                using HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+
+                if (response.StatusCode == HttpStatusCode.Accepted ||
+                    response.StatusCode == HttpStatusCode.OK ||
+                    response.StatusCode == HttpStatusCode.NoContent ||
+                    response.StatusCode == HttpStatusCode.Created)
                 {
-                    await logger?.LogErrorAsync(we, $"Subscription {metadata.SubscriptionUriString} web hook request sink.");
-                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
+                    await logger?.LogInformationAsync($"Subscription {metadata.SubscriptionUriString} web hook request is success.");
+                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
+                else
+                {
+                    await logger?.LogWarningAsync($"Subscription {metadata.SubscriptionUriString} web hook request returned an expected status code {response.StatusCode}");
+                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, string.Format("Rest request returned an expected status code {0}", response.StatusCode));
+                }
+            }
+            catch (WebException we)
+            {
+                await logger?.LogErrorAsync(we, $"Subscription {metadata.SubscriptionUriString} web hook request sink.");
+                record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
             }
             catch (Exception ex)
             {
-                await logger?.LogErrorAsync(ex, $"Subscription {metadata.SubscriptionUriString} web hook request sink.");
+                await logger?.LogErrorAsync(ex, $"Subscription {metadata.SubscriptionUriString} Web hook event sink.");
                 record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
                 if (message.Audit && record != null)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 

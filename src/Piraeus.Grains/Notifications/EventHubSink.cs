@@ -21,8 +21,6 @@ namespace Piraeus.Grains.Notifications
 
         private readonly string connectionString;
 
-        private readonly int delay;
-
         private readonly string hubName;
 
         private readonly string keyName;
@@ -55,11 +53,6 @@ namespace Piraeus.Grains.Notifications
             if (!int.TryParse(nvc["clients"], out clientCount))
             {
                 clientCount = 1;
-            }
-
-            if (!int.TryParse(nvc["delay"], out delay))
-            {
-                delay = 1000;
             }
 
             if (!string.IsNullOrEmpty(partitionId))

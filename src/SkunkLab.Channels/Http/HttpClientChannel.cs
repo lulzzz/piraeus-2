@@ -21,7 +21,7 @@ namespace SkunkLab.Channels.Http
 
         private readonly CancellationTokenSource tokenSource;
 
-        private ChannelState _state;
+        private ChannelState state;
 
         private string cacheKey;
 
@@ -123,15 +123,15 @@ namespace SkunkLab.Channels.Http
 
         public override ChannelState State
         {
-            get => _state;
+            get => state;
             internal set
             {
-                if (value != _state)
+                if (value != state)
                 {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
-                _state = value;
+                state = value;
             }
         }
 

@@ -37,15 +37,15 @@ namespace SkunkLab.Security.Authentication
             {
                 new Claim(System.Security.Claims.ClaimTypes.SerialNumber, certificate.SerialNumber, null, certificate.Issuer),
                 new Claim(System.Security.Claims.ClaimTypes.Thumbprint, certificate.Thumbprint, null, certificate.Issuer),
-                new Claim(System.Security.Claims.ClaimTypes.X500DistinguishedName, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer),
-                new Claim(System.Security.Claims.ClaimTypes.Name, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer),
-                new Claim(System.Security.Claims.ClaimTypes.Dns, GetParsedClaimValue(',', '=', certificate.Subject), null, certificate.Issuer)
+                new Claim(System.Security.Claims.ClaimTypes.X500DistinguishedName, GetParsedClaimValue(certificate.Subject), null, certificate.Issuer),
+                new Claim(System.Security.Claims.ClaimTypes.Name, GetParsedClaimValue(certificate.Subject), null, certificate.Issuer),
+                new Claim(System.Security.Claims.ClaimTypes.Dns, GetParsedClaimValue(certificate.Subject), null, certificate.Issuer)
             };
 
             return list;
         }
 
-        public static string GetParsedClaimValue(char delimiter1, char delimiter2, string value)
+        public static string GetParsedClaimValue(string value)
         {
             string[] parts = value.Split(new char[] { ',' });
             string[] item = parts[0].Split(new char[] { '=' });

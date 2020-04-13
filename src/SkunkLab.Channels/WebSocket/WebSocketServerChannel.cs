@@ -16,7 +16,7 @@ namespace SkunkLab.Channels.WebSocket
 
         private readonly CancellationToken token;
 
-        private ChannelState _state;
+        private ChannelState state;
 
         private bool disposed;
 
@@ -86,15 +86,15 @@ namespace SkunkLab.Channels.WebSocket
 
         public override ChannelState State
         {
-            get => _state;
+            get => state;
             internal set
             {
-                if (_state != value)
+                if (state != value)
                 {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
-                _state = value;
+                state = value;
             }
         }
 

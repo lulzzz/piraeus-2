@@ -16,14 +16,11 @@ namespace Piraeus.Clients.Mqtt
 
         private readonly MqttSession session;
 
-        private readonly double timeoutMilliseconds;
-
         private ConnectAckCode? code;
 
         public GenericMqttClient(MqttConfig config, IChannel channel, IMqttDispatch dispatcher = null)
         {
             this.dispatcher = dispatcher ?? new GenericMqttDispatcher();
-            timeoutMilliseconds = config.MaxTransmitSpan.TotalMilliseconds;
             session = new MqttSession(config);
             session.OnConnect += Session_OnConnect;
             session.OnDisconnect += Session_OnDisconnect;

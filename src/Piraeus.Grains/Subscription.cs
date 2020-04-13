@@ -307,9 +307,9 @@ namespace Piraeus.Grains
             {
                 _ = leaseKey ?? throw new ArgumentNullException(nameof(leaseKey));
 
+                State.LeaseExpiry.Remove(leaseKey);
                 State.MetricLeases.Remove(leaseKey);
                 State.ErrorLeases.Remove(leaseKey);
-                State.LeaseExpiry.Remove(leaseKey);
 
                 await WriteStateAsync();
             }
@@ -382,6 +382,14 @@ namespace Piraeus.Grains
                     State.ErrorLeases.Remove(item);
                     State.LeaseExpiry.Remove(item);
                 }
+
+                if(State.LeaseExpiry.Count == 0 &&
+                    State.MessageLeases.Count == 0 &&
+                    State.ErrorLeases.Count == 0)
+                {
+                    leaseTimer.Dispose();
+                    leaseTimer = null;
+                }
             }
             catch (Exception ex)
             {
@@ -407,6 +415,11 @@ namespace Piraeus.Grains
 
                     if (State.MessageQueue != null)
                         await DequeueAsync(State.MessageQueue);
+                }
+                else
+                {
+                    messageQueueTimer.Dispose();
+                    messageQueueTimer = null;
                 }
             }
             catch (Exception ex)

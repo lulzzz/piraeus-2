@@ -5,8 +5,6 @@ namespace SkunkLab.Protocols.Coap
 {
     public interface ICoapRequestDispatch : IDisposable
     {
-        string Identity { set; }
-
         Task<CoapMessage> DeleteAsync(CoapMessage message);
 
         Task<CoapMessage> GetAsync(CoapMessage message);
