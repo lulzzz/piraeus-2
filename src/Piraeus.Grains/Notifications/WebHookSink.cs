@@ -32,10 +32,11 @@ namespace Piraeus.Grains.Notifications
         public override async Task SendAsync(EventMessage message)
         {
             AuditRecord record = null;
+            byte[] payload = null;
 
             try
             {
-                byte[] payload = GetPayload(message);
+                payload = GetPayload(message);
                 if (payload == null)
                 {
                     await logger?.LogWarningAsync("Subscription {0} could not write to web hook sink because payload was null.");
