@@ -49,7 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkunkLab.Storage", "SkunkLa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Piraeus.UdpGateway", "Piraeus.UdpGateway\Piraeus.UdpGateway.csproj", "{4D3005F2-EE65-4270-9DF4-6DB1C4A2CC08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.Http.Client", "Samples.Http.Client\Samples.Http.Client.csproj", "{69567BFC-F976-447F-B332-0F0DCDD297FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Http.Client", "Samples.Http.Client\Samples.Http.Client.csproj", "{69567BFC-F976-447F-B332-0F0DCDD297FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Piraeus.Monitor", "Piraeus.Monitor\Piraeus.Monitor.csproj", "{E412B156-F229-4834-86E0-7BA4D1559C0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,6 +155,10 @@ Global
 		{69567BFC-F976-447F-B332-0F0DCDD297FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69567BFC-F976-447F-B332-0F0DCDD297FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69567BFC-F976-447F-B332-0F0DCDD297FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E412B156-F229-4834-86E0-7BA4D1559C0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E412B156-F229-4834-86E0-7BA4D1559C0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E412B156-F229-4834-86E0-7BA4D1559C0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E412B156-F229-4834-86E0-7BA4D1559C0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

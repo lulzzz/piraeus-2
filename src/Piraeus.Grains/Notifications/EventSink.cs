@@ -1,4 +1,5 @@
-﻿using Piraeus.Core.Messaging;
+﻿using Piraeus.Core.Logging;
+using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using System.Threading.Tasks;
 
@@ -8,9 +9,12 @@ namespace Piraeus.Grains.Notifications
     {
         protected SubscriptionMetadata metadata;
 
-        protected EventSink(SubscriptionMetadata metadata)
+        protected ILog logger;
+
+        protected EventSink(SubscriptionMetadata metadata, ILog logger = null)
         {
             this.metadata = metadata;
+            this.logger = logger;
         }
 
         public abstract Task SendAsync(EventMessage message);

@@ -1,4 +1,5 @@
 ﻿using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -37,8 +38,8 @@ namespace Piraeus.Grains.Notifications
 
         private IDatabase database;
 
-        public RedisSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public RedisSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             tqueue = new TaskQueue();
             cqm = new ConcurrentQueueManager();

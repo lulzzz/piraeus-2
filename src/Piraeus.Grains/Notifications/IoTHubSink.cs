@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Client;
 using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -32,8 +33,8 @@ namespace Piraeus.Grains.Notifications
 
         private readonly Uri uri;
 
-        public IoTHubSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public IoTHubSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);

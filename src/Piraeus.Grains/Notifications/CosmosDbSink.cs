@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -44,8 +45,8 @@ namespace Piraeus.Grains.Notifications
 
         private int arrayIndex;
 
-        public CosmosDBSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public CosmosDBSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             queue = new ConcurrentQueue<EventMessage>();
 

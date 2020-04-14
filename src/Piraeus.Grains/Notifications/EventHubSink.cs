@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.EventHubs;
 using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -37,8 +38,8 @@ namespace Piraeus.Grains.Notifications
 
         private int arrayIndex;
 
-        public EventHubSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public EventHubSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             queue = new ConcurrentQueue<byte[]>();
 

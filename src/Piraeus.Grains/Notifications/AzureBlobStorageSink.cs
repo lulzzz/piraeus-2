@@ -1,4 +1,5 @@
 ﻿using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -40,8 +41,8 @@ namespace Piraeus.Grains.Notifications
 
         private int arrayIndex;
 
-        public AzureBlobStorageSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public AzureBlobStorageSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             queue = new ConcurrentQueue<EventMessage>();
 
@@ -116,6 +117,7 @@ namespace Piraeus.Grains.Notifications
             byte[] payload = null;
             EventMessage msg = null;
             queue.Enqueue(message);
+
             try
             {
                 while (!queue.IsEmpty)

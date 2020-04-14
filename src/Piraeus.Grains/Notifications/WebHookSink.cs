@@ -18,10 +18,8 @@ namespace Piraeus.Grains.Notifications
 
         private readonly IAuditor auditor;
 
-        private readonly ILog logger;
-
         public WebHookSink(SubscriptionMetadata metadata, ILog logger)
-            : base(metadata)
+            : base(metadata, logger)
         {
             this.logger = logger;
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);

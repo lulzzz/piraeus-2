@@ -1,4 +1,5 @@
 ﻿using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -27,8 +28,8 @@ namespace Piraeus.Grains.Notifications
 
         private readonly Uri uri;
 
-        public AzureQueueStorageSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public AzureQueueStorageSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             loadQueue = new ConcurrentQueue<EventMessage>();
 

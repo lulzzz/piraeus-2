@@ -2,6 +2,7 @@
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Rest;
 using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -33,8 +34,8 @@ namespace Piraeus.Grains.Notifications
 
         private int arrayIndex;
 
-        public EventGridSink(SubscriptionMetadata metadata)
-            : base(metadata)
+        public EventGridSink(SubscriptionMetadata metadata, ILog logger = null)
+            : base(metadata, logger)
         {
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);

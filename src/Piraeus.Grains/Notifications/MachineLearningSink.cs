@@ -14,13 +14,15 @@ namespace Piraeus.Grains.Notifications
     public class MachineLearningSink : EventSink
     {
         private readonly IAuditor auditor;
-        private readonly ILog logger;
+
         private readonly string outputPiSystem;
+
         private readonly string token;
+
         private readonly Uri uri;
 
         public MachineLearningSink(SubscriptionMetadata metadata, ILog logger = null)
-                                            : base(metadata)
+            : base(metadata, logger)
         {
             this.logger = logger;
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);

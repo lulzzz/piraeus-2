@@ -1,4 +1,6 @@
-﻿using Piraeus.Auditing;
+﻿using Microsoft.Extensions.Logging;
+using Piraeus.Auditing;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
@@ -34,8 +36,8 @@ namespace Piraeus.Grains.Notifications
 
         private string token;
 
-        public RestWebServiceSink(SubscriptionMetadata metadata, List<Claim> claimset = null, X509Certificate2 certificate = null)
-                                                                    : base(metadata)
+        public RestWebServiceSink(SubscriptionMetadata metadata, List<Claim> claimset = null, X509Certificate2 certificate = null, ILog logger = null)
+            : base(metadata, logger)
         {
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             this.certificate = certificate;
