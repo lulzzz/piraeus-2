@@ -395,6 +395,18 @@ namespace Piraeus.Grains
             return await resourceList.GetListAsync();
         }
 
+        public async Task<List<string>> GetSigmaAlgebraAsync(int index, int quantity)
+        {
+            ISigmaAlgebra resourceList = client.GetGrain<ISigmaAlgebra>("resourcelist");
+            return await resourceList.GetListAsync(index, quantity);
+        }
+
+        public async Task<ListContinuationToken> GetSigmaAlgebraAsync(ListContinuationToken token)
+        {
+            ISigmaAlgebra resourceList = client.GetGrain<ISigmaAlgebra>("resourcelist");
+            return await resourceList.GetListAsync(token);
+        }
+
         #endregion Static ResourceList
 
         #region Static Access Control

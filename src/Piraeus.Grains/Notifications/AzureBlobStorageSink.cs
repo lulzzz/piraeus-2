@@ -83,7 +83,7 @@ namespace Piraeus.Grains.Notifications
                 blobType != "page" &&
                 blobType != "append")
             {
-                Trace.TraceWarning("Subscription {0} blob storage sink has invalid Blob Type of {1}", metadata.SubscriptionUriString, blobType);
+                logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' invalid blob type to write.").GetAwaiter();
                 return;
             }
 
@@ -130,7 +130,7 @@ namespace Piraeus.Grains.Notifications
                         payload = GetPayload(msg);
                         if (payload == null)
                         {
-                            Trace.TraceWarning("Subscription {0} could not write to blob storage sink because payload was either null or unknown protocol type.");
+                            await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to blob sink because message is null.");
                             return;
                         }
 
@@ -174,15 +174,13 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Initial blob write error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}'  message not written to blob sink.");
                 record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob", "AzureBlob", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
                 if (msg.Audit && record != null)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 
@@ -217,25 +215,20 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Retry Blob failed.");
-                Trace.TraceError(ex.Message);
+                await logger?.LogErrorAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to blob sink in fault task.");
                 record = new MessageAuditRecord(id, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob", "AzureBlob", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
-                if (canAudit)
-                {
+                if (canAudit && record != null)
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 
         private string GetAppendFilename(string contentType)
         {
             if (appendFilename == null)
-            {
                 appendFilename = GetBlobName(contentType);
-            }
 
             return appendFilename;
         }

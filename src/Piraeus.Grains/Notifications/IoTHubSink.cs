@@ -65,7 +65,7 @@ namespace Piraeus.Grains.Notifications
                 payload = GetPayload(message);
                 if (payload == null)
                 {
-                    Trace.TraceWarning("Subscription {0} could not write to iot hub sink because payload was either null or unknown protocol type.");
+                    await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to iot hub sink because message is null.");
                     return;
                 }
 
@@ -82,7 +82,7 @@ namespace Piraeus.Grains.Notifications
                         }
                         else
                         {
-                            Trace.TraceWarning("Cannot send IoTHub device {0} direct message because content-type is not JSON.", deviceId);
+                            await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' cannot send IoTHub direct method sink because content-type is not JSON.");
                             record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, string.Format("Cannot send IoTHub device {0} direct message because content-type is not JSON.", deviceId));
                         }
                     }
@@ -95,9 +95,7 @@ namespace Piraeus.Grains.Notifications
                         };
 
                         if (!string.IsNullOrEmpty(propertyName))
-                        {
                             serviceMessage.Properties.Add(propertyName, propertyValue);
-                        }
 
                         await serviceClient.SendAsync(deviceId, serviceMessage);
                         record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
@@ -110,29 +108,29 @@ namespace Piraeus.Grains.Notifications
                         ContentType = message.ContentType,
                         MessageId = message.MessageId
                     };
+
                     if (!string.IsNullOrEmpty(propertyName))
-                    {
                         msg.Properties.Add(propertyName, propertyValue);
-                    }
+
                     await deviceClient.SendEventAsync(msg);
                     record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
                 else
                 {
+                    await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' IoTHub sink has neither service or device client.");
                     Trace.TraceWarning("IoTHub subscription has neither Service or Device client");
                     record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, "IoTHub subscription has neither service or device client");
                 }
             }
             catch (Exception ex)
             {
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to IoTHub sink.");
                 record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
                 if (record != null && message.Audit)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 

@@ -90,7 +90,7 @@ namespace Piraeus.Grains.Notifications
 
                     if (payload == null)
                     {
-                        Trace.TraceWarning("Subscription {0} could not write to event hub sink because payload was either null or unknown protocol type.");
+                        await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to event hub sink because message is null.");
                         return;
                     }
 
@@ -98,31 +98,24 @@ namespace Piraeus.Grains.Notifications
                     data.Properties.Add("Content-Type", message.ContentType);
 
                     if (string.IsNullOrEmpty(partitionId))
-                    {
                         await storageArray[arrayIndex].SendAsync(data);
-                    }
                     else
-                    {
                         await senderArray[arrayIndex].SendAsync(data);
-                    }
 
-                    if (message.Audit)
-                    {
+                    if (message.Audit && record != null)
                         record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-                    }
                 }
             }
             catch (Exception ex)
             {
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid hub sink.");
                 record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
                 throw;
             }
             finally
             {
                 if (message.Audit && record != null)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 

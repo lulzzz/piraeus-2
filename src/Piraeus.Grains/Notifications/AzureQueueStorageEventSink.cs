@@ -74,7 +74,7 @@ namespace Piraeus.Grains.Notifications
                         payload = GetPayload(msg);
                         if (payload == null)
                         {
-                            Trace.TraceWarning("Subscription {0} could not write to queue storage sink because payload was either null or unknown protocol type.");
+                            await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink because message is null.");
                             return;
                         }
 
@@ -89,15 +89,14 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex)
             {
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink.");
                 record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
                 throw;
             }
             finally
             {
                 if (record != null && msg.Audit)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 

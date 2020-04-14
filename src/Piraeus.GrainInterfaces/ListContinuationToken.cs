@@ -12,8 +12,8 @@ namespace Piraeus.GrainInterfaces
         {
         }
 
-        [JsonProperty("count")]
-        public int Count { get; set; }
+        [JsonProperty("remaining")]
+        public int Remaining { get; set; }
 
         [JsonProperty("index")]
         public int Index { get; set; }

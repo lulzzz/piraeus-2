@@ -98,7 +98,7 @@ namespace Piraeus.Grains.Notifications
                         payload = GetPayload(message);
                         if (payload == null)
                         {
-                            Trace.TraceWarning("Subscription {0} could not write to CosmosDB sink because payload was either null or unknown protocol type.");
+                            await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink because message is null.");
                             continue;
                         }
 
@@ -132,14 +132,13 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex)
             {
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink.");
                 record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "CosmosDB", "CosmosDB", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
                 if (record != null && message.Audit)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 
@@ -149,12 +148,8 @@ namespace Piraeus.Grains.Notifications
             if (collections != null)
             {
                 foreach (DocumentCollection collection in collections)
-                {
                     if (collection.Id == id)
-                    {
                         return collection;
-                    }
-                }
             }
 
             return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection() { Id = id });
@@ -167,19 +162,14 @@ namespace Piraeus.Grains.Notifications
                 List<Database> dbs = await ListDatabasesAsync();
 
                 foreach (Database db in dbs)
-                {
                     if (db.Id == databaseId)
-                    {
                         return db;
-                    }
-                }
 
                 return await storageArray[0].CreateDatabaseAsync(new Database { Id = databaseId });
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Cannot return or create Doc DB database.");
-                Trace.TraceError(ex.Message);
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink failed to get database.");
                 throw;
             }
         }
@@ -253,8 +243,6 @@ namespace Piraeus.Grains.Notifications
         {
             string continuation = null;
             List<DocumentCollection> collections = new List<DocumentCollection>();
-
-            Exception exception;
             try
             {
                 do
@@ -277,29 +265,12 @@ namespace Piraeus.Grains.Notifications
 
                 return collections;
             }
-            catch (DocumentClientException dce)
-            {
-                exception = dce;
-            }
-            catch (AggregateException ae)
-            {
-                exception = ae;
-            }
             catch (Exception ex)
             {
-                exception = ex;
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink, failed to find collection.");
+                throw;
             }
 
-            if (exception != null)
-            {
-                Trace.TraceWarning("Exception locating Document DB collection.");
-                Trace.TraceError(exception.Message);
-                throw exception;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }

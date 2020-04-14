@@ -14,6 +14,10 @@ namespace Piraeus.GrainInterfaces
 
         Task<List<string>> GetListAsync();
 
+        Task<List<string>> GetListAsync(int index, int quantity);
+
+        Task<ListContinuationToken> GetListAsync(ListContinuationToken token);
+
         Task RemoveAsync(string resourceUriString);
     }
 }

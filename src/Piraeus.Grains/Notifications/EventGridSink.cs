@@ -69,7 +69,7 @@ namespace Piraeus.Grains.Notifications
                 payload = GetPayload(message);
                 if (payload == null)
                 {
-                    Trace.TraceWarning("Subscription {0} could not write to blob storage sink because payload was either null or unknown protocol type.");
+                    await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink because message is null.");
                     return;
                 }
 
@@ -83,15 +83,13 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Initial event grid write error {0}", ex.Message);
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink.");
                 record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
                 if (message.Audit && record != null)
-                {
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 
@@ -109,16 +107,13 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning("Retry EventGrid failed.");
-                Trace.TraceError(ex.Message);
+                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink in fault task.");
                 record = new MessageAuditRecord(id, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {
-                if (canAudit)
-                {
+                if (canAudit && record != null)
                     await auditor?.WriteAuditRecordAsync(record);
-                }
             }
         }
 
