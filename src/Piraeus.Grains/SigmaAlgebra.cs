@@ -1,5 +1,6 @@
 ﻿using Orleans;
 using Orleans.Providers;
+using Piraeus.Core.Logging;
 using Piraeus.GrainInterfaces;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,33 @@ namespace Piraeus.Grains
     [Serializable]
     public class SigmaAlgebra : Grain<SigmaAlgebraState>, ISigmaAlgebra
     {
+        [NonSerialized]
+        private ILog logger;
+
+        public SigmaAlgebra(ILog logger = null)
+        {
+            this.logger = logger;
+        }
+
+        public override Task OnActivateAsync()
+        {
+            State.Container ??= new List<string>();
+
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
+        }
+
         public async Task<bool> AddAsync(string resourceUriString)
         {
             long id = 1;
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
-            return await chain.AddAsync(resourceUriString);
+            bool result = await chain.AddAsync(resourceUriString);
+            await logger?.LogInformationAsync($"SigmaAlgebra add '{result}' for '{resourceUriString}'");
+            await Task.FromResult<bool>(result);
         }
 
         public async Task ClearAsync()
@@ -33,6 +56,7 @@ namespace Piraeus.Grains
                 cnt = await chain.GetCountAsync();
             }
 
+            await logger?.LogInformationAsync($"SigmaAlgebra cleared.");
             await ClearStateAsync();
         }
 
@@ -265,23 +289,12 @@ namespace Piraeus.Grains
 
         }
 
-        public override Task OnActivateAsync()
-        {
-            State.Container ??= new List<string>();
-
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
-        }
-
         public async Task RemoveAsync(string resourceUriString)
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
-            State.Container.Remove(resourceUriString);
+            bool result = State.Container.Remove(resourceUriString);
+            await logger?.LogInformationAsync($"SigmaAlgebra removed {result} on {resourceUriString}.");
             await Task.CompletedTask;
         }
     }
