@@ -12,8 +12,43 @@ namespace Piraeus.GrainInterfaces
         {
         }
 
-        [JsonProperty("remaining")]
-        public int Remaining { get; set; }
+        public ListContinuationToken(int index, int quantity, int pageSize)
+        {
+            Index = index;
+            Quantity = quantity;
+            PageSize = pageSize;
+        }
+
+        public ListContinuationToken(int index, int quantity, int pageSize, string filter)
+        {
+            Index = index;
+            Quantity = quantity;
+            PageSize = pageSize;
+            Filter = filter;
+        }
+
+        public ListContinuationToken(int index, int quantity, int pageSize, string filter, List<string> items)
+        {
+            Index = index;
+            Quantity = quantity;
+            PageSize = pageSize;
+            Filter = filter;
+            Items = items;
+        }
+
+
+        public ListContinuationToken(int index, int quantity, int pageSize, List<string> items)
+        {
+            Index = index;
+            Quantity = quantity;
+            PageSize = pageSize;
+            Items = items;
+        }
+
+
+
+        [JsonProperty("pageSize")]
+        public int PageSize { get; set; }
 
         [JsonProperty("index")]
         public int Index { get; set; }
@@ -23,5 +58,8 @@ namespace Piraeus.GrainInterfaces
 
         [JsonProperty("quantity")]
         public int Quantity { get; set; }
+
+        [JsonProperty("filter")]
+        public string Filter { get; set; }
     }
 }

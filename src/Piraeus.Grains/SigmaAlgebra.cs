@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Azure.ServiceBus;
+using System.Collections.Specialized;
 
 namespace Piraeus.Grains
 {
@@ -22,53 +24,220 @@ namespace Piraeus.Grains
 
         public async Task ClearAsync()
         {
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            int cnt = await chain.GetCountAsync();
+
+            while(cnt > 0)
+            {
+                await chain.ClearAsync();
+                id++;
+                chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                cnt = await chain.GetCountAsync();
+            }
+
             await ClearStateAsync();
         }
 
-        public async Task<bool> Contains(string resourceUriString)
+        public async Task<bool> ContainsAsync(string resourceUriString)
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
             return await Task.FromResult<bool>(State.Container.Contains(resourceUriString));
         }
 
-        public async Task<List<string>> GetListAsync()
+        public async Task<int> GetCountAsync()
         {
-            return await Task.FromResult<List<string>>(State.Container);
+            return await Task.FromResult<int>(State.Container.Count);
         }
 
-        public async Task<List<string>> GetListAsync(int index, int quantity)
+        public async Task<List<string>> GetListAsync()
+        {
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+
+            int cnt = await chain.GetCountAsync();
+            if (cnt == 0)
+                return await Task.FromResult<List<string>>(new List<string>());
+
+            List<string> list = new List<string>();
+
+            while (cnt > 0)
+            {
+                list.AddRange(await chain.GetListAsync());
+                id++;
+                chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                cnt = await chain.GetCountAsync();
+            }
+
+            list.Sort();
+            return await Task.FromResult<List<string>>(list);
+        }
+
+        public async Task<List<string>> GetListAsync(string filter)
+        {
+            _ = filter ?? throw new ArgumentNullException(nameof(filter));
+
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+
+            int cnt = await chain.GetCountAsync();
+            if (cnt == 0)
+                return await Task.FromResult<List<string>>(new List<string>());
+
+            List<string> list = new List<string>();
+
+            while(cnt > 0)
+            {
+                list.AddRange(await chain.GetListAsync(filter));
+                id++;
+                chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                cnt = await chain.GetCountAsync();
+            }
+
+            list.Sort();
+            return await Task.FromResult<List<string>>(list);
+        }
+
+        public async Task<List<string>> GetListAsync(int index, int pageSize)
         {
             if (index < 0)
                 throw new IndexOutOfRangeException(nameof(index));
 
-            if (quantity < 0)
-                throw new IndexOutOfRangeException(nameof(quantity));
+            if (pageSize < 0)
+                throw new IndexOutOfRangeException(nameof(pageSize));
 
-            if (index >= State.Container.Count)
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+
+            int cnt = await chain.GetCountAsync();
+            if (cnt == 0)
+                return await Task.FromResult<List<string>>(new List<string>());
+
+            List<string> list = new List<string>();
+            int numItems = 0;
+
+            while (cnt > 0)
             {
-                return null;
+                numItems += cnt;
+                if(index > numItems)
+                {
+                    id++;
+                    chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                    cnt = await chain.GetCountAsync();
+                    continue;
+                }
+                else
+                {
+                    int stdIndex = index - ((Convert.ToInt32(id) - 1) * 1000);
+                    List<string> chainList = await chain.GetListAsync();
+
+                    if (pageSize <= cnt - index)
+                    {
+                        list.AddRange(chainList.Skip(stdIndex).Take(pageSize));
+                        return await Task.FromResult<List<string>>(list);
+                    }
+                    else if (pageSize > cnt - index)
+                    {
+                        list.AddRange(chainList.Skip(stdIndex).Take(cnt - index));
+                        pageSize -= (cnt - index);
+                    }
+                }
             }
-            else if (index + quantity >= State.Container.Count)
+
+            return await Task.FromResult<List<string>>(list);
+        }
+
+        public async Task<List<string>> GetListAsync(int index, int pageSize, string filter)
+        {
+            if (index < 0)
+                throw new IndexOutOfRangeException(nameof(index));
+
+            if (pageSize < 0)
+                throw new IndexOutOfRangeException(nameof(pageSize));
+
+            _ = filter ?? throw new ArgumentNullException(nameof(filter));
+
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+
+            int cnt = await chain.GetCountAsync();
+
+            if (cnt == 0)
+                return await Task.FromResult<List<string>>(new List<string>());
+
+            List<string> list = new List<string>();
+
+            while (cnt > 0)
             {
-                return await Task.FromResult<List<string>>(new List<string>(State.Container.Skip(index).Take(State.Container.Count - index)));
+                int filterCount =+ await chain.GetCountAsync(filter);
+
+                if (index > filterCount)
+                {
+                    id++;
+                    chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                    cnt = await chain.GetCountAsync();
+                    continue;
+                }
+                else
+                {
+                    int stdIndex = index - ((Convert.ToInt32(id) - 1) * 1000);
+                    List<string> chainList = await chain.GetListAsync(filter);
+
+                    if (pageSize <= filterCount - index)
+                    {
+                        list.AddRange(chainList.Skip(stdIndex).Take(pageSize));
+                        return await Task.FromResult<List<string>>(list);
+                    }
+                    else if (pageSize > filterCount - index)
+                    {
+                        list.AddRange(chainList.Skip(stdIndex).Take(filterCount - index));
+                        pageSize -= (filterCount - index);
+                    }
+                }
             }
-            else
-            {
-                return await Task.FromResult<List<string>>(new List<string>(State.Container.Skip(index).Take(quantity)));
-            }
+
+            return await Task.FromResult<List<string>>(list);
         }
 
         public async Task<ListContinuationToken> GetListAsync(ListContinuationToken token)
         {
             _ = token ?? throw new ArgumentNullException(nameof(token));
 
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            int count = token.Filter != null ? await chain.GetCountAsync(token.Filter) : await chain.GetCountAsync();
+
+            if(token.Filter != null)
+            {
+                List<string> filterItems = await GetListAsync(token.Index, token.PageSize, token.Filter);
+                return await Task.FromResult<ListContinuationToken>(new ListContinuationToken(token.Index + filterItems.Count, token.Quantity, token.PageSize, token.Filter, filterItems));
+            }
+            else
+            {
+                List<string> items = await GetListAsync(token.Index, token.PageSize);
+                return await Task.FromResult<ListContinuationToken>(new ListContinuationToken(token.Index + items.Count, token.Quantity, token.PageSize, items));
+            }
+        }
+
+        public async Task<ListContinuationToken> GetListAsync(ListContinuationToken token, string filter)
+        {
+            _ = token ?? throw new ArgumentNullException(nameof(token));
+            _ = filter ?? throw new ArgumentNullException(nameof(filter));
+
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            int count = await chain.GetCountAsync(filter);
+
             int remaining = token.Index + token.Quantity >= State.Container.Count ? 0 : State.Container.Count - (token.Index + token.Quantity);
             int index = token.Index + token.Quantity >= State.Container.Count ? State.Container.Count - 1 : token.Index + token.Quantity;
             int quantity = token.Index + token.Quantity >= State.Container.Count ? State.Container.Count - token.Quantity : token.Quantity;
 
-            List<string> items = await GetListAsync(token.Index, token.Quantity);
-            return new ListContinuationToken() { Index = index, Quantity = quantity, Remaining = remaining, Items = items };
+            List<string> items = await GetListAsync(token.Index, token.Quantity, filter);
+            return new ListContinuationToken() { Index = index, Quantity = quantity, PageSize = remaining, Items = items };
+
+
+
         }
 
         public override Task OnActivateAsync()
