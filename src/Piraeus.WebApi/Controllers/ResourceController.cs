@@ -167,6 +167,64 @@ namespace Piraeus.WebApi.Controllers
             }
         }
 
+
+        [HttpGet("GetSigmaAlgebraWithFilter")]
+        [Authorize]
+        [Produces("application/json")]
+        public async Task<ActionResult<IEnumerable<string>>> GetSigmaAlgebra(string filter)
+        {
+            try
+            {
+                List<string> list = await graphManager.GetSigmaAlgebraAsync(filter);
+
+                logger?.LogInformation($"Returning sigma algebra");
+                if (list == null || list.Count == 0)
+                {
+                    logger?.LogWarning($"No sigma algebras found.");
+                }
+                else
+                {
+                    logger?.LogInformation("Sigma algebras returned.");
+                }
+                return StatusCode(200, list.ToArray());
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, $"Error getting sigma algebra");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [HttpGet("GetSigmaAlgebraWithContinuationToken")]
+        [Authorize]
+        [Produces("application/json")]
+        public async Task<ActionResult<ListContinuationToken>> GetSigmaAlgebra(ListContinuationToken token)
+        {
+            try
+            {
+                ListContinuationToken continuationToken = await graphManager.GetSigmaAlgebraAsync(token);
+
+                logger?.LogInformation($"Returning sigma algebra");
+                if (continuationToken == null)
+                {
+                    logger?.LogWarning($"No sigma algebras found.");
+                }
+                else
+                {
+                    logger?.LogInformation("Sigma algebras returned.");
+                }
+
+                return StatusCode(200, continuationToken);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, $"Error getting sigma algebra");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
         [HttpPost("Subscribe")]
         [Authorize]
         [Produces("application/json")]

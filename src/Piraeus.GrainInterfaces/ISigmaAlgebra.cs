@@ -6,7 +6,7 @@ namespace Piraeus.GrainInterfaces
 {
     public interface ISigmaAlgebra : IGrainWithStringKey
     {
-        Task AddAsync(string resourceUriString);
+        Task<bool> AddAsync(string resourceUriString);
 
         Task ClearAsync();
 

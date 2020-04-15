@@ -3,10 +3,8 @@ using Orleans.Providers;
 using Piraeus.GrainInterfaces;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.Azure.ServiceBus;
-using System.Collections.Specialized;
+using System.Threading.Tasks;
 
 namespace Piraeus.Grains
 {
@@ -14,12 +12,11 @@ namespace Piraeus.Grains
     [Serializable]
     public class SigmaAlgebra : Grain<SigmaAlgebraState>, ISigmaAlgebra
     {
-        public async Task AddAsync(string resourceUriString)
+        public async Task<bool> AddAsync(string resourceUriString)
         {
-            if (!State.Container.Contains(resourceUriString))
-                State.Container.Add(resourceUriString);
-
-            await WriteStateAsync();
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            return await chain.AddAsync(resourceUriString);
         }
 
         public async Task ClearAsync()
@@ -43,12 +40,40 @@ namespace Piraeus.Grains
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
-            return await Task.FromResult<bool>(State.Container.Contains(resourceUriString));
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            if (await chain.ContainsAsync(resourceUriString))
+                return await Task.FromResult<bool>(true);
+
+            int cnt = await chain.GetCountAsync();
+
+            while(cnt > 0)
+            {
+                id++;
+                chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                if (await chain.ContainsAsync(resourceUriString))
+                    return await Task.FromResult<bool>(true);
+            }
+
+            return await Task.FromResult<bool>(false);
         }
 
         public async Task<int> GetCountAsync()
         {
-            return await Task.FromResult<int>(State.Container.Count);
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            int cnt = await chain.GetCountAsync();
+            int total = cnt;
+
+            while(cnt > 0)
+            {
+                id++;
+                chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+                cnt = await chain.GetCountAsync();
+                total += cnt;
+            }
+
+            return await Task.FromResult<int>(total);
         }
 
         public async Task<List<string>> GetListAsync()
