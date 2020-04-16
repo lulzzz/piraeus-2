@@ -1,6 +1,7 @@
 ﻿using Orleans;
 using Orleans.Providers;
 using Piraeus.Core.Logging;
+using Piraeus.Core.Messaging;
 using Piraeus.GrainInterfaces;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace Piraeus.Grains
     public class SigmaAlgebra : Grain<SigmaAlgebraState>, ISigmaAlgebra
     {
         [NonSerialized]
-        private ILog logger;
+        private readonly ILog logger;
 
         public SigmaAlgebra(ILog logger = null)
         {
@@ -23,8 +24,6 @@ namespace Piraeus.Grains
 
         public override Task OnActivateAsync()
         {
-            State.Container ??= new List<string>();
-
             return Task.CompletedTask;
         }
 
@@ -39,7 +38,7 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
             bool result = await chain.AddAsync(resourceUriString);
             await logger?.LogInformationAsync($"SigmaAlgebra add '{result}' for '{resourceUriString}'");
-            await Task.FromResult<bool>(result);
+            return await Task.FromResult<bool>(result);
         }
 
         public async Task ClearAsync()
@@ -48,7 +47,7 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
             int cnt = await chain.GetCountAsync();
 
-            while(cnt > 0)
+            while (cnt > 0)
             {
                 await chain.ClearAsync();
                 id++;
@@ -71,7 +70,7 @@ namespace Piraeus.Grains
 
             int cnt = await chain.GetCountAsync();
 
-            while(cnt > 0)
+            while (cnt > 0)
             {
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
@@ -89,7 +88,7 @@ namespace Piraeus.Grains
             int cnt = await chain.GetCountAsync();
             int total = cnt;
 
-            while(cnt > 0)
+            while (cnt > 0)
             {
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
@@ -136,7 +135,7 @@ namespace Piraeus.Grains
 
             List<string> list = new List<string>();
 
-            while(cnt > 0)
+            while (cnt > 0)
             {
                 list.AddRange(await chain.GetListAsync(filter));
                 id++;
@@ -169,7 +168,7 @@ namespace Piraeus.Grains
             while (cnt > 0)
             {
                 numItems += cnt;
-                if(index > numItems)
+                if (index > numItems)
                 {
                     id++;
                     chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
@@ -219,7 +218,7 @@ namespace Piraeus.Grains
 
             while (cnt > 0)
             {
-                int filterCount =+ await chain.GetCountAsync(filter);
+                int filterCount = +await chain.GetCountAsync(filter);
 
                 if (index > filterCount)
                 {
@@ -257,7 +256,7 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
             int count = token.Filter != null ? await chain.GetCountAsync(token.Filter) : await chain.GetCountAsync();
 
-            if(token.Filter != null)
+            if (token.Filter != null)
             {
                 List<string> filterItems = await GetListAsync(token.Index, token.PageSize, token.Filter);
                 return await Task.FromResult<ListContinuationToken>(new ListContinuationToken(token.Index + filterItems.Count, token.Quantity, token.PageSize, token.Filter, filterItems));
@@ -269,33 +268,15 @@ namespace Piraeus.Grains
             }
         }
 
-        public async Task<ListContinuationToken> GetListAsync(ListContinuationToken token, string filter)
-        {
-            _ = token ?? throw new ArgumentNullException(nameof(token));
-            _ = filter ?? throw new ArgumentNullException(nameof(filter));
-
-            long id = 1;
-            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
-            int count = await chain.GetCountAsync(filter);
-
-            int remaining = token.Index + token.Quantity >= State.Container.Count ? 0 : State.Container.Count - (token.Index + token.Quantity);
-            int index = token.Index + token.Quantity >= State.Container.Count ? State.Container.Count - 1 : token.Index + token.Quantity;
-            int quantity = token.Index + token.Quantity >= State.Container.Count ? State.Container.Count - token.Quantity : token.Quantity;
-
-            List<string> items = await GetListAsync(token.Index, token.Quantity, filter);
-            return new ListContinuationToken() { Index = index, Quantity = quantity, PageSize = remaining, Items = items };
-
-
-
-        }
-
         public async Task RemoveAsync(string resourceUriString)
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
-            bool result = State.Container.Remove(resourceUriString);
+            long id = 1;
+            ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
+            bool result = await chain.RemoveAsync(resourceUriString);
             await logger?.LogInformationAsync($"SigmaAlgebra removed {result} on {resourceUriString}.");
-            await Task.CompletedTask;
+            await Task.FromResult<bool>(result);
         }
     }
 }

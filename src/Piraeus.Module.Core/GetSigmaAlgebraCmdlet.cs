@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Piraeus.Core.Messaging;
+using System.Collections.Generic;
 using System.Management.Automation;
 
 namespace Piraeus.Module
@@ -6,6 +7,9 @@ namespace Piraeus.Module
     [Cmdlet(VerbsCommon.Get, "PiraeusSigmaAlgebra")]
     public class GetSigmaAlgebraCmdlet : Cmdlet
     {
+        [Parameter(HelpMessage = "Url filter, e.g., http://www.example.org/*/thing?", Mandatory = false)]
+        public string Filter;
+
         [Parameter(HelpMessage = "Security token used to access the REST service.", Mandatory = true)]
         public string SecurityToken;
 
@@ -14,7 +18,13 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/resource/getsigmaalgebra", ServiceUrl);
+            string url;
+
+            if(string.IsNullOrEmpty(Filter))
+                url = $"{ServiceUrl}/api/resource/getsigmaalgebra";
+            else
+                url = $"{ServiceUrl}/api/resource/getsigmaalgebrawithfilter?filter={Filter}";
+
             RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 

@@ -1,4 +1,5 @@
 ﻿using Orleans;
+using Piraeus.Core.Messaging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -23,9 +24,6 @@ namespace Piraeus.GrainInterfaces
         Task<List<string>> GetListAsync(int index, int pageSize, string filter);
 
         Task<ListContinuationToken> GetListAsync(ListContinuationToken token);
-
-        Task<ListContinuationToken> GetListAsync(ListContinuationToken token, string filter);
-
 
         Task RemoveAsync(string resourceUriString);
     }

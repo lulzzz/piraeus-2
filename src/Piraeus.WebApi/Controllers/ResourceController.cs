@@ -196,7 +196,7 @@ namespace Piraeus.WebApi.Controllers
         }
 
 
-        [HttpGet("GetSigmaAlgebraWithContinuationToken")]
+        [HttpPost("PageSigmaAlgebra")]
         [Authorize]
         [Produces("application/json")]
         public async Task<ActionResult<ListContinuationToken>> GetSigmaAlgebra(ListContinuationToken token)

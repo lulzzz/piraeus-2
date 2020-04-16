@@ -1,6 +1,5 @@
 ﻿using Piraeus.Core.Logging;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Piraeus.Core

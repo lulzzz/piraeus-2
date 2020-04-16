@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans.Clustering.Redis;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Storage.Redis;
 using Piraeus.Configuration;
+using Piraeus.Core.Logging;
 using System;
 using System.Net;
 using System.Threading;
@@ -30,14 +32,6 @@ namespace Piraeus.SiloHost
 #else
             host = AddClusteredSiloHost();
 #endif
-            //if (orleansConfig.Dockerized)
-            //{
-            //    host = AddClusteredSiloHost();
-            //}
-            //else
-            //{
-            //    host = AddLocalSiloHost();
-            //}
 
             await host.StartAsync(cancellationToken);
         }
@@ -53,21 +47,19 @@ namespace Piraeus.SiloHost
         private ISiloHost AddLocalSiloHost()
         {
             var builder = new SiloHostBuilder()
-            // Use localhost clustering for a single local silo
             .UseLocalhostClustering()
-            // Configure ClusterId and ServiceId
             .Configure<ClusterOptions>(options =>
             {
                 options.ClusterId = orleansConfig.ClusterId;
                 options.ServiceId = orleansConfig.ServiceId;
             })
             .AddMemoryGrainStorage("store")
-            // Configure connectivity
             .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-
-            // Configure logging with any logging framework that supports Microsoft.Extensions.Logging.
-            // In this particular case it logs using the Microsoft.Extensions.Logging.Console package.
-            .ConfigureLogging(logging => logging.AddConsole());
+            .ConfigureLogging(logging => {
+                logging.AddConsole();
+                logging.AddDebug();
+                logging.Services.TryAddSingleton<ILog, Logger>();
+                });
 
             return builder.Build();
         }
@@ -104,16 +96,16 @@ namespace Piraeus.SiloHost
             silo.ConfigureLogging(builder =>
             {
                 if (loggers.HasFlag(LoggerType.Console))
-                {
                     builder.AddConsole();
-                }
 
                 if (loggers.HasFlag(LoggerType.Debug))
-                {
                     builder.AddDebug();
-                }
+
+                if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                    builder.AddApplicationInsights(orleansConfig.InstrumentationKey);
 
                 builder.SetMinimumLevel(orleansLogLevel);
+                builder.Services.TryAddSingleton<ILog, Logger>();
             });
 
             if (!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))

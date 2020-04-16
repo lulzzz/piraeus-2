@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Piraeus.Configuration;
 using Piraeus.Core.Logging;
 using Piraeus.Extensions.Configuration;
 using System;
@@ -9,22 +11,6 @@ namespace Piraeus.SiloHost.Core
 {
     public class Program
     {
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-.ConfigureLogging((builder) =>
-{
-    builder.AddConsole();
-    builder.SetMinimumLevel(LogLevel.Debug);
-})
-.ConfigureServices((hostContext, services) =>
-{
-    services.AddOrleansConfiguration();
-    services.AddSingleton<Logger>();    //add the logger
-    services.AddHostedService<SiloHostService>(); //start the silo host
-});
-        }
-
         private static void Main(string[] args)
         {
             Console.WriteLine("  ******** **  **            **      **                    **");
@@ -40,32 +26,45 @@ namespace Piraeus.SiloHost.Core
             CreateHostBuilder(args).Build().Run();
         }
 
-        //private static ManualResetEventSlim done;
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+                    .ConfigureLogging((builder) =>
+                    {
+                        var orleansConfig = GetOrleansConfiguration();
+                        LogLevel orleansLogLevel = Enum.Parse<LogLevel>(orleansConfig.LogLevel, true);
+                        var loggers = orleansConfig.GetLoggerTypes();
 
-        //static void Main(string[] args)
-        //{
-        //    //TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-        //    //IServiceCollection services = new ServiceCollection();
-        //    //Startup startup = new Startup(null);
-        //    //startup.ConfigureServices(services);
+                        if (loggers.HasFlag(LoggerType.Console))
+                            builder.AddConsole();
 
-        //    //done = new ManualResetEventSlim(false);
+                        if (loggers.HasFlag(LoggerType.Debug))
+                            builder.AddDebug();
 
-        //    //Console.CancelKeyPress += (sender, eventArgs) =>
-        //    //{
-        //    //    done.Set();
-        //    //    eventArgs.Cancel = true;
-        //    //};
+                        if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                            builder.AddApplicationInsights(orleansConfig.InstrumentationKey);
 
-        //    //Console.WriteLine("Orleans silo is running...");
-        //    //done.Wait();
+                        builder.SetMinimumLevel(orleansLogLevel);
+                        builder.Services.AddSingleton<ILog, Logger>();
 
-        //}
+                    })
+                    .ConfigureServices((hostContext, services) =>
+                    {
+                        services.AddOrleansConfiguration();
+                        services.AddSingleton<Logger>();    //add the logger
+                        services.AddHostedService<SiloHostService>(); //start the silo host
+                    });
+        }
 
-        //private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
-        //{
-        //    //Restart the container because unobserved exception
-        //    done.Set();
-        //}
+        private static OrleansConfig GetOrleansConfiguration()
+        {
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile("./orleansconfig.json")
+                .AddEnvironmentVariables("OR_");
+            IConfigurationRoot root = builder.Build();
+            OrleansConfig config = new OrleansConfig();
+            root.Bind(config);
+            return config;
+        }
     }
 }

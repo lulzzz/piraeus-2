@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Orleans.Runtime;
-using Orleans.Serialization;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Binary;
 using System;

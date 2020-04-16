@@ -54,11 +54,8 @@ namespace Piraeus.Module
                 {
                     msg = bufferStream.ToArray();
                 }
-                //buffer = new byte[response.ContentLength];
-                //stream.Read(buffer, 0, buffer.Length);
             }
 
-            //return Serializer.Deserialize<T>(contentType, buffer);
             if (msg != null)
             {
                 return Serializer.Deserialize<T>(contentType, msg);
@@ -83,7 +80,6 @@ namespace Piraeus.Module
 
         public override T Post<T>()
         {
-            //byte[] buffer = null;
             string contentType = requestBuilder.ContentType.ToLowerInvariant();
 
             HttpWebRequest request = requestBuilder.BuildRequest();
@@ -99,9 +95,6 @@ namespace Piraeus.Module
             byte[] msg = null;
             using (Stream responseStream = response.GetResponseStream())
             {
-                //    buffer = new byte[response.ContentLength];
-                //    responseStream.Read(buffer, 0, buffer.Length);
-
                 using MemoryStream bufferStream = new MemoryStream();
                 int bytesRead;
                 do
@@ -116,13 +109,11 @@ namespace Piraeus.Module
                 msg = bufferStream.ToArray();
             }
 
-            //return Serializer.Deserialize<T>(contentType, buffer);
             return Serializer.Deserialize<T>(contentType, msg);
         }
 
         public override U Post<T, U>(T body)
         {
-            //byte[] buffer = null;
             string contentType = requestBuilder.ContentType.ToLowerInvariant();
             byte[] payload = Serializer.Serialize<T>(contentType, body);
 

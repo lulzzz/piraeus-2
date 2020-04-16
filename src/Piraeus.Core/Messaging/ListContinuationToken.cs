@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Piraeus.GrainInterfaces
+namespace Piraeus.Core.Messaging
 {
     [Serializable]
     [JsonObject]

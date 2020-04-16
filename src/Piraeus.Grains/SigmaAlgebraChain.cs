@@ -44,7 +44,7 @@ namespace Piraeus.Grains
             nextId++;
 
             ISigmaAlgebraChain nextChain = GrainFactory.GetGrain<ISigmaAlgebraChain>(nextId);
-            while(await nextChain.GetCountAsync() >= 1000)
+            while (await nextChain.GetCountAsync() >= 1000)
             {
                 if (await nextChain.ContainsAsync(resourceUriString))
                     return await Task.FromResult<bool>(false);
@@ -79,13 +79,13 @@ namespace Piraeus.Grains
             int count = State.Container.Count;
             int nextCount = await nextChain.GetCountAsync();
 
-            if(count <= 1000 && nextCount > 0)
+            if (count <= 1000 && nextCount > 0)
             {
                 List<string> list = await nextChain.GetListAsync();
                 int qty = 1000 - count;
                 int delta = qty > list.Count ? list.Count : qty;
 
-                for(int i=0;i<delta;i++)
+                for (int i = 0; i < delta; i++)
                 {
                     State.Container.Add(list[i]);
                     await nextChain.RemoveAsync(list[i]);

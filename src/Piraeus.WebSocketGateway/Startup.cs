@@ -53,7 +53,7 @@ namespace Piraeus.WebSocketGateway
                 }
             }
             services.AddLogging(builder => builder.AddLogging(config));
-            services.AddSingleton<Logger>();
+            services.AddSingleton<ILog, Logger>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

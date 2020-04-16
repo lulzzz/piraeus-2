@@ -32,7 +32,7 @@ namespace Piraeus.WebSocketGateway.Middleware
 
         private CancellationTokenSource source;
 
-        public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client, Logger logger, IOptions<WebSocketOptions> options)
+        public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client, ILog logger, IOptions<WebSocketOptions> options)
         {
             container = new Dictionary<string, ProtocolAdapter>();
             _next = next;
@@ -66,12 +66,12 @@ namespace Piraeus.WebSocketGateway.Middleware
 
             await adapter.Channel.OpenAsync();
             await _next(context);
-            Console.WriteLine("Exiting WS Invoke");
+            await logger.LogInformationAsync("Exiting Web socket invoke.");
         }
 
         private void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs e)
         {
-            Console.WriteLine("Adapter closing");
+            logger.LogInformationAsync("Adapter closing.").GetAwaiter();
             ProtocolAdapter adapter = null;
 
             try
@@ -79,45 +79,46 @@ namespace Piraeus.WebSocketGateway.Middleware
                 if (container.ContainsKey(e.ChannelId))
                 {
                     adapter = container[e.ChannelId];
-                    Console.WriteLine("Adapter on close channel id found adapter to dispose.");
+                    logger.LogInformationAsync("Adapter on close channel id found adapter to dispose.").GetAwaiter();
                 }
                 else
                 {
-                    Console.WriteLine("Adapter on close did not find a channel id available for the adapter.");
+                    logger.LogInformationAsync("Adapter on close did not find a channel id available for the adapter.").GetAwaiter();
                 }
 
                 if ((adapter != null && adapter.Channel != null) && (adapter.Channel.State == ChannelState.Closed || adapter.Channel.State == ChannelState.Aborted || adapter.Channel.State == ChannelState.ClosedReceived || adapter.Channel.State == ChannelState.CloseSent))
                 {
                     adapter.Dispose();
-                    Console.WriteLine("Adapter disposed");
+                    logger.LogInformationAsync("Adapter disposed.").GetAwaiter();
                 }
                 else
                 {
                     try
                     {
-                        Console.WriteLine("Adpater trying to close channel.");
+                        logger.LogInformationAsync("Adpater trying to close channel.").GetAwaiter();
                         adapter.Channel.CloseAsync().GetAwaiter();
-                        Console.WriteLine("Adapter has closed the channel");
+                        logger.LogInformationAsync("Adapter has closed the channel").GetAwaiter();
                     }
                     catch { }
                     adapter.Dispose();
-                    Console.WriteLine("Adapter disposed by default");
+                    logger.LogWarningAsync("Adapter disposed by default").GetAwaiter();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Adapter on close fault - {ex.Message}");
+                logger.LogErrorAsync(ex, "Adapter on close fault").GetAwaiter();
             }
         }
 
         private void Adapter_OnError(object sender, ProtocolAdapterErrorEventArgs e)
         {
-            Console.WriteLine($"Adapter OnError - {e.Error.Message}");
+            logger.LogErrorAsync(e.Error, "Adapter OnError").GetAwaiter();
+
             if (container.ContainsKey(e.ChannelId))
             {
                 ProtocolAdapter adapter = container[e.ChannelId];
                 adapter.Channel.CloseAsync().GetAwaiter();
-                Console.WriteLine("Adapter channel closed due to error.");
+                logger.LogWarningAsync("Adapter channel closed due to error.").GetAwaiter();
             }
         }
     }

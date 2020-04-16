@@ -15,47 +15,48 @@ namespace Piraeus.WebApi
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-.ConfigureServices(services => services.AddPiraeusConfiguration())
-.ConfigureWebHostDefaults(webBuilder =>
-{
-    PiraeusConfig config = WebApiHelpers.GetPiraeusConfig();
-    webBuilder.ConfigureKestrel((options) =>
-    {
-        options.Limits.MaxConcurrentConnections = config.MaxConnections;
-        options.Limits.MaxConcurrentUpgradedConnections = config.MaxConnections;
-        options.Limits.MaxRequestBodySize = config.MaxBufferSize;
-        options.Limits.MinRequestBodyDataRate =
-    new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
-        options.Limits.MinResponseDataRate =
-    new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
-        X509Certificate2 cert = config.GetServerCerticate();
-        int[] ports = config.GetPorts();
+                .ConfigureServices(services => services.AddPiraeusConfiguration())
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    PiraeusConfig config = WebApiHelpers.GetPiraeusConfig();
+                    webBuilder
+                    .ConfigureKestrel((options) =>
+                    {
+                        options.Limits.MaxConcurrentConnections = config.MaxConnections;
+                        options.Limits.MaxConcurrentUpgradedConnections = config.MaxConnections;
+                        options.Limits.MaxRequestBodySize = config.MaxBufferSize;
+                        options.Limits.MinRequestBodyDataRate =
+                    new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
+                        options.Limits.MinResponseDataRate =
+                    new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
+                        X509Certificate2 cert = config.GetServerCerticate();
+                        int[] ports = config.GetPorts();
 
-        foreach (int port in ports)
-        {
-            if (cert != null)
-            {
-                options.ListenAnyIP(port, (a) => a.UseHttps(cert));
-            }
-            else
-            {
-                IPAddress address = GetIPAddress(Dns.GetHostName());
-                options.Listen(address, port);
-            }
-        }
+                        foreach (int port in ports)
+                        {
+                            if (cert != null)
+                            {
+                                options.ListenAnyIP(port, (a) => a.UseHttps(cert));
+                            }
+                            else
+                            {
+                                IPAddress address = GetIPAddress(Dns.GetHostName());
+                                options.Listen(address, port);
+                            }
+                        }
 
-        if (!string.IsNullOrEmpty(config.ServerCertificateFilename))
-        {
-            string[] portStrings = config.Ports.Split(";", StringSplitOptions.RemoveEmptyEntries);
+                        if (!string.IsNullOrEmpty(config.ServerCertificateFilename))
+                        {
+                            string[] portStrings = config.Ports.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var portString in portStrings)
-            {
-                options.ListenAnyIP(Convert.ToInt32(portString), (a) => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
-            }
-        }
-    });
-    webBuilder.UseStartup<Startup>();
-});
+                            foreach (var portString in portStrings)
+                            {
+                                options.ListenAnyIP(Convert.ToInt32(portString), (a) => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
+                            }
+                        }
+                    });
+                    webBuilder.UseStartup<Startup>();
+                });
         }
 
         public static void Main(string[] args)

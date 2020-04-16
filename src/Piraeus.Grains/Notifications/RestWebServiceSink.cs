@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Piraeus.Auditing;
+﻿using Piraeus.Auditing;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;

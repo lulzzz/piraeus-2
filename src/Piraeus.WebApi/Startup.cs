@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Orleans.Configuration;
 using Piraeus.Configuration;
 using Piraeus.Core.Logging;
 using Piraeus.Extensions.Configuration;
@@ -86,6 +87,7 @@ namespace Piraeus.WebApi
             services.AddPiraeusConfiguration();
             services.AddOrleansConfiguration();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<ILog, Logger>();
             services.AddLogging(log =>
             {
                 log.AddConsole();
@@ -97,7 +99,6 @@ namespace Piraeus.WebApi
                 services.AddApplicationInsightsTelemetry(pconfig.InstrumentationKey);
             }
 
-            services.AddSingleton<Logger>();
             services.AddSingletonOrleansClusterClient(WebApiHelpers.GetOrleansConfig());
             services.AddRouting();
         }

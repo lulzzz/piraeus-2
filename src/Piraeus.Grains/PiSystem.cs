@@ -1,6 +1,5 @@
 ﻿using Orleans;
 using Orleans.Concurrency;
-using Orleans.LeaseProviders;
 using Orleans.Providers;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
@@ -8,7 +7,6 @@ using Piraeus.Core.Metadata;
 using Piraeus.GrainInterfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -78,7 +76,7 @@ namespace Piraeus.Grains
 
                 await WriteStateAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, $"Pi-system UpdateMetadataAsync '{metadata.ResourceUriString}'");
                 await NotifyErrorAsync(ex);
@@ -102,7 +100,7 @@ namespace Piraeus.Grains
                     return await Task.FromResult<IEnumerable<string>>(result);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger.LogErrorAsync(ex, "Pi-system GetSubscriptionListAsync");
                 await NotifyErrorAsync(ex);
@@ -135,7 +133,7 @@ namespace Piraeus.Grains
 
                 await WriteStateAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, "Pi-system Subscribe");
                 await NotifyErrorAsync(ex);
@@ -156,7 +154,7 @@ namespace Piraeus.Grains
                 await subscriber.RemoveSubscriptionAsync(subscriptionUriString);
                 await WriteStateAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, "Pi-system Unsubscribe.");
                 await NotifyErrorAsync(ex);
@@ -278,7 +276,7 @@ namespace Piraeus.Grains
 
                 await ClearStateAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, "Pi-system clear.");
                 await NotifyErrorAsync(ex);
@@ -368,7 +366,7 @@ namespace Piraeus.Grains
 
                 return await Task.FromResult<bool>(false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, "Pi-system remove observer.");
                 await NotifyErrorAsync(ex);

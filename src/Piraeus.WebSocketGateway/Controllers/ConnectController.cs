@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Piraeus.Adapters;
 using Piraeus.Configuration;
+using Piraeus.Core.Logging;
 using Piraeus.Grains;
 using SkunkLab.Channels;
 using SkunkLab.Security.Authentication;
@@ -26,7 +27,7 @@ namespace Piraeus.WebSocketGateway.Controllers
 
         private readonly GraphManager graphManager;
 
-        private readonly ILogger logger;
+        private readonly ILog logger;
 
         private ProtocolAdapter adapter;
 
@@ -34,7 +35,7 @@ namespace Piraeus.WebSocketGateway.Controllers
 
         private CancellationTokenSource source;
 
-        public ConnectController(PiraeusConfig config, IClusterClient client, ILogger logger)
+        public ConnectController(PiraeusConfig config, IClusterClient client, ILog logger)
         {
             this.config = config;
             BasicAuthenticator basicAuthn = new BasicAuthenticator();
@@ -66,7 +67,7 @@ namespace Piraeus.WebSocketGateway.Controllers
                 catch (Exception ex)
                 {
                     StatusCode(500);
-                    Console.WriteLine(ex.Message);
+                    await logger.LogErrorAsync(ex, "Http-Get");
                     return new HttpResponseMessage(HttpStatusCode.InternalServerError);
                 }
             }

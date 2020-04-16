@@ -8,7 +8,6 @@ using Piraeus.GrainInterfaces;
 using Piraeus.Grains.Notifications;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
@@ -111,11 +110,11 @@ namespace Piraeus.Grains
                 State.Metadata = metadata;
                 await WriteStateAsync();
 
-                if(sink != null)
+                if (sink != null)
                     sink = EventSinkFactory.Create(State.Metadata);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, "Subscription get metadata.");
                 await NotifyErrorAsync(ex);
@@ -254,7 +253,7 @@ namespace Piraeus.Grains
 
                 return await Task.FromResult<string>(leaseKey);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, "Subscription add message observer.");
                 await NotifyErrorAsync(ex);
@@ -390,7 +389,7 @@ namespace Piraeus.Grains
                     State.LeaseExpiry.Remove(item);
                 }
 
-                if(State.LeaseExpiry.Count == 0 &&
+                if (State.LeaseExpiry.Count == 0 &&
                     State.MessageLeases.Count == 0 &&
                     State.ErrorLeases.Count == 0)
                 {
