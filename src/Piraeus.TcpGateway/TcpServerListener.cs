@@ -51,7 +51,7 @@ namespace Piraeus.TcpGateway
                 SecurityTokenType stt = Enum.Parse<SecurityTokenType>(config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
-                this.authn = bauthn;
+                authn = bauthn;
             }
         }
 
@@ -74,7 +74,7 @@ namespace Piraeus.TcpGateway
                 SecurityTokenType stt = (SecurityTokenType)System.Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
-                this.authn = bauthn;
+                authn = bauthn;
             }
         }
 
@@ -85,7 +85,7 @@ namespace Piraeus.TcpGateway
             listener.ExclusiveAddressUse = false;
             listener.Start();
 
-            await logger?.LogInformationAsync($"<----- TCP Listener started on Address {serverIP.ToString()} and Port {serverPort} ----->");
+            await logger?.LogInformationAsync($"<----- TCP Listener started on Address {serverIP} and Port {serverPort} ----->");
 
             while (!token.IsCancellationRequested)
             {
@@ -108,7 +108,7 @@ namespace Piraeus.TcpGateway
 
         public async Task StopAsync()
         {
-            await logger?.LogInformationAsync($"TCP Listener stopping on Address {serverIP.ToString()} and Port {serverPort}");
+            await logger?.LogInformationAsync($"TCP Listener stopping on Address {serverIP} and Port {serverPort}");
 
             if (dict != null & dict.Count > 0)
             {

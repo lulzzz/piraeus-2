@@ -22,16 +22,6 @@ namespace Piraeus.Grains
             this.logger = logger;
         }
 
-        public override Task OnActivateAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
-        }
-
         public async Task<bool> AddAsync(string resourceUriString)
         {
             long id = 1;
@@ -254,7 +244,8 @@ namespace Piraeus.Grains
 
             long id = 1;
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
-            int count = token.Filter != null ? await chain.GetCountAsync(token.Filter) : await chain.GetCountAsync();
+
+            _ = token.Filter != null ? await chain.GetCountAsync(token.Filter) : await chain.GetCountAsync();
 
             if (token.Filter != null)
             {
@@ -266,6 +257,16 @@ namespace Piraeus.Grains
                 List<string> items = await GetListAsync(token.Index, token.PageSize);
                 return await Task.FromResult<ListContinuationToken>(new ListContinuationToken(token.Index + items.Count, token.Quantity, token.PageSize, items));
             }
+        }
+
+        public override Task OnActivateAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
         }
 
         public async Task RemoveAsync(string resourceUriString)

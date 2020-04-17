@@ -323,7 +323,7 @@ namespace Piraeus.Clients.Mqtt
             try
             {
                 code = null;
-                this.channel.Dispose();
+                channel.Dispose();
             }
             catch (Exception ex)
             {

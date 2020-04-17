@@ -18,10 +18,10 @@ namespace Piraeus.Grains
     public class PiSystem : Grain<PiSystemState>, IPiSystem
     {
         [NonSerialized]
-        private IDisposable leaseTimer;
+        private readonly ILog logger;
 
         [NonSerialized]
-        private readonly ILog logger;
+        private IDisposable leaseTimer;
 
         public PiSystem(ILog logger = null)
         {
@@ -110,7 +110,6 @@ namespace Piraeus.Grains
 
         public async Task SubscribeAsync(ISubscription subscription)
         {
-
             try
             {
                 _ = subscription ?? throw new ArgumentNullException(nameof(subscription));
@@ -308,7 +307,6 @@ namespace Piraeus.Grains
                 await NotifyErrorAsync(ex);
                 throw;
             }
-
         }
 
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IErrorObserver observer)

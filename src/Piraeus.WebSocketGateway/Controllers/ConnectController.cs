@@ -43,7 +43,7 @@ namespace Piraeus.WebSocketGateway.Controllers
             basicAuthn.Add(tokenType, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
             authn = basicAuthn;
 
-            this.graphManager = new GraphManager(client);
+            graphManager = new GraphManager(client);
             this.logger = logger;
         }
 
@@ -106,7 +106,6 @@ namespace Piraeus.WebSocketGateway.Controllers
         {
             try
             {
-
                 adapter.Channel.CloseAsync().GetAwaiter();
                 logger.LogDebugAsync("Web socket adapter disposed.").GetAwaiter();
             }

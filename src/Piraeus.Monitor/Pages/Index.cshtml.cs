@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
-using Piraeus.GrainInterfaces;
 using Piraeus.Monitor.Hubs;
 using System.Collections.Generic;
 
@@ -23,10 +22,15 @@ namespace Piraeus.Monitor.Pages
         }
 
         public Dictionary<string, EventMetadata> Container { get; internal set; }
+
         public int Counter { get; set; }
+
         public int Index { get; internal set; }
+
         public List<string> PiSystems { get; internal set; }
+
         public int Quantity { get; internal set; }
+
         //public void OnGet()
         //{
         //    //PiSystems = adapter.GetPiSystemsAsync().GetAwaiter().GetResult();

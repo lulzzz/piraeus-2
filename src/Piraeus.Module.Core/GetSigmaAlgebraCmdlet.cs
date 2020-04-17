@@ -1,5 +1,4 @@
-﻿using Piraeus.Core.Messaging;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Management.Automation;
 
 namespace Piraeus.Module
@@ -20,7 +19,7 @@ namespace Piraeus.Module
         {
             string url;
 
-            if(string.IsNullOrEmpty(Filter))
+            if (string.IsNullOrEmpty(Filter))
                 url = $"{ServiceUrl}/api/resource/getsigmaalgebra";
             else
                 url = $"{ServiceUrl}/api/resource/getsigmaalgebrawithfilter?filter={Filter}";

@@ -86,17 +86,15 @@ namespace SkunkLab.Storage
         {
             if (obj == null)
             {
-                return default(T);
+                return default;
             }
 
-            using (var ms = new MemoryStream())
-            {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, obj);
-                ms.Position = 0;
+            using var ms = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(ms, obj);
+            ms.Position = 0;
 
-                return (T)formatter.Deserialize(ms);
-            }
+            return (T)formatter.Deserialize(ms);
         }
     }
 }

@@ -87,7 +87,6 @@ namespace SkunkLab.Storage
             string crlf = "\r\n";
             byte[] crlfBytes = Encoding.UTF8.GetBytes(crlf);
 
-
             byte[] buffer;
             if (existing.Length == 0)
             {

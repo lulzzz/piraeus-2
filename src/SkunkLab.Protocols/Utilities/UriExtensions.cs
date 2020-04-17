@@ -7,7 +7,7 @@ namespace SkunkLab.Protocols.Utilities
         public static string ToCanonicalString(this Uri uri, bool trailingWhack, bool removeLastSegment = false)
         {
             string uriString = uri.ToString().ToLowerInvariant();
-            string result = null;
+            string result;
 
             if (string.IsNullOrEmpty(uri.Query))
             {
@@ -25,13 +25,13 @@ namespace SkunkLab.Protocols.Utilities
             else
             {
                 Uri uri2 = new Uri(result);
-                return result.Replace("/" + uri2.Segments[uri2.Segments.Length - 1], "");
+                return result.Replace("/" + uri2.Segments[^1], "");
             }
         }
 
         private static string GetBase(string uriString, Uri uri, bool trailingWhack)
         {
-            bool isTrailing = uri.Segments[uri.Segments.Length - 1] == "/";
+            bool isTrailing = uri.Segments[^1] == "/";
 
             if (trailingWhack)
             {

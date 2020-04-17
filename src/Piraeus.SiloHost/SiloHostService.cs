@@ -55,11 +55,12 @@ namespace Piraeus.SiloHost
             })
             .AddMemoryGrainStorage("store")
             .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-            .ConfigureLogging(logging => {
+            .ConfigureLogging(logging =>
+            {
                 logging.AddConsole();
                 logging.AddDebug();
                 logging.Services.TryAddSingleton<ILog, Logger>();
-                });
+            });
 
             return builder.Build();
         }

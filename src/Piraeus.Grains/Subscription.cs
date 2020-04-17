@@ -21,6 +21,9 @@ namespace Piraeus.Grains
     public class Subscription : Grain<SubscriptionState>, ISubscription
     {
         [NonSerialized]
+        private readonly ILog logger;
+
+        [NonSerialized]
         private IDisposable leaseTimer;
 
         [NonSerialized]
@@ -31,9 +34,6 @@ namespace Piraeus.Grains
 
         [NonSerialized]
         private EventSink sink;
-
-        [NonSerialized]
-        private readonly ILog logger;
 
         public Subscription(ILog logger = null)
         {
@@ -112,7 +112,6 @@ namespace Piraeus.Grains
 
                 if (sink != null)
                     sink = EventSinkFactory.Create(State.Metadata);
-
             }
             catch (Exception ex)
             {
@@ -120,7 +119,6 @@ namespace Piraeus.Grains
                 await NotifyErrorAsync(ex);
                 throw;
             }
-
         }
 
         #endregion Metadata
@@ -179,12 +177,6 @@ namespace Piraeus.Grains
             }
         }
 
-        private async void Sink_OnResponse(object sender, EventSinkResponseArgs e)
-        {
-            IPiSystem pisystem = GrainFactory.GetGrain<IPiSystem>(e.Message.ResourceUri);
-            await pisystem.PublishAsync(e.Message);
-        }
-
         public async Task NotifyAsync(EventMessage message, List<KeyValuePair<string, string>> indexes)
         {
             try
@@ -230,6 +222,12 @@ namespace Piraeus.Grains
             }
 
             return list;
+        }
+
+        private async void Sink_OnResponse(object sender, EventSinkResponseArgs e)
+        {
+            IPiSystem pisystem = GrainFactory.GetGrain<IPiSystem>(e.Message.ResourceUri);
+            await pisystem.PublishAsync(e.Message);
         }
 
         #endregion Notification

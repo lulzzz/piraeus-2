@@ -12,9 +12,13 @@
     public class JsonWebToken : Microsoft.IdentityModel.Tokens.SecurityToken
     {
         private readonly DateTime created;
+
         private readonly DateTime expires;
+
         private readonly string id;
+
         private readonly string issuer;
+
         private readonly string tokenString;
 
         public JsonWebToken(string securityKey, IEnumerable<Claim> claims, double? lifetimeMinutes, string issuer = null, string audience = null)

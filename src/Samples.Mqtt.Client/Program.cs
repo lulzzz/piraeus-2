@@ -19,6 +19,8 @@ namespace Samples.Mqtt.Client
 
         private static readonly string subResource = null;
 
+        private static string audience = issuer;
+
         private static IChannel channel;
 
         private static int channelNum;
@@ -30,8 +32,6 @@ namespace Samples.Mqtt.Client
         private static int index;
 
         private static string issuer = "http://localhost/";
-
-        private static string audience = issuer;
 
         private static PiraeusMqttClient mqttClient;
 

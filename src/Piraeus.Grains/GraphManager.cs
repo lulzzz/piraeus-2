@@ -68,8 +68,8 @@ namespace Piraeus.Grains
             AddStorageProvider(builder, connectionString);
             AddAppInsighlts(builder, loggers, instrumentationKey);
             AddLoggers(builder, loggers, logLevel);
-            this.client = builder.Build();
-            this.client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
+            client = builder.Build();
+            client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
         }
 
         private IClientBuilder AddAppInsighlts(IClientBuilder builder, LoggerType loggers, string instrumentationKey = null)

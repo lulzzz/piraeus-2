@@ -26,7 +26,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             Id = "tcp-" + Guid.NewGuid().ToString();
             Port = ((IPEndPoint)client.Client.LocalEndPoint).Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpServerChannel(TcpClient client, X509Certificate2 certificate, bool clientAuth, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -39,7 +39,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             Id = "tcp-" + Guid.NewGuid().ToString();
             Port = ((IPEndPoint)client.Client.LocalEndPoint).Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpServerChannel(TcpClient client, TlsPskIdentityManager pskManager, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -51,7 +51,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             Id = "tcp-" + Guid.NewGuid().ToString();
             Port = ((IPEndPoint)client.Client.LocalEndPoint).Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         #endregion ctor
@@ -70,8 +70,6 @@ namespace SkunkLab.Channels.Tcp
 
         private readonly CancellationToken token;
 
-        private ChannelState state;
-
         private TcpClient client;
 
         private bool disposed;
@@ -81,6 +79,8 @@ namespace SkunkLab.Channels.Tcp
         private TlsServerProtocol protocol;
 
         private SemaphoreSlim readConnection;
+
+        private ChannelState state;
 
         private Stream stream;
 
@@ -114,7 +114,7 @@ namespace SkunkLab.Channels.Tcp
 
         public override int Port { get; internal set; }
 
-        public override bool RequireBlocking => this.pskManager != null;
+        public override bool RequireBlocking => pskManager != null;
 
         public override ChannelState State
         {
@@ -205,7 +205,7 @@ namespace SkunkLab.Channels.Tcp
             {
                 try
                 {
-                    protocol = client.ConnectPskTlsServer(pskManager, localStream);
+                    protocol = TlsClientUtil.ConnectPskTlsServer(pskManager, localStream);
                     stream = protocol.Stream;
                     IsEncrypted = true;
                 }

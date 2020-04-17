@@ -25,11 +25,11 @@ namespace Piraeus.WebApi.Controllers
         {
             if (!GraphManager.IsInitialized)
             {
-                this.graphManager = GraphManager.Create(clusterClient);
+                graphManager = GraphManager.Create(clusterClient);
             }
             else
             {
-                this.graphManager = GraphManager.Instance;
+                graphManager = GraphManager.Instance;
             }
 
             this.logger = logger;
@@ -167,7 +167,6 @@ namespace Piraeus.WebApi.Controllers
             }
         }
 
-
         [HttpGet("GetSigmaAlgebraWithFilter")]
         [Authorize]
         [Produces("application/json")]
@@ -194,7 +193,6 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
 
         [HttpPost("PageSigmaAlgebra")]
         [Authorize]
@@ -223,7 +221,6 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
 
         [HttpPost("Subscribe")]
         [Authorize]

@@ -32,7 +32,7 @@
 
                 TransformsDictionary dict = new TransformsDictionary();
                 Action<Type, TransformsDictionary> addTranAsType;
-                Action<TransformAction, TransformsDictionary> addTranAsInstance;
+                //Action<TransformAction, TransformsDictionary> addTranAsInstance;
 
                 addTranAsType = (typeRef, op) =>
                 {
@@ -40,10 +40,10 @@
                     op.Add(operation.Uri.ToString(), operation);
                 };
 
-                addTranAsInstance = (instance, op) =>
-                {
-                    op.Add(instance.Uri.ToString(), instance);
-                };
+                //addTranAsInstance = (instance, op) =>
+                //{
+                //    op.Add(instance.Uri.ToString(), instance);
+                //};
 
                 addTranAsType(typeof(AddTransformAction), dict);
                 addTranAsType(typeof(RemoveTransformAction), dict);

@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Orleans.Configuration;
 using Piraeus.Configuration;
 using Piraeus.Core.Logging;
 using Piraeus.Extensions.Configuration;

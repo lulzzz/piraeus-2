@@ -26,13 +26,13 @@ namespace Piraeus.Grains.Notifications
 
         private readonly ConcurrentQueueManager cqm;
 
+        private readonly int dbNumber;
+
         private readonly TimeSpan? expiry;
 
         private readonly TaskQueue tqueue;
 
         private readonly Uri uri;
-
-        private readonly int dbNumber;
 
         private ConnectionMultiplexer connection;
 
@@ -128,7 +128,7 @@ namespace Piraeus.Grains.Notifications
 
                     if (cacheKey == null)
                     {
-                        Trace.TraceWarning("Redis sink has no cache key for subscription '{0}'.", this.metadata.SubscriptionUriString);
+                        Trace.TraceWarning("Redis sink has no cache key for subscription '{0}'.", metadata.SubscriptionUriString);
                         Trace.TraceError("No cache key found.");
                     }
 

@@ -9,7 +9,7 @@ namespace Piraeus.Module
 
         public RestRequest(RestRequestBuilder builder)
         {
-            this.requestBuilder = builder;
+            requestBuilder = builder;
         }
 
         public override void Delete()

@@ -16,30 +16,30 @@ namespace SkunkLab.Channels.WebSocket
 
         private readonly CancellationToken token;
 
-        private ChannelState state;
-
         private bool disposed;
 
         private System.Net.WebSockets.WebSocket socket;
+
+        private ChannelState state;
 
         public WebSocketServerChannel(HttpContext context, WebSocketConfig config, CancellationToken token)
         {
             Id = "ws-" + Guid.NewGuid().ToString();
             this.config = config;
             this.token = token;
-            this.IsEncrypted = context.Request.Scheme == "wss";
-            this.IsAuthenticated = context.User.Identity.IsAuthenticated;
+            IsEncrypted = context.Request.Scheme == "wss";
+            IsAuthenticated = context.User.Identity.IsAuthenticated;
 
-            this.handler = new WebSocketHandler(config, token);
-            this.handler.OnReceive += Handler_OnReceive;
-            this.handler.OnError += Handler_OnError;
-            this.handler.OnOpen += Handler_OnOpen;
-            this.handler.OnClose += Handler_OnClose;
+            handler = new WebSocketHandler(config, token);
+            handler.OnReceive += Handler_OnReceive;
+            handler.OnError += Handler_OnError;
+            handler.OnOpen += Handler_OnOpen;
+            handler.OnClose += Handler_OnClose;
 
             Task task = Task.Factory.StartNew(async () =>
             {
                 await Task.Delay(100);
-                this.socket = await context.AcceptWebSocketRequestAsync(this.handler);
+                socket = await context.AcceptWebSocketRequestAsync(handler);
             });
 
             Task.WhenAll(task);
@@ -51,14 +51,14 @@ namespace SkunkLab.Channels.WebSocket
             this.config = config;
             this.token = token;
 
-            this.IsEncrypted = context.Request.Scheme == "wss";
-            this.IsAuthenticated = context.User.Identity.IsAuthenticated;
+            IsEncrypted = context.Request.Scheme == "wss";
+            IsAuthenticated = context.User.Identity.IsAuthenticated;
 
-            this.handler = new WebSocketHandler(config, token);
-            this.handler.OnReceive += Handler_OnReceive;
-            this.handler.OnError += Handler_OnError;
-            this.handler.OnOpen += Handler_OnOpen;
-            this.handler.OnClose += Handler_OnClose;
+            handler = new WebSocketHandler(config, token);
+            handler.OnReceive += Handler_OnReceive;
+            handler.OnError += Handler_OnError;
+            handler.OnOpen += Handler_OnOpen;
+            handler.OnClose += Handler_OnClose;
             this.socket = socket;
         }
 
@@ -138,7 +138,7 @@ namespace SkunkLab.Channels.WebSocket
         public override void Open()
         {
             State = ChannelState.Open;
-            this.handler.ProcessWebSocketRequestAsync(this.socket);
+            handler.ProcessWebSocketRequestAsync(socket);
         }
 
         #region Handler Events
@@ -146,30 +146,30 @@ namespace SkunkLab.Channels.WebSocket
         private void Handler_OnClose(object sender, WebSocketCloseEventArgs args)
         {
             State = ChannelState.Closed;
-            OnClose?.Invoke(this, new ChannelCloseEventArgs(this.Id));
+            OnClose?.Invoke(this, new ChannelCloseEventArgs(Id));
         }
 
         private void Handler_OnError(object sender, WebSocketErrorEventArgs args)
         {
-            OnError?.Invoke(this, new ChannelErrorEventArgs(this.Id, args.Error));
+            OnError?.Invoke(this, new ChannelErrorEventArgs(Id, args.Error));
         }
 
         private void Handler_OnOpen(object sender, WebSocketOpenEventArgs args)
         {
             State = ChannelState.Open;
-            OnOpen?.Invoke(this, new ChannelOpenEventArgs(this.Id, null));
+            OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
         }
 
         private void Handler_OnReceive(object sender, WebSocketReceiveEventArgs args)
         {
-            OnReceive?.Invoke(this, new ChannelReceivedEventArgs(this.Id, args.Message));
+            OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, args.Message));
         }
 
         #endregion Handler Events
 
         public override async Task OpenAsync()
         {
-            await this.handler.ProcessWebSocketRequestAsync(this.socket);
+            await handler.ProcessWebSocketRequestAsync(socket);
         }
 
         public override async Task ReceiveAsync()
@@ -184,7 +184,7 @@ namespace SkunkLab.Channels.WebSocket
 
         public override async Task SendAsync(byte[] message)
         {
-            await this.handler.SendAsync(message, WebSocketMessageType.Binary);
+            await handler.SendAsync(message, WebSocketMessageType.Binary);
         }
 
         protected void Disposing(bool dispose)
@@ -195,7 +195,7 @@ namespace SkunkLab.Channels.WebSocket
 
                 if (State == ChannelState.Open)
                 {
-                    this.handler.Close();
+                    handler.Close();
                 }
 
                 if (socket != null)

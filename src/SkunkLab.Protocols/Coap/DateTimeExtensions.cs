@@ -16,15 +16,16 @@
                     return expires.HasValue ? Encoding.UTF8.GetBytes(expires.Value.ToString()) : null;
 
                 case MediaType.Json:
-                    return expires.HasValue ? Encoding.UTF8.GetBytes(string.Format("{\"Expires\":\"{0}\"}", expires.Value.ToString())) : Encoding.UTF8.GetBytes(string.Format("{\"Expires\":\"\"}"));
+                    return expires.HasValue ? Encoding.UTF8.GetBytes($"{{\"Expires\":\"{expires.Value}\"}}") : Encoding.UTF8.GetBytes($"{{\"Expires\":\"\"}}");
 
                 case MediaType.Xml:
-                    return expires.HasValue ? Encoding.UTF8.GetBytes(string.Format("<Expires>{0}</Expires>", XmlConvert.ToString(expires.Value, XmlDateTimeSerializationMode.Utc))) : Encoding.UTF8.GetBytes("<Expires/>");
+                    return expires.HasValue ? Encoding.UTF8.GetBytes($"<Expires>{XmlConvert.ToString(expires.Value, XmlDateTimeSerializationMode.Utc)}</Expires>") : Encoding.UTF8.GetBytes("<Expires/>");
 
                 case MediaType.OctetStream:
-                    return expires.HasValue ? Encoding.UTF8.GetBytes(string.Format("Expires={0}", expires.Value.ToString())) : Encoding.UTF8.GetBytes(string.Format("Expires=\"\""));
+                    return expires.HasValue ? Encoding.UTF8.GetBytes($"Expires={expires.Value}") : Encoding.UTF8.GetBytes($"Expires=\"\"");
 
-                default: return null;
+                default:
+                    return null;
             }
         }
     }

@@ -26,7 +26,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             Id = "tcp2-" + Guid.NewGuid().ToString();
             Port = ((IPEndPoint)client.Client.LocalEndPoint).Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpServerChannel2(TcpClient client, X509Certificate2 certificate, bool clientAuth, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -40,7 +40,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             Id = "tcp2-" + Guid.NewGuid().ToString();
             Port = ((IPEndPoint)client.Client.LocalEndPoint).Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpServerChannel2(TcpClient client, TlsPskIdentityManager pskManager, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -53,7 +53,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             Id = "tcp2-" + Guid.NewGuid().ToString();
             Port = ((IPEndPoint)client.Client.LocalEndPoint).Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         #endregion ctor
@@ -74,8 +74,6 @@ namespace SkunkLab.Channels.Tcp
 
         private readonly CancellationToken token;
 
-        private ChannelState state;
-
         private TcpClient client;
 
         private bool disposed;
@@ -85,6 +83,8 @@ namespace SkunkLab.Channels.Tcp
         private TlsServerProtocol protocol;
 
         private SemaphoreSlim readConnection;
+
+        private ChannelState state;
 
         private Stream stream;
 
@@ -219,7 +219,7 @@ namespace SkunkLab.Channels.Tcp
             {
                 try
                 {
-                    protocol = client.ConnectPskTlsServer(pskManager, localStream);
+                    protocol = TlsClientUtil.ConnectPskTlsServer(pskManager, localStream);
                     stream = protocol.Stream;
                     IsEncrypted = true;
                 }

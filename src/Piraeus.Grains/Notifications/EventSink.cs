@@ -7,9 +7,9 @@ namespace Piraeus.Grains.Notifications
 {
     public abstract class EventSink
     {
-        protected SubscriptionMetadata metadata;
-
         protected ILog logger;
+
+        protected SubscriptionMetadata metadata;
 
         protected EventSink(SubscriptionMetadata metadata, ILog logger = null)
         {
@@ -17,9 +17,9 @@ namespace Piraeus.Grains.Notifications
             this.logger = logger;
         }
 
-        public abstract Task SendAsync(EventMessage message);
-
         public event System.EventHandler<EventSinkResponseArgs> OnResponse;
+
+        public abstract Task SendAsync(EventMessage message);
 
         protected virtual void RaiseOnResponse(EventSinkResponseArgs e)
         {

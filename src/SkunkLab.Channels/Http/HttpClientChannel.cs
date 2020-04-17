@@ -21,8 +21,6 @@ namespace SkunkLab.Channels.Http
 
         private readonly CancellationTokenSource tokenSource;
 
-        private ChannelState state;
-
         private string cacheKey;
 
         private X509Certificate2 certificate;
@@ -38,6 +36,8 @@ namespace SkunkLab.Channels.Http
         private string resourceUriString;
 
         private string securityToken;
+
+        private ChannelState state;
 
         public HttpClientChannel(string endpoint, string securityToken)
         {

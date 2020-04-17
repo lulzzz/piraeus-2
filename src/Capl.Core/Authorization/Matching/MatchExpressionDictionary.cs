@@ -12,7 +12,7 @@
 
         public MatchExpressionDictionary()
         {
-            this.expressions = new Dictionary<string, MatchExpression>();
+            expressions = new Dictionary<string, MatchExpression>();
         }
 
         public static MatchExpressionDictionary Default
@@ -25,7 +25,7 @@
                 }
 
                 Action<Type, MatchExpressionDictionary> addOpAsType;
-                Action<MatchExpression, MatchExpressionDictionary> addOpAsInstance;
+                //Action<MatchExpression, MatchExpressionDictionary> addOpAsInstance;
                 MatchExpressionDictionary dict = new MatchExpressionDictionary();
                 addOpAsType = (typeRef, op) =>
                 {
@@ -33,10 +33,10 @@
                     op.Add(matchExpression.Uri.ToString(), matchExpression);
                 };
 
-                addOpAsInstance = (instance, op) =>
-                {
-                    op.Add(instance.Uri.ToString(), instance);
-                };
+                //addOpAsInstance = (instance, op) =>
+                //{
+                //    op.Add(instance.Uri.ToString(), instance);
+                //};
 
                 addOpAsType(typeof(LiteralMatchExpression), dict);
                 addOpAsType(typeof(PatternMatchExpression), dict);

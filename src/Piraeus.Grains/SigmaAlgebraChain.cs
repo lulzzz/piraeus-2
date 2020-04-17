@@ -13,23 +13,6 @@ namespace Piraeus.Grains
     [Serializable]
     public class SigmaAlgebraChain : Grain<SigmaAlgebraChainState>, ISigmaAlgebraChain
     {
-        public override Task OnActivateAsync()
-        {
-            State.Container ??= new List<string>();
-            State.Id = this.GetGrainIdentity().PrimaryKeyLong;
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
-        }
-
-        public async Task ClearAsync()
-        {
-            await ClearStateAsync();
-        }
-
         public async Task<bool> AddAsync(string resourceUriString)
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
@@ -62,11 +45,6 @@ namespace Piraeus.Grains
             }
         }
 
-        public async Task<bool> ContainsAsync(string resourceUriString)
-        {
-            return await Task.FromResult<bool>(State.Container.Contains(resourceUriString));
-        }
-
         public async Task ChainupAsync()
         {
             if (State.Container.Count == 0)
@@ -95,6 +73,16 @@ namespace Piraeus.Grains
                 if (nextCount > 0)
                     await nextChain.ChainupAsync();
             }
+        }
+
+        public async Task ClearAsync()
+        {
+            await ClearStateAsync();
+        }
+
+        public async Task<bool> ContainsAsync(string resourceUriString)
+        {
+            return await Task.FromResult<bool>(State.Container.Contains(resourceUriString));
         }
 
         public async Task<int> GetCountAsync()
@@ -129,6 +117,18 @@ namespace Piraeus.Grains
 
             IEnumerable<string> en = State.Container.Where((a) => regex.IsMatch(a));
             return await Task.FromResult<List<string>>(new List<string>(en));
+        }
+
+        public override Task OnActivateAsync()
+        {
+            State.Container ??= new List<string>();
+            State.Id = this.GetGrainIdentity().PrimaryKeyLong;
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
         }
 
         public async Task<bool> RemoveAsync(string resourceUriString)

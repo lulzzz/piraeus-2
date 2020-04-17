@@ -100,7 +100,8 @@ namespace Piraeus.Adapters
             session.OnPublish += Session_OnPublish;
             session.OnSubscribe += Session_OnSubscribe;
             session.OnUnsubscribe += Session_OnUnsubscribe;
-            session.OnDisconnect += Session_OnDisconnect; ;
+            session.OnDisconnect += Session_OnDisconnect;
+            ;
             session.OnConnect += Session_OnConnect;
             logger?.LogInformationAsync($"MQTT adpater on channel '{Channel.Id}' is initialized.").GetAwaiter();
         }

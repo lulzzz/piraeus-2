@@ -26,7 +26,7 @@ namespace SkunkLab.Channels.Tcp
             this.token = token;
             Id = "tcp-" + Guid.NewGuid().ToString();
             this.token.Register(async () => await CloseAsync());
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(string hostname, int port, IPEndPoint localEP, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -36,12 +36,12 @@ namespace SkunkLab.Channels.Tcp
 
         public TcpClientChannel(IPEndPoint remoteEndpoint, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            this.remoteEP = remoteEndpoint;
+            remoteEP = remoteEndpoint;
             this.maxBufferSize = maxBufferSize;
             this.token = token;
             Id = "tcp-" + Guid.NewGuid().ToString();
             this.token.Register(async () => await CloseAsync());
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPEndPoint remoteEndpoint, IPEndPoint localEP, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -57,7 +57,7 @@ namespace SkunkLab.Channels.Tcp
             this.token = token;
             Id = "tcp-" + Guid.NewGuid().ToString();
             this.token.Register(async () => await CloseAsync());
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPAddress address, int port, IPEndPoint localEP, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -82,7 +82,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
 
             Port = port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPEndPoint remoteEndpoint, X509Certificate2 certificate, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -109,7 +109,7 @@ namespace SkunkLab.Channels.Tcp
             }
 
             Port = remoteEndpoint.Port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPAddress address, int port, X509Certificate2 certificate, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -137,7 +137,7 @@ namespace SkunkLab.Channels.Tcp
             }
 
             Port = port;
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPAddress address, int port, IPEndPoint localEP, string pskIdentity, byte[] psk, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -151,7 +151,7 @@ namespace SkunkLab.Channels.Tcp
             this.token.Register(async () => await CloseAsync());
             this.maxBufferSize = maxBufferSize;
             Id = "tcp-" + Guid.NewGuid().ToString();
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPAddress address, int port, string pskIdentity, byte[] psk, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -175,7 +175,7 @@ namespace SkunkLab.Channels.Tcp
             this.token = token;
             this.token.Register(async () => await CloseAsync());
             Id = "tcp-" + Guid.NewGuid().ToString();
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         public TcpClientChannel(IPEndPoint remoteEP, string pskIdentity, byte[] psk, int maxBufferSize = 0x400000, CancellationToken token = default)
@@ -193,7 +193,7 @@ namespace SkunkLab.Channels.Tcp
             this.token = token;
             this.token.Register(async () => await CloseAsync());
             Id = "tcp-" + Guid.NewGuid().ToString();
-            this.queue = new Queue<byte[]>();
+            queue = new Queue<byte[]>();
         }
 
         #endregion ctor
@@ -222,8 +222,6 @@ namespace SkunkLab.Channels.Tcp
 
         private readonly CancellationToken token;
 
-        private ChannelState state;
-
         private TcpClient client;
 
         private bool disposed;
@@ -233,6 +231,8 @@ namespace SkunkLab.Channels.Tcp
         private TlsClientProtocol protocol;
 
         private SemaphoreSlim readConnection;
+
+        private ChannelState state;
 
         private Stream stream;
 
@@ -391,7 +391,7 @@ namespace SkunkLab.Channels.Tcp
             {
                 try
                 {
-                    protocol = client.ConnectPskTlsClient(pskIdentity, psk, localStream);
+                    protocol = TlsClientUtil.ConnectPskTlsClient(pskIdentity, psk, localStream);
                     stream = protocol.Stream;
                     IsEncrypted = true;
                 }

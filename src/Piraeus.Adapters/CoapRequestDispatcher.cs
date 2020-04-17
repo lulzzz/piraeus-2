@@ -157,7 +157,7 @@ namespace Piraeus.Adapters
                 {
                     if (metadata.Audit)
                     {
-                        await auditor?.WriteAuditRecordAsync(new MessageAuditRecord("XXXXXXXXXXXX", session.Identity, this.channel.TypeId, "COAP", message.Payload.Length, MessageDirectionType.In, false, DateTime.UtcNow, "Not authorized, missing resource metadata, or channel encryption requirements")).LogExceptions(logger);
+                        await auditor?.WriteAuditRecordAsync(new MessageAuditRecord("XXXXXXXXXXXX", session.Identity, channel.TypeId, "COAP", message.Payload.Length, MessageDirectionType.In, false, DateTime.UtcNow, "Not authorized, missing resource metadata, or channel encryption requirements")).LogExceptions(logger);
                     }
 
                     logger?.LogErrorAsync(result.ErrorMessage);
@@ -271,12 +271,12 @@ namespace Piraeus.Adapters
             try
             {
                 await channel.SendAsync(message);
-                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
             catch (Exception ex)
             {
                 await logger?.LogErrorAsync(ex, $"Fault sending message on channel for {session.Identity}");
-                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, this.channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally
             {

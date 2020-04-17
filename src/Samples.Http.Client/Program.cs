@@ -15,6 +15,7 @@ namespace Samples.Http.Client
     internal class Program
     {
         private static string audience = issuer;
+
         private static CancellationTokenSource cts;
 
         private static string hostname;

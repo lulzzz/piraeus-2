@@ -269,7 +269,6 @@ namespace Piraeus.Grains.Notifications
                 await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink, failed to find collection.");
                 throw;
             }
-
         }
     }
 }

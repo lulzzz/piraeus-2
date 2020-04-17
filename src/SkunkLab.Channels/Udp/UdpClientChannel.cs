@@ -17,11 +17,11 @@ namespace SkunkLab.Channels.Udp
 
         private readonly CancellationToken token;
 
-        private ChannelState state;
-
         private UdpClient client;
 
         private bool disposedValue;
+
+        private ChannelState state;
 
         public UdpClientChannel(int localPort, IPEndPoint remoteEP, CancellationToken token)
         {

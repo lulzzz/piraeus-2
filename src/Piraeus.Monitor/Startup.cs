@@ -59,7 +59,6 @@ namespace Piraeus.Monitor
                 ac.MapHub<PiSystemHub>("/pisystemHub");
                 ac.MapRazorPages();
             });
-
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

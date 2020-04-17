@@ -45,22 +45,22 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/resource/UpsertPiSystemMetadata", this.ServiceUrl);
-            RestRequestBuilder builder = new RestRequestBuilder("PUT", url, RestConstants.ContentType.Json, false, this.SecurityToken);
+            string url = string.Format("{0}/api/resource/UpsertPiSystemMetadata", ServiceUrl);
+            RestRequestBuilder builder = new RestRequestBuilder("PUT", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             EventMetadata metadata = new EventMetadata()
             {
-                Audit = this.Audit,
-                Description = this.Description,
-                DiscoveryUrl = this.DiscoveryUrl,
-                Enabled = this.Enabled,
-                Expires = this.Expires,
-                MaxSubscriptionDuration = this.MaxSubscriptionDuration,
-                ResourceUriString = this.ResourceUriString,
-                RequireEncryptedChannel = this.RequireEncryptedChannel,
-                PublishPolicyUriString = this.PublishPolicyUriString,
-                SubscribePolicyUriString = this.SubscribePolicyUriString
+                Audit = Audit,
+                Description = Description,
+                DiscoveryUrl = DiscoveryUrl,
+                Enabled = Enabled,
+                Expires = Expires,
+                MaxSubscriptionDuration = MaxSubscriptionDuration,
+                ResourceUriString = ResourceUriString,
+                RequireEncryptedChannel = RequireEncryptedChannel,
+                PublishPolicyUriString = PublishPolicyUriString,
+                SubscribePolicyUriString = SubscribePolicyUriString
             };
 
             request.Put<EventMetadata>(metadata);

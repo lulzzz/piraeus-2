@@ -21,11 +21,11 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            AuthorizationPolicy policy = new AuthorizationPolicy(this.EvaluationExpression, new Uri(this.PolicyID), this.Delegation);
+            AuthorizationPolicy policy = new AuthorizationPolicy(EvaluationExpression, new Uri(PolicyID), Delegation);
 
-            if (this.Transforms != null && this.Transforms.Length > 0)
+            if (Transforms != null && Transforms.Length > 0)
             {
-                foreach (Transform transform in this.Transforms)
+                foreach (Transform transform in Transforms)
                 {
                     policy.Transforms.Add(transform);
                 }

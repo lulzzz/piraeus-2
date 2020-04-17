@@ -76,11 +76,11 @@ namespace SkunkLab.Channels.WebSocket
 
         private readonly CancellationToken token;
 
-        private ChannelState state;
-
         private ClientWebSocket client;
 
         private bool disposed;
+
+        private ChannelState state;
 
         public override event EventHandler<ChannelCloseEventArgs> OnClose;
 

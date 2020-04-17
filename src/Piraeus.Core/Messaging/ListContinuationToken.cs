@@ -36,7 +36,6 @@ namespace Piraeus.Core.Messaging
             Items = items;
         }
 
-
         public ListContinuationToken(int index, int quantity, int pageSize, List<string> items)
         {
             Index = index;
@@ -45,10 +44,8 @@ namespace Piraeus.Core.Messaging
             Items = items;
         }
 
-
-
-        [JsonProperty("pageSize")]
-        public int PageSize { get; set; }
+        [JsonProperty("filter")]
+        public string Filter { get; set; }
 
         [JsonProperty("index")]
         public int Index { get; set; }
@@ -56,10 +53,10 @@ namespace Piraeus.Core.Messaging
         [JsonProperty("items")]
         public List<string> Items { get; set; }
 
+        [JsonProperty("pageSize")]
+        public int PageSize { get; set; }
+
         [JsonProperty("quantity")]
         public int Quantity { get; set; }
-
-        [JsonProperty("filter")]
-        public string Filter { get; set; }
     }
 }

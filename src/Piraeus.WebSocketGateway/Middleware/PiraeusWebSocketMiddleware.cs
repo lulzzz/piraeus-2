@@ -39,7 +39,7 @@ namespace Piraeus.WebSocketGateway.Middleware
             _options = options.Value;
             this.config = config;
 
-            this.graphManager = new GraphManager(client);
+            graphManager = new GraphManager(client);
             this.logger = logger;
         }
 

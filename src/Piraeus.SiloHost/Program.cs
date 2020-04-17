@@ -11,21 +11,6 @@ namespace Piraeus.SiloHost.Core
 {
     public class Program
     {
-        private static void Main(string[] args)
-        {
-            Console.WriteLine("  ******** **  **            **      **                    **");
-            Console.WriteLine(" **////// //  /**           /**     /**                   /**");
-            Console.WriteLine("/**        ** /**  ******   /**     /**  ******   ****** ******");
-            Console.WriteLine("/*********/** /** **////**  /********** **////** **//// ///**/");
-            Console.WriteLine("////////**/** /**/**   /**  /**//////**/**   /**//*****   /**");
-            Console.WriteLine("       /**/** /**/**   /**  /**     /**/**   /** /////**  /**");
-            Console.WriteLine(" ******** /** ***//******   /**     /**//******  ******   //**");
-            Console.WriteLine("////////  // ///  //////    //      //  //////  //////     //");
-            Console.WriteLine("");
-
-            CreateHostBuilder(args).Build().Run();
-        }
-
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
@@ -46,7 +31,6 @@ namespace Piraeus.SiloHost.Core
 
                         builder.SetMinimumLevel(orleansLogLevel);
                         builder.Services.AddSingleton<ILog, Logger>();
-
                     })
                     .ConfigureServices((hostContext, services) =>
                     {
@@ -65,6 +49,21 @@ namespace Piraeus.SiloHost.Core
             OrleansConfig config = new OrleansConfig();
             root.Bind(config);
             return config;
+        }
+
+        private static void Main(string[] args)
+        {
+            Console.WriteLine("  ******** **  **            **      **                    **");
+            Console.WriteLine(" **////// //  /**           /**     /**                   /**");
+            Console.WriteLine("/**        ** /**  ******   /**     /**  ******   ****** ******");
+            Console.WriteLine("/*********/** /** **////**  /********** **////** **//// ///**/");
+            Console.WriteLine("////////**/** /**/**   /**  /**//////**/**   /**//*****   /**");
+            Console.WriteLine("       /**/** /**/**   /**  /**     /**/**   /** /////**  /**");
+            Console.WriteLine(" ******** /** ***//******   /**     /**//******  ******   //**");
+            Console.WriteLine("////////  // ///  //////    //      //  //////  //////     //");
+            Console.WriteLine("");
+
+            CreateHostBuilder(args).Build().Run();
         }
     }
 }

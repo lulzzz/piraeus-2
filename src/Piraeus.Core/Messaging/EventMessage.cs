@@ -46,14 +46,14 @@ namespace Piraeus.Core.Messaging
 
         public EventMessage(string messageId, string contentType, string resourceUri, ProtocolType protocol, byte[] message, DateTime timeStamp, string cacheKey, bool audit = false)
         {
-            this.MessageId = messageId ?? Guid.NewGuid().ToString();
-            this.ContentType = contentType;
-            this.ResourceUri = resourceUri;
-            this.Protocol = protocol;
-            this.Message = message;
-            this.Timestamp = timeStamp;
-            this.Audit = audit;
-            this.CacheKey = CacheKey;
+            MessageId = messageId ?? Guid.NewGuid().ToString();
+            ContentType = contentType;
+            ResourceUri = resourceUri;
+            Protocol = protocol;
+            Message = message;
+            Timestamp = timeStamp;
+            Audit = audit;
+            CacheKey = CacheKey;
         }
 
         public bool Audit { get; set; }

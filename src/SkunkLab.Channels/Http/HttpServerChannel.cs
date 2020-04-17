@@ -20,8 +20,6 @@ namespace SkunkLab.Channels.Http
 
         private readonly string securityToken;
 
-        private ChannelState state;
-
         private X509Certificate2 certificate;
 
         private bool disposed;
@@ -29,6 +27,8 @@ namespace SkunkLab.Channels.Http
         private IEnumerable<KeyValuePair<string, string>> indexes;
 
         private HttpRequestMessage request;
+
+        private ChannelState state;
 
         public HttpServerChannel(HttpContext context)
         {

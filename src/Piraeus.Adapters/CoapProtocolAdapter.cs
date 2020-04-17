@@ -161,7 +161,7 @@ namespace Piraeus.Adapters
             }
             else
             {
-                dispatcher = new CoapRequestDispatcher(session, Channel, config, graphManager, this.logger);
+                dispatcher = new CoapRequestDispatcher(session, Channel, config, graphManager, logger);
             }
         }
 
@@ -179,7 +179,7 @@ namespace Piraeus.Adapters
                     userAuditor?.WriteAuditRecordAsync(record).Ignore();
                 }
 
-                OnObserve?.Invoke(this, new ChannelObserverEventArgs(this.Channel.Id, message.ResourceUri.ToString(), MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload));
+                OnObserve?.Invoke(this, new ChannelObserverEventArgs(Channel.Id, message.ResourceUri.ToString(), MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload));
 
                 Task task = Task.Factory.StartNew(async () =>
                 {
