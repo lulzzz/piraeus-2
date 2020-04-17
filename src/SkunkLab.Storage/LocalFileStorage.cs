@@ -25,12 +25,7 @@ namespace SkunkLab.Storage
 
         public static LocalFileStorage Create()
         {
-            if (instance == null)
-            {
-                instance = new LocalFileStorage();
-            }
-
-            return instance;
+            return instance ??= new LocalFileStorage();
         }
 
         public static void RenameFile(string path)

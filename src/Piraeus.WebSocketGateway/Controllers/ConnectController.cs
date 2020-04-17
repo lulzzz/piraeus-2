@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Orleans;
 using Piraeus.Adapters;
 using Piraeus.Configuration;
@@ -62,17 +61,19 @@ namespace Piraeus.WebSocketGateway.Controllers
                     adapter.OnError += Adapter_OnError;
                     adapter.Init();
                     await adapter.Channel.OpenAsync();
+                    await logger.LogDebugAsync("Websocket channel open.");
                     return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
                 }
                 catch (Exception ex)
                 {
                     StatusCode(500);
-                    await logger.LogErrorAsync(ex, "Http-Get");
+                    await logger.LogErrorAsync(ex, "WebSocket get - 500");
                     return new HttpResponseMessage(HttpStatusCode.InternalServerError);
                 }
             }
             else
             {
+                await logger.LogWarningAsync($"WebSocket status code {HttpStatusCode.NotFound}");
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
         }
@@ -84,15 +85,18 @@ namespace Piraeus.WebSocketGateway.Controllers
                 if ((adapter != null && adapter.Channel != null) && (adapter.Channel.State == ChannelState.Closed || adapter.Channel.State == ChannelState.Aborted || adapter.Channel.State == ChannelState.ClosedReceived || adapter.Channel.State == ChannelState.CloseSent))
                 {
                     adapter.Dispose();
+                    logger.LogDebugAsync("Web socket adapter disposed.").GetAwaiter();
                 }
                 else
                 {
                     try
                     {
                         adapter.Channel.CloseAsync().GetAwaiter();
+                        logger.LogDebugAsync("Web socket channel closed.").GetAwaiter();
                     }
                     catch { }
                     adapter.Dispose();
+                    logger.LogDebugAsync("Web socket adapter disposed.").GetAwaiter();
                 }
             }
             catch { }
@@ -102,9 +106,13 @@ namespace Piraeus.WebSocketGateway.Controllers
         {
             try
             {
+
                 adapter.Channel.CloseAsync().GetAwaiter();
+                logger.LogDebugAsync("Web socket adapter disposed.").GetAwaiter();
             }
             catch { }
+
+            logger.LogErrorAsync(e.Error, "Web socket adapter error.").GetAwaiter();
         }
     }
 }
