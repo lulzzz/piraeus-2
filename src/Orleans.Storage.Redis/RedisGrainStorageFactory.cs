@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System;
 
 namespace Orleans.Storage.Redis
 {
@@ -8,7 +8,8 @@ namespace Orleans.Storage.Redis
     {
         public static IGrainStorage Create(IServiceProvider services, string name)
         {
-            IOptionsSnapshot<RedisStorageOptions> optionsSnapshot = services.GetRequiredService<IOptionsSnapshot<RedisStorageOptions>>();
+            IOptionsSnapshot<RedisStorageOptions> optionsSnapshot =
+                services.GetRequiredService<IOptionsSnapshot<RedisStorageOptions>>();
             return ActivatorUtilities.CreateInstance<RedisGrainStorage>(services, name, optionsSnapshot.Get(name));
         }
     }

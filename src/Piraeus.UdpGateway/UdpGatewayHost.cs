@@ -1,21 +1,33 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Orleans;
-using Piraeus.Configuration;
-using Piraeus.Core;
-using Piraeus.Core.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Piraeus.Configuration;
+using Piraeus.Core;
+using Piraeus.Core.Logging;
 
 namespace Piraeus.UdpGateway
 {
     public class UdpGatewayHost : IHostedService
     {
+        private readonly PiraeusConfig config;
+
+        private readonly Dictionary<int, UdpServerListener> listeners;
+
+        private readonly Logger logger;
+
+        private readonly OrleansConfig orleansConfig;
+
+        private readonly Dictionary<int, CancellationTokenSource> sources;
+
+        private string hostname;
+
         public UdpGatewayHost(PiraeusConfig config, OrleansConfig orleansConfig, Logger logger)
         {
             this.config = config;
@@ -24,18 +36,6 @@ namespace Piraeus.UdpGateway
             sources = new Dictionary<int, CancellationTokenSource>();
             listeners = new Dictionary<int, UdpServerListener>();
         }
-
-        private readonly Logger logger;
-
-        private readonly PiraeusConfig config;
-
-        private readonly OrleansConfig orleansConfig;
-
-        private readonly Dictionary<int, UdpServerListener> listeners;
-
-        private readonly Dictionary<int, CancellationTokenSource> sources;
-
-        private string hostname;
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -59,8 +59,7 @@ namespace Piraeus.UdpGateway
 
             int[] ports = config.GetPorts();
 
-            foreach (var port in ports)
-            {
+            foreach (var port in ports) {
                 sources.Add(port, new CancellationTokenSource());
             }
 
@@ -70,17 +69,17 @@ namespace Piraeus.UdpGateway
             hostname = Dns.GetHostName();
 #endif
             int index = 0;
-            while (index < ports.Length)
-            {
-                listeners.Add(ports[index], new UdpServerListener(new IPEndPoint(GetIPAddress(hostname), ports[index]), config, orleansConfig, this.logger, sources[ports[index]].Token));
+            while (index < ports.Length) {
+                listeners.Add(ports[index],
+                    new UdpServerListener(new IPEndPoint(GetIPAddress(hostname), ports[index]), config, orleansConfig,
+                        logger, sources[ports[index]].Token));
                 logger?.LogInformation($"UDP listener added to port {ports[index]}");
                 index++;
             }
 
             KeyValuePair<int, UdpServerListener>[] tcpKvps = listeners.ToArray();
 
-            foreach (var item in tcpKvps)
-            {
+            foreach (var item in tcpKvps) {
                 item.Value.StartAsync().LogExceptions(logger);
                 logger?.LogInformation($"TCP listener started on port {item.Key}");
             }
@@ -92,8 +91,7 @@ namespace Piraeus.UdpGateway
         public Task StopAsync(CancellationToken cancellationToken)
         {
             UdpServerListener[] servers = listeners.Values.ToArray();
-            foreach (var server in servers)
-            {
+            foreach (var server in servers) {
                 server.StopAsync().Ignore();
             }
 
@@ -103,10 +101,8 @@ namespace Piraeus.UdpGateway
         private IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++)
-            {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
-                {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
                     logger?.LogInformation($"IP address '{hostInfo.AddressList[index]}'.");
                     return hostInfo.AddressList[index];
                 }

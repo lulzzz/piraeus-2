@@ -1,7 +1,7 @@
-﻿using Orleans.Runtime;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Orleans.Runtime;
 
 namespace Orleans.Clustering.Redis
 {
@@ -9,10 +9,6 @@ namespace Orleans.Clustering.Redis
     public class RedisMembershipEntry
     {
         private string parsableAddress;
-
-        public RedisMembershipEntry()
-        {
-        }
 
         public string DeploymentId { get; set; }
 
@@ -50,8 +46,7 @@ namespace Orleans.Clustering.Redis
 
         public static RedisMembershipEntry Create(string deploymentId, MembershipEntry entry, string etag)
         {
-            var ret = new RedisMembershipEntry
-            {
+            var ret = new RedisMembershipEntry {
                 DeploymentId = deploymentId,
                 Address = entry.SiloAddress,
                 IAmAliveTime = entry.IAmAliveTime,
@@ -63,7 +58,8 @@ namespace Orleans.Clustering.Redis
                 SiloName = entry.SiloName,
                 UpdateZone = entry.UpdateZone,
                 FaultZone = entry.FaultZone,
-                SuspectingSilos = entry.SuspectTimes?.Select(silo => new SuspectingSilo { Id = silo.Item1.ToParsableString(), Time = silo.Item2 }).ToList()
+                SuspectingSilos = entry.SuspectTimes?.Select(silo => new SuspectingSilo
+                    {Id = silo.Item1.ToParsableString(), Time = silo.Item2}).ToList()
             };
 
             return ret;
@@ -71,50 +67,49 @@ namespace Orleans.Clustering.Redis
 
         public Tuple<MembershipEntry, string> ToMembershipEntryTuple()
         {
-            MembershipEntry entry = new MembershipEntry()
-            {
-                HostName = this.Hostname,
-                IAmAliveTime = this.IAmAliveTime ?? DateTime.UtcNow,
-                ProxyPort = this.ProxyPort,
+            MembershipEntry entry = new MembershipEntry {
+                HostName = Hostname,
+                IAmAliveTime = IAmAliveTime ?? DateTime.UtcNow,
+                ProxyPort = ProxyPort,
                 RoleName = string.Empty,
-                SiloAddress = this.Address,
-                SiloName = this.SiloName,
-                StartTime = this.StartTime,
-                Status = this.Status,
-                UpdateZone = this.UpdateZone,
-                FaultZone = this.FaultZone,
-                SuspectTimes = this.SuspectingSilos?.Select(silo => new Tuple<SiloAddress, DateTime>(SiloAddress.FromParsableString(silo.Id), silo.Time.Value)).ToList(),
+                SiloAddress = Address,
+                SiloName = SiloName,
+                StartTime = StartTime,
+                Status = Status,
+                UpdateZone = UpdateZone,
+                FaultZone = FaultZone,
+                SuspectTimes = SuspectingSilos?.Select(silo =>
+                    new Tuple<SiloAddress, DateTime>(SiloAddress.FromParsableString(silo.Id), silo.Time.Value)).ToList()
             };
 
-            return new Tuple<MembershipEntry, string>(entry, this.LastIndex.ToString());
+            return new Tuple<MembershipEntry, string>(entry, LastIndex.ToString());
         }
 
         public Tuple<MembershipEntry, string> ToMembershipEntryTuple(SiloAddress address)
         {
-            MembershipEntry entry = new MembershipEntry()
-            {
-                HostName = this.Hostname,
+            MembershipEntry entry = new MembershipEntry {
+                HostName = Hostname,
                 IAmAliveTime = IAmAliveTime ?? DateTime.UtcNow,
-                ProxyPort = this.ProxyPort,
+                ProxyPort = ProxyPort,
                 RoleName = string.Empty,
                 SiloAddress = address,
-                SiloName = this.SiloName,
-                StartTime = this.StartTime,
-                Status = this.Status,
+                SiloName = SiloName,
+                StartTime = StartTime,
+                Status = Status,
                 UpdateZone = 0,
                 FaultZone = 0,
-                SuspectTimes = this.SuspectingSilos?.Select(silo => new Tuple<SiloAddress, DateTime>(SiloAddress.FromParsableString(silo.Id), silo.Time.Value)).ToList(),
+                SuspectTimes = SuspectingSilos?.Select(silo =>
+                    new Tuple<SiloAddress, DateTime>(SiloAddress.FromParsableString(silo.Id), silo.Time.Value)).ToList()
             };
 
-            return new Tuple<MembershipEntry, string>(entry, this.LastIndex.ToString());
+            return new Tuple<MembershipEntry, string>(entry, LastIndex.ToString());
         }
     }
 
     [Serializable]
     public class SuspectingSilo
     {
-        [NonSerialized]
-        private DateTime? time;
+        [NonSerialized] private DateTime? time;
 
         public string Id { get; set; }
 

@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Piraeus.Core.Metadata
 {
@@ -12,7 +12,9 @@ namespace Piraeus.Core.Metadata
         {
         }
 
-        public SubscriptionMetadata(string identity, string subscriptionUriString, string address, string symmetricKey, string description = null, TimeSpan? ttl = null, DateTime? expires = null, TimeSpan? spoolRate = null, bool durableMessaging = false)
+        public SubscriptionMetadata(string identity, string subscriptionUriString, string address, string symmetricKey,
+            string description = null, TimeSpan? ttl = null, DateTime? expires = null, TimeSpan? spoolRate = null,
+            bool durableMessaging = false)
         {
             Identity = identity;
             SubscriptionUriString = subscriptionUriString;
@@ -41,43 +43,31 @@ namespace Piraeus.Core.Metadata
             IsEphemeral = true;
         }
 
-        [JsonProperty("claimKey")]
-        public string ClaimKey { get; set; }
+        [JsonProperty("claimKey")] public string ClaimKey { get; set; }
 
-        [JsonProperty("description")]
-        public string Description { get; set; }
+        [JsonProperty("description")] public string Description { get; set; }
 
-        [JsonProperty("durableMessaging")]
-        public bool DurableMessaging { get; set; }
+        [JsonProperty("durableMessaging")] public bool DurableMessaging { get; set; }
 
-        [JsonProperty("expires")]
-        public DateTime? Expires { get; set; }
+        [JsonProperty("expires")] public DateTime? Expires { get; set; }
 
-        [JsonProperty("identity")]
-        public string Identity { get; set; }
+        [JsonProperty("identity")] public string Identity { get; set; }
 
-        [JsonProperty("indexes")]
-        public List<KeyValuePair<string, string>> Indexes { get; set; }
+        [JsonProperty("indexes")] public List<KeyValuePair<string, string>> Indexes { get; set; }
 
-        [JsonProperty("isEphemeral")]
-        public bool IsEphemeral { get; set; }
+        [JsonProperty("isEphemeral")] public bool IsEphemeral { get; set; }
 
-        [JsonProperty("notifyAddress")]
-        public string NotifyAddress { get; set; }
+        [JsonProperty("notifyAddress")] public string NotifyAddress { get; set; }
 
-        [JsonProperty("spoolRate")]
-        public TimeSpan? SpoolRate { get; set; }
+        [JsonProperty("spoolRate")] public TimeSpan? SpoolRate { get; set; }
 
         [JsonProperty("subscriptionUriString")]
         public string SubscriptionUriString { get; set; }
 
-        [JsonProperty("symmetricKey")]
-        public string SymmetricKey { get; set; }
+        [JsonProperty("symmetricKey")] public string SymmetricKey { get; set; }
 
-        [JsonProperty("securityTokenType")]
-        public SecurityTokenType? TokenType { get; set; }
+        [JsonProperty("securityTokenType")] public SecurityTokenType? TokenType { get; set; }
 
-        [JsonProperty("ttl")]
-        public TimeSpan? TTL { get; set; }
+        [JsonProperty("ttl")] public TimeSpan? TTL { get; set; }
     }
 }

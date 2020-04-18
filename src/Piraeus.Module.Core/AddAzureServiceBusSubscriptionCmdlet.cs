@@ -1,12 +1,13 @@
-﻿using Piraeus.Core.Metadata;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
     [Cmdlet(VerbsCommon.Add, "PiraeusServiceBusSubscription")]
     public class AddAzureServiceBusSubscriptionCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Account name of Servie Bus, i.e., <account>.servicebus.windows.net", Mandatory = true)]
+        [Parameter(HelpMessage = "Account name of Servie Bus, i.e., <account>.servicebus.windows.net",
+            Mandatory = true)]
         public string Account;
 
         [Parameter(HelpMessage = "Description of the subscription.", Mandatory = false)]
@@ -32,18 +33,20 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string uriString = string.Format("sb://{0}.servicebus.windows.net?topic={1}&keyname={2}", Account, Topic, KeyName);
+            string uriString = string.Format("sb://{0}.servicebus.windows.net?topic={1}&keyname={2}", Account, Topic,
+                KeyName);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,
-                Description = this.Description
+                Description = Description
             };
 
-            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

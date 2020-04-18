@@ -1,5 +1,5 @@
-﻿using Piraeus.Core.Metadata;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
@@ -27,15 +27,15 @@ namespace Piraeus.Module
         {
             string url = $"{ServiceUrl}/api/resource/subscribe?resourceuristring={ResourceUriString}";
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = Endpoint,
                 SymmetricKey = HmacKey,
-                Description = this.Description
+                Description = Description
             };
 
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

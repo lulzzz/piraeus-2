@@ -9,7 +9,7 @@ export function getPrioritizedUnits(unitsObj) {
     for (var u in unitsObj) {
         units.push({ unit: u, priority: priorities[u] });
     }
-    units.sort(function (a, b) {
+    units.sort(function(a, b) {
         return a.priority - b.priority;
     });
     return units;

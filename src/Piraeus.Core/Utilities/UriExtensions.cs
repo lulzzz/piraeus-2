@@ -8,38 +8,30 @@ namespace Piraeus.Core.Utilities
         {
             string uriString = uri.ToString().ToLowerInvariant();
             string result;
-            if (string.IsNullOrEmpty(uri.Query))
-            {
+            if (string.IsNullOrEmpty(uri.Query)) {
                 result = GetBase(uriString, uri, trailingWhack);
             }
-            else
-            {
+            else {
                 result = GetFromQuery(uriString, uri);
             }
 
-            if (!removeLastSegment)
-            {
+            if (!removeLastSegment) {
                 return result;
             }
-            else
-            {
-                Uri uri2 = new Uri(result);
-                return result.Replace("/" + uri2.Segments[^1], "");
-            }
+
+            Uri uri2 = new Uri(result);
+            return result.Replace("/" + uri2.Segments[^1], "");
         }
 
         private static string GetBase(string uriString, Uri uri, bool trailingWhack)
         {
             bool isTrailing = uri.Segments[^1] == "/";
 
-            if (trailingWhack)
-            {
+            if (trailingWhack) {
                 return isTrailing ? uriString : uriString + "/";
             }
-            else
-            {
-                return !isTrailing ? uriString : uriString.Remove(uriString.Length - 1, 1);
-            }
+
+            return !isTrailing ? uriString : uriString.Remove(uriString.Length - 1, 1);
         }
 
         private static string GetFromQuery(string uriString, Uri uri)

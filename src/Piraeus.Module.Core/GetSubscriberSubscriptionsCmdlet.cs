@@ -17,8 +17,10 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/subscription/GetSubscriberSubscriptions?identity={1}", ServiceUrl, Identity);
-            RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
+            string url = string.Format("{0}/api/subscription/GetSubscriberSubscriptions?identity={1}", ServiceUrl,
+                Identity);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             IEnumerable<string> subscriptions = request.Get<IEnumerable<string>>();

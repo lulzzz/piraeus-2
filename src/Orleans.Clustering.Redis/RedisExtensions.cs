@@ -11,12 +11,6 @@ namespace Orleans.Clustering.Redis
     {
         #region Membership Table
 
-        public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder, ILogger<RedisMembershipTable> logger,
-           Action<RedisClusteringOptions> configureOptions)
-        {
-            return builder.ConfigureServices(services => services.UseRedisMembership(configureOptions));
-        }
-
         public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder,
            Action<RedisClusteringOptions> configureOptions)
         {

@@ -1,11 +1,4 @@
-﻿using Piraeus.Adapters;
-using Piraeus.Configuration;
-using Piraeus.Core.Logging;
-using Piraeus.Grains;
-using SkunkLab.Channels;
-using SkunkLab.Security.Authentication;
-using SkunkLab.Security.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,6 +6,13 @@ using System.Net.Sockets;
 using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
+using Piraeus.Adapters;
+using Piraeus.Configuration;
+using Piraeus.Core.Logging;
+using Piraeus.Grains;
+using SkunkLab.Channels;
+using SkunkLab.Security.Authentication;
+using SkunkLab.Security.Tokens;
 
 namespace Piraeus.UdpGateway
 {
@@ -36,7 +36,8 @@ namespace Piraeus.UdpGateway
 
         private readonly CancellationToken token;
 
-        public UdpServerListener(IPEndPoint localEP, PiraeusConfig config, OrleansConfig orleansConfig, ILog logger = null, CancellationToken token = default)
+        public UdpServerListener(IPEndPoint localEP, PiraeusConfig config, OrleansConfig orleansConfig,
+            ILog logger = null, CancellationToken token = default)
         {
             this.localEP = localEP;
             listener = new UdpClient();
@@ -46,18 +47,18 @@ namespace Piraeus.UdpGateway
             this.logger = logger;
             graphManager = new GraphManager(orleansConfig);
 
-            if (config.ClientTokenType != null && config.ClientSymmetricKey != null)
-            {
+            if (config.ClientTokenType != null && config.ClientSymmetricKey != null) {
                 SecurityTokenType stt = Enum.Parse<SecurityTokenType>(config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
-                this.authn = bauthn;
+                authn = bauthn;
             }
 
             cache = MemoryCache.Default;
         }
 
-        public UdpServerListener(IPAddress address, int port, PiraeusConfig config, OrleansConfig orleansConfig, ILog logger = null, CancellationToken token = default)
+        public UdpServerListener(IPAddress address, int port, PiraeusConfig config, OrleansConfig orleansConfig,
+            ILog logger = null, CancellationToken token = default)
         {
             localEP = new IPEndPoint(address, port);
             listener = new UdpClient();
@@ -67,12 +68,12 @@ namespace Piraeus.UdpGateway
             this.logger = logger;
             graphManager = new GraphManager(orleansConfig);
 
-            if (config.ClientTokenType != null && config.ClientSymmetricKey != null)
-            {
-                SecurityTokenType stt = (SecurityTokenType)System.Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
+            if (config.ClientTokenType != null && config.ClientSymmetricKey != null) {
+                SecurityTokenType stt =
+                    (SecurityTokenType)Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
-                this.authn = bauthn;
+                authn = bauthn;
             }
 
             cache = MemoryCache.Default;
@@ -86,33 +87,29 @@ namespace Piraeus.UdpGateway
 
             await logger.LogDebugAsync($"UDP Gateway started on {localEP.Address} and port {localEP.Port}");
 
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
+            while (!token.IsCancellationRequested) {
+                try {
                     UdpReceiveResult result = await listener.ReceiveAsync();
-                    if (result.Buffer.Length > 0)
-                    {
+                    if (result.Buffer.Length > 0) {
                         string key = CreateNamedKey($"{result.RemoteEndPoint.Address}:{result.RemoteEndPoint.Port}");
-                        if (cache.Contains(key))
-                        {
-                            Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(key);
-                            if (tuple != null && tuple.Item1 != null)
-                            {
+                        if (cache.Contains(key)) {
+                            Tuple<ProtocolAdapter, CancellationTokenSource> tuple =
+                                (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(key);
+                            if (tuple != null && tuple.Item1 != null) {
                                 cache.Get(CreateNamedKey(tuple.Item1.Channel.Id));
-                                if (tuple.Item1.Channel.State == ChannelState.Open)
-                                {
+                                if (tuple.Item1.Channel.State == ChannelState.Open) {
                                     await tuple.Item1.Channel.AddMessageAsync(result.Buffer);
                                 }
                             }
                         }
-                        else
-                        {
+                        else {
                             CancellationTokenSource cts = new CancellationTokenSource();
-                            ProtocolAdapter adapter = ProtocolAdapterFactory.Create(config, graphManager, authn, listener, result.RemoteEndPoint, logger, cts.Token);
+                            ProtocolAdapter adapter = ProtocolAdapterFactory.Create(config, graphManager, authn,
+                                listener, result.RemoteEndPoint, logger, cts.Token);
                             string namedKey = CreateNamedKey(adapter.Channel.Id);
                             cache.Add(namedKey, key, GetCachePolicy(5.0 * 60.0));
-                            cache.Add(key, new Tuple<ProtocolAdapter, CancellationTokenSource>(adapter, cts), GetCachePolicy(5.0 * 60.0));
+                            cache.Add(key, new Tuple<ProtocolAdapter, CancellationTokenSource>(adapter, cts),
+                                GetCachePolicy(5.0 * 60.0));
 
                             adapter.OnError += Adapter_OnError;
                             adapter.OnClose += Adapter_OnClose;
@@ -123,8 +120,7 @@ namespace Piraeus.UdpGateway
                         }
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     logger?.LogErrorAsync(ex, "Fault UDP listener.");
                     throw ex;
                 }
@@ -133,43 +129,37 @@ namespace Piraeus.UdpGateway
 
         public async Task StopAsync()
         {
-            await logger?.LogInformationAsync($"UDP Listener stopping on Address {localEP.Address} and Port {localEP.Port}");
+            await logger?.LogInformationAsync(
+                $"UDP Listener stopping on Address {localEP.Address} and Port {localEP.Port}");
 
-            if (dict != null & dict.Count > 0)
-            {
+            if ((dict != null) & (dict.Count > 0)) {
                 var keys = dict.Keys;
-                if (keys != null && keys.Count > 0)
-                {
-                    try
-                    {
+                if (keys != null && keys.Count > 0) {
+                    try {
                         string[] keysArray = keys.ToArray();
-                        foreach (var key in keysArray)
-                        {
-                            if (dict.ContainsKey(key))
-                            {
+                        foreach (var key in keysArray) {
+                            if (dict.ContainsKey(key)) {
                                 ProtocolAdapter adapter = dict[key];
                                 dict.Remove(key);
-                                try
-                                {
+                                try {
                                     adapter.Dispose();
-                                    await logger.LogWarningAsync($"UDP Listener stopping and dispose Protcol adapter {key}");
+                                    await logger.LogWarningAsync(
+                                        $"UDP Listener stopping and dispose Protcol adapter {key}");
                                 }
-                                catch (Exception ex)
-                                {
-                                    await logger.LogErrorAsync(ex, "Fault dispose protcol adaper while Stopping UDP Listener - {ex.Message}");
+                                catch (Exception ex) {
+                                    await logger.LogErrorAsync(ex,
+                                        "Fault dispose protcol adaper while Stopping UDP Listener - {ex.Message}");
                                 }
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        await logger.LogErrorAsync(ex, $"UDP Listener fault during stop.'");
+                    catch (Exception ex) {
+                        await logger.LogErrorAsync(ex, "UDP Listener fault during stop.'");
                     }
                 }
             }
-            else
-            {
-                await logger.LogWarningAsync($"No protocol adapters in TCP Listener dictionary to dispose and remove");
+            else {
+                await logger.LogWarningAsync("No protocol adapters in TCP Listener dictionary to dispose and remove");
             }
 
             listener.Close();
@@ -189,14 +179,12 @@ namespace Piraeus.UdpGateway
         {
             string key = CreateNamedKey(e.ChannelId);
 
-            if (cache.Contains(key))
-            {
+            if (cache.Contains(key)) {
                 string namedKey = (string)cache.Get(key);
-                if (cache.Contains(namedKey))
-                {
-                    Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(namedKey);
-                    if (tuple != null && tuple.Item1 != null)
-                    {
+                if (cache.Contains(namedKey)) {
+                    Tuple<ProtocolAdapter, CancellationTokenSource> tuple =
+                        (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(namedKey);
+                    if (tuple != null && tuple.Item1 != null) {
                         tuple.Item1.Channel.SendAsync(e.Message).GetAwaiter();
                     }
                 }
@@ -205,19 +193,16 @@ namespace Piraeus.UdpGateway
 
         private void CacheItemRemovedCallback(CacheEntryRemovedArguments args)
         {
-            if (args.RemovedReason == CacheEntryRemovedReason.Expired)
-            {
+            if (args.RemovedReason == CacheEntryRemovedReason.Expired) {
                 logger?.LogInformationAsync($"Expired {args.CacheItem.Key} removed.");
-                try
-                {
-                    string[] parts = args.CacheItem.Key.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        if (cache.Contains((string)args.CacheItem.Value))
-                        {
-                            Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get((string)args.CacheItem.Value);
-                            if (tuple != null && tuple.Item1 != null)
-                            {
+                try {
+                    string[] parts = args.CacheItem.Key.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2) {
+                        if (cache.Contains((string)args.CacheItem.Value)) {
+                            Tuple<ProtocolAdapter, CancellationTokenSource> tuple =
+                                (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(
+                                    (string)args.CacheItem.Value);
+                            if (tuple != null && tuple.Item1 != null) {
                                 tuple.Item1.Dispose();
                             }
 
@@ -225,17 +210,15 @@ namespace Piraeus.UdpGateway
                         }
                     }
 
-                    if (parts.Length == 3)
-                    {
-                        Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)args.CacheItem.Value;
-                        if (tuple != null && tuple.Item1 != null)
-                        {
+                    if (parts.Length == 3) {
+                        Tuple<ProtocolAdapter, CancellationTokenSource> tuple =
+                            (Tuple<ProtocolAdapter, CancellationTokenSource>)args.CacheItem.Value;
+                        if (tuple != null && tuple.Item1 != null) {
                             tuple.Item1.Dispose();
                         }
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     logger?.LogErrorAsync(ex, "Fault UDP cache expiry.").GetAwaiter();
                 }
             }
@@ -245,23 +228,20 @@ namespace Piraeus.UdpGateway
         {
             string channelKey = CreateNamedKey(id);
 
-            if (cache.Contains(channelKey))
-            {
+            if (cache.Contains(channelKey)) {
                 string tupleKey = (string)cache.Get(channelKey);
-                if (cache.Contains(tupleKey))
-                {
-                    try
-                    {
-                        Tuple<ProtocolAdapter, CancellationTokenSource> tuple = (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(tupleKey);
-                        if (tuple != null && tuple.Item1 != null)
-                        {
+                if (cache.Contains(tupleKey)) {
+                    try {
+                        Tuple<ProtocolAdapter, CancellationTokenSource> tuple =
+                            (Tuple<ProtocolAdapter, CancellationTokenSource>)cache.Get(tupleKey);
+                        if (tuple != null && tuple.Item1 != null) {
                             tuple.Item1.Dispose();
                         }
+
                         cache.Remove(tupleKey);
                         cache.Remove(channelKey);
                     }
-                    catch (Exception ex)
-                    {
+                    catch (Exception ex) {
                         logger?.LogErrorAsync(ex, "Fault UDP cleanup.").GetAwaiter();
                     }
                 }
@@ -275,8 +255,7 @@ namespace Piraeus.UdpGateway
 
         private CacheItemPolicy GetCachePolicy(double expirySeconds)
         {
-            return new CacheItemPolicy()
-            {
+            return new CacheItemPolicy {
                 SlidingExpiration = TimeSpan.FromSeconds(expirySeconds),
                 RemovedCallback = CacheItemRemovedCallback
             };

@@ -2,10 +2,6 @@
 {
     public class WebServerConfig : WebConfig
     {
-        public WebServerConfig()
-        {
-        }
-
         #region Client Name Claim Type and Indexes
 
         public string WebIdentityIndexClaimTypes { get; set; }

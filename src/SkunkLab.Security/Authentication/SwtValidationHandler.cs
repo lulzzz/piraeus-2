@@ -1,5 +1,4 @@
-﻿using SkunkLab.Security.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using SkunkLab.Security.Tokens;
 
 namespace SkunkLab.Security.Authentication
 {
@@ -25,43 +25,41 @@ namespace SkunkLab.Security.Authentication
             this.issuer = issuer;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
         {
             HttpStatusCode statusCode;
 
-            if (!TryRetrieveToken(request, out string token))
-            {
+            if (!TryRetrieveToken(request, out string token)) {
                 statusCode = HttpStatusCode.Unauthorized;
                 return Task<HttpResponseMessage>.Factory.StartNew(() =>
-                            new HttpResponseMessage(statusCode));
+                    new HttpResponseMessage(statusCode));
             }
 
-            try
-            {
-                if (SecurityTokenValidator.Validate(token, SecurityTokenType.SWT, signingKey, issuer, audience))
-                {
+            try {
+                if (SecurityTokenValidator.Validate(token, SecurityTokenType.SWT, signingKey, issuer, audience)) {
                 }
 
                 return base.SendAsync(request, cancellationToken);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Trace.TraceWarning("Exception in SWT validation.");
                 Trace.TraceError(ex.Message);
                 statusCode = HttpStatusCode.InternalServerError;
             }
 
             return Task<HttpResponseMessage>.Factory.StartNew(() =>
-                  new HttpResponseMessage(statusCode));
+                new HttpResponseMessage(statusCode));
         }
 
         private static bool TryRetrieveToken(HttpRequestMessage request, out string token)
         {
             token = null;
-            if (!request.Headers.TryGetValues("Authorization", out IEnumerable<string> authzHeaders) || authzHeaders.Count() > 1)
-            {
+            if (!request.Headers.TryGetValues("Authorization", out IEnumerable<string> authzHeaders) ||
+                authzHeaders.Count() > 1) {
                 return false;
             }
+
             var bearerToken = authzHeaders.ElementAt(0);
             token = bearerToken.StartsWith("Bearer ") ? bearerToken.Substring(7) : bearerToken;
             return true;

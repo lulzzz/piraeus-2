@@ -1,5 +1,5 @@
-﻿using Piraeus.Core.Messaging;
-using System;
+﻿using System;
+using Piraeus.Core.Messaging;
 
 namespace Piraeus.Adapters
 {

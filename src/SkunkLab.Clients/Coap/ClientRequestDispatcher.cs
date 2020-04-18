@@ -1,6 +1,6 @@
-﻿using SkunkLab.Protocols.Coap;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using SkunkLab.Protocols.Coap;
 
 namespace SkunkLab.Clients.Coap
 {
@@ -18,7 +18,8 @@ namespace SkunkLab.Clients.Coap
         public Task<CoapMessage> DeleteAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
-            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token);
+            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset,
+                ResponseCodeType.EmptyMessage, message.Token);
             tcs.SetResult(msg);
             return tcs.Task;
         }
@@ -26,7 +27,8 @@ namespace SkunkLab.Clients.Coap
         public Task<CoapMessage> GetAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
-            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token);
+            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset,
+                ResponseCodeType.EmptyMessage, message.Token);
             tcs.SetResult(msg);
             return tcs.Task;
         }
@@ -34,7 +36,8 @@ namespace SkunkLab.Clients.Coap
         public Task<CoapMessage> ObserveAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
-            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token);
+            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset,
+                ResponseCodeType.EmptyMessage, message.Token);
             tcs.SetResult(msg);
             return tcs.Task;
         }
@@ -43,9 +46,12 @@ namespace SkunkLab.Clients.Coap
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
             CoapUri uri = new CoapUri(message.ResourceUri.ToString());
-            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
+            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable
+                ? ResponseMessageType.Acknowledgement
+                : ResponseMessageType.NonConfirmable;
 
-            registry.GetAction("POST", uri.Resource)?.Invoke(MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload);
+            registry.GetAction("POST", uri.Resource)
+                ?.Invoke(MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload);
             CoapMessage response = new CoapResponse(message.MessageId, rmt, ResponseCodeType.Created, message.Token);
             tcs.SetResult(response);
             return tcs.Task;
@@ -54,7 +60,8 @@ namespace SkunkLab.Clients.Coap
         public Task<CoapMessage> PutAsync(CoapMessage message)
         {
             TaskCompletionSource<CoapMessage> tcs = new TaskCompletionSource<CoapMessage>();
-            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token);
+            CoapMessage msg = new CoapResponse(message.MessageId, ResponseMessageType.Reset,
+                ResponseCodeType.EmptyMessage, message.Token);
             tcs.SetResult(msg);
             return tcs.Task;
         }
@@ -69,10 +76,8 @@ namespace SkunkLab.Clients.Coap
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
+            if (!disposedValue) {
+                if (disposing) {
                     registry.Clear();
                     registry = null;
                 }

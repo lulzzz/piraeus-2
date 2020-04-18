@@ -1,6 +1,6 @@
-﻿using Piraeus.Core.Metadata;
-using System;
+﻿using System;
 using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
@@ -10,10 +10,14 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Azure Redis account, e.g., <account>.redis.cache.windows.net")]
         public string Account;
 
-        [Parameter(HelpMessage = "(Optional) claim type for the identity used as the cache key.  If omitted, the resource URI query string must contain cachekey parameter and value to set the key.  If query string parameter is used it will override the claim type.")]
+        [Parameter(HelpMessage =
+            "(Optional) claim type for the identity used as the cache key.  If omitted, the resource URI query string must contain cachekey parameter and value to set the key.  If query string parameter is used it will override the claim type.")]
         public string ClaimType;
 
-        [Parameter(HelpMessage = "(Optional) Redis database number to use for the cache.  If omitted, will use the default database", Mandatory = false)]
+        [Parameter(
+            HelpMessage =
+                "(Optional) Redis database number to use for the cache.  If omitted, will use the default database",
+            Mandatory = false)]
         public int DatabaseNum;
 
         [Parameter(HelpMessage = "Description of the subscription.", Mandatory = false)]
@@ -38,38 +42,31 @@ namespace Piraeus.Module
         {
             string uriString = string.Format("redis://{0}.redis.cache.windows.net", Account);
 
-            if (DatabaseNum >= 0 && Expiry.HasValue)
-            {
+            if (DatabaseNum >= 0 && Expiry.HasValue) {
                 uriString = string.Format("{0}?db={1}&expiry={2}", uriString, DatabaseNum, Expiry.ToString());
             }
-            else if (DatabaseNum >= 0)
-            {
+            else if (DatabaseNum >= 0) {
                 uriString = string.Format("{0}?db={1}", uriString, DatabaseNum);
             }
-            else if (Expiry.HasValue)
-            {
+            else if (Expiry.HasValue) {
                 uriString = string.Format("{0}?expiry={1}", uriString, Expiry.ToString());
             }
-            else
-            {
-                //using defauls for database and cached item will never expire
-            }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
-                Description = this.Description,
+                Description = Description,
                 SymmetricKey = SecurityKey
             };
 
-            if (!string.IsNullOrEmpty(ClaimType))
-            {
+            if (!string.IsNullOrEmpty(ClaimType)) {
                 metadata.ClaimKey = ClaimType.ToLowerInvariant();
             }
 
-            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

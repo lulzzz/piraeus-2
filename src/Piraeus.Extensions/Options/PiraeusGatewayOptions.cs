@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using Piraeus.Configuration;
-using System;
 
 namespace Piraeus.Extensions.Options
 {
@@ -37,7 +37,7 @@ namespace Piraeus.Extensions.Options
 
         public string DataConnectionString { get; set; }
 
-        public bool Dockerized { get; set; } = false;
+        public bool Dockerized { get; set; }
 
         public LoggerType LoggerTypes { get; set; }
 
@@ -49,24 +49,20 @@ namespace Piraeus.Extensions.Options
 
         private OrleansStorageType SetStorageType()
         {
-            if (string.IsNullOrEmpty(DataConnectionString))
-            {
+            if (string.IsNullOrEmpty(DataConnectionString)) {
                 return default;
             }
 
             string cs = DataConnectionString.ToLowerInvariant();
-            if (cs.Contains(":6380") || cs.Contains(":6379"))
-            {
+            if (cs.Contains(":6380") || cs.Contains(":6379")) {
                 return OrleansStorageType.Redis;
             }
-            else if (cs.Contains("defaultendpointsprotocol=") && cs.Contains("accountname=") && cs.Contains("accountkey="))
-            {
+
+            if (cs.Contains("defaultendpointsprotocol=") && cs.Contains("accountname=") && cs.Contains("accountkey=")) {
                 return OrleansStorageType.AzureStorage;
             }
-            else
-            {
-                throw new ArgumentException("Invalid connection string");
-            }
+
+            throw new ArgumentException("Invalid connection string");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -12,7 +13,6 @@ using Piraeus.Extensions.Logging;
 using Piraeus.Extensions.Orleans;
 using Piraeus.HttpGateway.Formatters;
 using Piraeus.HttpGateway.Middleware;
-using System;
 
 namespace Piraeus.HttpGateway
 {
@@ -20,8 +20,7 @@ namespace Piraeus.HttpGateway
     {
         public void Configure(IApplicationBuilder app)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
@@ -51,8 +50,7 @@ namespace Piraeus.HttpGateway
             services.AddSingletonOrleansClusterClient(orleansConfig);
             LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
-            {
+            if (loggers.HasFlag(LoggerType.AppInsights)) {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
                     op.InstrumentationKey = config.InstrumentationKey;
@@ -60,6 +58,7 @@ namespace Piraeus.HttpGateway
                     op.EnableHeartbeat = true;
                 });
             }
+
             services.AddLogging(builder => builder.AddLogging(config));
             services.AddSingleton<Logger>();
             services.AddTransient<PiraeusHttpMiddleware>();
@@ -67,8 +66,7 @@ namespace Piraeus.HttpGateway
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
+                    options.TokenValidationParameters = new TokenValidationParameters {
                         ValidateIssuer = !string.IsNullOrEmpty(config.ClientIssuer),
                         ValidateAudience = !string.IsNullOrEmpty(config.ClientAudience),
                         ValidateLifetime = true,

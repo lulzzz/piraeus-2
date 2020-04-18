@@ -1,6 +1,6 @@
-﻿using SkunkLab.Protocols.Mqtt;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SkunkLab.Protocols.Mqtt;
 
 namespace Piraeus.Clients.Mqtt
 {

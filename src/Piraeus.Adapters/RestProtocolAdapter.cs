@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Orleans;
 using Piraeus.Auditing;
 using Piraeus.Configuration;
@@ -9,9 +12,6 @@ using Piraeus.Core.Utilities;
 using Piraeus.Grains;
 using SkunkLab.Channels;
 using SkunkLab.Security.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Piraeus.Adapters
 {
@@ -49,7 +49,8 @@ namespace Piraeus.Adapters
 
         private bool disposed;
 
-        public RestProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IChannel channel, HttpContext context, ILog logger = null)
+        public RestProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IChannel channel,
+            HttpContext context, ILog logger = null)
         {
             this.config = config;
             this.channel = channel;
@@ -57,27 +58,28 @@ namespace Piraeus.Adapters
             method = context.Request.Method.ToUpperInvariant();
             messageUri = new MessageUri(context.Request);
 
-            IdentityDecoder decoder = new IdentityDecoder(config.ClientIdentityNameClaimType, context, config.GetClientIndexes());
+            IdentityDecoder decoder =
+                new IdentityDecoder(config.ClientIdentityNameClaimType, context, config.GetClientIndexes());
             identity = decoder.Id;
             indexes = decoder.Indexes;
             adapter = new OrleansAdapter(identity, channel.TypeId, "REST", graphManager, logger);
-            if (method == "GET")
-            {
+            if (method == "GET") {
                 adapter.OnObserve += Adapter_OnObserve;
             }
+
             protocolType = ProtocolType.REST;
             contentType = messageUri.ContentType;
             resource = messageUri.Resource;
             subscriptions = messageUri.Subscriptions;
 
             auditFactory = AuditFactory.CreateSingleton();
-            if (config.AuditConnectionString != null && config.AuditConnectionString.Contains("DefaultEndpointsProtocol"))
-            {
-                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"), AuditType.Message);
+            if (config.AuditConnectionString != null &&
+                config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
+                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"),
+                    AuditType.Message);
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
             }
-            else if (config.AuditConnectionString != null)
-            {
+            else if (config.AuditConnectionString != null) {
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
             }
@@ -86,17 +88,17 @@ namespace Piraeus.Adapters
             userAuditor = auditFactory.GetAuditor(AuditType.User);
         }
 
-        public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
-
-        public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
-
-        public override event EventHandler<ChannelObserverEventArgs> OnObserve;
-
         public override IChannel Channel
         {
             get => channel;
             set => channel = value;
         }
+
+        public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
+
+        public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
+
+        public override event EventHandler<ChannelObserverEventArgs> OnObserve;
 
         public override void Dispose()
         {
@@ -113,37 +115,33 @@ namespace Piraeus.Adapters
 
         protected void Disposing(bool disposing)
         {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    try
-                    {
-                        if (adapter != null)
-                        {
+            if (!disposed) {
+                if (disposing) {
+                    try {
+                        if (adapter != null) {
                             adapter.Dispose();
-                            logger?.LogDebugAsync($"HTTP orleans adapter disposed on channel {Channel.Id}").GetAwaiter();
+                            logger?.LogDebugAsync($"HTTP orleans adapter disposed on channel {Channel.Id}")
+                                .GetAwaiter();
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        logger?.LogErrorAsync(ex, $"REST adapter disposing orleans adapter error on channel '{Channel.Id}'.").GetAwaiter();
+                    catch (Exception ex) {
+                        logger?.LogErrorAsync(ex,
+                            $"REST adapter disposing orleans adapter error on channel '{Channel.Id}'.").GetAwaiter();
                     }
 
-                    try
-                    {
-                        if (Channel != null)
-                        {
+                    try {
+                        if (Channel != null) {
                             string channelId = Channel.Id;
                             Channel.Dispose();
                             logger?.LogDebugAsync($"REST adapter channel {channelId} disposed").GetAwaiter();
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        logger?.LogErrorAsync(ex, $"REST adapter Disposing channel on channel '{Channel.Id}'.").GetAwaiter();
+                    catch (Exception ex) {
+                        logger?.LogErrorAsync(ex, $"REST adapter Disposing channel on channel '{Channel.Id}'.")
+                            .GetAwaiter();
                     }
                 }
+
                 disposed = true;
             }
         }
@@ -151,16 +149,20 @@ namespace Piraeus.Adapters
         private void Adapter_OnObserve(object sender, ObserveMessageEventArgs e)
         {
             logger?.LogDebugAsync("REST adapter received observed message");
-            OnObserve?.Invoke(this, new ChannelObserverEventArgs(channel.Id, e.Message.ResourceUri, e.Message.ContentType, e.Message.Message));
+            OnObserve?.Invoke(this,
+                new ChannelObserverEventArgs(channel.Id, e.Message.ResourceUri, e.Message.ContentType,
+                    e.Message.Message));
             AuditRecord record = new UserAuditRecord(channel.Id, identity, DateTime.UtcNow);
             userAuditor?.UpdateAuditRecordAsync(record).Ignore();
-            AuditRecord messageRecord = new MessageAuditRecord(e.Message.MessageId, identity, channel.TypeId, protocolType.ToString(), e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+            AuditRecord messageRecord = new MessageAuditRecord(e.Message.MessageId, identity, channel.TypeId,
+                protocolType.ToString(), e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             messageAuditor?.WriteAuditRecordAsync(messageRecord);
         }
 
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
-            AuditRecord record = new UserAuditRecord(Channel.Id, identity, config.ClientIdentityNameClaimType, Channel.TypeId, $"REST-{method}", "Granted", DateTime.UtcNow);
+            AuditRecord record = new UserAuditRecord(Channel.Id, identity, config.ClientIdentityNameClaimType,
+                Channel.TypeId, $"REST-{method}", "Granted", DateTime.UtcNow);
             userAuditor?.WriteAuditRecordAsync(record).Ignore();
 
             logger?.LogDebugAsync("REST adapter channel is open.").GetAwaiter();
@@ -170,56 +172,46 @@ namespace Piraeus.Adapters
         {
             Exception error = null;
 
-            if (method == "POST" && string.IsNullOrEmpty(resource))
-            {
+            if (method == "POST" && string.IsNullOrEmpty(resource)) {
                 error = new Exception("REST adapter cannot send message without resource.");
             }
 
-            if (method == "POST" && string.IsNullOrEmpty(contentType))
-            {
+            if (method == "POST" && string.IsNullOrEmpty(contentType)) {
                 error = new Exception("REST adapter cannot send message without content-type.");
             }
 
-            if (method == "POST" && (e.Message == null || e.Message.Length == 0))
-            {
+            if (method == "POST" && (e.Message == null || e.Message.Length == 0)) {
                 error = new Exception("REST adapter cannot send empty message.");
             }
 
-            if (method == "GET" && (subscriptions == null || subscriptions.Count() == 0))
-            {
+            if (method == "GET" && (subscriptions == null || subscriptions.Count() == 0)) {
                 error = new Exception("REST adapter cannot subscribe to '0' subscriptions.");
             }
 
-            if (error != null)
-            {
+            if (error != null) {
                 logger?.LogWarningAsync(error.Message).GetAwaiter();
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(channel.Id, error));
                 return;
             }
 
-            try
-            {
-                if (method == "POST")
-                {
+            try {
+                if (method == "POST") {
                     EventMessage message = new EventMessage(contentType, resource, protocolType, e.Message);
-                    if (!string.IsNullOrEmpty(messageUri.CacheKey))
-                    {
+                    if (!string.IsNullOrEmpty(messageUri.CacheKey)) {
                         message.CacheKey = messageUri.CacheKey;
                     }
 
                     adapter.PublishAsync(message, indexes).GetAwaiter();
                     logger?.LogDebugAsync("REST adapter published message");
-                    MessageAuditRecord record = new MessageAuditRecord(message.MessageId, identity, channel.TypeId, protocolType.ToString(), e.Message.Length, MessageDirectionType.In, true, DateTime.UtcNow);
+                    MessageAuditRecord record = new MessageAuditRecord(message.MessageId, identity, channel.TypeId,
+                        protocolType.ToString(), e.Message.Length, MessageDirectionType.In, true, DateTime.UtcNow);
                     messageAuditor?.WriteAuditRecordAsync(record).Ignore();
                     OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(Channel.Id));
                 }
 
-                if (method == "GET")
-                {
-                    foreach (var subscription in subscriptions)
-                    {
-                        SubscriptionMetadata metadata = new SubscriptionMetadata()
-                        {
+                if (method == "GET") {
+                    foreach (var subscription in subscriptions) {
+                        SubscriptionMetadata metadata = new SubscriptionMetadata {
                             Identity = identity,
                             Indexes = indexes,
                             IsEphemeral = true
@@ -229,8 +221,7 @@ namespace Piraeus.Adapters
                     }
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogErrorAsync($"REST adapter processing error on receive - {ex.Message}");
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(channel.Id, ex));
             }

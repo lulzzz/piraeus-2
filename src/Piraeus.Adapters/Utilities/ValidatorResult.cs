@@ -4,8 +4,8 @@
     {
         public ValidatorResult(bool validated, string error = null)
         {
-            this.Validated = validated;
-            this.ErrorMessage = error;
+            Validated = validated;
+            ErrorMessage = error;
         }
 
         public string ErrorMessage { get; set; }

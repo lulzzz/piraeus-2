@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Hosting;
 using Piraeus.Configuration;
 using Piraeus.GrainInterfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace Piraeus.Extensions.Orleans
 {
@@ -15,11 +15,10 @@ namespace Piraeus.Extensions.Orleans
 
         public static void AddSingletonOrleansClusterClient(this IServiceCollection services, OrleansConfig config)
         {
-            services.AddSingleton<IClusterClient>(serviceProvider =>
+            services.AddSingleton(serviceProvider =>
             {
                 var builder = new ClientBuilder();
-                if (!string.IsNullOrEmpty(config.InstrumentationKey))
-                {
+                if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
 
@@ -32,7 +31,7 @@ namespace Piraeus.Extensions.Orleans
 
         public static void AddScopedOrleansClusterClient(this IServiceCollection services, OrleansConfig config)
         {
-            services.AddScoped<IClusterClient>(serviceProvider =>
+            services.AddScoped(serviceProvider =>
             {
                 var builder = new ClientBuilder();
                 builder.AddOrleansClusterClient(config);
@@ -44,16 +43,16 @@ namespace Piraeus.Extensions.Orleans
 
         public static void AddTransientOrleansClusterClient(this IServiceCollection services, OrleansConfig config)
         {
-            services.AddTransient<IClusterClient>(serviceProvider =>
+            services.AddTransient(serviceProvider =>
             {
                 var builder = new ClientBuilder();
                 builder.AddOrleansClusterClient(config);
                 IClusterClient client = builder.Build();
                 client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
-                if (!string.IsNullOrEmpty(config.InstrumentationKey))
-                {
+                if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
+
                 return client;
             });
         }
@@ -81,29 +80,25 @@ namespace Piraeus.Extensions.Orleans
             }
 #endif
 
-            Piraeus.Configuration.LoggerType loggers = config.GetLoggerTypes();
+            LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
-            {
+            if (loggers.HasFlag(LoggerType.AppInsights)) {
                 builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
             }
 
             builder.ConfigureLogging(op =>
             {
-                if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
-                {
+                if (loggers.HasFlag(LoggerType.AppInsights)) {
                     op.AddApplicationInsights(config.InstrumentationKey);
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
 
-                if (loggers.HasFlag(Piraeus.Configuration.LoggerType.Console))
-                {
+                if (loggers.HasFlag(LoggerType.Console)) {
                     op.AddConsole();
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
 
-                if (loggers.HasFlag(Piraeus.Configuration.LoggerType.Debug))
-                {
+                if (loggers.HasFlag(LoggerType.Debug)) {
                     op.AddDebug();
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
@@ -120,7 +115,8 @@ namespace Piraeus.Extensions.Orleans
             async Task<bool> RetryFilter(Exception exception)
             {
                 attempt++;
-                Console.WriteLine($"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
+                Console.WriteLine(
+                    $"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
                 if (attempt > maxAttempts)
                     return false;
 

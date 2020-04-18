@@ -12,24 +12,23 @@ namespace Piraeus.TcpGateway
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-.ConfigureServices((hostContext, services) =>
-{
-    services.AddPiraeusConfiguration(out PiraeusConfig config);
-    if (!string.IsNullOrEmpty(config.InstrumentationKey))
-    {
-        services.AddApplicationInsightsTelemetry(op =>
-        {
-            op.InstrumentationKey = config.InstrumentationKey;
-            op.AddAutoCollectedMetricExtractor = true;
-            op.EnableHeartbeat = true;
-        });
-    }
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.AddPiraeusConfiguration(out PiraeusConfig config);
+                    if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
+                        services.AddApplicationInsightsTelemetry(op =>
+                        {
+                            op.InstrumentationKey = config.InstrumentationKey;
+                            op.AddAutoCollectedMetricExtractor = true;
+                            op.EnableHeartbeat = true;
+                        });
+                    }
 
-    services.AddOrleansConfiguration();
-    services.AddLogging(builder => builder.AddLogging(config));
-    services.AddSingleton<Logger>();
-    services.AddHostedService<TcpGatewayHost>();
-});
+                    services.AddOrleansConfiguration();
+                    services.AddLogging(builder => builder.AddLogging(config));
+                    services.AddSingleton<Logger>();
+                    services.AddHostedService<TcpGatewayHost>();
+                });
         }
 
         private static void Main(string[] args)

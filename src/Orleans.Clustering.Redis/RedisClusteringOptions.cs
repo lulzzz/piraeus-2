@@ -5,10 +5,6 @@ namespace Orleans.Clustering.Redis
     [Serializable]
     public class RedisClusteringOptions
     {
-        public RedisClusteringOptions()
-        {
-        }
-
         public string ConnectionString { get; set; }
 
         public int? ConnectRetry { get; set; }

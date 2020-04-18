@@ -1,6 +1,6 @@
-﻿using SkunkLab.Protocols;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SkunkLab.Protocols;
 
 namespace Piraeus.Clients.Mqtt
 {
@@ -15,16 +15,14 @@ namespace Piraeus.Clients.Mqtt
 
         public void Dispatch(string key, string contentType, byte[] data)
         {
-            if (register.ContainsKey(key))
-            {
+            if (register.ContainsKey(key)) {
                 register[key](key, contentType, data);
             }
         }
 
         public void Register(string key, Action<string, string, byte[]> action)
         {
-            if (!register.ContainsKey(key))
-            {
+            if (!register.ContainsKey(key)) {
                 register.Add(key, action);
             }
         }

@@ -1,7 +1,7 @@
-﻿using StackExchange.Redis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 
 namespace SkunkLab.Storage
 {
@@ -25,8 +25,7 @@ namespace SkunkLab.Storage
 
         public static RedisPskStorage CreateSingleton(string connectionString)
         {
-            if (instance == null)
-            {
+            if (instance == null) {
                 instance = new RedisPskStorage(connectionString);
             }
 
@@ -36,18 +35,16 @@ namespace SkunkLab.Storage
         public override async Task<string[]> GetKeys()
         {
             EndPoint[] endpoints = connection.GetEndPoints();
-            if (endpoints != null && endpoints.Length > 0)
-            {
+            if (endpoints != null && endpoints.Length > 0) {
                 var server = connection.GetServer(endpoints[0]);
                 int dbNum = id ?? 0;
                 var keys = server.Keys(dbNum);
                 List<string> list = new List<string>();
-                foreach (var key in keys)
-                {
+                foreach (var key in keys) {
                     list.Add(key.ToString());
                 }
 
-                return await Task.FromResult<string[]>(list.ToArray());
+                return await Task.FromResult(list.ToArray());
             }
 
             return null;

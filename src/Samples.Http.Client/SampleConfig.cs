@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Samples.Http.Client
 {
@@ -7,26 +7,16 @@ namespace Samples.Http.Client
     [JsonObject]
     public class SampleConfig
     {
-        public SampleConfig()
-        {
-        }
+        [JsonProperty("audience")] public string Audience { get; set; }
 
-        [JsonProperty("audience")]
-        public string Audience { get; set; }
+        [JsonProperty("dns")] public string DnsName { get; set; }
 
-        [JsonProperty("dns")]
-        public string DnsName { get; set; }
+        [JsonProperty("identityClaimType")] public string IdentityNameClaimType { get; set; }
 
-        [JsonProperty("identityClaimType")]
-        public string IdentityNameClaimType { get; set; }
+        [JsonProperty("issuer")] public string Issuer { get; set; }
 
-        [JsonProperty("issuer")]
-        public string Issuer { get; set; }
+        [JsonProperty("location")] public string Location { get; set; }
 
-        [JsonProperty("location")]
-        public string Location { get; set; }
-
-        [JsonProperty("symmetricKey")]
-        public string SymmetricKey { get; set; }
+        [JsonProperty("symmetricKey")] public string SymmetricKey { get; set; }
     }
 }

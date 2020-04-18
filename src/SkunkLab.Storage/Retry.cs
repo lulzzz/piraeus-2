@@ -14,24 +14,19 @@ namespace SkunkLab.Storage
         public static void Execute(Action retryOperation, TimeSpan deltaBackoff, int maxRetries)
         {
             int delayMilliseconds = Convert.ToInt32(deltaBackoff.TotalMilliseconds);
-            if (maxRetries < 1)
-            {
+            if (maxRetries < 1) {
                 throw new ArgumentOutOfRangeException("Retry maxRetries must be >= 1.");
             }
 
             int attempt = 0;
 
-            while (attempt < maxRetries)
-            {
-                try
-                {
+            while (attempt < maxRetries) {
+                try {
                     retryOperation();
                     return;
                 }
-                catch
-                {
-                    if (attempt == maxRetries)
-                    {
+                catch {
+                    if (attempt == maxRetries) {
                         throw;
                     }
 
@@ -52,30 +47,24 @@ namespace SkunkLab.Storage
         {
             int delayMilliseconds = Convert.ToInt32(deltaBackoff.TotalMilliseconds);
 
-            if (maxRetries < 1)
-            {
+            if (maxRetries < 1) {
                 throw new ArgumentOutOfRangeException("Retry maxRetries must be >= 1.");
             }
 
             int attempt = 0;
 
-            while (attempt < maxRetries)
-            {
-                try
-                {
+            while (attempt < maxRetries) {
+                try {
                     await Task.Run(retryOperation);
                     break;
                 }
-                catch (Exception ex)
-                {
-                    if (attempt == maxRetries)
-                    {
+                catch (Exception ex) {
+                    if (attempt == maxRetries) {
                         Trace.TraceWarning("WARNING: Task failed all retries.");
                         Trace.TraceError("ERORR: Task retry error {0}", ex.Message);
                         Trace.TraceError("ERORR: Task retry stack trace {0}", ex.StackTrace);
                     }
-                    else
-                    {
+                    else {
                         Trace.TraceWarning("WARNING: Task in retry mode.");
                     }
 

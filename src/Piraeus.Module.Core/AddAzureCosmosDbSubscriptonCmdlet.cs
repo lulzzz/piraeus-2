@@ -1,5 +1,5 @@
-﻿using Piraeus.Core.Metadata;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
@@ -35,18 +35,21 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string uriString = string.Format("https://{0}.documents.azure.com:443?database={1}&collection={2}&clients={3}", Account, Database, Collection, NumClients <= 0 ? 1 : NumClients);
+            string uriString =
+                string.Format("https://{0}.documents.azure.com:443?database={1}&collection={2}&clients={3}", Account,
+                    Database, Collection, NumClients <= 0 ? 1 : NumClients);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,
-                Description = this.Description
+                Description = Description
             };
 
-            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

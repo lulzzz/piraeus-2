@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -16,7 +17,6 @@ using Piraeus.Extensions.Configuration;
 using Piraeus.Extensions.Orleans;
 using Piraeus.Monitor.Extensions;
 using Piraeus.Monitor.Hubs;
-using System;
 
 namespace Piraeus.Monitor
 {
@@ -33,12 +33,10 @@ namespace Piraeus.Monitor
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
+            else {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
@@ -46,8 +44,7 @@ namespace Piraeus.Monitor
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            if (!string.IsNullOrEmpty(config.TenantId))
-            {
+            if (!string.IsNullOrEmpty(config.TenantId)) {
                 app.UseCookiePolicy();
                 app.UseAuthentication();
             }
@@ -72,12 +69,11 @@ namespace Piraeus.Monitor
 
             if (string.Equals(
                 Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"),
-                "true", StringComparison.OrdinalIgnoreCase))
-            {
+                "true", StringComparison.OrdinalIgnoreCase)) {
                 services.Configure<ForwardedHeadersOptions>(options =>
                 {
                     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
-                        ForwardedHeaders.XForwardedProto;
+                                               ForwardedHeaders.XForwardedProto;
                     // Only loopback proxies are allowed by default.
                     // Clear that restriction because forwarders are enabled by explicit
                     // configuration.
@@ -87,13 +83,11 @@ namespace Piraeus.Monitor
 
                 Console.WriteLine("Forward headers IS CONFIGURED");
             }
-            else
-            {
+            else {
                 Console.WriteLine("Forward headers NOT CONFIGURED");
             }
 
-            if (!string.IsNullOrEmpty(config.TenantId))
-            {
+            if (!string.IsNullOrEmpty(config.TenantId)) {
                 Console.WriteLine($"Using tenantId = {config.TenantId}");
                 //----------------------------------------------------------------
                 services.Configure<CookiePolicyOptions>(options =>
@@ -128,18 +122,17 @@ namespace Piraeus.Monitor
 
             services.AddSignalR();
             services.AddMvc(options =>
-            {
-                options.EnableEndpointRouting = false;
-
-                if (!string.IsNullOrEmpty(config.TenantId))
                 {
-                    var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                    options.Filters.Add(new AuthorizeFilter(policy));
-                }
-            })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                    options.EnableEndpointRouting = false;
+
+                    if (!string.IsNullOrEmpty(config.TenantId)) {
+                        var policy = new AuthorizationPolicyBuilder()
+                            .RequireAuthenticatedUser()
+                            .Build();
+                        options.Filters.Add(new AuthorizeFilter(policy));
+                    }
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddRazorPages();
         }
     }

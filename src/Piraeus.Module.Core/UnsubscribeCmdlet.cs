@@ -16,8 +16,10 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/resource/unsubscribe?subscriptionuristring={1}", ServiceUrl, SubscriptionUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("DELETE", url, RestConstants.ContentType.Json, true, SecurityToken);
+            string url = string.Format("{0}/api/resource/unsubscribe?subscriptionuristring={1}", ServiceUrl,
+                SubscriptionUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("DELETE", url, RestConstants.ContentType.Json, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             request.Delete();

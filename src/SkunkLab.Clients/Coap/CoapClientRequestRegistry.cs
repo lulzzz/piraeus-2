@@ -1,6 +1,6 @@
-﻿using SkunkLab.Protocols.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SkunkLab.Protocols.Utilities;
 
 namespace SkunkLab.Clients.Coap
 {
@@ -18,8 +18,7 @@ namespace SkunkLab.Clients.Coap
             Uri uri = new Uri(resourceUriString);
             string key = verb.ToUpperInvariant() + uri.ToCanonicalString(false);
 
-            if (!container.ContainsKey(key))
-            {
+            if (!container.ContainsKey(key)) {
                 container.Add(key, action);
             }
         }
@@ -34,14 +33,11 @@ namespace SkunkLab.Clients.Coap
             Uri uri = new Uri(resourceUriString);
             string key = verb.ToUpperInvariant() + uri.ToCanonicalString(false);
 
-            if (container.ContainsKey(key))
-            {
+            if (container.ContainsKey(key)) {
                 return container[key];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public void Remove(string verb, string resourceUriString)

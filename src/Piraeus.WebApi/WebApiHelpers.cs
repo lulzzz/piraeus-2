@@ -13,7 +13,7 @@ namespace Piraeus.WebApi
 
             IConfigurationRoot root = builder.Build();
             OrleansConfig config = new OrleansConfig();
-            ConfigurationBinder.Bind(root, config);
+            root.Bind(config);
 
             return config;
         }
@@ -26,7 +26,7 @@ namespace Piraeus.WebApi
 
             IConfigurationRoot root = builder.Build();
             PiraeusConfig config = new PiraeusConfig();
-            ConfigurationBinder.Bind(root, config);
+            root.Bind(config);
 
             return config;
         }

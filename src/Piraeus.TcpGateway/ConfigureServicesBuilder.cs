@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Piraeus.TcpGateway
 {
@@ -9,16 +9,15 @@ namespace Piraeus.TcpGateway
     {
         public ConfigureServicesBuilder(MethodInfo configureServices)
         {
-            if (configureServices == null)
-            {
+            if (configureServices == null) {
                 throw new ArgumentNullException(nameof(configureServices));
             }
 
             var parameters = configureServices.GetParameters();
             if (parameters.Length > 1 ||
-                parameters.Any(p => p.ParameterType != typeof(IServiceCollection)))
-            {
-                throw new InvalidOperationException("ConfigureServices can take at most a single IServiceCollection parameter.");
+                parameters.Any(p => p.ParameterType != typeof(IServiceCollection))) {
+                throw new InvalidOperationException(
+                    "ConfigureServices can take at most a single IServiceCollection parameter.");
             }
 
             MethodInfo = configureServices;
@@ -38,13 +37,14 @@ namespace Piraeus.TcpGateway
         {
             var parameters = new object[MethodInfo.GetParameters().Length];
 
-            if (parameters.Length > 0)
-            {
+            if (parameters.Length > 0) {
                 parameters[0] = exportServices;
             }
 
             IServiceProvider serviceProvider = MethodInfo.Invoke(instance, parameters) as IServiceProvider;
-            _ = serviceProvider ?? throw new InvalidOperationException("The ConfigureServices method did not returned a configured IServiceProvider instance.");
+            _ = serviceProvider ??
+                throw new InvalidOperationException(
+                    "The ConfigureServices method did not returned a configured IServiceProvider instance.");
 
             return serviceProvider;
         }

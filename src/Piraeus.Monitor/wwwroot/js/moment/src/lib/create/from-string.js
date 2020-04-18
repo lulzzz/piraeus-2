@@ -1,55 +1,61 @@
-import { configFromStringAndFormat } from './from-string-and-format';
-import { createUTCDate } from './date-from-array';
-import { configFromArray } from './from-array';
-import { hooks } from '../utils/hooks';
-import { deprecate } from '../utils/deprecate';
-import getParsingFlags from './parsing-flags';
-import { defaultLocaleMonthsShort } from '../units/month';
-import { defaultLocaleWeekdaysShort } from '../units/day-of-week';
+import { configFromStringAndFormat } from "./from-string-and-format";
+import { createUTCDate } from "./date-from-array";
+import { configFromArray } from "./from-array";
+import { hooks } from "../utils/hooks";
+import { deprecate } from "../utils/deprecate";
+import getParsingFlags from "./parsing-flags";
+import { defaultLocaleMonthsShort } from "../units/month";
+import { defaultLocaleWeekdaysShort } from "../units/day-of-week";
 
 // iso 8601 regex
 // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
-var extendedIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
-var basicIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
+var extendedIsoRegex =
+    /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
+var basicIsoRegex =
+    /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
 
 var tzRegex = /Z|[+-]\d\d(?::?\d\d)?/;
 
 var isoDates = [
-    ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
-    ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
-    ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
-    ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
-    ['YYYY-DDD', /\d{4}-\d{3}/],
-    ['YYYY-MM', /\d{4}-\d\d/, false],
-    ['YYYYYYMMDD', /[+-]\d{10}/],
-    ['YYYYMMDD', /\d{8}/],
+    ["YYYYYY-MM-DD", /[+-]\d{6}-\d\d-\d\d/],
+    ["YYYY-MM-DD", /\d{4}-\d\d-\d\d/],
+    ["GGGG-[W]WW-E", /\d{4}-W\d\d-\d/],
+    ["GGGG-[W]WW", /\d{4}-W\d\d/, false],
+    ["YYYY-DDD", /\d{4}-\d{3}/],
+    ["YYYY-MM", /\d{4}-\d\d/, false],
+    ["YYYYYYMMDD", /[+-]\d{10}/],
+    ["YYYYMMDD", /\d{8}/],
     // YYYYMM is NOT allowed by the standard
-    ['GGGG[W]WWE', /\d{4}W\d{3}/],
-    ['GGGG[W]WW', /\d{4}W\d{2}/, false],
-    ['YYYYDDD', /\d{7}/]
+    ["GGGG[W]WWE", /\d{4}W\d{3}/],
+    ["GGGG[W]WW", /\d{4}W\d{2}/, false],
+    ["YYYYDDD", /\d{7}/]
 ];
 
 // iso time formats and regexes
 var isoTimes = [
-    ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
-    ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
-    ['HH:mm:ss', /\d\d:\d\d:\d\d/],
-    ['HH:mm', /\d\d:\d\d/],
-    ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
-    ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
-    ['HHmmss', /\d\d\d\d\d\d/],
-    ['HHmm', /\d\d\d\d/],
-    ['HH', /\d\d/]
+    ["HH:mm:ss.SSSS", /\d\d:\d\d:\d\d\.\d+/],
+    ["HH:mm:ss,SSSS", /\d\d:\d\d:\d\d,\d+/],
+    ["HH:mm:ss", /\d\d:\d\d:\d\d/],
+    ["HH:mm", /\d\d:\d\d/],
+    ["HHmmss.SSSS", /\d\d\d\d\d\d\.\d+/],
+    ["HHmmss,SSSS", /\d\d\d\d\d\d,\d+/],
+    ["HHmmss", /\d\d\d\d\d\d/],
+    ["HHmm", /\d\d\d\d/],
+    ["HH", /\d\d/]
 ];
 
 var aspNetJsonRegex = /^\/?Date\((\-?\d+)/i;
 
 // date from iso format
 export function configFromISO(config) {
-    var i, l,
+    var i,
+        l,
         string = config._i,
         match = extendedIsoRegex.exec(string) || basicIsoRegex.exec(string),
-        allowTime, dateFormat, timeFormat, tzFormat;
+        allowTime,
+        dateFormat,
+        timeFormat,
+        tzFormat;
 
     if (match) {
         getParsingFlags(config).iso = true;
@@ -69,7 +75,7 @@ export function configFromISO(config) {
             for (i = 0, l = isoTimes.length; i < l; i++) {
                 if (isoTimes[i][1].exec(match[3])) {
                     // match[2] should be 'T' or space
-                    timeFormat = (match[2] || ' ') + isoTimes[i][0];
+                    timeFormat = (match[2] || " ") + isoTimes[i][0];
                     break;
                 }
             }
@@ -84,13 +90,13 @@ export function configFromISO(config) {
         }
         if (match[4]) {
             if (tzRegex.exec(match[4])) {
-                tzFormat = 'Z';
+                tzFormat = "Z";
             } else {
                 config._isValid = false;
                 return;
             }
         }
-        config._f = dateFormat + (timeFormat || '') + (tzFormat || '');
+        config._f = dateFormat + (timeFormat || "") + (tzFormat || "");
         configFromStringAndFormat(config);
     } else {
         config._isValid = false;
@@ -98,7 +104,8 @@ export function configFromISO(config) {
 }
 
 // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
-var rfc2822 = /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/;
+var rfc2822 =
+    /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/;
 
 function extractFromRFC2822Strings(yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr) {
     var result = [
@@ -128,7 +135,7 @@ function untruncateYear(yearStr) {
 
 function preprocessRFC2822(s) {
     // Remove comments and folding whitespace and replace multiple-spaces with a single space
-    return s.replace(/\([^)]*\)|[\n\t]/g, ' ').replace(/(\s\s+)/g, ' ').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    return s.replace(/\([^)]*\)|[\n\t]/g, " ").replace(/(\s\s+)/g, " ").replace(/^\s\s*/, "").replace(/\s\s*$/, "");
 }
 
 function checkWeekday(weekdayStr, parsedInput, config) {
@@ -220,11 +227,11 @@ export function configFromString(config) {
 }
 
 hooks.createFromInputFallback = deprecate(
-    'value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), ' +
-    'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
-    'discouraged and will be removed in an upcoming major release. Please refer to ' +
-    'http://momentjs.com/guides/#/warnings/js-date/ for more info.',
-    function (config) {
-        config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
+    "value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), " +
+    "which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are " +
+    "discouraged and will be removed in an upcoming major release. Please refer to " +
+    "http://momentjs.com/guides/#/warnings/js-date/ for more info.",
+    function(config) {
+        config._d = new Date(config._i + (config._useUTC ? " UTC" : ""));
     }
 );

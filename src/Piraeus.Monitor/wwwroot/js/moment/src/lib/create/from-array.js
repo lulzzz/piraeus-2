@@ -1,11 +1,11 @@
-import { hooks } from '../utils/hooks';
-import { createDate, createUTCDate } from './date-from-array';
-import { daysInYear } from '../units/year';
-import { weekOfYear, weeksInYear, dayOfYearFromWeeks } from '../units/week-calendar-utils';
-import { YEAR, MONTH, DATE, HOUR, MINUTE, SECOND, MILLISECOND } from '../units/constants';
-import { createLocal } from './local';
-import defaults from '../utils/defaults';
-import getParsingFlags from './parsing-flags';
+import { hooks } from "../utils/hooks";
+import { createDate, createUTCDate } from "./date-from-array";
+import { daysInYear } from "../units/year";
+import { weekOfYear, weeksInYear, dayOfYearFromWeeks } from "../units/week-calendar-utils";
+import { YEAR, MONTH, DATE, HOUR, MINUTE, SECOND, MILLISECOND } from "../units/constants";
+import { createLocal } from "./local";
+import defaults from "../utils/defaults";
+import getParsingFlags from "./parsing-flags";
 
 function currentDateArray(config) {
     // hooks is actually the exported moment object
@@ -84,7 +84,7 @@ export function configFromArray(config) {
     }
 
     // check for mismatching day of week
-    if (config._w && typeof config._w.d !== 'undefined' && config._w.d !== expectedWeekday) {
+    if (config._w && typeof config._w.d !== "undefined" && config._w.d !== expectedWeekday) {
         getParsingFlags(config).weekdayMismatch = true;
     }
 }

@@ -60,7 +60,7 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Dispose()
         {
-            Disposing(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -132,7 +132,7 @@ namespace SkunkLab.Protocols.Mqtt
 
         #endregion Retry Signal
 
-        protected void Disposing(bool dispose)
+        protected virtual void Dispose(bool dispose)
         {
             if (dispose & !disposed) {
                 quarantine.Dispose();

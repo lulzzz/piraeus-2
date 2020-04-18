@@ -1,10 +1,15 @@
-declare function moment(inp?: moment.MomentInput, format?: moment.MomentFormatSpecification, strict?: boolean): moment.Moment;
-declare function moment(inp?: moment.MomentInput, format?: moment.MomentFormatSpecification, language?: string, strict?: boolean): moment.Moment;
+declare function moment(inp?: moment.MomentInput, format?: moment.MomentFormatSpecification, strict?: boolean): moment.
+    Moment;
+
+declare function moment(inp?: moment.MomentInput,
+    format?: moment.MomentFormatSpecification,
+    language?: string,
+    strict?: boolean): moment.Moment;
 
 declare namespace moment {
-    type RelativeTimeKey = 's' | 'ss' | 'm' | 'mm' | 'h' | 'hh' | 'd' | 'dd' | 'M' | 'MM' | 'y' | 'yy';
-    type CalendarKey = 'sameDay' | 'nextDay' | 'lastDay' | 'nextWeek' | 'lastWeek' | 'sameElse' | string;
-    type LongDateFormatKey = 'LTS' | 'LT' | 'L' | 'LL' | 'LLL' | 'LLLL' | 'lts' | 'lt' | 'l' | 'll' | 'lll' | 'llll';
+    type RelativeTimeKey = "s" | "ss" | "m" | "mm" | "h" | "hh" | "d" | "dd" | "M" | "MM" | "y" | "yy";
+    type CalendarKey = "sameDay" | "nextDay" | "lastDay" | "nextWeek" | "lastWeek" | "sameElse" | string;
+    type LongDateFormatKey = "LTS" | "LT" | "L" | "LL" | "LLL" | "LLLL" | "lts" | "lt" | "l" | "ll" | "lll" | "llll";
 
     interface Locale {
         calendar(key?: CalendarKey, m?: Moment, now?: Moment): string;
@@ -15,8 +20,10 @@ declare namespace moment {
 
         preparse(inp: string): string;
         postformat(inp: string): string;
-        relativeTime(n: number, withoutSuffix: boolean,
-            key: RelativeTimeKey, isFuture: boolean): string;
+        relativeTime(n: number,
+            withoutSuffix: boolean,
+            key: RelativeTimeKey,
+            isFuture: boolean): string;
         pastFuture(diff: number, absRelTime: string): string;
         set(config: Object): void;
 
@@ -59,6 +66,7 @@ declare namespace moment {
     }
 
     type CalendarSpecVal = string | ((m?: MomentInput, now?: Moment) => string);
+
     interface CalendarSpec {
         sameDay?: CalendarSpecVal;
         nextDay?: CalendarSpecVal;
@@ -73,9 +81,11 @@ declare namespace moment {
 
     type RelativeTimeSpecVal = (
         string |
-        ((n: number, withoutSuffix: boolean,
-            key: RelativeTimeKey, isFuture: boolean) => string)
-    );
+        ((n: number,
+            withoutSuffix: boolean,
+            key: RelativeTimeKey,
+            isFuture: boolean) => string)
+        );
     type RelativeTimeFuturePastVal = string | ((relTime: string) => string);
 
     interface RelativeTimeSpec {
@@ -285,15 +295,31 @@ declare namespace moment {
 
     namespace unitOfTime {
         type Base = (
-            "year" | "years" | "y" |
-            "month" | "months" | "M" |
-            "week" | "weeks" | "w" |
-            "day" | "days" | "d" |
-            "hour" | "hours" | "h" |
-            "minute" | "minutes" | "m" |
-            "second" | "seconds" | "s" |
-            "millisecond" | "milliseconds" | "ms"
-        );
+            "year" |
+            "years" |
+            "y" |
+            "month" |
+            "months" |
+            "M" |
+            "week" |
+            "weeks" |
+            "w" |
+            "day" |
+            "days" |
+            "d" |
+            "hour" |
+            "hours" |
+            "h" |
+            "minute" |
+            "minutes" |
+            "m" |
+            "second" |
+            "seconds" |
+            "s" |
+            "millisecond" |
+            "milliseconds" |
+            "ms"
+            );
 
         type _quarter = "quarter" | "quarters" | "Q";
         type _isoWeek = "isoWeek" | "isoWeeks" | "W";
@@ -308,12 +334,25 @@ declare namespace moment {
 
         type MomentConstructor = Base | _date;
 
-        type All = Base | _quarter | _isoWeek | _date |
-            "weekYear" | "weekYears" | "gg" |
-            "isoWeekYear" | "isoWeekYears" | "GG" |
-            "dayOfYear" | "dayOfYears" | "DDD" |
-            "weekday" | "weekdays" | "e" |
-            "isoWeekday" | "isoWeekdays" | "E";
+        type All = Base |
+                   _quarter |
+                   _isoWeek |
+                   _date |
+                   "weekYear" |
+                   "weekYears" |
+                   "gg" |
+                   "isoWeekYear" |
+                   "isoWeekYears" |
+                   "GG" |
+                   "dayOfYear" |
+                   "dayOfYears" |
+                   "DDD" |
+                   "weekday" |
+                   "weekdays" |
+                   "e" |
+                   "isoWeekday" |
+                   "isoWeekdays" |
+                   "E";
     }
 
     interface MomentInputObject {
@@ -399,7 +438,8 @@ declare namespace moment {
         to: MomentInput;
     }
 
-    type MomentInput = Moment | Date | string | number | (number | string)[] | MomentInputObject | void; // null | undefined
+    type MomentInput =
+        Moment | Date | string | number | (number | string)[] | MomentInputObject | void; // null | undefined
     type DurationInputArg1 = Duration | number | string | FromTo | DurationInputObject | void; // null | undefined
     type DurationInputArg2 = unitOfTime.DurationConstructor;
     type LocaleSpecifier = string | Moment | Duration | string[] | boolean;
@@ -569,7 +609,10 @@ declare namespace moment {
         isSame(inp?: MomentInput, granularity?: unitOfTime.StartOf): boolean;
         isSameOrAfter(inp?: MomentInput, granularity?: unitOfTime.StartOf): boolean;
         isSameOrBefore(inp?: MomentInput, granularity?: unitOfTime.StartOf): boolean;
-        isBetween(a: MomentInput, b: MomentInput, granularity?: unitOfTime.StartOf, inclusivity?: "()" | "[)" | "(]" | "[]"): boolean;
+        isBetween(a: MomentInput,
+            b: MomentInput,
+            granularity?: unitOfTime.StartOf,
+            inclusivity?: "()" | "[)" | "(]" | "[]"): boolean;
 
         /**
          * @deprecated as of 2.8.0, use locale
@@ -622,26 +665,36 @@ declare namespace moment {
 
     // NOTE(constructor): Same as moment constructor
     export function utc(inp?: MomentInput, format?: MomentFormatSpecification, strict?: boolean): Moment;
-    export function utc(inp?: MomentInput, format?: MomentFormatSpecification, language?: string, strict?: boolean): Moment;
+
+    export function utc(inp?: MomentInput,
+        format?: MomentFormatSpecification,
+        language?: string,
+        strict?: boolean): Moment;
 
     export function unix(timestamp: number): Moment;
 
     export function invalid(flags?: MomentParsingFlagsOpt): Moment;
+
     export function isMoment(m: any): m is Moment;
+
     export function isDate(m: any): m is Date;
+
     export function isDuration(d: any): d is Duration;
 
     /**
      * @deprecated in 2.8.0
      */
     export function lang(language?: string): string;
+
     /**
      * @deprecated in 2.8.0
      */
     export function lang(language?: string, definition?: Locale): string;
 
     export function locale(language?: string): string;
+
     export function locale(language?: string[]): string;
+
     export function locale(language?: string, definition?: LocaleSpecification | void): string; // null | undefined
 
     export function localeData(key?: string | string[]): Locale;
@@ -650,45 +703,82 @@ declare namespace moment {
 
     // NOTE(constructor): Same as moment constructor
     export function parseZone(inp?: MomentInput, format?: MomentFormatSpecification, strict?: boolean): Moment;
-    export function parseZone(inp?: MomentInput, format?: MomentFormatSpecification, language?: string, strict?: boolean): Moment;
+
+    export function parseZone(inp?: MomentInput,
+        format?: MomentFormatSpecification,
+        language?: string,
+        strict?: boolean): Moment;
 
     export function months(): string[];
+
     export function months(index: number): string;
+
     export function months(format: string): string[];
+
     export function months(format: string, index: number): string;
+
     export function monthsShort(): string[];
+
     export function monthsShort(index: number): string;
+
     export function monthsShort(format: string): string[];
+
     export function monthsShort(format: string, index: number): string;
 
     export function weekdays(): string[];
+
     export function weekdays(index: number): string;
+
     export function weekdays(format: string): string[];
+
     export function weekdays(format: string, index: number): string;
+
     export function weekdays(localeSorted: boolean): string[];
+
     export function weekdays(localeSorted: boolean, index: number): string;
+
     export function weekdays(localeSorted: boolean, format: string): string[];
+
     export function weekdays(localeSorted: boolean, format: string, index: number): string;
+
     export function weekdaysShort(): string[];
+
     export function weekdaysShort(index: number): string;
+
     export function weekdaysShort(format: string): string[];
+
     export function weekdaysShort(format: string, index: number): string;
+
     export function weekdaysShort(localeSorted: boolean): string[];
+
     export function weekdaysShort(localeSorted: boolean, index: number): string;
+
     export function weekdaysShort(localeSorted: boolean, format: string): string[];
+
     export function weekdaysShort(localeSorted: boolean, format: string, index: number): string;
+
     export function weekdaysMin(): string[];
+
     export function weekdaysMin(index: number): string;
+
     export function weekdaysMin(format: string): string[];
+
     export function weekdaysMin(format: string, index: number): string;
+
     export function weekdaysMin(localeSorted: boolean): string[];
+
     export function weekdaysMin(localeSorted: boolean, index: number): string;
+
     export function weekdaysMin(localeSorted: boolean, format: string): string[];
+
     export function weekdaysMin(localeSorted: boolean, format: string, index: number): string;
 
     export function min(moments: Moment[]): Moment;
+
     export function min(...moments: Moment[]): Moment;
+
     export function max(moments: Moment[]): Moment;
+
     export function max(...moments: Moment[]): Moment;
 
     /**
@@ -697,15 +787,21 @@ declare namespace moment {
     export function now(): number;
 
     export function defineLocale(language: string, localeSpec: LocaleSpecification | void): Locale; // null
+
     export function updateLocale(language: string, localeSpec: LocaleSpecification | void): Locale; // null
 
     export function locales(): string[];
 
     export function normalizeUnits(unit: unitOfTime.All): string;
+
     export function relativeTimeThreshold(threshold: string): number | boolean;
+
     export function relativeTimeThreshold(threshold: string, limit: number): boolean;
+
     export function relativeTimeRounding(fn: (num: number) => number): boolean;
+
     export function relativeTimeRounding(): (num: number) => number;
+
     export function calendarFormat(m: Moment, now: Moment): string;
 
     export function parseTwoDigitYear(input: string): number;
@@ -728,7 +824,7 @@ declare namespace moment {
         TIME_SECONDS: string,
         TIME_MS: string,
         WEEK: string,
-        MONTH: string
+        MONTH: string;
     };
 }
 

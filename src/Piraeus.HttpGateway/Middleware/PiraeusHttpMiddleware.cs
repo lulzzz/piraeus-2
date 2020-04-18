@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Orleans;
 using Piraeus.Adapters;
 using Piraeus.Configuration;
 using Piraeus.Grains;
-using System.Threading;
-using System.Threading.Tasks;
+using SkunkLab.Channels;
 
 namespace Piraeus.HttpGateway.Middleware
 {
@@ -16,8 +17,7 @@ namespace Piraeus.HttpGateway.Middleware
 
         private readonly RequestDelegate next;
 
-        private readonly WaitHandle[] waitHandles = new WaitHandle[]
-        {
+        private readonly WaitHandle[] waitHandles = {
             new AutoResetEvent(false)
         };
 
@@ -34,8 +34,6 @@ namespace Piraeus.HttpGateway.Middleware
             graphManager = new GraphManager(client);
         }
 
-        private delegate void HttpResponseObserverHandler(object sender, SkunkLab.Channels.ChannelObserverEventArgs args);
-
         private event HttpResponseObserverHandler OnMessage;
 
         public async Task Invoke(HttpContext context)
@@ -46,14 +44,13 @@ namespace Piraeus.HttpGateway.Middleware
             adapter.OnClose += Adapter_OnClose;
             adapter.Init();
             await next(context);
-            if (context.Request.Method.ToUpperInvariant() == "GET")
-            {
+            if (context.Request.Method.ToUpperInvariant() == "GET") {
                 //long polling
                 //adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
 
                 //adapter.Init();
                 this.context = context;
-                ThreadPool.QueueUserWorkItem(new WaitCallback(Listen), waitHandles[0]);
+                ThreadPool.QueueUserWorkItem(Listen, waitHandles[0]);
                 WaitHandle.WaitAll(waitHandles);
                 //adapter.Dispose();
             }
@@ -66,7 +63,7 @@ namespace Piraeus.HttpGateway.Middleware
             adapter.Dispose();
         }
 
-        private void Adapter_OnObserve(object sender, SkunkLab.Channels.ChannelObserverEventArgs e)
+        private void Adapter_OnObserve(object sender, ChannelObserverEventArgs e)
         {
             OnMessage?.Invoke(this, e);
         }
@@ -85,5 +82,7 @@ namespace Piraeus.HttpGateway.Middleware
                 are.Set();
             };
         }
+
+        private delegate void HttpResponseObserverHandler(object sender, ChannelObserverEventArgs args);
     }
 }

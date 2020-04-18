@@ -13,33 +13,37 @@ var count = 0;
 var index = 0;
 var timeArray = new Array(slice);
 
-var chart = new Chart(document.getElementById("line-chart"), {
-    type: 'scatter',
-    data: {
-        labels: [],
-        datasets: [{
-            data: [],
-            label: "message/sec",
-            borderColor: "#3e95cd",
-            fill: false,
-            showLine: true
-        }]
-    },
-    options: {
-        title: {
-            display: true,
-            text: 'Throughput Chart'
+var chart = new Chart(document.getElementById("line-chart"),
+    {
+        type: "scatter",
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    data: [],
+                    label: "message/sec",
+                    borderColor: "#3e95cd",
+                    fill: false,
+                    showLine: true
+                }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: "Throughput Chart"
+            }
         }
-    }
-});
+    });
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/pisystemHub").withAutomaticReconnect().build();
 
-connection.on("ReceiveMessage", function (message) {
-    updateData(message);
-    //var root = document.getElementById(id);
-    //writeLine(root, message);
-});
+connection.on("ReceiveMessage",
+    function(message) {
+        updateData(message);
+        //var root = document.getElementById(id);
+        //writeLine(root, message);
+    });
 
 connection.start();
 
@@ -81,7 +85,11 @@ function updateData(message) {
     var jsonObj = JSON.parse(message);
 
     timeArray[index] = (moment(jsonObj.lastMessageTimestamp));
-    updateText(jsonObj.lastMessageTimestamp, jsonObj.messageCount, jsonObj.byteCount, jsonObj.lastErrorTimestamp, jsonObj.errorCount);
+    updateText(jsonObj.lastMessageTimestamp,
+        jsonObj.messageCount,
+        jsonObj.byteCount,
+        jsonObj.lastErrorTimestamp,
+        jsonObj.errorCount);
     index++;
     if (index === slice) {
         index = 0;
@@ -104,8 +112,7 @@ function updateData(message) {
             console.log("slice " + slice);
             console.log("rate" + rate);
             addData(d1, rate);
-        }
-        else {
+        } else {
             //d1 = Math.max.apply(Math, timeArray);
             //timeArray = new Array(slice);
             dlast = moment(d1);
@@ -142,13 +149,12 @@ function toggleMonitor() {
     count = 0;
     index = 0;
     var parameters = new URLSearchParams(window.location.search);
-    var resourceUriString = parameters.get('r');
-    var span = document.getElementById('monitorAction');
+    var resourceUriString = parameters.get("r");
+    var span = document.getElementById("monitorAction");
     if (span.className === "glyphicon glyphicon-play") {
         span.className = "glyphicon glyphicon-stop";
         subscribe(resourceUriString);
-    }
-    else {
+    } else {
         span.className = "glyphicon glyphicon-play";
         connection.invoke("UnsubscribeAsync", resourceUriString);
     }

@@ -1,10 +1,10 @@
-﻿using SkunkLab.Channels;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using SkunkLab.Channels;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Coap.Handlers;
 using SkunkLab.Security.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SkunkLab.Clients.Coap
 {
@@ -30,8 +30,9 @@ namespace SkunkLab.Clients.Coap
 
         private bool usedToken;
 
-        public PiraeusCoapClient(CoapConfig config, IChannel channel, SecurityTokenType tokenType, string securityToken, ICoapRequestDispatch dispatcher = null)
-                                                                                            : this(config, channel, dispatcher)
+        public PiraeusCoapClient(CoapConfig config, IChannel channel, SecurityTokenType tokenType, string securityToken,
+            ICoapRequestDispatch dispatcher = null)
+            : this(config, channel, dispatcher)
         {
             this.tokenType = tokenType;
             this.securityToken = securityToken;
@@ -41,7 +42,7 @@ namespace SkunkLab.Clients.Coap
         public PiraeusCoapClient(CoapConfig config, IChannel channel, ICoapRequestDispatch dispatcher = null)
         {
             this.config = config;
-            this.pingId = new List<ushort>();
+            pingId = new List<ushort>();
             session = new CoapSession(config);
 
             observers = new Dictionary<string, string>();
@@ -63,8 +64,7 @@ namespace SkunkLab.Clients.Coap
 
         public async Task ObserveAsync(string resourceUriString, Action<CodeType, string, byte[]> action)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
@@ -74,8 +74,8 @@ namespace SkunkLab.Clients.Coap
             ushort id = session.CoapSender.NewId(token, true, action);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
             string coapUriString = GetCoapUriString(scheme, resourceUriString);
-            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.GET, token, new Uri(coapUriString), null)
-            {
+            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.GET, token,
+                new Uri(coapUriString), null) {
                 Observe = true
             };
             observers.Add(resourceUriString, Convert.ToBase64String(token));
@@ -83,10 +83,10 @@ namespace SkunkLab.Clients.Coap
             await channel.SendAsync(observeRequest);
         }
 
-        public async Task PublishAsync(string resourceUriString, string contentType, byte[] payload, bool confirmable, Action<CodeType, string, byte[]> action)
+        public async Task PublishAsync(string resourceUriString, string contentType, byte[] payload, bool confirmable,
+            Action<CodeType, string, byte[]> action)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
@@ -98,12 +98,12 @@ namespace SkunkLab.Clients.Coap
             string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
             RequestMessageType mtype = confirmable ? RequestMessageType.Confirmable : RequestMessageType.NonConfirmable;
-            CoapRequest cr = new CoapRequest(id, mtype, MethodType.POST, token, new Uri(coapUriString), MediaTypeConverter.ConvertToMediaType(contentType), payload);
+            CoapRequest cr = new CoapRequest(id, mtype, MethodType.POST, token, new Uri(coapUriString),
+                MediaTypeConverter.ConvertToMediaType(contentType), payload);
 
             queue.Enqueue(cr.Encode());
 
-            while (queue.Count > 0)
-            {
+            while (queue.Count > 0) {
                 byte[] message = queue.Dequeue();
                 Task t = channel.SendAsync(message);
                 await Task.WhenAll(t);
@@ -112,8 +112,7 @@ namespace SkunkLab.Clients.Coap
 
         public Task PublishAsync(string resourceUriString, string contentType, byte[] payload, NoResponseType nrt)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 Open();
                 Receive();
             }
@@ -125,17 +124,17 @@ namespace SkunkLab.Clients.Coap
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
             string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
-            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.POST, new Uri(coapUriString), MediaTypeConverter.ConvertToMediaType(contentType), payload)
-            {
+            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.POST,
+                new Uri(coapUriString), MediaTypeConverter.ConvertToMediaType(contentType), payload) {
                 NoResponse = nrt
             };
             return channel.SendAsync(cr.Encode());
         }
 
-        public async Task SubscribeAsync(string resourceUriString, bool confirmable, Action<CodeType, string, byte[]> action)
+        public async Task SubscribeAsync(string resourceUriString, bool confirmable,
+            Action<CodeType, string, byte[]> action)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
@@ -153,8 +152,7 @@ namespace SkunkLab.Clients.Coap
 
         public async Task SubscribeAsync(string resourceUriString, NoResponseType nrt)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
@@ -164,8 +162,8 @@ namespace SkunkLab.Clients.Coap
             ushort id = session.CoapSender.NewId(token);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
             string coapUriString = GetCoapUriString(scheme, resourceUriString);
-            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.PUT, token, new Uri(coapUriString), null)
-            {
+            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.PUT, token,
+                new Uri(coapUriString), null) {
                 NoResponse = nrt
             };
             await channel.SendAsync(cr.Encode());
@@ -173,23 +171,21 @@ namespace SkunkLab.Clients.Coap
 
         public async Task UnobserveAsync(string resourceUriString)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
             session.UpdateKeepAliveTimestamp();
 
-            if (observers.ContainsKey(resourceUriString))
-            {
+            if (observers.ContainsKey(resourceUriString)) {
                 string tokenString = observers[resourceUriString];
                 byte[] token = Convert.FromBase64String(tokenString);
-                ushort id = session.CoapSender.NewId(token, false, null);
+                ushort id = session.CoapSender.NewId(token, false);
                 string scheme = channel.IsEncrypted ? "coaps" : "coap";
                 string coapUriString = GetCoapUriString(scheme, resourceUriString);
 
-                CoapRequest request = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.GET, new Uri(coapUriString), null)
-                {
+                CoapRequest request = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.GET,
+                    new Uri(coapUriString), null) {
                     Observe = false
                 };
                 await channel.SendAsync(request.Encode());
@@ -198,10 +194,10 @@ namespace SkunkLab.Clients.Coap
             }
         }
 
-        public async Task UnsubscribeAsync(string resourceUriString, bool confirmable, Action<CodeType, string, byte[]> action)
+        public async Task UnsubscribeAsync(string resourceUriString, bool confirmable,
+            Action<CodeType, string, byte[]> action)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
@@ -218,8 +214,7 @@ namespace SkunkLab.Clients.Coap
 
         public async Task UnsubscribeAsync(string resourceUriString, NoResponseType nrt)
         {
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await ConnectAsync();
             }
 
@@ -229,11 +224,61 @@ namespace SkunkLab.Clients.Coap
             ushort id = session.CoapSender.NewId(token);
             string scheme = channel.IsEncrypted ? "coaps" : "coap";
             string coapUriString = GetCoapUriString(scheme, resourceUriString);
-            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.DELETE, token, new Uri(coapUriString), null)
-            {
+            CoapRequest cr = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.DELETE, token,
+                new Uri(coapUriString), null) {
                 NoResponse = nrt
             };
             await channel.SendAsync(cr.Encode());
+        }
+
+        private async Task ConnectAsync()
+        {
+            try {
+                await channel.OpenAsync();
+                Receive();
+            }
+            catch (Exception ex) {
+                throw ex.InnerException;
+            }
+        }
+
+        private string GetCoapUriString(string scheme, string resourceUriString)
+        {
+            if (!usedToken && securityToken != null &&
+                (tokenType != SecurityTokenType.NONE || tokenType != SecurityTokenType.X509)) {
+                usedToken = true;
+                return string.Format("{0}://{1}?r={2}&tt={3}&t={4}", scheme, config.Authority, resourceUriString,
+                    tokenType.ToString(), securityToken);
+            }
+
+            return string.Format("{0}://{1}?r={2}", scheme, config.Authority, resourceUriString);
+        }
+
+        private Task Open()
+        {
+            TaskCompletionSource<Task> tcs = new TaskCompletionSource<Task>();
+            channel.OpenAsync().GetAwaiter();
+            tcs.SetResult(null);
+            return tcs.Task;
+        }
+
+        private void Receive()
+        {
+            Task task = channel.ReceiveAsync();
+            Task.WhenAll(task);
+        }
+
+        private void Session_OnKeepAlive(object sender, CoapMessageEventArgs args)
+        {
+            Task task = channel.SendAsync(args.Message.Encode());
+            Task.WhenAll(task);
+        }
+
+        private void Session_OnRetry(object sender, CoapMessageEventArgs args)
+        {
+            pingId.Add(args.Message.MessageId);
+            Task task = channel.SendAsync(args.Message.Encode());
+            Task.WhenAll(task);
         }
 
         #region channel events
@@ -267,66 +312,12 @@ namespace SkunkLab.Clients.Coap
         {
             CoapMessage msg = await handler.ProcessAsync();
 
-            if (msg != null && pingId.Contains(msg.MessageId))
-            {
+            if (msg != null && pingId.Contains(msg.MessageId)) {
                 pingId.Remove(msg.MessageId);
                 OnPingResponse?.Invoke(this, new CoapMessageEventArgs(msg));
             }
         }
 
         #endregion channel events
-
-        private async Task ConnectAsync()
-        {
-            try
-            {
-                await channel.OpenAsync();
-                Receive();
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException;
-            }
-        }
-
-        private string GetCoapUriString(string scheme, string resourceUriString)
-        {
-            if (!usedToken && securityToken != null && (tokenType != SecurityTokenType.NONE || tokenType != SecurityTokenType.X509))
-            {
-                usedToken = true;
-                return string.Format("{0}://{1}?r={2}&tt={3}&t={4}", scheme, config.Authority, resourceUriString, tokenType.ToString(), securityToken);
-            }
-            else
-            {
-                return string.Format("{0}://{1}?r={2}", scheme, config.Authority, resourceUriString);
-            }
-        }
-
-        private Task Open()
-        {
-            TaskCompletionSource<Task> tcs = new TaskCompletionSource<Task>();
-            channel.OpenAsync().GetAwaiter();
-            tcs.SetResult(null);
-            return tcs.Task;
-        }
-
-        private void Receive()
-        {
-            Task task = channel.ReceiveAsync();
-            Task.WhenAll(task);
-        }
-
-        private void Session_OnKeepAlive(object sender, CoapMessageEventArgs args)
-        {
-            Task task = channel.SendAsync(args.Message.Encode());
-            Task.WhenAll(task);
-        }
-
-        private void Session_OnRetry(object sender, CoapMessageEventArgs args)
-        {
-            pingId.Add(args.Message.MessageId);
-            Task task = channel.SendAsync(args.Message.Encode());
-            Task.WhenAll(task);
-        }
     }
 }

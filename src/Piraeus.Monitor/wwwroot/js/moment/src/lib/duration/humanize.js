@@ -1,13 +1,13 @@
-import { createDuration } from './create';
+import { createDuration } from "./create";
 
 var round = Math.round;
 var thresholds = {
-    ss: 44,         // a few seconds to seconds
-    s: 45,         // seconds to minute
-    m: 45,         // minutes to hour
-    h: 22,         // hours to day
-    d: 26,         // days to month
-    M: 11          // months to year
+    ss: 44, // a few seconds to seconds
+    s: 45, // seconds to minute
+    m: 45, // minutes to hour
+    h: 22, // hours to day
+    d: 26, // days to month
+    M: 11 // months to year
 };
 
 // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
@@ -17,24 +17,25 @@ function substituteTimeAgo(string, number, withoutSuffix, isFuture, locale) {
 
 function relativeTime(posNegDuration, withoutSuffix, locale) {
     var duration = createDuration(posNegDuration).abs();
-    var seconds = round(duration.as('s'));
-    var minutes = round(duration.as('m'));
-    var hours = round(duration.as('h'));
-    var days = round(duration.as('d'));
-    var months = round(duration.as('M'));
-    var years = round(duration.as('y'));
+    var seconds = round(duration.as("s"));
+    var minutes = round(duration.as("m"));
+    var hours = round(duration.as("h"));
+    var days = round(duration.as("d"));
+    var months = round(duration.as("M"));
+    var years = round(duration.as("y"));
 
-    var a = seconds <= thresholds.ss && ['s', seconds] ||
-        seconds < thresholds.s && ['ss', seconds] ||
-        minutes <= 1 && ['m'] ||
-        minutes < thresholds.m && ['mm', minutes] ||
-        hours <= 1 && ['h'] ||
-        hours < thresholds.h && ['hh', hours] ||
-        days <= 1 && ['d'] ||
-        days < thresholds.d && ['dd', days] ||
-        months <= 1 && ['M'] ||
-        months < thresholds.M && ['MM', months] ||
-        years <= 1 && ['y'] || ['yy', years];
+    var a = seconds <= thresholds.ss && ["s", seconds] ||
+        seconds < thresholds.s && ["ss", seconds] ||
+        minutes <= 1 && ["m"] ||
+        minutes < thresholds.m && ["mm", minutes] ||
+        hours <= 1 && ["h"] ||
+        hours < thresholds.h && ["hh", hours] ||
+        days <= 1 && ["d"] ||
+        days < thresholds.d && ["dd", days] ||
+        months <= 1 && ["M"] ||
+        months < thresholds.M && ["MM", months] ||
+        years <= 1 && ["y"] ||
+        ["yy", years];
 
     a[2] = withoutSuffix;
     a[3] = +posNegDuration > 0;
@@ -47,7 +48,7 @@ export function getSetRelativeTimeRounding(roundingFunction) {
     if (roundingFunction === undefined) {
         return round;
     }
-    if (typeof (roundingFunction) === 'function') {
+    if (typeof (roundingFunction) === "function") {
         round = roundingFunction;
         return true;
     }
@@ -63,7 +64,7 @@ export function getSetRelativeTimeThreshold(threshold, limit) {
         return thresholds[threshold];
     }
     thresholds[threshold] = limit;
-    if (threshold === 's') {
+    if (threshold === "s") {
         thresholds.ss = limit - 1;
     }
     return true;

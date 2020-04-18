@@ -6,12 +6,11 @@ namespace Piraeus.Adapters
     public class ProtocolAdapterPortException : Exception
     {
         public ProtocolAdapterPortException()
-            : base()
         {
         }
 
         public ProtocolAdapterPortException(string message)
-           : base(message)
+            : base(message)
         {
         }
 

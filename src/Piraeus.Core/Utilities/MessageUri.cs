@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Primitives;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Web;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace Piraeus.Core.Utilities
 {
@@ -18,12 +19,12 @@ namespace Piraeus.Core.Utilities
         private readonly IEnumerable<KeyValuePair<string, string>> items;
 
         public MessageUri(HttpRequest request)
-                    : this(HttpUtility.HtmlDecode(UriHelper.GetEncodedUrl(request)))
+            : this(HttpUtility.HtmlDecode(request.GetEncodedUrl()))
         {
-            if (request.QueryString.HasValue)
-            {
+            if (request.QueryString.HasValue) {
                 var query = QueryHelpers.ParseQuery(request.QueryString.Value);
-                items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
+                items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value))
+                    .ToList();
             }
 
             Read(request);
@@ -33,7 +34,8 @@ namespace Piraeus.Core.Utilities
             : this(request.RequestUri.ToString())
         {
             var query = QueryHelpers.ParseQuery(request.RequestUri.Query);
-            items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
+            items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value))
+                .ToList();
             Read(request);
         }
 
@@ -41,13 +43,11 @@ namespace Piraeus.Core.Utilities
             : base(uriString)
         {
             List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
-            NameValueCollection nvc = HttpUtility.ParseQueryString(HttpUtility.UrlDecode(this.Query));
-            for (int i = 0; i < nvc.Count; i++)
-            {
+            NameValueCollection nvc = HttpUtility.ParseQueryString(HttpUtility.UrlDecode(Query));
+            for (int i = 0; i < nvc.Count; i++) {
                 string key = nvc.Keys[i];
                 string[] values = nvc.GetValues(i);
-                foreach (string val in values)
-                {
+                foreach (string val in values) {
                     list.Add(new KeyValuePair<string, string>(key, val));
                 }
             }
@@ -75,23 +75,18 @@ namespace Piraeus.Core.Utilities
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal KeyValuePair<string, string>[] BuildIndexes(IEnumerable<string> indexes)
         {
-            if (indexes == null)
-            {
+            if (indexes == null) {
                 return null;
             }
 
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
-            foreach (string index in indexes)
-            {
-                string[] parts = index.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length != 2)
-                {
+            foreach (string index in indexes) {
+                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }
-                else
-                {
-                    indexList.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
-                }
+
+                indexList.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
             }
 
             return indexList.Count > 0 ? indexList.ToArray() : null;
@@ -100,13 +95,11 @@ namespace Piraeus.Core.Utilities
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal void CheckUri(IEnumerable<string> uriStrings)
         {
-            if (uriStrings == null)
-            {
+            if (uriStrings == null) {
                 return;
             }
 
-            foreach (string uriString in uriStrings)
-            {
+            foreach (string uriString in uriStrings) {
                 CheckUri(uriString);
             }
         }
@@ -114,48 +107,42 @@ namespace Piraeus.Core.Utilities
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal void CheckUri(string uriString)
         {
-            if (string.IsNullOrEmpty(uriString))
-            {
+            if (string.IsNullOrEmpty(uriString)) {
                 return;
             }
 
-            if (!Uri.IsWellFormedUriString(uriString, UriKind.Absolute))
-            {
+            if (!IsWellFormedUriString(uriString, UriKind.Absolute)) {
                 throw new UriFormatException("uriString");
             }
         }
 
         private IEnumerable<string> GetEnumerableHeaders(string key, HttpRequestMessage request)
         {
-            try
-            {
-                if (request.Headers.Contains(key))
-                {
+            try {
+                if (request.Headers.Contains(key)) {
                     return request.Headers.GetValues(key);
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError(ex.Message);
+            catch (Exception ex) {
+                Trace.TraceError(ex.Message);
                 throw ex;
             }
         }
 
         private IEnumerable<string> GetEnumerableParameters(string key)
         {
-            return from kv in items where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture) select kv.Value.ToLower(CultureInfo.InvariantCulture);
+            return from kv in items
+                where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
+                select kv.Value.ToLower(CultureInfo.InvariantCulture);
         }
 
         private string GetSingleParameter(string key)
         {
             IEnumerable<string> parameters = GetEnumerableParameters(key);
 
-            if (parameters.Count() > 1)
-            {
+            if (parameters.Count() > 1) {
                 throw new IndexOutOfRangeException(key);
             }
 
@@ -178,25 +165,21 @@ namespace Piraeus.Core.Utilities
         {
             ContentType ??= request.ContentType?.ToLowerInvariant();
             Resource ??= request.Headers[HttpHeaderConstants.RESOURCE_HEADER];
-            if (request.Headers.ContainsKey(HttpHeaderConstants.SUBSCRIBE_HEADER))
-            {
+            if (request.Headers.ContainsKey(HttpHeaderConstants.SUBSCRIBE_HEADER)) {
                 string[] arr = request.Headers[HttpHeaderConstants.SUBSCRIBE_HEADER].ToArray();
-                string[] subs = arr[0].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                if (subs != null && subs.Count() > 0)
-                {
+                string[] subs = arr[0].Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries);
+                if (subs != null && subs.Count() > 0) {
                     Subscriptions = new List<string>(subs);
                 }
             }
 
             CacheKey ??= request.Headers[HttpHeaderConstants.CACHE_KEY];
-            if (request.Headers.ContainsKey(HttpHeaderConstants.INDEX_HEADER))
-            {
+            if (request.Headers.ContainsKey(HttpHeaderConstants.INDEX_HEADER)) {
                 StringValues vals = request.Headers[HttpHeaderConstants.INDEX_HEADER];
                 List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
 
-                foreach (var val in vals)
-                {
-                    string[] parts = val.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var val in vals) {
+                    string[] parts = val.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
                     list.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
                 }
 
@@ -206,7 +189,9 @@ namespace Piraeus.Core.Utilities
 
         private void Read(HttpRequestMessage request)
         {
-            ContentType = request.Content.Headers.ContentType != null ? request.Content.Headers.ContentType.MediaType : "application/octet-stream";
+            ContentType = request.Content.Headers.ContentType != null
+                ? request.Content.Headers.ContentType.MediaType
+                : "application/octet-stream";
             Subscriptions = GetEnumerableHeaders(HttpHeaderConstants.SUBSCRIBE_HEADER, request);
             CheckUri(Subscriptions);
             IEnumerable<string> resources = GetEnumerableHeaders(HttpHeaderConstants.RESOURCE_HEADER, request);
@@ -217,19 +202,16 @@ namespace Piraeus.Core.Utilities
             IEnumerable<string> messageIds = GetEnumerableHeaders(HttpHeaderConstants.MESSAGEID_HEADER, request);
             IEnumerable<string> cachekeys = GetEnumerableHeaders(HttpHeaderConstants.CACHE_KEY, request);
 
-            if (resources != null && resources.Count() == 1)
-            {
-                this.Resource = resources.First();
+            if (resources != null && resources.Count() == 1) {
+                Resource = resources.First();
             }
 
-            if (messageIds != null && messageIds.Count() == 1)
-            {
-                this.MessageId = messageIds.First();
+            if (messageIds != null && messageIds.Count() == 1) {
+                MessageId = messageIds.First();
             }
 
-            if (cachekeys != null && cachekeys.Count() == 1)
-            {
-                this.CacheKey = cachekeys.First();
+            if (cachekeys != null && cachekeys.Count() == 1) {
+                CacheKey = cachekeys.First();
             }
 
             string contentType = GetSingleParameter(QueryStringConstants.CONTENT_TYPE);
@@ -238,7 +220,8 @@ namespace Piraeus.Core.Utilities
             string securityToken = GetSingleParameter(QueryStringConstants.SECURITY_TOKEN);
             string messageId = GetSingleParameter(QueryStringConstants.MESSAGE_ID);
             IEnumerable<string> subscriptions = GetEnumerableParameters(QueryStringConstants.SUBSCRIPTION);
-            KeyValuePair<string, string>[] queryStringIndexes = BuildIndexes(GetEnumerableParameters(QueryStringConstants.INDEX));
+            KeyValuePair<string, string>[] queryStringIndexes =
+                BuildIndexes(GetEnumerableParameters(QueryStringConstants.INDEX));
 
             Resource ??= resource;
             Indexes ??= queryStringIndexes;
@@ -251,17 +234,13 @@ namespace Piraeus.Core.Utilities
 
         private void SetResource(IEnumerable<string> resources)
         {
-            if (resources == null)
-            {
-                return;
+            if (resources == null) {
             }
-            else if (resources.Count() > 1)
-            {
+            else if (resources.Count() > 1) {
                 throw new IndexOutOfRangeException("Number of resources specified in request header must be 0 or 1.");
             }
-            else
-            {
-                this.Resource = resources.First();
+            else {
+                Resource = resources.First();
             }
         }
     }

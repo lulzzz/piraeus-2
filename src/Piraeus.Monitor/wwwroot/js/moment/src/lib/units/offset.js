@@ -1,44 +1,48 @@
-import zeroFill from '../utils/zero-fill';
-import { createDuration } from '../duration/create';
-import { addSubtract } from '../moment/add-subtract';
-import { isMoment, copyConfig } from '../moment/constructor';
-import { addFormatToken } from '../format/format';
-import { addRegexToken, matchOffset, matchShortOffset } from '../parse/regex';
-import { addParseToken } from '../parse/token';
-import { createLocal } from '../create/local';
-import { prepareConfig } from '../create/from-anything';
-import { createUTC } from '../create/utc';
-import isDate from '../utils/is-date';
-import toInt from '../utils/to-int';
-import isUndefined from '../utils/is-undefined';
-import compareArrays from '../utils/compare-arrays';
-import { hooks } from '../utils/hooks';
+import zeroFill from "../utils/zero-fill";
+import { createDuration } from "../duration/create";
+import { addSubtract } from "../moment/add-subtract";
+import { isMoment, copyConfig } from "../moment/constructor";
+import { addFormatToken } from "../format/format";
+import { addRegexToken, matchOffset, matchShortOffset } from "../parse/regex";
+import { addParseToken } from "../parse/token";
+import { createLocal } from "../create/local";
+import { prepareConfig } from "../create/from-anything";
+import { createUTC } from "../create/utc";
+import isDate from "../utils/is-date";
+import toInt from "../utils/to-int";
+import isUndefined from "../utils/is-undefined";
+import compareArrays from "../utils/compare-arrays";
+import { hooks } from "../utils/hooks";
 
 // FORMATTING
 
 function offset(token, separator) {
-    addFormatToken(token, 0, 0, function () {
-        var offset = this.utcOffset();
-        var sign = '+';
-        if (offset < 0) {
-            offset = -offset;
-            sign = '-';
-        }
-        return sign + zeroFill(~~(offset / 60), 2) + separator + zeroFill(~~(offset) % 60, 2);
-    });
+    addFormatToken(token,
+        0,
+        0,
+        function() {
+            var offset = this.utcOffset();
+            var sign = "+";
+            if (offset < 0) {
+                offset = -offset;
+                sign = "-";
+            }
+            return sign + zeroFill(~~(offset / 60), 2) + separator + zeroFill(~~(offset) % 60, 2);
+        });
 }
 
-offset('Z', ':');
-offset('ZZ', '');
+offset("Z", ":");
+offset("ZZ", "");
 
 // PARSING
 
-addRegexToken('Z', matchShortOffset);
-addRegexToken('ZZ', matchShortOffset);
-addParseToken(['Z', 'ZZ'], function (input, array, config) {
-    config._useUTC = true;
-    config._tzm = offsetFromString(matchShortOffset, input);
-});
+addRegexToken("Z", matchShortOffset);
+addRegexToken("ZZ", matchShortOffset);
+addParseToken(["Z", "ZZ"],
+    function(input, array, config) {
+        config._useUTC = true;
+        config._tzm = offsetFromString(matchShortOffset, input);
+    });
 
 // HELPERS
 
@@ -48,19 +52,17 @@ addParseToken(['Z', 'ZZ'], function (input, array, config) {
 var chunkOffset = /([\+\-]|\d\d)/gi;
 
 function offsetFromString(matcher, string) {
-    var matches = (string || '').match(matcher);
+    var matches = (string || "").match(matcher);
 
     if (matches === null) {
         return null;
     }
 
     var chunk = matches[matches.length - 1] || [];
-    var parts = (chunk + '').match(chunkOffset) || ['-', 0, 0];
+    var parts = (chunk + "").match(chunkOffset) || ["-", 0, 0];
     var minutes = +(parts[1] * 60) + toInt(parts[2]);
 
-    return minutes === 0 ?
-        0 :
-        parts[0] === '+' ? minutes : -minutes;
+    return minutes === 0 ? 0 : parts[0] === "+" ? minutes : -minutes;
 }
 
 // Return a moment from input, that is local/utc/zone equivalent to model.
@@ -88,7 +90,7 @@ function getDateOffset(m) {
 
 // This function will be called whenever a moment is mutated.
 // It is intended to keep the offset in sync with the timezone.
-hooks.updateOffset = function () { };
+hooks.updateOffset = function() {};
 
 // MOMENTS
 
@@ -109,7 +111,7 @@ export function getSetOffset(input, keepLocalTime, keepMinutes) {
         return input != null ? this : NaN;
     }
     if (input != null) {
-        if (typeof input === 'string') {
+        if (typeof input === "string") {
             input = offsetFromString(matchShortOffset, input);
             if (input === null) {
                 return this;
@@ -123,11 +125,11 @@ export function getSetOffset(input, keepLocalTime, keepMinutes) {
         this._offset = input;
         this._isUTC = true;
         if (localAdjust != null) {
-            this.add(localAdjust, 'm');
+            this.add(localAdjust, "m");
         }
         if (offset !== input) {
             if (!keepLocalTime || this._changeInProgress) {
-                addSubtract(this, createDuration(input - offset, 'm'), 1, false);
+                addSubtract(this, createDuration(input - offset, "m"), 1, false);
             } else if (!this._changeInProgress) {
                 this._changeInProgress = true;
                 hooks.updateOffset(this, true);
@@ -142,7 +144,7 @@ export function getSetOffset(input, keepLocalTime, keepMinutes) {
 
 export function getSetZone(input, keepLocalTime) {
     if (input != null) {
-        if (typeof input !== 'string') {
+        if (typeof input !== "string") {
             input = -input;
         }
 
@@ -164,7 +166,7 @@ export function setOffsetToLocal(keepLocalTime) {
         this._isUTC = false;
 
         if (keepLocalTime) {
-            this.subtract(getDateOffset(this), 'm');
+            this.subtract(getDateOffset(this), "m");
         }
     }
     return this;
@@ -173,12 +175,11 @@ export function setOffsetToLocal(keepLocalTime) {
 export function setOffsetToParsedOffset() {
     if (this._tzm != null) {
         this.utcOffset(this._tzm, false, true);
-    } else if (typeof this._i === 'string') {
+    } else if (typeof this._i === "string") {
         var tZone = offsetFromString(matchOffset, this._i);
         if (tZone != null) {
             this.utcOffset(tZone);
-        }
-        else {
+        } else {
             this.utcOffset(0, true);
         }
     }
@@ -197,7 +198,7 @@ export function hasAlignedHourOffset(input) {
 export function isDaylightSavingTime() {
     return (
         this.utcOffset() > this.clone().month(0).utcOffset() ||
-        this.utcOffset() > this.clone().month(5).utcOffset()
+            this.utcOffset() > this.clone().month(5).utcOffset()
     );
 }
 

@@ -1,5 +1,5 @@
-import { normalizeUnits } from '../units/aliases';
-import { hooks } from '../utils/hooks';
+import { normalizeUnits } from "../units/aliases";
+import { hooks } from "../utils/hooks";
 
 var MS_PER_SECOND = 1000;
 var MS_PER_MINUTE = 60 * MS_PER_SECOND;
@@ -34,44 +34,44 @@ function utcStartOfDate(y, m, d) {
 export function startOf(units) {
     var time;
     units = normalizeUnits(units);
-    if (units === undefined || units === 'millisecond' || !this.isValid()) {
+    if (units === undefined || units === "millisecond" || !this.isValid()) {
         return this;
     }
 
     var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
 
     switch (units) {
-        case 'year':
-            time = startOfDate(this.year(), 0, 1);
-            break;
-        case 'quarter':
-            time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
-            break;
-        case 'month':
-            time = startOfDate(this.year(), this.month(), 1);
-            break;
-        case 'week':
-            time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
-            break;
-        case 'isoWeek':
-            time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
-            break;
-        case 'day':
-        case 'date':
-            time = startOfDate(this.year(), this.month(), this.date());
-            break;
-        case 'hour':
-            time = this._d.valueOf();
-            time -= mod(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
-            break;
-        case 'minute':
-            time = this._d.valueOf();
-            time -= mod(time, MS_PER_MINUTE);
-            break;
-        case 'second':
-            time = this._d.valueOf();
-            time -= mod(time, MS_PER_SECOND);
-            break;
+    case "year":
+        time = startOfDate(this.year(), 0, 1);
+        break;
+    case "quarter":
+        time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+        break;
+    case "month":
+        time = startOfDate(this.year(), this.month(), 1);
+        break;
+    case "week":
+        time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+        break;
+    case "isoWeek":
+        time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+        break;
+    case "day":
+    case "date":
+        time = startOfDate(this.year(), this.month(), this.date());
+        break;
+    case "hour":
+        time = this._d.valueOf();
+        time -= mod(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+        break;
+    case "minute":
+        time = this._d.valueOf();
+        time -= mod(time, MS_PER_MINUTE);
+        break;
+    case "second":
+        time = this._d.valueOf();
+        time -= mod(time, MS_PER_SECOND);
+        break;
     }
 
     this._d.setTime(time);
@@ -82,44 +82,44 @@ export function startOf(units) {
 export function endOf(units) {
     var time;
     units = normalizeUnits(units);
-    if (units === undefined || units === 'millisecond' || !this.isValid()) {
+    if (units === undefined || units === "millisecond" || !this.isValid()) {
         return this;
     }
 
     var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
 
     switch (units) {
-        case 'year':
-            time = startOfDate(this.year() + 1, 0, 1) - 1;
-            break;
-        case 'quarter':
-            time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
-            break;
-        case 'month':
-            time = startOfDate(this.year(), this.month() + 1, 1) - 1;
-            break;
-        case 'week':
-            time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
-            break;
-        case 'isoWeek':
-            time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
-            break;
-        case 'day':
-        case 'date':
-            time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
-            break;
-        case 'hour':
-            time = this._d.valueOf();
-            time += MS_PER_HOUR - mod(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
-            break;
-        case 'minute':
-            time = this._d.valueOf();
-            time += MS_PER_MINUTE - mod(time, MS_PER_MINUTE) - 1;
-            break;
-        case 'second':
-            time = this._d.valueOf();
-            time += MS_PER_SECOND - mod(time, MS_PER_SECOND) - 1;
-            break;
+    case "year":
+        time = startOfDate(this.year() + 1, 0, 1) - 1;
+        break;
+    case "quarter":
+        time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+        break;
+    case "month":
+        time = startOfDate(this.year(), this.month() + 1, 1) - 1;
+        break;
+    case "week":
+        time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+        break;
+    case "isoWeek":
+        time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+        break;
+    case "day":
+    case "date":
+        time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
+        break;
+    case "hour":
+        time = this._d.valueOf();
+        time += MS_PER_HOUR - mod(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+        break;
+    case "minute":
+        time = this._d.valueOf();
+        time += MS_PER_MINUTE - mod(time, MS_PER_MINUTE) - 1;
+        break;
+    case "second":
+        time = this._d.valueOf();
+        time += MS_PER_SECOND - mod(time, MS_PER_SECOND) - 1;
+        break;
     }
 
     this._d.setTime(time);

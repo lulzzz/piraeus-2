@@ -1,10 +1,10 @@
-﻿using Capl.Authorization;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Capl.Authorization;
 
 namespace Piraeus.Module
 {
     [Cmdlet(VerbsCommon.New, "CaplRule")]
-    [OutputType(typeof(Capl.Authorization.Rule))]
+    [OutputType(typeof(Rule))]
     public class CaplRuleCmdlet : Cmdlet
     {
         [Parameter(HelpMessage = "Truthful evaluation of the rule", Mandatory = true)]
@@ -21,16 +21,14 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            Rule rule = new Rule
-            {
-                Evaluates = this.Evaluates,
-                Operation = this.Operation,
-                MatchExpression = this.MatchExpression
+            Rule rule = new Rule {
+                Evaluates = Evaluates,
+                Operation = Operation,
+                MatchExpression = MatchExpression
             };
 
-            if (!string.IsNullOrEmpty(this.Issuer))
-            {
-                rule.Issuer = this.Issuer;
+            if (!string.IsNullOrEmpty(Issuer)) {
+                rule.Issuer = Issuer;
             }
 
             WriteObject(rule);

@@ -1,7 +1,7 @@
-﻿using Piraeus.Core.Metadata;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
@@ -11,13 +11,16 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Optional description of the subsription.", Mandatory = false)]
         public string Description;
 
-        [Parameter(HelpMessage = "Durably persist messages for the TTL when the subsystem is disconnected.", Mandatory = false)]
+        [Parameter(HelpMessage = "Durably persist messages for the TTL when the subsystem is disconnected.",
+            Mandatory = false)]
         public bool DurableMessaging;
 
         [Parameter(HelpMessage = "Expiration of the subscription.", Mandatory = false)]
         public DateTime? Expires;
 
-        [Parameter(HelpMessage = "Security identity from claims; required for actively connected subsystems; otherwise omit.", Mandatory = false)]
+        [Parameter(
+            HelpMessage = "Security identity from claims; required for actively connected subsystems; otherwise omit.",
+            Mandatory = false)]
         public string Identity;
 
         [Parameter(HelpMessage = "List of key/value indexes for the subscription.", Mandatory = false)]
@@ -35,13 +38,18 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Url of the service.", Mandatory = true)]
         public string ServiceUrl;
 
-        [Parameter(HelpMessage = "The rate retained messages are sent when the subsystem reconnects.", Mandatory = false)]
+        [Parameter(HelpMessage = "The rate retained messages are sent when the subsystem reconnects.",
+            Mandatory = false)]
         public TimeSpan? SpoolRate;
 
-        [Parameter(HelpMessage = "Symmetric key if a passively connection subsystem that uses SWT or JWT tokens; otherwise omit.", Mandatory = false)]
+        [Parameter(
+            HelpMessage =
+                "Symmetric key if a passively connection subsystem that uses SWT or JWT tokens; otherwise omit.",
+            Mandatory = false)]
         public string SymmetricKey;
 
-        [Parameter(HelpMessage = "Type of security token used for passively connected subsystem; otherwise omit.", Mandatory = false)]
+        [Parameter(HelpMessage = "Type of security token used for passively connected subsystem; otherwise omit.",
+            Mandatory = false)]
         public SecurityTokenType? TokenType;
 
         [Parameter(HelpMessage = "Time-To-Live for retained messages.", Mandatory = false)]
@@ -49,21 +57,22 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
-                Identity = this.Identity,
-                Indexes = this.Indexes,
-                NotifyAddress = this.NotifyAddress,
-                TokenType = this.TokenType,
-                SymmetricKey = this.SymmetricKey,
-                Expires = this.Expires,
-                TTL = this.TTL,
-                SpoolRate = this.SpoolRate,
-                DurableMessaging = this.DurableMessaging
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
+                Identity = Identity,
+                Indexes = Indexes,
+                NotifyAddress = NotifyAddress,
+                TokenType = TokenType,
+                SymmetricKey = SymmetricKey,
+                Expires = Expires,
+                TTL = TTL,
+                SpoolRate = SpoolRate,
+                DurableMessaging = DurableMessaging
             };
 
-            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

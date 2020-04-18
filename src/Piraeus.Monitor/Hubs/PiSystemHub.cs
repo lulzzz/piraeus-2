@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Piraeus.Monitor.Hubs
 {
@@ -15,7 +15,7 @@ namespace Piraeus.Monitor.Hubs
         public PiSystemHub(IMetricStream metricStream)
         {
             this.metricStream = metricStream;
-            this.container = new HashSet<string>();
+            container = new HashSet<string>();
         }
 
         public override Task OnConnectedAsync()
@@ -35,8 +35,7 @@ namespace Piraeus.Monitor.Hubs
 
         public async Task SubscribeAsync(string resourceUriString)
         {
-            if (!container.Contains(resourceUriString))
-            {
+            if (!container.Contains(resourceUriString)) {
                 container.Add(resourceUriString);
                 await metricStream.SubscribeAsync(resourceUriString);
             }
@@ -44,8 +43,7 @@ namespace Piraeus.Monitor.Hubs
 
         public async Task UnsubscribeAsync(string resourceUriString)
         {
-            if (container.Contains(resourceUriString))
-            {
+            if (container.Contains(resourceUriString)) {
                 container.Remove(resourceUriString);
                 await metricStream.UnsubscribeAsync(resourceUriString);
             }

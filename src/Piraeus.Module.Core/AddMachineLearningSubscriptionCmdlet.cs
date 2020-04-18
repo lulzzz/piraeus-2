@@ -1,12 +1,13 @@
-﻿using Piraeus.Core.Metadata;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
     [Cmdlet(VerbsCommon.Add, "PiraeusMachineLearningSubscription")]
     public class AddMachineLearningSubscriptionCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Azure ML service security key (base64 encoded) for Web service call.", Mandatory = true)]
+        [Parameter(HelpMessage = "Azure ML service security key (base64 encoded) for Web service call.",
+            Mandatory = true)]
         public string AmlSecurityKey;
 
         [Parameter(HelpMessage = "Azure ML Web service URL to call.", Mandatory = true)]
@@ -29,17 +30,18 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = $"{ServiceUrl}/api/resource/subscribe?resourceuristring={ResourceUriString}&r={OutputResourceUriString}";
+            string url =
+                $"{ServiceUrl}/api/resource/subscribe?resourceuristring={ResourceUriString}&r={OutputResourceUriString}";
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = AmlServiceUrl,
                 SymmetricKey = AmlSecurityKey,
-                Description = this.Description
+                Description = Description
             };
 
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

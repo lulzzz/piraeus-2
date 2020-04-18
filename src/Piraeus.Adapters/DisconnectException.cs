@@ -6,12 +6,11 @@ namespace Piraeus.Adapters
     public class DisconnectException : Exception
     {
         public DisconnectException()
-            : base()
         {
         }
 
         public DisconnectException(string message)
-           : base(message)
+            : base(message)
         {
         }
 

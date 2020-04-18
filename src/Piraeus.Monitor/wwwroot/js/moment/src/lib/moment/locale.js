@@ -1,5 +1,5 @@
-import { getLocale } from '../locale/locales';
-import { deprecate } from '../utils/deprecate';
+import { getLocale } from "../locale/locales";
+import { deprecate } from "../utils/deprecate";
 
 // If passed a locale key, it will set the locale for this
 // instance.  Otherwise, it will return the locale configuration
@@ -19,8 +19,8 @@ export function locale(key) {
 }
 
 export var lang = deprecate(
-    'moment().lang() is deprecated. Instead, use moment().localeData() to get the language configuration. Use moment().locale() to change languages.',
-    function (key) {
+    "moment().lang() is deprecated. Instead, use moment().localeData() to get the language configuration. Use moment().locale() to change languages.",
+    function(key) {
         if (key === undefined) {
             return this.localeData();
         } else {

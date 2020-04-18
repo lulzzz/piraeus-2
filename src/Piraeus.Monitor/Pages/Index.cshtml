@@ -1,13 +1,12 @@
 ﻿@page
-@using Piraeus.GrainInterfaces
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
     int cnt = 0;
 }
 
-<link href="~/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="~/jqueryui/themes/base/jquery-ui.css" />
+<link href="~/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="~/jqueryui/themes/base/jquery-ui.css"/>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
 <script src="~/jquery/jquery.js"></script>
 <script src="~/jqueryui/jquery-ui.js"></script>
@@ -20,7 +19,7 @@
 <div class="container">
     <div class="container-fluid">
         <a href="?index=@Model.Index&quantity=@Model.Quantity">
-            <span title="Page Forward" id="pagefwd" class="glyphicon glyphicon-arrow-right" style="float:right;padding-right:20px;"></span>
+            <span title="Page Forward" id="pagefwd" class="glyphicon glyphicon-arrow-right" style="float: right; padding-right: 20px;"></span>
         </a>
     </div>
 </div>
@@ -32,9 +31,11 @@
 
         <div class="card">
             <div class="card-header" role="tab" id="heading-@cnt">
-                <span title="Live Monitor PI-System" id="monitor" class="glyphicon glyphicon-circle-arrow-right" style="float:right;padding-right:20px;" onclick="goMonitor('@item.Key')"></span>
+                <span title="Live Monitor PI-System" id="monitor" class="glyphicon glyphicon-circle-arrow-right" style="float: right; padding-right: 20px;" onclick="goMonitor('@item.Key')"></span>
                 <a data-toggle="collapse" data-parent="#accordion" href="#collapse-@cnt" aria-expanded="true"
-                   aria-controls="collapse-@cnt">@item.Key</a>
+                   aria-controls="collapse-@cnt">
+                    @item.Key
+                </a>
             </div>
             <div id="collapse-@cnt" class="collapse" role="tabpanel" aria-labelledby="heading-@cnt" data-parent="#accordion">
                 <div class="card-body">
@@ -79,6 +80,5 @@
                 </div>
             </div>
         </div>
-
     }
 </div>

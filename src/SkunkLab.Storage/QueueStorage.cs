@@ -1,10 +1,10 @@
-﻿using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Queue;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
+using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace SkunkLab.Storage
 {
@@ -20,30 +20,30 @@ namespace SkunkLab.Storage
 
         protected QueueStorage(string connectionString)
         {
-            CloudStorageAccount account = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(connectionString);
-            StorageCredentials credentials = new StorageCredentials(account.Credentials.AccountName, Convert.ToBase64String(account.Credentials.ExportKey()));
+            CloudStorageAccount account = CloudStorageAccount.Parse(connectionString);
+            StorageCredentials credentials = new StorageCredentials(account.Credentials.AccountName,
+                Convert.ToBase64String(account.Credentials.ExportKey()));
 
             client = new CloudQueueClient(account.QueueStorageUri, credentials);
 
             container = new Dictionary<string, CloudQueue>();
 
-            if (bufferManager != null)
-            {
+            if (bufferManager != null) {
                 client.BufferManager = bufferManager;
             }
         }
 
         public static QueueStorage CreateSingleton(string connectionString)
         {
-            if (instance == null)
-            {
+            if (instance == null) {
                 instance = new QueueStorage(connectionString);
             }
 
             return instance;
         }
 
-        public static QueueStorage CreateSingleton(string connectionString, long maxBufferPoolSize, int defaultBufferSize)
+        public static QueueStorage CreateSingleton(string connectionString, long maxBufferPoolSize,
+            int defaultBufferSize)
         {
             BufferManager manager = BufferManager.CreateBufferManager(maxBufferPoolSize, defaultBufferSize);
             bufferManager = new SkunkLabBufferManager(manager, defaultBufferSize);
@@ -84,8 +84,7 @@ namespace SkunkLab.Storage
         {
             CloudQueue queue = GetQueue(queueName);
 
-            if (!await queue.ExistsAsync())
-            {
+            if (!await queue.ExistsAsync()) {
                 throw new InvalidOperationException("Cloud queue does not exist.");
             }
 
@@ -93,33 +92,29 @@ namespace SkunkLab.Storage
 
             List<CloudQueueMessage> list = approxMessageCount.HasValue ? new List<CloudQueueMessage>() : null;
 
-            if (list == null)
-            {
+            if (list == null) {
                 return null;
             }
 
-            if (!numberOfMessages.HasValue)
-            {
+            if (!numberOfMessages.HasValue) {
                 CloudQueueMessage message = await queue.GetMessageAsync();
-                if (message != null)
-                {
+                if (message != null) {
                     list.Add(message);
                 }
             }
-            else
-            {
+            else {
                 list = new List<CloudQueueMessage>(await queue.GetMessagesAsync(numberOfMessages.Value));
             }
 
             return list;
         }
 
-        public async Task EnqueueAsync(string queueName, byte[] source, TimeSpan? ttl = null, TimeSpan? initialVisibilityDelay = null)
+        public async Task EnqueueAsync(string queueName, byte[] source, TimeSpan? ttl = null,
+            TimeSpan? initialVisibilityDelay = null)
         {
             CloudQueue queue = GetQueue(queueName);
 
-            if (!await queue.ExistsAsync())
-            {
+            if (!await queue.ExistsAsync()) {
                 throw new InvalidOperationException("Cloud queue does not exist.");
             }
 
@@ -130,15 +125,14 @@ namespace SkunkLab.Storage
         private CloudQueue GetQueue(string queueName)
         {
             CloudQueue queue;
-            if (container.ContainsKey(queueName))
-            {
+            if (container.ContainsKey(queueName)) {
                 queue = container[queueName];
             }
-            else
-            {
+            else {
                 queue = client.GetQueueReference(queueName);
                 container.Add(queueName, queue);
             }
+
             return queue;
         }
     }

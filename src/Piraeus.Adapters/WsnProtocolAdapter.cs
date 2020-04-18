@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Security;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Piraeus.Auditing;
@@ -11,10 +15,6 @@ using Piraeus.Core.Utilities;
 using Piraeus.Grains;
 using SkunkLab.Channels;
 using SkunkLab.Security.Identity;
-using System;
-using System.Collections.Generic;
-using System.Security;
-using System.Threading.Tasks;
 
 namespace Piraeus.Adapters
 {
@@ -52,32 +52,34 @@ namespace Piraeus.Adapters
 
         private bool disposedValue;
 
-        public WsnProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IChannel channel, HttpContext context, ILog logger = null)
+        public WsnProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IChannel channel,
+            HttpContext context, ILog logger = null)
         {
             this.config = config;
             this.graphManager = graphManager;
-            this.Channel = channel;
+            Channel = channel;
             this.logger = logger;
 
-            IdentityDecoder decoder = new IdentityDecoder(config.ClientIdentityNameClaimType, context, config.GetClientIndexes());
+            IdentityDecoder decoder =
+                new IdentityDecoder(config.ClientIdentityNameClaimType, context, config.GetClientIndexes());
             identity = decoder.Id;
             localIndexes = decoder.Indexes;
 
             MessageUri messageUri = new MessageUri(context.Request);
-            this.contentType = messageUri.ContentType;
-            this.cacheKey = messageUri.CacheKey;
-            this.resource = messageUri.Resource;
-            this.subscriptions = messageUri.Subscriptions != null ? new List<string>(messageUri.Subscriptions) : null;
-            this.indexes = messageUri.Indexes != null ? new List<KeyValuePair<string, string>>(messageUri.Indexes) : null;
+            contentType = messageUri.ContentType;
+            cacheKey = messageUri.CacheKey;
+            resource = messageUri.Resource;
+            subscriptions = messageUri.Subscriptions != null ? new List<string>(messageUri.Subscriptions) : null;
+            indexes = messageUri.Indexes != null ? new List<KeyValuePair<string, string>>(messageUri.Indexes) : null;
 
             auditFactory = AuditFactory.CreateSingleton();
-            if (config.AuditConnectionString != null && config.AuditConnectionString.Contains("DefaultEndpointsProtocol"))
-            {
-                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"), AuditType.Message);
+            if (config.AuditConnectionString != null &&
+                config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
+                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"),
+                    AuditType.Message);
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
             }
-            else if (config.AuditConnectionString != null)
-            {
+            else if (config.AuditConnectionString != null) {
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
             }
@@ -86,13 +88,13 @@ namespace Piraeus.Adapters
             userAuditor = auditFactory.GetAuditor(AuditType.User);
         }
 
+        public override IChannel Channel { get; set; }
+
         public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
 
         public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
 
         public override event EventHandler<ChannelObserverEventArgs> OnObserve;
-
-        public override IChannel Channel { get; set; }
 
         public override void Init()
         {
@@ -111,25 +113,26 @@ namespace Piraeus.Adapters
             MessageAuditRecord record = null;
             int length = 0;
             DateTime sendTime = DateTime.UtcNow;
-            try
-            {
+            try {
                 byte[] message = ProtocolTransition.ConvertToHttp(e.Message);
                 Send(message).LogExceptions();
-                OnObserve?.Invoke(this, new ChannelObserverEventArgs(Channel.Id, e.Message.ResourceUri, e.Message.ContentType, e.Message.Message));
+                OnObserve?.Invoke(this,
+                    new ChannelObserverEventArgs(Channel.Id, e.Message.ResourceUri, e.Message.ContentType,
+                        e.Message.Message));
 
                 length = message.Length;
-                record = new MessageAuditRecord(e.Message.MessageId, identity, this.Channel.TypeId, "WSN", length, MessageDirectionType.Out, true, sendTime);
+                record = new MessageAuditRecord(e.Message.MessageId, identity, Channel.TypeId, "WSN", length,
+                    MessageDirectionType.Out, true, sendTime);
             }
-            catch (Exception ex)
-            {
-                string msg = string.Format("{0} - WSN adapter observe error on channel '{1}' with '{2}'", DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
+            catch (Exception ex) {
+                string msg = string.Format("{0} - WSN adapter observe error on channel '{1}' with '{2}'",
+                    DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
                 logger?.LogError(ex, $"WSN adapter observe error on channel '{Channel.Id}'.");
-                record = new MessageAuditRecord(e.Message.MessageId, identity, this.Channel.TypeId, "WSN", length, MessageDirectionType.Out, true, sendTime, msg);
+                record = new MessageAuditRecord(e.Message.MessageId, identity, Channel.TypeId, "WSN", length,
+                    MessageDirectionType.Out, true, sendTime, msg);
             }
-            finally
-            {
-                if (e.Message.Audit)
-                {
+            finally {
+                if (e.Message.Audit) {
                     messageAuditor?.WriteAuditRecordAsync(record).Ignore();
                 }
             }
@@ -137,10 +140,8 @@ namespace Piraeus.Adapters
 
         private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
         {
-            try
-            {
-                if (!closing)
-                {
+            try {
+                if (!closing) {
                     closing = true;
                     UserAuditRecord record = new UserAuditRecord(Channel.Id, identity, DateTime.UtcNow);
                     userAuditor?.UpdateAuditRecordAsync(record).IgnoreException();
@@ -148,8 +149,7 @@ namespace Piraeus.Adapters
 
                 OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(e.ChannelId));
             }
-            catch
-            {
+            catch {
             }
         }
 
@@ -161,9 +161,10 @@ namespace Piraeus.Adapters
 
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
-            if (!Channel.IsAuthenticated)
-            {
-                OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, new SecurityException("Not authenticated on WSN channel")));
+            if (!Channel.IsAuthenticated) {
+                OnError?.Invoke(this,
+                    new ProtocolAdapterErrorEventArgs(Channel.Id,
+                        new SecurityException("Not authenticated on WSN channel")));
                 Channel.CloseAsync().Ignore();
                 return;
             }
@@ -171,12 +172,9 @@ namespace Piraeus.Adapters
             adapter = new OrleansAdapter(identity, "WebSocket", "WSN", graphManager);
             adapter.OnObserve += Adapter_OnObserve;
 
-            if (subscriptions != null)
-            {
-                foreach (var sub in subscriptions)
-                {
-                    SubscriptionMetadata metadata = new SubscriptionMetadata()
-                    {
+            if (subscriptions != null) {
+                foreach (var sub in subscriptions) {
+                    SubscriptionMetadata metadata = new SubscriptionMetadata {
                         Identity = identity,
                         Indexes = localIndexes,
                         IsEphemeral = true
@@ -191,8 +189,8 @@ namespace Piraeus.Adapters
         {
             var metadata = graphManager.GetPiSystemMetadataAsync(resource).GetAwaiter().GetResult();
 
-            EventMessage msg = new EventMessage(contentType, resource, ProtocolType.WSN, e.Message, DateTime.UtcNow, metadata.Audit)
-            {
+            EventMessage msg = new EventMessage(contentType, resource, ProtocolType.WSN, e.Message, DateTime.UtcNow,
+                metadata.Audit) {
                 CacheKey = cacheKey
             };
 
@@ -201,19 +199,18 @@ namespace Piraeus.Adapters
 
         private async Task Send(byte[] message)
         {
-            try
-            {
-                if (message.Length > config.MaxBufferSize)
-                {
-                    logger?.LogErrorAsync($"Message size {message.Length} is greater than max message size {config.MaxBufferSize}.");
-                    OnError.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, new Exception("Exceeded max message size.")));
+            try {
+                if (message.Length > config.MaxBufferSize) {
+                    logger?.LogErrorAsync(
+                        $"Message size {message.Length} is greater than max message size {config.MaxBufferSize}.");
+                    OnError.Invoke(this,
+                        new ProtocolAdapterErrorEventArgs(Channel.Id, new Exception("Exceeded max message size.")));
                     return;
                 }
 
                 await Channel.SendAsync(message);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, $"WSN adapter send error on channel '{Channel.Id}'.");
             }
         }
@@ -230,10 +227,8 @@ namespace Piraeus.Adapters
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
+            if (!disposedValue) {
+                if (disposing) {
                     adapter.Dispose();
                 }
 

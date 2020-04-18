@@ -4,22 +4,23 @@ namespace Piraeus.Module
 {
     public class RestRequestBuilder
     {
-        public RestRequestBuilder(string method, string url, string contentType, bool zeroLength, string securityToken = null)
+        public RestRequestBuilder(string method, string url, string contentType, bool zeroLength,
+            string securityToken = null)
         {
-            this.Method = method;
-            this.ContentType = contentType;
-            this.BaseUrl = url;
-            this.IsZeroContentLength = zeroLength;
-            this.SecurityToken = securityToken;
+            Method = method;
+            ContentType = contentType;
+            BaseUrl = url;
+            IsZeroContentLength = zeroLength;
+            SecurityToken = securityToken;
         }
 
         public RestRequestBuilder(string method, string url, string contentType, string securityKey)
         {
-            this.Method = method;
-            this.ContentType = contentType;
-            this.BaseUrl = url;
-            this.IsZeroContentLength = true;
-            this.SecurityKey = securityKey;
+            Method = method;
+            ContentType = contentType;
+            BaseUrl = url;
+            IsZeroContentLength = true;
+            SecurityKey = securityKey;
         }
 
         public string BaseUrl { get; internal set; }
@@ -37,27 +38,23 @@ namespace Piraeus.Module
         public HttpWebRequest BuildRequest()
         {
             HttpWebRequest request;
-            if (!string.IsNullOrEmpty(this.SecurityKey))
-            {
-                string url = string.Format("{0}?key={1}", this.BaseUrl, this.SecurityKey);
-                request = (HttpWebRequest)HttpWebRequest.Create(url);
+            if (!string.IsNullOrEmpty(SecurityKey)) {
+                string url = string.Format("{0}?key={1}", BaseUrl, SecurityKey);
+                request = (HttpWebRequest)WebRequest.Create(url);
             }
-            else
-            {
-                request = (HttpWebRequest)HttpWebRequest.Create(this.BaseUrl);
+            else {
+                request = (HttpWebRequest)WebRequest.Create(BaseUrl);
             }
 
-            request.ContentType = this.ContentType;
-            request.Method = this.Method;
+            request.ContentType = ContentType;
+            request.Method = Method;
 
-            if (this.IsZeroContentLength)
-            {
+            if (IsZeroContentLength) {
                 request.ContentLength = 0;
             }
 
-            if (!string.IsNullOrEmpty(this.SecurityToken))
-            {
-                request.Headers.Add("Authorization", string.Format("Bearer {0}", this.SecurityToken));
+            if (!string.IsNullOrEmpty(SecurityToken)) {
+                request.Headers.Add("Authorization", string.Format("Bearer {0}", SecurityToken));
             }
 
             return request;

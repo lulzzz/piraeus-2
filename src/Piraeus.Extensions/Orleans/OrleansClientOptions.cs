@@ -1,15 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using Microsoft.Extensions.Logging;
 
 namespace Piraeus.Extensions.Orleans
 {
     [Serializable]
     public class OrleansClientOptions
     {
-        public OrleansClientOptions()
-        {
-        }
-
         public string DataConnectionString { get; set; }
 
         public string[] Loggers { get; set; }

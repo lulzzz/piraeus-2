@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Piraeus.Configuration
 {
@@ -7,17 +7,11 @@ namespace Piraeus.Configuration
     [JsonObject]
     public class ManagementApiConfig
     {
-        public ManagementApiConfig()
-        {
-        }
-
         #region Management API
 
-        [JsonProperty("audience", Order = 1)]
-        public string Audience { get; set; }
+        [JsonProperty("audience", Order = 1)] public string Audience { get; set; }
 
-        [JsonProperty("issuer", Order = 0)]
-        public string Issuer { get; set; }
+        [JsonProperty("issuer", Order = 0)] public string Issuer { get; set; }
 
         [JsonProperty("nameClaimType", Order = 4)]
         public string NameClaimType { get; set; }
@@ -34,8 +28,7 @@ namespace Piraeus.Configuration
         [JsonProperty("symmetricKey", Order = 3)]
         public string SymmetricKey { get; set; }
 
-        [JsonProperty("tokenType", Order = 2)]
-        public string TokenType { get; set; }
+        [JsonProperty("tokenType", Order = 2)] public string TokenType { get; set; }
 
         #endregion Management API
     }

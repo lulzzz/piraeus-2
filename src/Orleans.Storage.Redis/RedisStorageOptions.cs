@@ -11,10 +11,6 @@
     {
         public const int DEFAULT_INIT_STAGE = ServiceLifecycleStage.ApplicationServices;
 
-        public RedisStorageOptions()
-        {
-        }
-
         public string ConnectionString { get; set; }
 
         public int? ConnectRetry { get; set; }

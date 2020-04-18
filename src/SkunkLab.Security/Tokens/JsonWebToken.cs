@@ -1,44 +1,40 @@
-﻿namespace SkunkLab.Security.Tokens
-{
-    using Microsoft.IdentityModel.Tokens;
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IdentityModel.Tokens.Jwt;
-    using System.Net;
-    using System.Security.Claims;
-    using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Security.Claims;
+using System.Threading;
+using Microsoft.IdentityModel.Tokens;
 
-    public class JsonWebToken : Microsoft.IdentityModel.Tokens.SecurityToken
+namespace SkunkLab.Security.Tokens
+{
+    public class JsonWebToken : SecurityToken
     {
         private readonly DateTime created;
 
         private readonly DateTime expires;
 
-        private readonly string id;
-
-        private readonly string issuer;
-
         private readonly string tokenString;
 
-        public JsonWebToken(string securityKey, IEnumerable<Claim> claims, double? lifetimeMinutes, string issuer = null, string audience = null)
+        public JsonWebToken(string securityKey, IEnumerable<Claim> claims, double? lifetimeMinutes,
+            string issuer = null, string audience = null)
         {
-            this.issuer = issuer;
-            id = Guid.NewGuid().ToString();
+            this.Issuer = issuer;
+            Id = Guid.NewGuid().ToString();
             created = DateTime.UtcNow;
             expires = created.AddMinutes(lifetimeMinutes ?? 20);
-            SigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(securityKey));
+            SigningKey = new SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
-            SecurityTokenDescriptor msstd = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor()
-            {
+            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor {
                 Issuer = issuer,
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
                 IssuedAt = created,
                 NotBefore = created,
                 Audience = audience,
-                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(SigningKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(SigningKey, SecurityAlgorithms.HmacSha256Signature)
             };
 
             JwtSecurityToken jwtToken = jwt.CreateJwtSecurityToken(msstd);
@@ -47,55 +43,54 @@
 
         public JsonWebToken(Uri address, string securityKey, string issuer, IEnumerable<Claim> claims)
         {
-            this.issuer = issuer;
-            id = Guid.NewGuid().ToString();
+            this.Issuer = issuer;
+            Id = Guid.NewGuid().ToString();
             created = DateTime.UtcNow;
             expires = created.AddMinutes(20);
-            SigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(securityKey));
+            SigningKey = new SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
-            SecurityTokenDescriptor msstd = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor()
-            {
+            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor {
                 Issuer = issuer,
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
                 IssuedAt = created,
                 NotBefore = created,
                 Audience = address.ToString(),
-                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(SigningKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(SigningKey, SecurityAlgorithms.HmacSha256Signature)
             };
 
             JwtSecurityToken jwtToken = jwt.CreateJwtSecurityToken(msstd);
             tokenString = jwt.WriteToken(jwtToken);
         }
 
-        public JsonWebToken(Uri audience, string securityKey, string issuer, IEnumerable<Claim> claims, double lifetimeMinutes)
+        public JsonWebToken(Uri audience, string securityKey, string issuer, IEnumerable<Claim> claims,
+            double lifetimeMinutes)
         {
-            this.issuer = issuer;
-            id = Guid.NewGuid().ToString();
+            this.Issuer = issuer;
+            Id = Guid.NewGuid().ToString();
             created = DateTime.UtcNow;
             expires = created.AddMinutes(lifetimeMinutes);
-            SigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(securityKey));
+            SigningKey = new SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
-            Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor msstd = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor()
-            {
+            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor {
                 Issuer = issuer,
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
                 IssuedAt = created,
                 NotBefore = created,
                 Audience = audience.ToString(),
-                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(SigningKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(SigningKey, SecurityAlgorithms.HmacSha256Signature)
             };
 
             JwtSecurityToken jwtToken = jwt.CreateJwtSecurityToken(msstd);
             tokenString = jwt.WriteToken(jwtToken);
         }
 
-        public override string Id => this.id;
+        public override string Id { get; }
 
-        public override string Issuer => this.issuer;
+        public override string Issuer { get; }
 
         public override SecurityKey SecurityKey => null;
 
@@ -107,13 +102,11 @@
 
         public static void Authenticate(string token, string issuer, string audience, string signingKey)
         {
-            try
-            {
+            try {
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
-                TokenValidationParameters validationParameters = new TokenValidationParameters()
-                {
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Convert.FromBase64String(signingKey)),
+                TokenValidationParameters validationParameters = new TokenValidationParameters {
+                    IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(signingKey)),
                     ValidIssuer = issuer,
                     ValidAudience = audience,
                     ValidateAudience = true,
@@ -121,15 +114,14 @@
                     ValidateIssuerSigningKey = true
                 };
 
-                Thread.CurrentPrincipal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken stoken);
+                Thread.CurrentPrincipal =
+                    tokenHandler.ValidateToken(token, validationParameters, out SecurityToken stoken);
             }
-            catch (Microsoft.IdentityModel.Tokens.SecurityTokenValidationException e)
-            {
+            catch (SecurityTokenValidationException e) {
                 Trace.TraceWarning("JWT validation has security token exception.");
                 Trace.TraceError(e.Message);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Trace.TraceWarning("Exception in JWT validation.");
                 Trace.TraceError(ex.Message);
             }

@@ -1,15 +1,15 @@
-﻿using Microsoft.WindowsAzure.Storage;
-using System.ServiceModel.Channels;
+﻿using System.ServiceModel.Channels;
+using Microsoft.WindowsAzure.Storage;
 
 namespace SkunkLab.Storage
 {
     public class SkunkLabBufferManager : IBufferManager
     {
-        private readonly int defaultBufferSize = 0;
+        private readonly int defaultBufferSize;
 
         public SkunkLabBufferManager(BufferManager manager, int defaultBufferSize)
         {
-            this.Manager = manager;
+            Manager = manager;
             this.defaultBufferSize = defaultBufferSize;
         }
 
@@ -17,17 +17,17 @@ namespace SkunkLab.Storage
 
         public int GetDefaultBufferSize()
         {
-            return this.defaultBufferSize;
+            return defaultBufferSize;
         }
 
         public void ReturnBuffer(byte[] buffer)
         {
-            this.Manager.ReturnBuffer(buffer);
+            Manager.ReturnBuffer(buffer);
         }
 
         public byte[] TakeBuffer(int bufferSize)
         {
-            return this.Manager.TakeBuffer(bufferSize);
+            return Manager.TakeBuffer(bufferSize);
         }
     }
 }

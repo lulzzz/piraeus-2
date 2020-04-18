@@ -1,5 +1,5 @@
-﻿using Piraeus.Core.Metadata;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
@@ -17,8 +17,10 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/resource/GetPISystemMetadata?ResourceUriString={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
+            string url = string.Format("{0}/api/resource/GetPISystemMetadata?ResourceUriString={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             EventMetadata metadata = request.Get<EventMetadata>();

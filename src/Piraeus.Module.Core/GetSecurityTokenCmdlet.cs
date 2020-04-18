@@ -13,8 +13,8 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/manage?code={1}", this.ServiceUrl, this.Key);
-            RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, null);
+            string url = string.Format("{0}/api/manage?code={1}", ServiceUrl, Key);
+            RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true);
             RestRequest request = new RestRequest(builder);
 
             WriteObject(request.Get<string>());

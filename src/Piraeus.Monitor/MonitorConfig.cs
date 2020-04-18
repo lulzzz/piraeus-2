@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Piraeus.Monitor
 {
@@ -7,17 +7,10 @@ namespace Piraeus.Monitor
     [JsonObject]
     public class MonitorConfig
     {
-        public MonitorConfig()
-        {
-        }
+        [JsonProperty("clientId")] public string ClientId { get; set; }
 
-        [JsonProperty("clientId")]
-        public string ClientId { get; set; }
+        [JsonProperty("domain")] public string Domain { get; set; }
 
-        [JsonProperty("domain")]
-        public string Domain { get; set; }
-
-        [JsonProperty("tenantId")]
-        public string TenantId { get; set; }
+        [JsonProperty("tenantId")] public string TenantId { get; set; }
     }
 }

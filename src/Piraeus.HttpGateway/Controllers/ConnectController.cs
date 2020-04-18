@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Piraeus.Adapters;
 using Piraeus.Configuration;
 using Piraeus.Grains;
-using System;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using SkunkLab.Channels;
 
 namespace Piraeus.HttpGateway.Controllers
 {
@@ -19,8 +21,7 @@ namespace Piraeus.HttpGateway.Controllers
 
         private readonly GraphManager graphManager;
 
-        private readonly WaitHandle[] waitHandles = new WaitHandle[]
-        {
+        private readonly WaitHandle[] waitHandles = {
             new AutoResetEvent(false)
         };
 
@@ -42,19 +43,17 @@ namespace Piraeus.HttpGateway.Controllers
             graphManager = new GraphManager(client);
         }
 
-        private delegate void HttpResponseObserverHandler(object sender, SkunkLab.Channels.ChannelObserverEventArgs args);
-
         private event HttpResponseObserverHandler OnMessage;
 
         [HttpGet]
         public IActionResult Get()
         {
-            this.context = this.HttpContext;
+            context = HttpContext;
             source = new CancellationTokenSource();
             adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
             adapter.OnObserve += Adapter_OnObserve;
             adapter.Init();
-            ThreadPool.QueueUserWorkItem(new WaitCallback(Listen), waitHandles[0]);
+            ThreadPool.QueueUserWorkItem(Listen, waitHandles[0]);
             WaitHandle.WaitAll(waitHandles);
             Task task = adapter.Channel.CloseAsync();
             Task.WhenAll(task);
@@ -69,12 +68,12 @@ namespace Piraeus.HttpGateway.Controllers
         [HttpPost]
         public HttpResponseMessage Post()
         {
-            this.context = this.HttpContext;
+            context = HttpContext;
             source = new CancellationTokenSource();
             adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
             adapter.OnClose += Adapter_OnClose;
             adapter.Init();
-            return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
+            return new HttpResponseMessage(HttpStatusCode.Accepted);
         }
 
         private void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs e)
@@ -82,7 +81,7 @@ namespace Piraeus.HttpGateway.Controllers
             adapter.Dispose();
         }
 
-        private void Adapter_OnObserve(object sender, SkunkLab.Channels.ChannelObserverEventArgs e)
+        private void Adapter_OnObserve(object sender, ChannelObserverEventArgs e)
         {
             OnMessage?.Invoke(this, e);
         }
@@ -98,5 +97,7 @@ namespace Piraeus.HttpGateway.Controllers
                 are.Set();
             };
         }
+
+        private delegate void HttpResponseObserverHandler(object sender, ChannelObserverEventArgs args);
     }
 }

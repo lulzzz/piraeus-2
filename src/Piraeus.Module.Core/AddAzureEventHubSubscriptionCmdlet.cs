@@ -1,5 +1,5 @@
-﻿using Piraeus.Core.Metadata;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
@@ -24,7 +24,8 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Number of blob storage clients to use.", Mandatory = false)]
         public int NumClients;
 
-        [Parameter(HelpMessage = "(Optional) ID of partition if you want to send message to a single partition.", Mandatory = false)]
+        [Parameter(HelpMessage = "(Optional) ID of partition if you want to send message to a single partition.",
+            Mandatory = false)]
         public string PartitionId;
 
         [Parameter(HelpMessage = "Unique URI identifier of resource to subscribe.", Mandatory = true)]
@@ -38,23 +39,24 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string uriString = string.Format("eh://{0}.servicebus.windows.net?hub={1}&keyname={2}&clients={3}", Account, Hub, KeyName, NumClients <= 0 ? 1 : NumClients);
+            string uriString = string.Format("eh://{0}.servicebus.windows.net?hub={1}&keyname={2}&clients={3}", Account,
+                Hub, KeyName, NumClients <= 0 ? 1 : NumClients);
 
-            if (PartitionId != null)
-            {
+            if (PartitionId != null) {
                 uriString = string.Format("{0}&partitionid={1}", uriString, PartitionId);
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,
-                Description = this.Description
+                Description = Description
             };
 
-            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

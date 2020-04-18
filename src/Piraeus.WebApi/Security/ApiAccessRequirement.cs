@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using AuthorizationPolicy = Capl.Authorization.AuthorizationPolicy;
 
 namespace Piraeus.WebApi.Security
 {
     public class ApiAccessRequirement : IAuthorizationRequirement
     {
-        public ApiAccessRequirement(Capl.Authorization.AuthorizationPolicy policy)
+        public ApiAccessRequirement(AuthorizationPolicy policy)
         {
             Policy = policy;
         }
 
-        public Capl.Authorization.AuthorizationPolicy Policy { get; private set; }
+        public AuthorizationPolicy Policy { get; }
     }
 }

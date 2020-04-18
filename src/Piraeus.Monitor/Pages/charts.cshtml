@@ -4,31 +4,41 @@
     ViewData["Title"] = "charts";
 }
 
-<link href="~/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css" rel="stylesheet" type="text/css" />
+<link href="~/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css" rel="stylesheet" type="text/css"/>
 <div class="card-header" id="heading-1">
     <div>
-        <span>Set # messages for cycle <input id="numMsgs" type="number" style="width:40px" value="10" /><button onclick="setSize()">Set</button></span>
+        <span>Set # messages for cycle <input id="numMsgs" type="number" style="width: 40px" value="10"/><button onclick="setSize()">Set</button></span>
     </div>
-    <span title="Go Back" id="back" class="glyphicon glyphicon-circle-arrow-left" style="float:right;padding-right:20px;" onclick="goBack()"></span>
-    <span title="Turn Charting On or Off" id="monitorAction" class="glyphicon glyphicon-play" style="float:right;padding-right:20px;" onclick="toggleMonitor()"></span>
-    <span title="Clear Chart" id="clear" class="glyphicon glyphicon-repeat" style="float:right;padding-right:20px;" onclick="reload()"></span>
+    <span title="Go Back" id="back" class="glyphicon glyphicon-circle-arrow-left" style="float: right; padding-right: 20px;" onclick="goBack()"></span>
+    <span title="Turn Charting On or Off" id="monitorAction" class="glyphicon glyphicon-play" style="float: right; padding-right: 20px;" onclick="toggleMonitor()"></span>
+    <span title="Clear Chart" id="clear" class="glyphicon glyphicon-repeat" style="float: right; padding-right: 20px;" onclick="reload()"></span>
     <div class="col-lg-10">
         <canvas id="line-chart" width="800" height="400"></canvas>
         <div class="col-lg-2">
             <table width="800">
                 <tr>
                     <td width="100">Message Time</td>
-                    <td width="300"><span id="lmt"></span></td>
+                    <td width="300">
+                        <span id="lmt"></span>
+                    </td>
                     <td width="100">Messages</td>
-                    <td width="100"><span id="mc"></span></td>
+                    <td width="100">
+                        <span id="mc"></span>
+                    </td>
                     <td width="100">Bytes</td>
-                    <td width="100"><span id="bc"></span></td>
+                    <td width="100">
+                        <span id="bc"></span>
+                    </td>
                 </tr>
                 <tr>
                     <td width="200">Error Time</td>
-                    <td width="300"><span id="let"></span></td>
+                    <td width="300">
+                        <span id="let"></span>
+                    </td>
                     <td width="100">Errors</td>
-                    <td width="100"><span id="ec"></span></td>
+                    <td width="100">
+                        <span id="ec"></span>
+                    </td>
                 </tr>
             </table>
         </div>

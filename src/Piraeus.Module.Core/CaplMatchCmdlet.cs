@@ -1,11 +1,12 @@
-﻿using Capl.Authorization;
-using System;
+﻿using System;
 using System.Management.Automation;
+using Capl.Authorization;
+using Capl.Authorization.Matching;
 
 namespace Piraeus.Module
 {
     [Cmdlet(VerbsCommon.New, "CaplMatch")]
-    [OutputType(typeof(Capl.Authorization.Match))]
+    [OutputType(typeof(Match))]
     public class CaplMatchCmdlet : Cmdlet
     {
         [Parameter(HelpMessage = "Claim type to match", Mandatory = true)]
@@ -23,28 +24,23 @@ namespace Piraeus.Module
         protected override void ProcessRecord()
         {
             Uri matchUri;
-            if (this.Type == MatchType.Literal)
-            {
-                matchUri = Capl.Authorization.Matching.LiteralMatchExpression.MatchUri;
+            if (Type == MatchType.Literal) {
+                matchUri = LiteralMatchExpression.MatchUri;
             }
-            else if (this.Type == MatchType.Pattern)
-            {
-                matchUri = Capl.Authorization.Matching.PatternMatchExpression.MatchUri;
+            else if (Type == MatchType.Pattern) {
+                matchUri = PatternMatchExpression.MatchUri;
             }
-            else if (this.Type == MatchType.ComplexType)
-            {
-                matchUri = Capl.Authorization.Matching.ComplexTypeMatchExpression.MatchUri;
+            else if (Type == MatchType.ComplexType) {
+                matchUri = ComplexTypeMatchExpression.MatchUri;
             }
-            else if (this.Type == MatchType.Unary)
-            {
-                matchUri = Capl.Authorization.Matching.UnaryMatchExpression.MatchUri;
+            else if (Type == MatchType.Unary) {
+                matchUri = UnaryMatchExpression.MatchUri;
             }
-            else
-            {
+            else {
                 throw new ArgumentOutOfRangeException("Type");
             }
 
-            WriteObject(new Match() { ClaimType = this.ClaimType, Required = this.Required, Type = matchUri });
+            WriteObject(new Match {ClaimType = ClaimType, Required = Required, Type = matchUri});
         }
     }
 }

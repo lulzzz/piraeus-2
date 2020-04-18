@@ -1,4 +1,4 @@
-import absFloor from '../utils/abs-floor';
+import absFloor from "../utils/abs-floor";
 var abs = Math.abs;
 
 function sign(x) {
@@ -38,26 +38,27 @@ export function toISOString() {
     var D = days;
     var h = hours;
     var m = minutes;
-    var s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, '') : '';
+    var s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, "") : "";
     var total = this.asSeconds();
 
     if (!total) {
         // this is the same as C#'s (Noda) and python (isodate)...
         // but not other JS (goog.date)
-        return 'P0D';
+        return "P0D";
     }
 
-    var totalSign = total < 0 ? '-' : '';
-    var ymSign = sign(this._months) !== sign(total) ? '-' : '';
-    var daysSign = sign(this._days) !== sign(total) ? '-' : '';
-    var hmsSign = sign(this._milliseconds) !== sign(total) ? '-' : '';
+    var totalSign = total < 0 ? "-" : "";
+    var ymSign = sign(this._months) !== sign(total) ? "-" : "";
+    var daysSign = sign(this._days) !== sign(total) ? "-" : "";
+    var hmsSign = sign(this._milliseconds) !== sign(total) ? "-" : "";
 
-    return totalSign + 'P' +
-        (Y ? ymSign + Y + 'Y' : '') +
-        (M ? ymSign + M + 'M' : '') +
-        (D ? daysSign + D + 'D' : '') +
-        ((h || m || s) ? 'T' : '') +
-        (h ? hmsSign + h + 'H' : '') +
-        (m ? hmsSign + m + 'M' : '') +
-        (s ? hmsSign + s + 'S' : '');
+    return totalSign +
+        "P" +
+        (Y ? ymSign + Y + "Y" : "") +
+        (M ? ymSign + M + "M" : "") +
+        (D ? daysSign + D + "D" : "") +
+        ((h || m || s) ? "T" : "") +
+        (h ? hmsSign + h + "H" : "") +
+        (m ? hmsSign + m + "M" : "") +
+        (s ? hmsSign + s + "S" : "");
 }

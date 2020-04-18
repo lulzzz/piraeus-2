@@ -6,23 +6,19 @@ namespace Piraeus.Auditing
     {
         public static void IgnoreException(this Task task)
         {
-            if (task.IsCompleted)
-            {
+            if (task.IsCompleted) {
                 var ignored = task.Exception;
             }
-            else
-            {
+            else {
                 IgnoreAsync(task);
             }
 
             static async void IgnoreAsync(Task asyncTask)
             {
-                try
-                {
+                try {
                     await asyncTask.ConfigureAwait(false);
                 }
-                catch
-                {
+                catch {
                 }
             }
         }

@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Piraeus.Auditing
 {
@@ -11,7 +11,8 @@ namespace Piraeus.Auditing
         {
         }
 
-        public UserAuditRecord(string channelId, string identity, string claimType, string channel, string protocol, string status, DateTime loginTime)
+        public UserAuditRecord(string channelId, string identity, string claimType, string channel, string protocol,
+            string status, DateTime loginTime)
         {
             ChannelId = channelId;
             Identity = identity;
@@ -29,8 +30,7 @@ namespace Piraeus.Auditing
             LogoutTime = logoutTime;
         }
 
-        [JsonProperty("channel")]
-        public string Channel { get; set; }
+        [JsonProperty("channel")] public string Channel { get; set; }
 
         [JsonProperty("channelId")]
         public string ChannelId
@@ -39,8 +39,7 @@ namespace Piraeus.Auditing
             set => PartitionKey = value;
         }
 
-        [JsonProperty("claimType")]
-        public string ClaimType { get; set; }
+        [JsonProperty("claimType")] public string ClaimType { get; set; }
 
         [JsonProperty("identity")]
         public string Identity
@@ -49,21 +48,18 @@ namespace Piraeus.Auditing
             set => RowKey = value;
         }
 
-        [JsonProperty("loginTime")]
-        public DateTime? LoginTime { get; set; }
+        [JsonProperty("loginTime")] public DateTime? LoginTime { get; set; }
 
-        [JsonProperty("logoutTime")]
-        public DateTime? LogoutTime { get; set; }
+        [JsonProperty("logoutTime")] public DateTime? LogoutTime { get; set; }
 
-        [JsonProperty("protocol")]
-        public string Protocol { get; set; }
+        [JsonProperty("protocol")] public string Protocol { get; set; }
 
-        [JsonProperty("status")]
-        public string Status { get; set; }
+        [JsonProperty("status")] public string Status { get; set; }
 
         public override string ConvertToCsv()
         {
-            return string.Format($"{ChannelId},{Identity},{Channel},{Protocol},{ClaimType},{Status},{LoginTime},{LogoutTime}");
+            return string.Format(
+                $"{ChannelId},{Identity},{Channel},{Protocol},{ClaimType},{Status},{LoginTime},{LogoutTime}");
         }
 
         public override string ConvertToJson()

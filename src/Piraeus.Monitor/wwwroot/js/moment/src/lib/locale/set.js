@@ -1,7 +1,7 @@
-import isFunction from '../utils/is-function';
-import extend from '../utils/extend';
-import isObject from '../utils/is-object';
-import hasOwnProp from '../utils/has-own-prop';
+import isFunction from "../utils/is-function";
+import extend from "../utils/extend";
+import isObject from "../utils/is-object";
+import hasOwnProp from "../utils/has-own-prop";
 
 export function set(config) {
     var prop, i;
@@ -10,7 +10,7 @@ export function set(config) {
         if (isFunction(prop)) {
             this[i] = prop;
         } else {
-            this['_' + i] = prop;
+            this["_" + i] = prop;
         }
     }
     this._config = config;
@@ -19,7 +19,8 @@ export function set(config) {
     // TODO: Remove "ordinalParse" fallback in next major release.
     this._dayOfMonthOrdinalParseLenient = new RegExp(
         (this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) +
-        '|' + (/\d{1,2}/).source);
+        "|" +
+        (/\d{1,2}/).source);
 }
 
 export function mergeConfigs(parentConfig, childConfig) {

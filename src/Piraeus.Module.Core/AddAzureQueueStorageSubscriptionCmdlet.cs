@@ -1,13 +1,14 @@
-﻿using Piraeus.Core.Metadata;
-using System;
+﻿using System;
 using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
     [Cmdlet(VerbsCommon.Add, "PiraeusQueueStorageSubscription")]
     public class AddAzureQueueStorageSubscriptionCmdlet : Cmdlet
     {
-        [Parameter(HelpMessage = "Account name of Azure Queue Storage, e.g, <acconut>.queue.core.windows.net", Mandatory = true)]
+        [Parameter(HelpMessage = "Account name of Azure Queue Storage, e.g, <acconut>.queue.core.windows.net",
+            Mandatory = true)]
         public string Account;
 
         [Parameter(HelpMessage = "Description of the subscription.", Mandatory = false)]
@@ -33,19 +34,22 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string uriString = TTL.HasValue ? string.Format("https://{0}.queue.core.windows.net?queue={1}&ttl={2}", Account, Queue, TTL.Value.ToString()) :
-                string.Format("https://{0}.queue.core.windows.net?queue={1}", Account, Queue);
+            string uriString = TTL.HasValue
+                ? string.Format("https://{0}.queue.core.windows.net?queue={1}&ttl={2}", Account, Queue,
+                    TTL.Value.ToString())
+                : string.Format("https://{0}.queue.core.windows.net?queue={1}", Account, Queue);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,
-                Description = this.Description
+                Description = Description
             };
 
-            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl, ResourceUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            string url = string.Format("{0}/api/resource/subscribe?resourceuristring={1}", ServiceUrl,
+                ResourceUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             string subscriptionUriString = request.Post<SubscriptionMetadata, string>(metadata);

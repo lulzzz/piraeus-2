@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using Piraeus.Configuration;
-using System;
 
 namespace Piraeus.Extensions.Logging
 {
@@ -12,13 +12,11 @@ namespace Piraeus.Extensions.Logging
 
             LogLevel logLevel = Enum.Parse<LogLevel>(config.LogLevel, true);
 
-            if (loggerTypes.HasFlag(LoggerType.Console))
-            {
+            if (loggerTypes.HasFlag(LoggerType.Console)) {
                 builder.AddConsole();
             }
 
-            if (loggerTypes.HasFlag(LoggerType.Debug))
-            {
+            if (loggerTypes.HasFlag(LoggerType.Debug)) {
                 builder.AddDebug();
             }
 

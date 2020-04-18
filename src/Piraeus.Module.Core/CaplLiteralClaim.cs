@@ -1,10 +1,10 @@
-﻿using Capl.Authorization;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Capl.Authorization;
 
 namespace Piraeus.Module
 {
     [Cmdlet(VerbsCommon.New, "CaplLiteralClaim")]
-    [OutputType(typeof(Capl.Authorization.LiteralClaim))]
+    [OutputType(typeof(LiteralClaim))]
     public class CaplLiteralClaim : Cmdlet
     {
         [Parameter(HelpMessage = "Claim type of the literal claim.", Mandatory = true)]

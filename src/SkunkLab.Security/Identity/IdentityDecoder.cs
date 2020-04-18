@@ -1,28 +1,26 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace SkunkLab.Security.Identity
 {
     public class IdentityDecoder
     {
-        public IdentityDecoder(string identityClaimType, HttpContext context = null, List<KeyValuePair<string, string>> indexes = null)
+        public IdentityDecoder(string identityClaimType, HttpContext context = null,
+            List<KeyValuePair<string, string>> indexes = null)
         {
             Id = DecodeClaimType(context, identityClaimType);
 
-            if (indexes != null)
-            {
+            if (indexes != null) {
                 Indexes = new List<KeyValuePair<string, string>>();
 
-                foreach (var item in indexes)
-                {
+                foreach (var item in indexes) {
                     string value = DecodeClaimType(context, item.Key);
-                    if (!string.IsNullOrEmpty(value))
-                    {
+                    if (!string.IsNullOrEmpty(value)) {
                         Indexes.Add(new KeyValuePair<string, string>(item.Value, value));
                     }
                 }
@@ -35,38 +33,32 @@ namespace SkunkLab.Security.Identity
 
         private string DecodeClaimType(HttpContext context, string claimType)
         {
-            if (claimType == null)
-            {
+            if (claimType == null) {
                 return null;
             }
 
-            if (context == null)
-            {
+            if (context == null) {
                 return DecodeClaimType(claimType);
             }
 
-            IEnumerable<Claim> claims = context.User.Claims.Where((c) => c.Type.ToLowerInvariant() == claimType.ToLowerInvariant());
-            if (claims != null && claims.Count() == 1)
-            {
+            IEnumerable<Claim> claims =
+                context.User.Claims.Where(c => c.Type.ToLowerInvariant() == claimType.ToLowerInvariant());
+            if (claims != null && claims.Count() == 1) {
                 return claims.First().Value;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         private string DecodeClaimType(string claimType)
         {
             Task<string> task = Task.Factory.StartNew(() =>
             {
-                if (claimType == null)
-                {
+                if (claimType == null) {
                     return null;
                 }
 
-                if (!(Thread.CurrentPrincipal is ClaimsPrincipal principal))
-                {
+                if (!(Thread.CurrentPrincipal is ClaimsPrincipal principal)) {
                     return null;
                 }
 

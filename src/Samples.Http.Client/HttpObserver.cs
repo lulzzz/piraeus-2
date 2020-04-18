@@ -1,5 +1,5 @@
-﻿using SkunkLab.Channels;
-using System;
+﻿using System;
+using SkunkLab.Channels;
 
 namespace Samples.Http.Client
 {
@@ -7,12 +7,12 @@ namespace Samples.Http.Client
     {
         public HttpObserver(Uri resourceUri)
         {
-            this.ResourceUri = resourceUri;
+            ResourceUri = resourceUri;
         }
 
-        public override event ObserverEventHandler OnNotify;
-
         public override Uri ResourceUri { get; set; }
+
+        public override event ObserverEventHandler OnNotify;
 
         public override void Update(Uri resourceUri, string contentType, byte[] message)
         {

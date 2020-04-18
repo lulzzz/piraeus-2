@@ -1,14 +1,14 @@
-import hasOwnProp from '../utils/has-own-prop';
+import hasOwnProp from "../utils/has-own-prop";
 
 var aliases = {};
 
 export function addUnitAlias(unit, shorthand) {
     var lowerCase = unit.toLowerCase();
-    aliases[lowerCase] = aliases[lowerCase + 's'] = aliases[shorthand] = unit;
+    aliases[lowerCase] = aliases[lowerCase + "s"] = aliases[shorthand] = unit;
 }
 
 export function normalizeUnits(units) {
-    return typeof units === 'string' ? aliases[units] || aliases[units.toLowerCase()] : undefined;
+    return typeof units === "string" ? aliases[units] || aliases[units.toLowerCase()] : undefined;
 }
 
 export function normalizeObjectUnits(inputObject) {
