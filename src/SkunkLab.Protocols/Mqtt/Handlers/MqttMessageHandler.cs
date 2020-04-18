@@ -18,10 +18,10 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
         protected MqttSession Session { get; set; }
 
-        public static MqttMessageHandler Create(MqttSession session, MqttMessage message, IMqttDispatch dispatcher = null)
+        public static MqttMessageHandler Create(MqttSession session, MqttMessage message,
+            IMqttDispatch dispatcher = null)
         {
-            return message.MessageType switch
-            {
+            return message.MessageType switch {
                 MqttMessageType.CONNACK => new MqttConnackHandler(session, message),
                 MqttMessageType.CONNECT => new MqttConnectHandler(session, message),
                 MqttMessageType.DISCONNECT => new MqttDisconnectHandler(session, message),
@@ -36,7 +36,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
                 MqttMessageType.SUBSCRIBE => new MqttSubscribeHandler(session, message),
                 MqttMessageType.UNSUBACK => new MqttUnsubAckHandler(session, message),
                 MqttMessageType.UNSUBSCRIBE => new MqttUnsubscribeHandler(session, message),
-                _ => throw new InvalidCastException("MqttMessageType"),
+                _ => throw new InvalidCastException("MqttMessageType")
             };
         }
 

@@ -1,28 +1,21 @@
-﻿namespace Capl.Authorization.Operations
-{
-    using System;
+﻿using System;
 
+namespace Capl.Authorization.Operations
+{
     /// <summary>
-    /// Compares two DateTime values to determine if the left argument is greater than or equal the right argument.
+    ///     Compares two DateTime values to determine if the left argument is greater than or equal the right argument.
     /// </summary>
     public class GreaterThanOrEqualDateTimeOperation : Operation
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GreaterThanOrEqualDateTimeOperation"/> class.
-        /// </summary>
-        public GreaterThanOrEqualDateTimeOperation()
-        {
-        }
-
         public static Uri OperationUri => new Uri(AuthorizationConstants.OperationUris.GreaterThanOrEqualDateTime);
 
         /// <summary>
-        /// Gets the URI that identifies the operation.
+        ///     Gets the URI that identifies the operation.
         /// </summary>
         public override Uri Uri => new Uri(AuthorizationConstants.OperationUris.GreaterThanOrEqualDateTime);
 
         /// <summary>
-        /// Executes the comparsion.
+        ///     Executes the comparsion.
         /// </summary>
         /// <param name="left">LHS of the expression argument.</param>
         /// <param name="right">RHS of the expression argument.</param>

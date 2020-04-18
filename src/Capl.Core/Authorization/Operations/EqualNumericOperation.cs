@@ -1,28 +1,21 @@
-﻿namespace Capl.Authorization.Operations
-{
-    using System;
+﻿using System;
 
+namespace Capl.Authorization.Operations
+{
     /// <summary>
-    /// Compares two decimals for equality.
+    ///     Compares two decimals for equality.
     /// </summary>
     public class EqualNumericOperation : Operation
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EqualNumericOperation"/> class.
-        /// </summary>
-        public EqualNumericOperation()
-        {
-        }
-
         public static Uri OperationUri => new Uri(AuthorizationConstants.OperationUris.EqualNumeric);
 
         /// <summary>
-        /// Gets the URI that identifies the operation.
+        ///     Gets the URI that identifies the operation.
         /// </summary>
         public override Uri Uri => new Uri(AuthorizationConstants.OperationUris.EqualNumeric);
 
         /// <summary>
-        /// Executes the comparsion.
+        ///     Executes the comparsion.
         /// </summary>
         /// <param name="left">LHS of the expression argument.</param>
         /// <param name="right">RHS of the expression argument.</param>

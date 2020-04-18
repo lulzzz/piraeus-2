@@ -1,10 +1,10 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
+namespace SkunkLab.Protocols.Coap
+{
     internal class OptionBuilder
     {
         private readonly SortedList<int, CoapOption> list;
@@ -25,20 +25,17 @@
 
             list = new SortedList<int, CoapOption>();
             IEnumerator<CoapOption> en = options.GetEnumerator();
-            while (en.MoveNext())
-            {
+            while (en.MoveNext()) {
                 int typeInt = (int)en.Current.Type;
 
-                if (optionDict.ContainsKey(typeInt))
-                {
+                if (optionDict.ContainsKey(typeInt)) {
                     optionDict[typeInt] = optionDict[typeInt] + 1;
                 }
-                else
-                {
+                else {
                     optionDict.Add(typeInt, 0);
                 }
 
-                list.Add(((int)en.Current.Type * 1000) + optionDict[typeInt], en.Current);
+                list.Add((int)en.Current.Type * 1000 + optionDict[typeInt], en.Current);
             }
         }
 
@@ -46,16 +43,14 @@
         {
             int typeInt = (int)option.Type;
 
-            if (optionDict.ContainsKey(typeInt))
-            {
+            if (optionDict.ContainsKey(typeInt)) {
                 optionDict[typeInt] = optionDict[typeInt]++;
             }
-            else
-            {
+            else {
                 optionDict.Add(typeInt, 0);
             }
 
-            list.Add(((int)option.Type * 1000) + optionDict[typeInt], option);
+            list.Add((int)option.Type * 1000 + optionDict[typeInt], option);
         }
 
         public byte[] Encode()
@@ -63,11 +58,9 @@
             byte[] options = null;
             int previous = 0;
 
-            using (MemoryStream stream = new MemoryStream())
-            {
+            using (MemoryStream stream = new MemoryStream()) {
                 KeyValuePair<int, CoapOption>[] kvps = list.ToArray();
-                foreach (KeyValuePair<int, CoapOption> kvp in kvps)
-                {
+                foreach (KeyValuePair<int, CoapOption> kvp in kvps) {
                     byte[] encodedOption = kvp.Value.Encode(previous);
 
                     stream.Write(encodedOption, 0, encodedOption.Length);

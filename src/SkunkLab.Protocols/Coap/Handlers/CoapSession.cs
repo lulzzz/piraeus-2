@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using SkunkLab.Security.Identity;
-using SkunkLab.Security.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Timers;
+using Microsoft.AspNetCore.Http;
+using SkunkLab.Security.Identity;
+using SkunkLab.Security.Tokens;
 
 namespace SkunkLab.Protocols.Coap.Handlers
 {
@@ -32,21 +32,17 @@ namespace SkunkLab.Protocols.Coap.Handlers
             this.context = context;
 
             CoapReceiver = new Receiver(config.ExchangeLifetime.TotalMilliseconds);
-            CoapSender = new Transmitter(config.ExchangeLifetime.TotalMilliseconds, config.MaxTransmitSpan.TotalMilliseconds, config.MaxRetransmit);
+            CoapSender = new Transmitter(config.ExchangeLifetime.TotalMilliseconds,
+                config.MaxTransmitSpan.TotalMilliseconds, config.MaxRetransmit);
             CoapSender.OnRetry += Transmit_OnRetry;
 
-            if (config.KeepAlive.HasValue)
-            {
+            if (config.KeepAlive.HasValue) {
                 keepaliveTimestamp = DateTime.UtcNow.AddSeconds(config.KeepAlive.Value);
                 keepaliveTimer = new Timer(config.KeepAlive.Value * 1000);
                 keepaliveTimer.Elapsed += KeepaliveTimer_Elapsed;
                 keepaliveTimer.Start();
             }
         }
-
-        public event EventHandler<CoapMessageEventArgs> OnKeepAlive;
-
-        public event EventHandler<CoapMessageEventArgs> OnRetry;
 
         public Receiver CoapReceiver { get; internal set; }
 
@@ -62,14 +58,16 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         public bool IsAuthenticated { get; set; }
 
+        public event EventHandler<CoapMessageEventArgs> OnKeepAlive;
+
+        public event EventHandler<CoapMessageEventArgs> OnRetry;
+
         public bool Authenticate(string tokenType, string token)
         {
-            if (HasBootstrapToken)
-            {
+            if (HasBootstrapToken) {
                 IsAuthenticated = Config.Authenticator.Authenticate(bootstrapTokenType, bootstrapToken);
             }
-            else
-            {
+            else {
                 SecurityTokenType tt = (SecurityTokenType)Enum.Parse(typeof(SecurityTokenType), tokenType, true);
                 bootstrapTokenType = tt;
                 bootstrapToken = token;
@@ -87,26 +85,21 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         public void EnsureAuthentication(CoapMessage message, bool force = false)
         {
-            if (!IsAuthenticated || force)
-            {
+            if (!IsAuthenticated || force) {
                 CoapUri coapUri = new CoapUri(message.ResourceUri.ToString());
-                if (!Authenticate(coapUri.TokenType, coapUri.SecurityToken))
-                {
+                if (!Authenticate(coapUri.TokenType, coapUri.SecurityToken)) {
                     throw new SecurityException("CoAP session not authenticated.");
                 }
-                else
-                {
-                    IdentityDecoder decoder = new IdentityDecoder(Config.IdentityClaimType, context, Config.Indexes);
-                    Identity = decoder.Id;
-                    Indexes = decoder.Indexes;
-                }
+
+                IdentityDecoder decoder = new IdentityDecoder(Config.IdentityClaimType, context, Config.Indexes);
+                Identity = decoder.Id;
+                Indexes = decoder.Indexes;
             }
         }
 
         public bool IsNoResponse(NoResponseType? messageNrt, NoResponseType result)
         {
-            if (!messageNrt.HasValue)
-            {
+            if (!messageNrt.HasValue) {
                 return false;
             }
 
@@ -120,12 +113,10 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         private void KeepaliveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (keepaliveTimestamp <= DateTime.UtcNow)
-            {
+            if (keepaliveTimestamp <= DateTime.UtcNow) {
                 CoapToken token = CoapToken.Create();
                 ushort id = CoapSender.NewId(token.TokenBytes);
-                CoapRequest ping = new CoapRequest()
-                {
+                CoapRequest ping = new CoapRequest {
                     MessageId = id,
                     Token = token.TokenBytes,
                     Code = CodeType.EmptyMessage,
@@ -151,12 +142,9 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    if (keepaliveTimer != null)
-                    {
+            if (!disposedValue) {
+                if (disposing) {
+                    if (keepaliveTimer != null) {
                         keepaliveTimer.Stop();
                         keepaliveTimer.Dispose();
                     }

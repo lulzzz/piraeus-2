@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace SkunkLab.Protocols.Coap.Handlers
 {
@@ -13,32 +14,28 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public override async Task<CoapMessage> ProcessAsync()
         {
             CoapMessage response = null;
-            if (!Session.CoapReceiver.IsDup(Message.MessageId))
-            {
-                response = await Dispatcher.PostAsync(Message).ContinueWith<CoapMessage>(ExceptionAction, TaskContinuationOptions.OnlyOnFaulted);
+            if (!Session.CoapReceiver.IsDup(Message.MessageId)) {
+                response = await Dispatcher.PostAsync(Message)
+                    .ContinueWith(ExceptionAction, TaskContinuationOptions.OnlyOnFaulted);
             }
-            else
-            {
-                if (Message.MessageType == CoapMessageType.Confirmable)
-                {
-                    return await Task.FromResult<CoapMessage>(new CoapResponse(Message.MessageId, ResponseMessageType.Acknowledgement, ResponseCodeType.EmptyMessage));
+            else {
+                if (Message.MessageType == CoapMessageType.Confirmable) {
+                    return await Task.FromResult<CoapMessage>(new CoapResponse(Message.MessageId,
+                        ResponseMessageType.Acknowledgement, ResponseCodeType.EmptyMessage));
                 }
             }
 
-            if (response != null && !Message.NoResponse.IsNoResponse(Message.Code))
-            {
+            if (response != null && !Message.NoResponse.IsNoResponse(Message.Code)) {
                 return response;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         private CoapMessage ExceptionAction(Task task)
         {
-            System.Diagnostics.Trace.WriteLine(task.Exception.Message);
-            System.Diagnostics.Trace.WriteLine(task.Exception.StackTrace);
+            Trace.WriteLine(task.Exception.Message);
+            Trace.WriteLine(task.Exception.StackTrace);
             return null;
         }
     }

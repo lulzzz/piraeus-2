@@ -1,25 +1,18 @@
-﻿namespace Capl.Authorization.Operations
-{
-    using System;
-    using System.Collections;
-    using System.Xml;
+﻿using System;
+using System.Collections;
+using System.Xml;
 
+namespace Capl.Authorization.Operations
+{
     /// <summary>
-    /// Compares two DateTime types by UTC.
+    ///     Compares two DateTime types by UTC.
     /// </summary>
     public class DateTimeComparer : IComparer
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DateTimeComparer"/> class.
-        /// </summary>
-        public DateTimeComparer()
-        {
-        }
-
         #region IComparer Members
 
         /// <summary>
-        /// Compares two DateTime types by UTC.
+        ///     Compares two DateTime types by UTC.
         /// </summary>
         /// <param name="x">LHS datetime parameter to test.</param>
         /// <param name="y">RHS datatime parameter to test.</param>
@@ -29,13 +22,11 @@
             DateTime left = XmlConvert.ToDateTime((string)x, XmlDateTimeSerializationMode.Utc);
             DateTime right = XmlConvert.ToDateTime((string)y, XmlDateTimeSerializationMode.Utc);
 
-            if (left == right)
-            {
+            if (left == right) {
                 return 0;
             }
 
-            if (left < right)
-            {
+            if (left < right) {
                 return -1;
             }
 

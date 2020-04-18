@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Piraeus.WebApi
 {
-    public class Program
+    public static class Program
     {
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
@@ -49,7 +49,7 @@ namespace Piraeus.WebApi
                         {
                             string[] portStrings = config.Ports.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                            foreach (var portString in portStrings)
+                            foreach (string portString in portStrings)
                             {
                                 options.ListenAnyIP(Convert.ToInt32(portString), (a) => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
                             }

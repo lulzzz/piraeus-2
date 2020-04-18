@@ -1,12 +1,12 @@
-﻿namespace Capl.Authorization
-{
-    using System;
-    using System.Globalization;
-    using System.Runtime.Serialization;
-    using System.Xml;
+﻿using System;
+using System.Globalization;
+using System.Runtime.Serialization;
+using System.Xml;
 
+namespace Capl.Authorization
+{
     /// <summary>
-    /// Extensions for deserialization.
+    ///     Extensions for deserialization.
     /// </summary>
     public static class XmlReaderExtensions
     {
@@ -18,7 +18,7 @@
         }
 
         /// <summary>
-        /// Gets the value of an Xml element from the reader.
+        ///     Gets the value of an Xml element from the reader.
         /// </summary>
         /// <param name="reader">XmlReader to extend.</param>
         /// <param name="localName">Local name of the element to be inspected.</param>
@@ -30,23 +30,19 @@
             _ = localName ?? throw new ArgumentNullException(nameof(localName));
             _ = namespaceUri ?? throw new ArgumentNullException(nameof(namespaceUri));
 
-            if (reader.LocalName != localName)
-            {
+            if (reader.LocalName != localName) {
                 throw new SerializationException(localName);
             }
 
-            if (reader.NamespaceURI != namespaceUri)
-            {
+            if (reader.NamespaceURI != namespaceUri) {
                 throw new SerializationException(localName);
             }
 
-            if (reader.IsEmptyElement)
-            {
+            if (reader.IsEmptyElement) {
                 return null;
             }
 
-            if (reader.NodeType != XmlNodeType.Element)
-            {
+            if (reader.NodeType != XmlNodeType.Element) {
                 throw new SerializationException("Xml reader not positioned on an element to reader the value.");
             }
 
@@ -54,7 +50,7 @@
         }
 
         /// <summary>
-        /// Gets an attribute value that is optional.
+        ///     Gets an attribute value that is optional.
         /// </summary>
         /// <param name="reader">XmlReader to extend.</param>
         /// <param name="name">Name of attribute to inspect.</param>
@@ -69,7 +65,7 @@
         }
 
         /// <summary>
-        /// Gets a required attribute value.
+        ///     Gets a required attribute value.
         /// </summary>
         /// <param name="reader">XmlReader to extend.</param>
         /// <param name="name">Name of attribute to inspect.</param>
@@ -78,9 +74,9 @@
         {
             string val = reader.GetOptionalAttribute(name);
 
-            if (string.IsNullOrEmpty(val))
-            {
-                throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Required attribute {0} not found", name));
+            if (string.IsNullOrEmpty(val)) {
+                throw new SerializationException(string.Format(CultureInfo.InvariantCulture,
+                    "Required attribute {0} not found", name));
             }
 
             return val;
@@ -92,7 +88,7 @@
         }
 
         /// <summary>
-        /// Determines whether an element is a required end element.
+        ///     Determines whether an element is a required end element.
         /// </summary>
         /// <param name="reader">XmlReader to extend.</param>
         /// <param name="localName">Local name of element to inspect.</param>
@@ -102,7 +98,8 @@
         {
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
-            return (reader.LocalName == localName && reader.NamespaceURI == namespaceUri) && (reader.IsEmptyElement || reader.NodeType == XmlNodeType.EndElement);
+            return reader.LocalName == localName && reader.NamespaceURI == namespaceUri &&
+                   (reader.IsEmptyElement || reader.NodeType == XmlNodeType.EndElement);
         }
 
         public static bool IsRequiredStartElement(this XmlReader reader, string localName)
@@ -112,7 +109,8 @@
 
         public static bool IsRequiredStartElement(this XmlReader reader, string localName, string namespaceUri)
         {
-            return (reader.LocalName == localName && reader.NamespaceURI == namespaceUri && reader.NodeType == XmlNodeType.Element);
+            return reader.LocalName == localName && reader.NamespaceURI == namespaceUri &&
+                   reader.NodeType == XmlNodeType.Element;
         }
 
         public static void MoveToRequiredStartElement(this XmlReader reader, string localName)
@@ -121,7 +119,7 @@
         }
 
         /// <summary>
-        /// Moves the XmlReader to a specific starting element.
+        ///     Moves the XmlReader to a specific starting element.
         /// </summary>
         /// <param name="reader">XmlReader to extend.</param>
         /// <param name="localName">Local name of the element to position as start.</param>
@@ -130,37 +128,36 @@
         {
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
-            if ((reader.IsEmptyElement && reader.LocalName == localName && reader.NamespaceURI == namespaceUri) || (reader.NodeType == XmlNodeType.Element && reader.LocalName == localName && reader.NamespaceURI == namespaceUri))
-            {
+            if (reader.IsEmptyElement && reader.LocalName == localName && reader.NamespaceURI == namespaceUri ||
+                reader.NodeType == XmlNodeType.Element && reader.LocalName == localName &&
+                reader.NamespaceURI == namespaceUri) {
                 return;
             }
 
             reader.MoveToElement();
 
-            while (reader.Read())
-            {
-                if ((reader.IsEmptyElement && reader.LocalName == localName && reader.NamespaceURI == namespaceUri) || (reader.NodeType == XmlNodeType.Element && reader.LocalName == localName && reader.NamespaceURI == namespaceUri))
-                {
+            while (reader.Read()) {
+                if (reader.IsEmptyElement && reader.LocalName == localName && reader.NamespaceURI == namespaceUri ||
+                    reader.NodeType == XmlNodeType.Element && reader.LocalName == localName &&
+                    reader.NamespaceURI == namespaceUri) {
                     return;
                 }
             }
 
-            throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Required element {0} in namespace {1} not found", localName, namespaceUri));
+            throw new SerializationException(string.Format(CultureInfo.InvariantCulture,
+                "Required element {0} in namespace {1} not found", localName, namespaceUri));
         }
 
         public static void MoveToStartElement(this XmlReader reader)
         {
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
-            if (reader.NodeType == XmlNodeType.Element)
-            {
+            if (reader.NodeType == XmlNodeType.Element) {
                 return;
             }
 
-            while (reader.Read())
-            {
-                if (reader.NodeType == XmlNodeType.Element)
-                {
+            while (reader.Read()) {
+                if (reader.NodeType == XmlNodeType.Element) {
                     return;
                 }
             }

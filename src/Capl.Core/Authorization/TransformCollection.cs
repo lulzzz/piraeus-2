@@ -1,12 +1,12 @@
-﻿namespace Capl.Authorization
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using System.Xml;
-    using System.Xml.Serialization;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Xml;
+using System.Xml.Serialization;
 
+namespace Capl.Authorization
+{
     [Serializable]
     [XmlSchemaProvider(null, IsAny = true)]
     public class TransformCollection : TransformBase, IList<Transform>, IXmlSerializable
@@ -18,6 +18,24 @@
             transforms = new List<Transform>();
         }
 
+        #region IEnumerable<ScopeTransform> Members
+
+        public IEnumerator<Transform> GetEnumerator()
+        {
+            return transforms.GetEnumerator();
+        }
+
+        #endregion IEnumerable<ScopeTransform> Members
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        #endregion IEnumerable Members
+
         public static TransformCollection Load(XmlReader reader)
         {
             TransformCollection transforms = new TransformCollection();
@@ -25,6 +43,19 @@
 
             return transforms;
         }
+
+        #region ITransform Members
+
+        public override IEnumerable<Claim> TransformClaims(IEnumerable<Claim> claims)
+        {
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
+
+            foreach (Transform transform in this) claims = transform.TransformClaims(claims);
+
+            return claims;
+        }
+
+        #endregion ITransform Members
 
         #region IList<ScopeTransform> Members
 
@@ -84,40 +115,6 @@
 
         #endregion ICollection<ScopeTransform> Members
 
-        #region IEnumerable<ScopeTransform> Members
-
-        public IEnumerator<Transform> GetEnumerator()
-        {
-            return transforms.GetEnumerator();
-        }
-
-        #endregion IEnumerable<ScopeTransform> Members
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        #endregion IEnumerable Members
-
-        #region ITransform Members
-
-        public override IEnumerable<Claim> TransformClaims(IEnumerable<Claim> claims)
-        {
-            _ = claims ?? throw new ArgumentNullException(nameof(claims));
-
-            foreach (Transform transform in this)
-            {
-                claims = transform.TransformClaims(claims);
-            }
-
-            return claims;
-        }
-
-        #endregion ITransform Members
-
         #region IXmlSerializable Members
 
         public override void ReadXml(XmlReader reader)
@@ -126,15 +123,12 @@
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Transforms);
 
-            while (reader.Read())
-            {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transform))
-                {
-                    this.Add(ClaimTransform.Load(reader));
+            while (reader.Read()) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transform)) {
+                    Add(ClaimTransform.Load(reader));
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transforms))
-                {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transforms)) {
                     break;
                 }
             }
@@ -144,17 +138,14 @@
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
-            if (this.Count == 0)
-            {
+            if (Count == 0) {
                 return;
             }
 
-            writer.WriteStartElement(AuthorizationConstants.Elements.Transforms, AuthorizationConstants.Namespaces.Xmlns);
+            writer.WriteStartElement(AuthorizationConstants.Elements.Transforms,
+                AuthorizationConstants.Namespaces.Xmlns);
 
-            foreach (ClaimTransform transform in this)
-            {
-                transform.WriteXml(writer);
-            }
+            foreach (ClaimTransform transform in this) transform.WriteXml(writer);
 
             writer.WriteEndElement();
         }

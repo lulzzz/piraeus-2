@@ -115,7 +115,7 @@ namespace Piraeus.Clients.Mqtt
             UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
             await channel.SendAsync(msg.Encode());
 
-            foreach (var topic in topics)
+            foreach (string topic in topics)
             {
                 dispatcher.Unregister(topic);
             }

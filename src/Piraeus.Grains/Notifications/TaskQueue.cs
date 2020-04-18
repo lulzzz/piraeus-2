@@ -5,21 +5,18 @@
 
     internal sealed class TaskQueue
     {
-        private readonly object _lockObj = new object();
+        private readonly object lockObj = new object();
 
-        private Task _lastQueuedTask = Task.FromResult<int>(0);
+        private Task lastQueuedTask = Task.FromResult<int>(0);
 
         public Task Enqueue(Func<Task> taskFunc)
         {
             Func<Task, Task> continuationFunction = null;
-            lock (this._lockObj)
+            lock (this.lockObj)
             {
-                if (continuationFunction == null)
-                {
-                    continuationFunction = _ => taskFunc();
-                }
-                Task task = this._lastQueuedTask.ContinueWith<Task>(continuationFunction, TaskContinuationOptions.OnlyOnRanToCompletion).Unwrap();
-                this._lastQueuedTask = task;
+                continuationFunction = _ => taskFunc();
+                Task task = this.lastQueuedTask.ContinueWith<Task>(continuationFunction, TaskContinuationOptions.OnlyOnRanToCompletion).Unwrap();
+                this.lastQueuedTask = task;
                 return task;
             }
         }

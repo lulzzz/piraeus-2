@@ -1,14 +1,14 @@
-﻿namespace Capl.Authorization
-{
-    using Capl.Authorization.Matching;
-    using Capl.Authorization.Transforms;
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using System.Xml;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Xml;
+using Capl.Authorization.Matching;
+using Capl.Authorization.Transforms;
 
+namespace Capl.Authorization
+{
     /// <summary>
-    /// The abstract scope of a transform.
+    ///     The abstract scope of a transform.
     /// </summary>
     [Serializable]
     public class ClaimTransform : Transform
@@ -33,13 +33,14 @@
         {
         }
 
-        public ClaimTransform(Uri transformId, Uri transformType, Match matchExpression, LiteralClaim targetClaim, Term evaluationExpression)
+        public ClaimTransform(Uri transformId, Uri transformType, Match matchExpression, LiteralClaim targetClaim,
+            Term evaluationExpression)
         {
-            this.TransformID = transformId;
-            this.Type = transformType;
-            this.MatchExpression = matchExpression;
-            this.TargetClaim = targetClaim;
-            this.Expression = evaluationExpression;
+            TransformID = transformId;
+            Type = transformType;
+            MatchExpression = matchExpression;
+            TargetClaim = targetClaim;
+            Expression = evaluationExpression;
         }
 
         public override Term Expression { get; set; }
@@ -63,7 +64,7 @@
         #region ITransform Members
 
         /// <summary>
-        /// Executes the transform.
+        ///     Executes the transform.
         /// </summary>
         /// <param name="claimSet">Input set of claims to transform.</param>
         /// <returns>Transformed set of claims.</returns>
@@ -75,35 +76,31 @@
             IEnumerable<Claim> transformedClaims = null;
             TransformAction action = TransformAction.Create(Type, null);
 
-            if (this.MatchExpression != null)
-            {
-                MatchExpression matcher = MatchExpressionDictionary.Default[this.MatchExpression.Type.ToString()]; //CaplConfigurationManager.MatchExpressions[this.MatchExpression.Type.ToString()];
-                matchedClaims = matcher.MatchClaims(claims, this.MatchExpression.ClaimType, this.MatchExpression.Value);
+            if (MatchExpression != null) {
+                MatchExpression
+                    matcher = MatchExpressionDictionary.Default[
+                        MatchExpression.Type
+                            .ToString()]; //CaplConfigurationManager.MatchExpressions[this.MatchExpression.Type.ToString()];
+                matchedClaims = matcher.MatchClaims(claims, MatchExpression.ClaimType, MatchExpression.Value);
             }
 
             bool eval;
-            if (this.Expression == null)
-            {
+            if (Expression == null) {
                 eval = true;
             }
-            else
-            {
-                eval = this.Expression.Evaluate(claims);
+            else {
+                eval = Expression.Evaluate(claims);
             }
 
-            if (eval)
-            {
-                transformedClaims = action.Execute(claims, matchedClaims, this.TargetClaim);
+            if (eval) {
+                transformedClaims = action.Execute(claims, matchedClaims, TargetClaim);
             }
 
-            if (transformedClaims != null)
-            {
+            if (transformedClaims != null) {
                 return transformedClaims;
             }
-            else
-            {
-                return claims;
-            }
+
+            return claims;
         }
 
         #endregion ITransform Members
@@ -111,7 +108,7 @@
         #region IXmlSerializable Members
 
         /// <summary>
-        /// Reads the Xml of a scope transform.
+        ///     Reads the Xml of a scope transform.
         /// </summary>
         /// <param name="reader">An XmlReader for a scope transform.</param>
         public override void ReadXml(XmlReader reader)
@@ -120,80 +117,70 @@
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Transform);
 
-            this.Type = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
+            Type = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
 
-            while (reader.Read())
-            {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Match))
-                {
-                    this.MatchExpression = Match.Load(reader);
+            while (reader.Read()) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Match)) {
+                    MatchExpression = Match.Load(reader);
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim))
-                {
-                    this.TargetClaim = new LiteralClaim
-                    {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim)) {
+                    TargetClaim = new LiteralClaim {
                         ClaimType = reader.GetRequiredAttribute(AuthorizationConstants.Attributes.ClaimType)
                     };
 
-                    if (!reader.IsEmptyElement)
-                    {
-                        this.TargetClaim.ClaimValue = reader.GetElementValue(AuthorizationConstants.Elements.TargetClaim);
+                    if (!reader.IsEmptyElement) {
+                        TargetClaim.ClaimValue = reader.GetElementValue(AuthorizationConstants.Elements.TargetClaim);
                     }
                 }
 
                 if (reader.LocalName == AuthorizationConstants.Elements.Rule ||
-                        reader.LocalName == AuthorizationConstants.Elements.LogicalAnd ||
-                        reader.LocalName == AuthorizationConstants.Elements.LogicalOr)
-                {
-                    this.Expression = Term.Load(reader);
+                    reader.LocalName == AuthorizationConstants.Elements.LogicalAnd ||
+                    reader.LocalName == AuthorizationConstants.Elements.LogicalOr) {
+                    Expression = Term.Load(reader);
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transform))
-                {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transform)) {
                     break;
                 }
             }
         }
 
         /// <summary>
-        /// Writes the Xml of a scope transform.
+        ///     Writes the Xml of a scope transform.
         /// </summary>
         /// <param name="writer">An XmlWriter for the scope transform.</param>
         public override void WriteXml(XmlWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
-            writer.WriteStartElement(AuthorizationConstants.Elements.Transform, AuthorizationConstants.Namespaces.Xmlns);
+            writer.WriteStartElement(AuthorizationConstants.Elements.Transform,
+                AuthorizationConstants.Namespaces.Xmlns);
 
-            if (this.TransformID != null)
-            {
-                writer.WriteAttributeString(AuthorizationConstants.Attributes.TransformId, this.TransformID.ToString());
+            if (TransformID != null) {
+                writer.WriteAttributeString(AuthorizationConstants.Attributes.TransformId, TransformID.ToString());
             }
 
-            writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, this.Type.ToString());
+            writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, Type.ToString());
 
-            if (this.MatchExpression != null)
-            {
-                this.MatchExpression.WriteXml(writer);
+            if (MatchExpression != null) {
+                MatchExpression.WriteXml(writer);
             }
 
-            if (this.TargetClaim != null)
-            {
-                writer.WriteStartElement(AuthorizationConstants.Elements.TargetClaim, AuthorizationConstants.Namespaces.Xmlns);
-                writer.WriteAttributeString(AuthorizationConstants.Attributes.ClaimType, this.TargetClaim.ClaimType);
+            if (TargetClaim != null) {
+                writer.WriteStartElement(AuthorizationConstants.Elements.TargetClaim,
+                    AuthorizationConstants.Namespaces.Xmlns);
+                writer.WriteAttributeString(AuthorizationConstants.Attributes.ClaimType, TargetClaim.ClaimType);
 
-                if (!string.IsNullOrEmpty(this.TargetClaim.ClaimValue))
-                {
-                    writer.WriteString(this.TargetClaim.ClaimValue);
+                if (!string.IsNullOrEmpty(TargetClaim.ClaimValue)) {
+                    writer.WriteString(TargetClaim.ClaimValue);
                 }
 
                 writer.WriteEndElement();
             }
 
-            if (this.Expression != null)
-            {
-                this.Expression.WriteXml(writer);
+            if (Expression != null) {
+                Expression.WriteXml(writer);
             }
 
             writer.WriteEndElement();

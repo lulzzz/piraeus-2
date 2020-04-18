@@ -1,13 +1,12 @@
-﻿namespace Capl.Issuance
-{
-    using System;
-    using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
+namespace Capl.Issuance
+{
     [Serializable]
     public class IssueModeNotRecognizedException : Exception
     {
         public IssueModeNotRecognizedException()
-            : base()
         {
         }
 

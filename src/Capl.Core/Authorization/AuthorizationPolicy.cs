@@ -1,13 +1,13 @@
-﻿namespace Capl.Authorization
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using System.Xml;
-    using System.Xml.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Xml;
+using System.Xml.Serialization;
 
+namespace Capl.Authorization
+{
     /// <summary>
-    /// An authorization policy.
+    ///     An authorization policy.
     /// </summary>
     [Serializable]
     [XmlSchemaProvider(null, IsAny = true)]
@@ -20,7 +20,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorizationPolicy"/> class.
+        ///     Initializes a new instance of the <see cref="AuthorizationPolicy" /> class.
         /// </summary>
         /// <param name="authorizationRule">The authorization rule to be evaluated.</param>
         public AuthorizationPolicy(Term evaluationExpression)
@@ -29,7 +29,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorizationPolicy"/> class.
+        ///     Initializes a new instance of the <see cref="AuthorizationPolicy" /> class.
         /// </summary>
         /// <param name="evaluationExpression">An evaluation expression.</param>
         /// <param name="policyUri">A unique URI for the authorization policy.</param>
@@ -43,41 +43,40 @@
         {
         }
 
-        public AuthorizationPolicy(Term evaluationExpression, Uri policyId, bool delegation, TransformCollection transforms)
+        public AuthorizationPolicy(Term evaluationExpression, Uri policyId, bool delegation,
+            TransformCollection transforms)
         {
-            this.Expression = evaluationExpression;
-            this.PolicyId = policyId;
-            this.Delegation = delegation;
+            Expression = evaluationExpression;
+            PolicyId = policyId;
+            Delegation = delegation;
 
-            if (transforms == null)
-            {
-                this.Transforms = new TransformCollection();
+            if (transforms == null) {
+                Transforms = new TransformCollection();
             }
-            else
-            {
-                this.Transforms = transforms;
+            else {
+                Transforms = transforms;
             }
         }
 
         public bool Delegation { get; set; }
 
         /// <summary>
-        /// Gets and sets an evaluation expression.
+        ///     Gets and sets an evaluation expression.
         /// </summary>
         public override Term Expression { get; set; }
 
         /// <summary>
-        /// Gets or sets an operation URI that identifies the policy.
+        ///     Gets or sets an operation URI that identifies the policy.
         /// </summary>
         public Uri PolicyId { get; set; }
 
         /// <summary>
-        /// Gets transforms for the authorization policy.
+        ///     Gets transforms for the authorization policy.
         /// </summary>
         public override TransformCollection Transforms { get; internal set; }
 
         /// <summary>
-        /// Loads an authorization policy.
+        ///     Loads an authorization policy.
         /// </summary>
         /// <param name="reader">XmlReader instance of the authorization policy.</param>
         /// <returns>Capl.Authorization.AuthorizationPolicy</returns>
@@ -94,31 +93,26 @@
             _ = identity ?? throw new ArgumentNullException(nameof(identity));
 
             List<Claim> claims;
-            if (!this.Delegation)
-            {
+            if (!Delegation) {
                 claims = new List<Claim>(identity.Claims);
             }
-            else if (identity.Actor != null)
-            {
+            else if (identity.Actor != null) {
                 claims = new List<Claim>(identity.Actor.Claims);
             }
-            else
-            {
+            else {
                 return false;
             }
 
-            foreach (ClaimTransform transform in this.Transforms)
-            {
+            foreach (ClaimTransform transform in Transforms)
                 claims = new List<Claim>(transform.TransformClaims(claims.ToArray()));
-            }
 
-            return this.Expression.Evaluate(claims);
+            return Expression.Evaluate(claims);
         }
 
         #region IXmlSerializable Members
 
         /// <summary>
-        /// Reads an authorization policy.
+        ///     Reads an authorization policy.
         /// </summary>
         /// <param name="reader">XmlReader instance of the authorization policy.</param>
         public override void ReadXml(XmlReader reader)
@@ -126,30 +120,25 @@
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.AuthorizationPolicy);
-            this.PolicyId = new Uri(reader.GetOptionalAttribute(AuthorizationConstants.Attributes.PolicyId));
+            PolicyId = new Uri(reader.GetOptionalAttribute(AuthorizationConstants.Attributes.PolicyId));
             string del = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Delegation);
 
-            if (!string.IsNullOrEmpty(del))
-            {
-                this.Delegation = XmlConvert.ToBoolean(del);
+            if (!string.IsNullOrEmpty(del)) {
+                Delegation = XmlConvert.ToBoolean(del);
             }
 
-            while (reader.Read())
-            {
+            while (reader.Read()) {
                 if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd) ||
                     reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr) ||
-                    reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule))
-                {
-                    this.Expression = Term.Load(reader);
+                    reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule)) {
+                    Expression = Term.Load(reader);
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms))
-                {
-                    this.Transforms.ReadXml(reader);
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms)) {
+                    Transforms.ReadXml(reader);
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.AuthorizationPolicy))
-                {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.AuthorizationPolicy)) {
                     break;
                 }
             }
@@ -158,27 +147,26 @@
         }
 
         /// <summary>
-        /// Writes an authorization policy an XmlWriter.
+        ///     Writes an authorization policy an XmlWriter.
         /// </summary>
         /// <param name="writer">Writer to write the authorization policy.</param>
         public override void WriteXml(XmlWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
-            writer.WriteStartElement(AuthorizationConstants.Elements.AuthorizationPolicy, AuthorizationConstants.Namespaces.Xmlns);
+            writer.WriteStartElement(AuthorizationConstants.Elements.AuthorizationPolicy,
+                AuthorizationConstants.Namespaces.Xmlns);
 
-            if (this.PolicyId != null)
-            {
-                writer.WriteAttributeString(AuthorizationConstants.Attributes.PolicyId, this.PolicyId.ToString());
+            if (PolicyId != null) {
+                writer.WriteAttributeString(AuthorizationConstants.Attributes.PolicyId, PolicyId.ToString());
             }
 
-            writer.WriteAttributeString(AuthorizationConstants.Attributes.Delegation, XmlConvert.ToString(this.Delegation));
+            writer.WriteAttributeString(AuthorizationConstants.Attributes.Delegation, XmlConvert.ToString(Delegation));
 
-            this.Expression.WriteXml(writer);
+            Expression.WriteXml(writer);
 
-            if (this.Transforms != null)
-            {
-                this.Transforms.WriteXml(writer);
+            if (Transforms != null) {
+                Transforms.WriteXml(writer);
             }
 
             writer.WriteEndElement();

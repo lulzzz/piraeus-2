@@ -1,40 +1,38 @@
-﻿namespace Capl.Issuance
-{
-    using Capl.Authorization;
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using System.Xml;
-    using System.Xml.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Xml;
+using System.Xml.Serialization;
+using Capl.Authorization;
 
+namespace Capl.Issuance
+{
     [Serializable]
     [XmlSchemaProvider(null, IsAny = true)]
     public class IssuePolicy : IssuePolicyBase
     {
-        private IssueMode _mode;
+        private IssueMode mode;
 
-        private string _policyId;
-
-        private TransformCollection _transforms;
+        private string policyId;
 
         public IssuePolicy()
         {
-            this._transforms = new TransformCollection();
+            Transforms = new TransformCollection();
         }
 
         public IssueMode Mode
         {
-            get => this._mode;
-            set => this._mode = value;
+            get => mode;
+            set => mode = value;
         }
 
         public string PolicyId
         {
-            get => this._policyId;
-            set => this._policyId = value;
+            get => policyId;
+            set => policyId = value;
         }
 
-        public TransformCollection Transforms => this._transforms;
+        public TransformCollection Transforms { get; private set; }
 
         public static IssuePolicy Load(XmlReader reader)
         {
@@ -59,42 +57,30 @@
             List<Claim> clone = new List<Claim>(identity.Claims);
 
             List<Claim> copyList = new List<Claim>();
-            foreach (Claim claim in clone)
-            {
-                copyList.Add(claim);
-            }
+            foreach (Claim claim in clone) copyList.Add(claim);
 
             IEnumerable<Claim> inputClaims = new ClaimsIdentity(copyList).Claims;
 
             List<ICollection<Claim>> list = new List<ICollection<Claim>>();
 
-            foreach (ClaimTransform transform in this._transforms)
-            {
+            foreach (ClaimTransform transform in Transforms)
                 clone = new List<Claim>(transform.TransformClaims(clone.ToArray()));
-            }
 
-            if (this._mode == IssueMode.Unique)
-            {
-                foreach (Claim c in inputClaims)
-                {
-                    ICollection<Claim> claimSet = clone.FindAll(delegate (Claim claim)
+            if (mode == IssueMode.Unique) {
+                foreach (Claim c in inputClaims) {
+                    ICollection<Claim> claimSet = clone.FindAll(delegate(Claim claim)
                     {
-                        return (c.Type == claim.Type && c.Value == claim.Value && c.Issuer == claim.Issuer);
+                        return c.Type == claim.Type && c.Value == claim.Value && c.Issuer == claim.Issuer;
                     });
 
-                    if (claimSet.Count > 0)
-                    {
+                    if (claimSet.Count > 0) {
                         list.Add(claimSet);
                     }
                 }
 
                 foreach (ICollection<Claim> claimCollection in list)
-                {
-                    foreach (Claim c in claimCollection)
-                    {
-                        clone.Remove(c);
-                    }
-                }
+                foreach (Claim c in claimCollection)
+                    clone.Remove(c);
             }
 
             return clone;
@@ -105,35 +91,28 @@
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns);
-            this._policyId = reader.GetOptionalAttribute(IssueConstants.Attributes.PolicyId);
+            policyId = reader.GetOptionalAttribute(IssueConstants.Attributes.PolicyId);
             string mode = reader.GetOptionalAttribute(IssueConstants.Attributes.Mode);
 
-            if (mode == IssueConstants.IssueModes.Aggregate)
-            {
-                this._mode = IssueMode.Aggregate;
+            if (mode == IssueConstants.IssueModes.Aggregate) {
+                this.mode = IssueMode.Aggregate;
             }
-            else if (mode == IssueConstants.IssueModes.Unique)
-            {
-                this._mode = IssueMode.Unique;
+            else if (mode == IssueConstants.IssueModes.Unique) {
+                this.mode = IssueMode.Unique;
             }
-            else if (mode == null)
-            {
-                this._mode = IssueMode.Aggregate;
+            else if (mode == null) {
+                this.mode = IssueMode.Aggregate;
             }
-            else
-            {
+            else {
                 throw new IssueModeNotRecognizedException("Issue mode is not recognized.");
             }
 
-            while (reader.Read())
-            {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms))
-                {
-                    this._transforms = TransformCollection.Load(reader);
+            while (reader.Read()) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms)) {
+                    Transforms = TransformCollection.Load(reader);
                 }
 
-                if (reader.IsRequiredEndElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns))
-                {
+                if (reader.IsRequiredEndElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns)) {
                     break;
                 }
             }
@@ -147,21 +126,18 @@
 
             writer.WriteStartElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns);
 
-            if (this._mode == IssueMode.Aggregate)
-            {
+            if (mode == IssueMode.Aggregate) {
                 writer.WriteAttributeString(IssueConstants.Attributes.Mode, IssueConstants.IssueModes.Aggregate);
             }
-            else
-            {
+            else {
                 writer.WriteAttributeString(IssueConstants.Attributes.Mode, IssueConstants.IssueModes.Unique);
             }
 
-            if (this._policyId != null)
-            {
-                writer.WriteAttributeString(AuthorizationConstants.Attributes.PolicyId, this._policyId);
+            if (policyId != null) {
+                writer.WriteAttributeString(AuthorizationConstants.Attributes.PolicyId, policyId);
             }
 
-            this._transforms.WriteXml(writer);
+            Transforms.WriteXml(writer);
             writer.WriteEndElement();
         }
     }

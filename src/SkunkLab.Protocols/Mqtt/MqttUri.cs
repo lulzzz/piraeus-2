@@ -1,10 +1,10 @@
-﻿using SkunkLab.Protocols.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+using SkunkLab.Protocols.Utilities;
 
 namespace SkunkLab.Protocols.Mqtt
 {
@@ -13,21 +13,17 @@ namespace SkunkLab.Protocols.Mqtt
         private readonly IEnumerable<KeyValuePair<string, string>> items;
 
         public MqttUri(string uriString)
-                    : base(uriString, UriKind.Absolute)
+            : base(uriString, UriKind.Absolute)
         {
             Uri uri = new Uri(uriString.ToLowerInvariant());
             Resource = uri.ToCanonicalString(false);
             List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
             NameValueCollection nvc = HttpUtility.ParseQueryString(new Uri(HttpUtility.UrlDecode(uriString)).Query);
 
-            for (int i = 0; i < nvc.Count; i++)
-            {
+            for (int i = 0; i < nvc.Count; i++) {
                 string key = nvc.Keys[i];
                 string[] values = nvc.GetValues(i);
-                foreach (string val in values)
-                {
-                    list.Add(new KeyValuePair<string, string>(key, val));
-                }
+                foreach (string val in values) list.Add(new KeyValuePair<string, string>(key, val));
             }
 
             items = list.ToArray();
@@ -51,17 +47,13 @@ namespace SkunkLab.Protocols.Mqtt
         private KeyValuePair<string, string>[] BuildIndexes(IEnumerable<string> indexes)
         {
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
-            foreach (string index in indexes)
-            {
-                string[] parts = index.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length != 2)
-                {
+            foreach (string index in indexes) {
+                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }
-                else
-                {
-                    indexList.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
-                }
+
+                indexList.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
             }
 
             return indexList.Count > 0 ? indexList.ToArray() : null;
@@ -69,15 +61,16 @@ namespace SkunkLab.Protocols.Mqtt
 
         private IEnumerable<string> GetEnumerableParameters(string key)
         {
-            return from kv in items where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture) select kv.Value.ToLower(CultureInfo.InvariantCulture);
+            return from kv in items
+                where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
+                select kv.Value.ToLower(CultureInfo.InvariantCulture);
         }
 
         private string GetSingleParameter(string key)
         {
             IEnumerable<string> parameters = GetEnumerableParameters(key);
 
-            if (parameters.Count() > 1)
-            {
+            if (parameters.Count() > 1) {
                 throw new IndexOutOfRangeException(key);
             }
 

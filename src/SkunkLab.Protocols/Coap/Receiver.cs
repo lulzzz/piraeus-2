@@ -23,10 +23,15 @@ namespace SkunkLab.Protocols.Coap
             timer.Elapsed += Timer_Elapsed;
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public void CacheId(ushort id)
         {
-            if (!container.ContainsKey(id))
-            {
+            if (!container.ContainsKey(id)) {
                 container.Add(id, DateTime.UtcNow.AddMilliseconds(lifetimeMilliseconds));
             }
 
@@ -37,12 +42,6 @@ namespace SkunkLab.Protocols.Coap
         {
             container.Clear();
             timer.Enabled = false;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public bool IsDup(ushort id)
@@ -58,12 +57,9 @@ namespace SkunkLab.Protocols.Coap
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    if (timer != null)
-                    {
+            if (!disposedValue) {
+                if (disposing) {
+                    if (timer != null) {
                         timer.Stop();
                         timer.Dispose();
                     }
@@ -77,21 +73,14 @@ namespace SkunkLab.Protocols.Coap
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            var query = container.Where((c) => c.Value < DateTime.UtcNow);
+            var query = container.Where(c => c.Value < DateTime.UtcNow);
 
             List<ushort> list = new List<ushort>();
-            if (query != null && query.Count() > 0)
-            {
-                foreach (var item in query)
-                {
-                    list.Add(item.Key);
-                }
+            if (query != null && query.Count() > 0) {
+                foreach (var item in query) list.Add(item.Key);
             }
 
-            foreach (var item in list)
-            {
-                container.Remove(item);
-            }
+            foreach (var item in list) container.Remove(item);
 
             timer.Enabled = container.Count() > 0;
         }

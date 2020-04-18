@@ -1,11 +1,11 @@
-﻿namespace Capl.Authorization.Transforms
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
+namespace Capl.Authorization.Transforms
+{
     /// <summary>
-    /// A dictionary that contains transforms that can be identified by their respective URIs for their operations.
+    ///     A dictionary that contains transforms that can be identified by their respective URIs for their operations.
     /// </summary>
     public class TransformsDictionary : IDictionary<string, TransformAction>
     {
@@ -14,7 +14,7 @@
         private readonly Dictionary<string, TransformAction> transforms;
 
         /// <summary>
-        /// Creates an instance of the object.
+        ///     Creates an instance of the object.
         /// </summary>
         public TransformsDictionary()
         {
@@ -25,25 +25,18 @@
         {
             get
             {
-                if (defaultInstance != null)
-                {
+                if (defaultInstance != null) {
                     return defaultInstance;
                 }
 
                 TransformsDictionary dict = new TransformsDictionary();
-                Action<Type, TransformsDictionary> addTranAsType;
-                //Action<TransformAction, TransformsDictionary> addTranAsInstance;
 
-                addTranAsType = (typeRef, op) =>
+                static void addTranAsType(Type typeRef, TransformsDictionary op)
                 {
-                    TransformAction operation = (TransformAction)Activator.CreateInstance(Type.GetType(typeRef.FullName));
+                    TransformAction operation =
+                        (TransformAction)Activator.CreateInstance(Type.GetType(typeRef.FullName));
                     op.Add(operation.Uri.ToString(), operation);
-                };
-
-                //addTranAsInstance = (instance, op) =>
-                //{
-                //    op.Add(instance.Uri.ToString(), instance);
-                //};
+                }
 
                 addTranAsType(typeof(AddTransformAction), dict);
                 addTranAsType(typeof(RemoveTransformAction), dict);
@@ -53,6 +46,24 @@
                 return defaultInstance;
             }
         }
+
+        #region IEnumerable<KeyValuePair<string,TransformAction>> Members
+
+        public IEnumerator<KeyValuePair<string, TransformAction>> GetEnumerator()
+        {
+            return transforms.GetEnumerator();
+        }
+
+        #endregion IEnumerable<KeyValuePair<string,TransformAction>> Members
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return transforms.GetEnumerator();
+        }
+
+        #endregion IEnumerable Members
 
         #region IDictionary<string,TransformAction> Members
 
@@ -67,7 +78,7 @@
         }
 
         /// <summary>
-        /// Adds a new transform.
+        ///     Adds a new transform.
         /// </summary>
         /// <param name="key">The key that identifies the tranform.</param>
         /// <param name="value">The transform instance.</param>
@@ -125,23 +136,5 @@
         }
 
         #endregion ICollection<KeyValuePair<string,TransformAction>> Members
-
-        #region IEnumerable<KeyValuePair<string,TransformAction>> Members
-
-        public IEnumerator<KeyValuePair<string, TransformAction>> GetEnumerator()
-        {
-            return transforms.GetEnumerator();
-        }
-
-        #endregion IEnumerable<KeyValuePair<string,TransformAction>> Members
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return transforms.GetEnumerator();
-        }
-
-        #endregion IEnumerable Members
     }
 }

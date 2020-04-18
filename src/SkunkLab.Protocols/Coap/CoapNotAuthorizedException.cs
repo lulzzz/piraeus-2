@@ -6,7 +6,6 @@ namespace SkunkLab.Protocols.Coap
     public class CoapNotAuthorizedException : Exception
     {
         public CoapNotAuthorizedException()
-            : base()
         {
         }
 

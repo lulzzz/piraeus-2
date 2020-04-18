@@ -1,9 +1,9 @@
-﻿namespace Capl.Authorization.Matching
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
+namespace Capl.Authorization.Matching
+{
     public class MatchExpressionDictionary : IDictionary<string, MatchExpression>
     {
         private static MatchExpressionDictionary defaultInstance;
@@ -19,8 +19,7 @@
         {
             get
             {
-                if (defaultInstance != null)
-                {
+                if (defaultInstance != null) {
                     return defaultInstance;
                 }
 
@@ -29,7 +28,8 @@
                 MatchExpressionDictionary dict = new MatchExpressionDictionary();
                 addOpAsType = (typeRef, op) =>
                 {
-                    MatchExpression matchExpression = (MatchExpression)Activator.CreateInstance(Type.GetType(typeRef.FullName));
+                    MatchExpression matchExpression =
+                        (MatchExpression)Activator.CreateInstance(Type.GetType(typeRef.FullName));
                     op.Add(matchExpression.Uri.ToString(), matchExpression);
                 };
 
@@ -48,6 +48,24 @@
             }
         }
 
+        #region IEnumerable<KeyValuePair<string,MatchExpression>> Members
+
+        public IEnumerator<KeyValuePair<string, MatchExpression>> GetEnumerator()
+        {
+            return expressions.GetEnumerator();
+        }
+
+        #endregion IEnumerable<KeyValuePair<string,MatchExpression>> Members
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return expressions.GetEnumerator();
+        }
+
+        #endregion IEnumerable Members
+
         #region IDictionary<string,MatchExpression> Members
 
         public ICollection<string> Keys => expressions.Keys;
@@ -61,7 +79,7 @@
         }
 
         /// <summary>
-        /// Adds a new match expression.
+        ///     Adds a new match expression.
         /// </summary>
         /// <param name="key">The key that identifies the match expression.</param>
         /// <param name="value">The match expression instance.</param>
@@ -119,23 +137,5 @@
         }
 
         #endregion ICollection<KeyValuePair<string,MatchExpression>> Members
-
-        #region IEnumerable<KeyValuePair<string,MatchExpression>> Members
-
-        public IEnumerator<KeyValuePair<string, MatchExpression>> GetEnumerator()
-        {
-            return expressions.GetEnumerator();
-        }
-
-        #endregion IEnumerable<KeyValuePair<string,MatchExpression>> Members
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return expressions.GetEnumerator();
-        }
-
-        #endregion IEnumerable Members
     }
 }

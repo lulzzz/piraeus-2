@@ -11,37 +11,34 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
         public override async Task<MqttMessage> ProcessAsync()
         {
-            if (Session.IsConnected)
-            {
+            if (Session.IsConnected) {
                 Session.Disconnect(Message);
                 return null;
             }
 
             ConnectMessage msg = Message as ConnectMessage;
 
-            if (msg.ProtocolVersion != 4)
-            {
+            if (msg.ProtocolVersion != 4) {
                 Session.ConnectResult = ConnectAckCode.UnacceptableProtocolVersion;
-                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.UnacceptableProtocolVersion));
+                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false,
+                    ConnectAckCode.UnacceptableProtocolVersion));
             }
 
-            if (msg.ClientId == null && !msg.CleanSession)
-            {
+            if (msg.ClientId == null && !msg.CleanSession) {
                 Session.ConnectResult = ConnectAckCode.IdentifierRejected;
-                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.IdentifierRejected));
+                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false,
+                    ConnectAckCode.IdentifierRejected));
             }
 
-            if (!Session.IsAuthenticated)
-            {
+            if (!Session.IsAuthenticated) {
                 Session.ConnectResult = ConnectAckCode.NotAuthorized;
-                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.BadUsernameOrPassword));
+                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false,
+                    ConnectAckCode.BadUsernameOrPassword));
             }
-            else
-            {
-                Session.IsConnected = true;
-                Session.Connect(ConnectAckCode.ConnectionAccepted);
-                return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.ConnectionAccepted));
-            }
+
+            Session.IsConnected = true;
+            Session.Connect(ConnectAckCode.ConnectionAccepted);
+            return await Task.FromResult<MqttMessage>(new ConnectAckMessage(false, ConnectAckCode.ConnectionAccepted));
         }
     }
 }

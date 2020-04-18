@@ -34,6 +34,18 @@ namespace SkunkLab.Channels.Udp
 
         public abstract string TypeId { get; }
 
+        public abstract Task AddMessageAsync(byte[] message);
+
+        public abstract Task CloseAsync();
+
+        public abstract void Dispose();
+
+        public abstract Task OpenAsync();
+
+        public abstract Task ReceiveAsync();
+
+        public abstract Task SendAsync(byte[] message);
+
         public static UdpChannel Create(UdpClient client, IPEndPoint remoteEP, CancellationToken token)
         {
             return new UdpServerChannel(client, remoteEP, token);
@@ -48,17 +60,5 @@ namespace SkunkLab.Channels.Udp
         {
             return new UdpClientChannel(localPort, remoteEP, token);
         }
-
-        public abstract Task AddMessageAsync(byte[] message);
-
-        public abstract Task CloseAsync();
-
-        public abstract void Dispose();
-
-        public abstract Task OpenAsync();
-
-        public abstract Task ReceiveAsync();
-
-        public abstract Task SendAsync(byte[] message);
     }
 }

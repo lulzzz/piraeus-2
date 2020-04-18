@@ -18,9 +18,9 @@ namespace Piraeus.WebSocketGateway.Middleware
 {
     public class PiraeusWebSocketMiddleware
     {
-        private readonly RequestDelegate _next;
+        private readonly RequestDelegate next;
 
-        private readonly WebSocketOptions _options;
+        private readonly WebSocketOptions options;
 
         private readonly PiraeusConfig config;
 
@@ -35,8 +35,8 @@ namespace Piraeus.WebSocketGateway.Middleware
         public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client, ILog logger, IOptions<WebSocketOptions> options)
         {
             container = new Dictionary<string, ProtocolAdapter>();
-            _next = next;
-            _options = options.Value;
+            this.next = next;
+            this.options = options.Value;
             this.config = config;
 
             graphManager = new GraphManager(client);
@@ -65,7 +65,7 @@ namespace Piraeus.WebSocketGateway.Middleware
             adapter.Init();
 
             await adapter.Channel.OpenAsync();
-            await _next(context);
+            await next(context);
             await logger.LogInformationAsync("Exiting Web socket invoke.");
         }
 

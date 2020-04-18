@@ -1,28 +1,21 @@
-﻿namespace Capl.Authorization.Operations
-{
-    using System;
+﻿using System;
 
+namespace Capl.Authorization.Operations
+{
     /// <summary>
-    /// Compares two string for inequality.
+    ///     Compares two string for inequality.
     /// </summary>
     public class NotEqualOperation : Operation
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NotEqualOperation"/> class.
-        /// </summary>
-        public NotEqualOperation()
-        {
-        }
-
         public static Uri OperationUri => new Uri(AuthorizationConstants.OperationUris.NotEqual);
 
         /// <summary>
-        /// Gets the URI that identifies the operation.
+        ///     Gets the URI that identifies the operation.
         /// </summary>
         public override Uri Uri => new Uri(AuthorizationConstants.OperationUris.NotEqual);
 
         /// <summary>
-        /// Executes the comparsion.
+        ///     Executes the comparsion.
         /// </summary>
         /// <param name="left">LHS of the expression argument.</param>
         /// <param name="right">RHS of the expression argument.</param>

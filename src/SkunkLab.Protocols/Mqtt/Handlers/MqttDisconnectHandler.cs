@@ -5,7 +5,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
     public class MqttDisconnectHandler : MqttMessageHandler
     {
         public MqttDisconnectHandler(MqttSession session, MqttMessage message)
-         : base(session, message)
+            : base(session, message)
         {
         }
 

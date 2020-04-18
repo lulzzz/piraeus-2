@@ -1,36 +1,35 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
+namespace SkunkLab.Protocols.Coap
+{
     public class CoapMessage
     {
-        internal CoapOptionCollection _options;
+        protected List<byte[]> eTag;
 
-        protected List<byte[]> _eTag;
+        protected List<byte[]> ifMatch;
 
-        protected List<byte[]> _ifMatch;
+        protected List<string> locationPath;
 
-        protected List<string> _locationPath;
+        protected List<string> locationQuery;
 
-        protected List<string> _locationQuery;
+        protected uint maxAge = 60;
+        internal CoapOptionCollection options;
 
-        protected uint _maxAge = 60;
+        protected byte[] token;
 
-        protected byte[] _token;
-
-        protected byte _tokenLength;
+        protected byte tokenLength;
 
         protected byte version = 1;
 
         public CoapMessage()
         {
-            this._options = new CoapOptionCollection();
-            this._locationPath = new List<string>();
-            this._locationQuery = new List<string>();
-            this._ifMatch = new List<byte[]>();
-            this._eTag = new List<byte[]>();
+            options = new CoapOptionCollection();
+            locationPath = new List<string>();
+            locationQuery = new List<string>();
+            ifMatch = new List<byte[]>();
+            eTag = new List<byte[]>();
         }
 
         public virtual MediaType? Accept { get; set; }
@@ -41,24 +40,24 @@
 
         public virtual List<byte[]> ETag
         {
-            get => this._eTag;
-            internal set => this._eTag = value;
+            get => eTag;
+            internal set => eTag = value;
         }
 
         public virtual bool HasContentFormat { get; internal set; }
 
-        public virtual List<byte[]> IfMatch => this._ifMatch;
+        public virtual List<byte[]> IfMatch => ifMatch;
 
         public virtual bool IfNoneMatch { get; set; }
 
-        public virtual List<string> LocationPath => this._locationPath;
+        public virtual List<string> LocationPath => locationPath;
 
-        public virtual List<string> LocationQuery => this._locationQuery;
+        public virtual List<string> LocationQuery => locationQuery;
 
         public virtual uint MaxAge
         {
-            get => this._maxAge;
-            set => this._maxAge = value;
+            get => maxAge;
+            set => maxAge = value;
         }
 
         public virtual byte[] MessageBytes { get; internal set; }
@@ -71,7 +70,7 @@
 
         public virtual bool? Observe { get; set; }
 
-        public virtual CoapOptionCollection Options => this._options;
+        public virtual CoapOptionCollection Options => options;
 
         public virtual byte[] Payload { get; set; }
 
@@ -85,28 +84,26 @@
 
         public virtual byte[] Token
         {
-            get => this._token;
+            get => token;
             set
             {
-                if (value != null)
-                {
-                    this.TokenLength = (byte)value.Length;
-                    this._token = value;
+                if (value != null) {
+                    TokenLength = (byte)value.Length;
+                    token = value;
                 }
             }
         }
 
         protected virtual byte TokenLength
         {
-            get => this._tokenLength;
+            get => tokenLength;
             set
             {
-                if (value > 8)
-                {
+                if (value > 8) {
                     throw new IndexOutOfRangeException("Token length is between 0 and 8 inclusive.");
                 }
 
-                this._tokenLength = value;
+                tokenLength = value;
             }
         }
 
@@ -123,50 +120,45 @@
             int index = 0;
             byte header = message[index++];
 
-            if (header >> 0x06 != 1)
-            {
+            if (header >> 0x06 != 1) {
                 throw new CoapVersionMismatchException("Coap Version 1 is only supported version for Coap response.");
             }
 
-            this.MessageType = (CoapMessageType)Convert.ToInt32((header >> 0x04) & 0x03);
-            this.TokenLength = (byte)(header & 0x0F);
+            MessageType = (CoapMessageType)Convert.ToInt32((header >> 0x04) & 0x03);
+            TokenLength = (byte)(header & 0x0F);
 
             byte code = message[index++];
-            this.Code = (CodeType)(((code >> 0x05) * 100) + (code & 0x1F));
+            Code = (CodeType)((code >> 0x05) * 100 + (code & 0x1F));
 
-            this.MessageId = (ushort)(message[index++] << 0x08 | message[index++]);
-            byte[] tokenBytes = new byte[this.TokenLength];
-            Buffer.BlockCopy(message, index, tokenBytes, 0, this.TokenLength);
-            this.Token = tokenBytes;
+            MessageId = (ushort)((message[index++] << 0x08) | message[index++]);
+            byte[] tokenBytes = new byte[TokenLength];
+            Buffer.BlockCopy(message, index, tokenBytes, 0, TokenLength);
+            Token = tokenBytes;
 
-            index += this.TokenLength;
+            index += TokenLength;
             int previous = 0;
-            bool marker = ((message[index] & 0xFF) == 0xFF);
+            bool marker = (message[index] & 0xFF) == 0xFF;
 
-            while (!marker)
-            {
-                int delta = (message[index] >> 0x04);
+            while (!marker) {
+                int delta = message[index] >> 0x04;
                 CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
-                this.Options.Add(CoapOption);
+                Options.Add(CoapOption);
                 previous += delta;
-                if (index < message.Length)
-                {
-                    marker = ((message[index] & 0xFF) == 0xFF);
+                if (index < message.Length) {
+                    marker = (message[index] & 0xFF) == 0xFF;
                 }
-                else
-                {
+                else {
                     break;
                 }
             }
 
-            if (marker)
-            {
+            if (marker) {
                 index++;
-                this.Payload = new byte[message.Length - index];
-                Buffer.BlockCopy(message, index, this.Payload, 0, this.Payload.Length);
+                Payload = new byte[message.Length - index];
+                Buffer.BlockCopy(message, index, Payload, 0, Payload.Length);
             }
 
-            this.HasContentFormat = this.Options.ContainsContentFormat();
+            HasContentFormat = Options.ContainsContentFormat();
 
             ReadOptions(this);
         }
@@ -176,58 +168,53 @@
             LoadOptions();
             int length = 0;
 
-            byte[] header = new byte[4 + this.TokenLength];
+            byte[] header = new byte[4 + TokenLength];
 
             int index = 0;
 
-            header[index++] = (byte)(0x01 << 0x06 | (byte)(Convert.ToByte((int)MessageType) << 0x04) | this.TokenLength);
+            header[index++] = (byte)((0x01 << 0x06) | (byte)(Convert.ToByte((int)MessageType) << 0x04) | TokenLength);
 
-            int code = (int)this.Code;
-            header[index++] = code < 10 ? (byte)code : (byte)((byte)(Convert.ToByte(Convert.ToString((int)this.Code).Substring(0, 1)) << 0x05) |
-                                                              Convert.ToByte(Convert.ToString((int)this.Code).Substring(1, 2)));
-            header[index++] = (byte)((this.MessageId >> 8) & 0x00FF);
-            header[index++] = (byte)(this.MessageId & 0x00FF);
+            int code = (int)Code;
+            header[index++] = code < 10
+                ? (byte)code
+                : (byte)((byte)(Convert.ToByte(Convert.ToString((int)Code).Substring(0, 1)) << 0x05) |
+                         Convert.ToByte(Convert.ToString((int)Code).Substring(1, 2)));
+            header[index++] = (byte)((MessageId >> 8) & 0x00FF);
+            header[index++] = (byte)(MessageId & 0x00FF);
 
-            if (this.TokenLength > 0)
-            {
-                Buffer.BlockCopy(this.Token, 0, header, 4, this.TokenLength);
+            if (TokenLength > 0) {
+                Buffer.BlockCopy(Token, 0, header, 4, TokenLength);
             }
 
             length += header.Length;
 
             byte[] options = null;
 
-            if (this.Options.Count > 0)
-            {
-                OptionBuilder builder = new OptionBuilder(this.Options.ToArray());
+            if (Options.Count > 0) {
+                OptionBuilder builder = new OptionBuilder(Options.ToArray());
                 options = builder.Encode();
                 length += options.Length;
             }
 
             byte[] buffer;
-            if (this.Payload != null)
-            {
-                length += this.Payload.Length + 1;
+            if (Payload != null) {
+                length += Payload.Length + 1;
                 buffer = new byte[length];
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
-                if (options != null)
-                {
+                if (options != null) {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
-                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length + options.Length, 1);
-                    Buffer.BlockCopy(this.Payload, 0, buffer, header.Length + options.Length + 1, this.Payload.Length);
+                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length + options.Length, 1);
+                    Buffer.BlockCopy(Payload, 0, buffer, header.Length + options.Length + 1, Payload.Length);
                 }
-                else
-                {
-                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length, 1);
-                    Buffer.BlockCopy(this.Payload, 0, buffer, header.Length + 1, this.Payload.Length);
+                else {
+                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length, 1);
+                    Buffer.BlockCopy(Payload, 0, buffer, header.Length + 1, Payload.Length);
                 }
             }
-            else
-            {
+            else {
                 buffer = new byte[length];
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
-                if (options != null)
-                {
+                if (options != null) {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
                 }
             }
@@ -247,122 +234,111 @@
 
             message.ResourceUri = message.Options.GetResourceUri();
 
-            message._ifMatch = ifmatch == null ? new List<byte[]>() : new List<byte[]>(ifmatch as byte[][]);
-            message._eTag = etag == null ? new List<byte[]>() : new List<byte[]>(etag as byte[][]);
+            message.ifMatch = ifmatch == null ? new List<byte[]>() : new List<byte[]>(ifmatch as byte[][]);
+            message.eTag = etag == null ? new List<byte[]>() : new List<byte[]>(etag as byte[][]);
             message.IfNoneMatch = message.Options.Contains(new CoapOption(OptionType.IfNoneMatch, null));
-            message._locationPath = locationpath == null ? new List<string>() : new List<string>(locationpath as string[]);
+            message.locationPath =
+                locationpath == null ? new List<string>() : new List<string>(locationpath as string[]);
 
-            if (observe != null)
-            {
-                message.Observe = ((uint)observe) == 0 ? true : false;
+            if (observe != null) {
+                message.Observe = (uint)observe == 0 ? true : false;
             }
 
-            object contentType = (message.Options.GetOptionValue(OptionType.ContentFormat));
-            if (contentType != null)
-            {
+            object contentType = message.Options.GetOptionValue(OptionType.ContentFormat);
+            if (contentType != null) {
                 message.ContentType = (MediaType)Convert.ToInt32(contentType);
             }
 
-            message.MaxAge = message.Options.GetOptionValue(OptionType.MaxAge) != null ? (uint)message.Options.GetOptionValue(OptionType.MaxAge) : 0;
+            message.MaxAge = message.Options.GetOptionValue(OptionType.MaxAge) != null
+                ? (uint)message.Options.GetOptionValue(OptionType.MaxAge)
+                : 0;
 
             object accept = message.Options.GetOptionValue(OptionType.Accept);
-            if (accept != null)
-            {
+            if (accept != null) {
                 message.Accept = (MediaType)Convert.ToInt32(accept);
             }
 
-            message._locationQuery = locationquery == null ? new List<string>() : new List<string>(locationquery as string[]);
+            message.locationQuery =
+                locationquery == null ? new List<string>() : new List<string>(locationquery as string[]);
             message.ProxyUri = message.Options.GetOptionValue(OptionType.ProxyUri) as string;
             message.ProxyScheme = message.Options.GetOptionValue(OptionType.ProxyScheme) as string;
-            message.Size1 = message.Options.GetOptionValue(OptionType.Size1) != null ? (uint)message.Options.GetOptionValue(OptionType.Size1) : 0;
+            message.Size1 = message.Options.GetOptionValue(OptionType.Size1) != null
+                ? (uint)message.Options.GetOptionValue(OptionType.Size1)
+                : 0;
         }
 
         protected void LoadOptions()
         {
-            Action<OptionType, byte[]> loadByteArray = new Action<OptionType, byte[]>((type, array) =>
+            Action<OptionType, byte[]> loadByteArray = (type, array) =>
             {
-                this.Options.Add(new CoapOption(type, array));
-            });
+                Options.Add(new CoapOption(type, array));
+            };
 
-            Action<OptionType, string> loadString = new Action<OptionType, string>((type, value) =>
+            Action<OptionType, string> loadString = (type, value) =>
             {
-                if (value != null)
-                {
-                    this.Options.Add(new CoapOption(type, value));
+                if (value != null) {
+                    Options.Add(new CoapOption(type, value));
                 }
-            });
+            };
 
-            Action<OptionType, bool> loadBool = new Action<OptionType, bool>((type, value) =>
+            Action<OptionType, bool> loadBool = (type, value) =>
             {
-                if (value)
-                {
-                    this.Options.Add(new CoapOption(type, null));
+                if (value) {
+                    Options.Add(new CoapOption(type, null));
                 }
-            });
+            };
 
-            Action<OptionType, uint, bool> loadUint = new Action<OptionType, uint, bool>((type, value, includeZero) =>
+            Action<OptionType, uint, bool> loadUint = (type, value, includeZero) =>
             {
-                if (value > 0)
-                {
-                    this.Options.Add(new CoapOption(type, value));
+                if (value > 0) {
+                    Options.Add(new CoapOption(type, value));
                 }
 
-                if (value == 0 && includeZero)
-                {
-                    this.Options.Add(new CoapOption(type, value));
+                if (value == 0 && includeZero) {
+                    Options.Add(new CoapOption(type, value));
                 }
-            });
+            };
 
-            this.Options.Clear();
+            Options.Clear();
 
-            if (this.ResourceUri != null)
-            {
-                IEnumerable<CoapOption> resourceOptions = this.ResourceUri.DecomposeCoapUri();
-                foreach (CoapOption co in resourceOptions)
-                {
-                    this.Options.Add(co);
-                }
+            if (ResourceUri != null) {
+                IEnumerable<CoapOption> resourceOptions = ResourceUri.DecomposeCoapUri();
+                foreach (CoapOption co in resourceOptions) Options.Add(co);
             }
 
-            if (this.Observe.HasValue)
-            {
-                loadUint(OptionType.Observe, Convert.ToUInt32(!this.Observe.Value), true);
+            if (Observe.HasValue) {
+                loadUint(OptionType.Observe, Convert.ToUInt32(!Observe.Value), true);
             }
 
-            if (this.NoResponse.HasValue)
-            {
-                loadUint(OptionType.NoResponse, Convert.ToUInt32(this.NoResponse.Value), false);
+            if (NoResponse.HasValue) {
+                loadUint(OptionType.NoResponse, Convert.ToUInt32(NoResponse.Value), false);
             }
 
-            if (this.IfMatch != null)
-            {
-                this.IfMatch.ForEach(s => loadByteArray(OptionType.IfMatch, s));
+            if (IfMatch != null) {
+                IfMatch.ForEach(s => loadByteArray(OptionType.IfMatch, s));
             }
 
-            if (this.ETag != null)
-            {
-                this.ETag.ForEach(s => loadByteArray(OptionType.ETag, s));
+            if (ETag != null) {
+                ETag.ForEach(s => loadByteArray(OptionType.ETag, s));
             }
 
-            loadBool(OptionType.IfNoneMatch, this.IfNoneMatch);
+            loadBool(OptionType.IfNoneMatch, IfNoneMatch);
 
-            this.LocationPath.ForEach(s => loadString(OptionType.LocationPath, s));
+            LocationPath.ForEach(s => loadString(OptionType.LocationPath, s));
 
-            if (this.ContentType.HasValue)
-            {
-                loadUint(OptionType.ContentFormat, (uint)this.ContentType.Value, true);
+            if (ContentType.HasValue) {
+                loadUint(OptionType.ContentFormat, (uint)ContentType.Value, true);
             }
 
-            loadUint(OptionType.MaxAge, this.MaxAge, false);
-            if (this.Accept.HasValue)
-            {
-                loadUint(OptionType.Accept, (uint)this.Accept.Value, false);
+            loadUint(OptionType.MaxAge, MaxAge, false);
+            if (Accept.HasValue) {
+                loadUint(OptionType.Accept, (uint)Accept.Value, false);
             }
 
-            this.LocationQuery.ForEach(s => loadString(OptionType.LocationQuery, s));
-            loadString(OptionType.ProxyUri, this.ProxyUri);
-            loadString(OptionType.ProxyScheme, this.ProxyScheme);
-            loadUint(OptionType.Size1, this.Size1, false);
+            LocationQuery.ForEach(s => loadString(OptionType.LocationQuery, s));
+            loadString(OptionType.ProxyUri, ProxyUri);
+            loadString(OptionType.ProxyScheme, ProxyScheme);
+            loadUint(OptionType.Size1, Size1, false);
         }
     }
 }

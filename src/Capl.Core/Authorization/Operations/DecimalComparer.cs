@@ -1,25 +1,18 @@
-﻿namespace Capl.Authorization.Operations
-{
-    using System;
-    using System.Collections;
-    using System.Globalization;
+﻿using System;
+using System.Collections;
+using System.Globalization;
 
+namespace Capl.Authorization.Operations
+{
     /// <summary>
-    /// Comparers two decimal types.
+    ///     Comparers two decimal types.
     /// </summary>
     public class DecimalComparer : IComparer
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DecimalComparer"/> class.
-        /// </summary>
-        public DecimalComparer()
-        {
-        }
-
         #region IComparer Members
 
         /// <summary>
-        /// Compares two DateTime types by UTC.
+        ///     Compares two DateTime types by UTC.
         /// </summary>
         /// <param name="x">LHS datetime parameter to test.</param>
         /// <param name="y">RHS datatime parameter to test.</param>
@@ -29,13 +22,11 @@
             decimal left = Convert.ToDecimal(x, CultureInfo.InvariantCulture);
             decimal right = Convert.ToDecimal(y, CultureInfo.InvariantCulture);
 
-            if (left == right)
-            {
+            if (left == right) {
                 return 0;
             }
 
-            if (left < right)
-            {
+            if (left < right) {
                 return -1;
             }
 

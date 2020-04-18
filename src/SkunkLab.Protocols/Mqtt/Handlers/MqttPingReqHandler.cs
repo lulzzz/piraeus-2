@@ -11,8 +11,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
         public override async Task<MqttMessage> ProcessAsync()
         {
-            if (!Session.IsConnected)
-            {
+            if (!Session.IsConnected) {
                 Session.Disconnect(Message);
                 return null;
             }

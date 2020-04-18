@@ -1,7 +1,7 @@
-﻿using Org.BouncyCastle.Crypto.Tls;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Security;
 using System.Text;
+using Org.BouncyCastle.Crypto.Tls;
 
 namespace SkunkLab.Channels.Tcp
 {
@@ -29,14 +29,11 @@ namespace SkunkLab.Channels.Tcp
         public byte[] GetPsk(byte[] identity)
         {
             string identityString = Encoding.UTF8.GetString(identity);
-            if (container.ContainsKey(identityString))
-            {
+            if (container.ContainsKey(identityString)) {
                 return container[identityString];
             }
-            else
-            {
-                throw new SecurityException("Identity not found for PSK");
-            }
+
+            throw new SecurityException("Identity not found for PSK");
         }
     }
 }

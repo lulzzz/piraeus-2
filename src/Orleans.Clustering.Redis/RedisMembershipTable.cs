@@ -14,7 +14,7 @@ namespace Orleans.Clustering.Redis
 {
     public class RedisMembershipTable : IMembershipTable
     {
-        public static readonly TableVersion _tableVersion = new TableVersion(0, "0");
+        public static readonly TableVersion tableVersion = new TableVersion(0, "0");
 
         private readonly string clusterId;
 
@@ -159,7 +159,7 @@ namespace Orleans.Clustering.Redis
                     }
                     else
                     {
-                        data = new MembershipTableData(_tableVersion);
+                        data = new MembershipTableData(tableVersion);
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");
@@ -201,7 +201,7 @@ namespace Orleans.Clustering.Redis
                     }
                     else
                     {
-                        data = new MembershipTableData(_tableVersion);
+                        data = new MembershipTableData(tableVersion);
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");

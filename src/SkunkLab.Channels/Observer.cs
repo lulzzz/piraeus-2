@@ -6,9 +6,8 @@ namespace SkunkLab.Channels
 
     public abstract class Observer
     {
-        public abstract event ObserverEventHandler OnNotify;
-
         public abstract Uri ResourceUri { get; set; }
+        public abstract event ObserverEventHandler OnNotify;
 
         public abstract void Update(Uri resourceUri, string contentType, byte[] message);
     }

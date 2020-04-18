@@ -1,6 +1,6 @@
-﻿using SkunkLab.Security.Authentication;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SkunkLab.Security.Authentication;
 
 namespace SkunkLab.Protocols.Mqtt
 {
@@ -10,7 +10,9 @@ namespace SkunkLab.Protocols.Mqtt
         {
         }
 
-        public MqttConfig(double keepAliveSeconds = 180.0, double ackTimeout = 2.0, double ackRandomFactor = 1.5, int maxRetransmit = 4, double maxLatency = 100.0, IAuthenticator authenticator = null, string identityClaimType = null, List<KeyValuePair<string, string>> indexes = null)
+        public MqttConfig(double keepAliveSeconds = 180.0, double ackTimeout = 2.0, double ackRandomFactor = 1.5,
+            int maxRetransmit = 4, double maxLatency = 100.0, IAuthenticator authenticator = null,
+            string identityClaimType = null, List<KeyValuePair<string, string>> indexes = null)
         {
             KeepAliveSeconds = keepAliveSeconds;
             AckTimeout = TimeSpan.FromSeconds(ackTimeout);
@@ -29,7 +31,7 @@ namespace SkunkLab.Protocols.Mqtt
         public IAuthenticator Authenticator { get; set; }
 
         public TimeSpan ExchangeLifetime =>
-                TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + (2 * MaxLatency.TotalSeconds) + AckTimeout.TotalSeconds);
+            TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + 2 * MaxLatency.TotalSeconds + AckTimeout.TotalSeconds);
 
         public string IdentityClaimType { get; set; }
 
@@ -45,15 +47,17 @@ namespace SkunkLab.Protocols.Mqtt
         {
             get
             {
-                double secs = (AckTimeout.TotalSeconds) * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit)) - 1) * AckRandomFactor;
+                double secs = AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit)) - 1) *
+                              AckRandomFactor;
                 return TimeSpan.FromSeconds(secs);
             }
         }
 
         public TimeSpan MaxTransmitWait =>
-                TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) * AckRandomFactor);
+            TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) *
+                                 AckRandomFactor);
 
         public TimeSpan NonLifetime =>
-                TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
+            TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
     }
 }

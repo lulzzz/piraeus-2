@@ -11,7 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Piraeus.WebSocketGateway
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {

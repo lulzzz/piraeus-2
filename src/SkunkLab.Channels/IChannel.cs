@@ -5,16 +5,6 @@ namespace SkunkLab.Channels
 {
     public interface IChannel : IDisposable
     {
-        event EventHandler<ChannelCloseEventArgs> OnClose;
-
-        event EventHandler<ChannelErrorEventArgs> OnError;
-
-        event EventHandler<ChannelOpenEventArgs> OnOpen;
-
-        event EventHandler<ChannelReceivedEventArgs> OnReceive;
-
-        event EventHandler<ChannelStateEventArgs> OnStateChange;
-
         string Id { get; }
 
         bool IsAuthenticated { get; }
@@ -30,6 +20,15 @@ namespace SkunkLab.Channels
         ChannelState State { get; }
 
         string TypeId { get; }
+        event EventHandler<ChannelCloseEventArgs> OnClose;
+
+        event EventHandler<ChannelErrorEventArgs> OnError;
+
+        event EventHandler<ChannelOpenEventArgs> OnOpen;
+
+        event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        event EventHandler<ChannelStateEventArgs> OnStateChange;
 
         Task AddMessageAsync(byte[] message);
 

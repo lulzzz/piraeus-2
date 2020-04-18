@@ -1,13 +1,12 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
-    using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
+namespace SkunkLab.Protocols.Coap
+{
     [Serializable]
     public class UnsupportedMediaTypeException : Exception
     {
         public UnsupportedMediaTypeException()
-            : base()
         {
         }
 

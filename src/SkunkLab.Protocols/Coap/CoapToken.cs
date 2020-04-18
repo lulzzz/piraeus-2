@@ -1,7 +1,7 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Coap
+{
     public class CoapToken
     {
         private static readonly Random ran;
@@ -17,12 +17,12 @@
 
         public CoapToken(byte[] tokenBytes)
         {
-            this.TokenBytes = tokenBytes;
+            TokenBytes = tokenBytes;
         }
 
         public byte[] TokenBytes { get; set; }
 
-        public string TokenString => Convert.ToBase64String(this.TokenBytes);
+        public string TokenString => Convert.ToBase64String(TokenBytes);
 
         public static CoapToken Create()
         {

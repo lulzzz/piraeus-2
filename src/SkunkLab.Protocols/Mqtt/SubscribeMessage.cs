@@ -1,27 +1,25 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     public class SubscribeMessage : MqttMessage
     {
-        private readonly IDictionary<string, QualityOfServiceLevelType> _topics;
-
         public SubscribeMessage()
         {
-            this._topics = new Dictionary<string, QualityOfServiceLevelType>();
+            Topics = new Dictionary<string, QualityOfServiceLevelType>();
         }
 
         public SubscribeMessage(ushort messageId, IDictionary<string, QualityOfServiceLevelType> topics)
         {
-            this.MessageId = messageId;
-            this._topics = topics;
+            MessageId = messageId;
+            Topics = topics;
         }
 
         public bool DupFlag
         {
-            get => base.Dup;
-            set => base.Dup = value;
+            get => Dup;
+            set => Dup = value;
         }
 
         public override bool HasAck => true;
@@ -33,33 +31,32 @@
             internal set => base.MessageType = value;
         }
 
-        public IDictionary<string, QualityOfServiceLevelType> Topics => this._topics;
+        public IDictionary<string, QualityOfServiceLevelType> Topics { get; }
 
         public void AddTopic(string topic, QualityOfServiceLevelType qosLevel)
         {
-            this._topics.Add(topic, qosLevel);
+            Topics.Add(topic, qosLevel);
         }
 
         public override byte[] Encode()
         {
-            _ = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), this.QualityOfService.ToString(), false));
+            _ = Convert.ToByte((int)Enum.Parse(typeof(QualityOfServiceLevelType), QualityOfService.ToString(), false));
 
             byte fixedHeader = (0x08 << Constants.Header.MessageTypeOffset) |
-                   1 << Constants.Header.QosLevelOffset |
-                   0x00 |
-                   0x00;
+                               (1 << Constants.Header.QosLevelOffset) |
+                               0x00 |
+                               0x00;
 
             byte[] messageId = new byte[2];
-            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF);
-            messageId[1] = (byte)(this.MessageId & 0x00FF);
+            messageId[0] = (byte)((MessageId >> 8) & 0x00FF);
+            messageId[1] = (byte)(MessageId & 0x00FF);
 
             ByteContainer payloadContainer = new ByteContainer();
 
-            IEnumerator<KeyValuePair<string, QualityOfServiceLevelType>> en = this._topics.GetEnumerator();
-            while (en.MoveNext())
-            {
+            IEnumerator<KeyValuePair<string, QualityOfServiceLevelType>> en = Topics.GetEnumerator();
+            while (en.MoveNext()) {
                 string topic = en.Current.Key;
-                QualityOfServiceLevelType qosLevel = this._topics[topic];
+                QualityOfServiceLevelType qosLevel = Topics[topic];
                 payloadContainer.Add(topic);
                 byte topicQos = Convert.ToByte((int)qosLevel);
                 payloadContainer.Add(topicQos);
@@ -80,9 +77,8 @@
 
         public void RemoveTopic(string topic)
         {
-            if (this._topics.ContainsKey(topic))
-            {
-                this._topics.Remove(topic);
+            if (Topics.ContainsKey(topic)) {
+                Topics.Remove(topic);
             }
         }
 
@@ -94,11 +90,10 @@
             byte fixedHeader = message[index];
             subscribeMessage.DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do
-            {
+            do {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -113,12 +108,11 @@
 
             subscribeMessage.MessageId = messageId;
 
-            while (index < buffer.Length)
-            {
+            while (index < buffer.Length) {
                 string topic = ByteContainer.DecodeString(buffer, index, out int length);
                 index += length;
                 QualityOfServiceLevelType topicQosLevel = (QualityOfServiceLevelType)buffer[index++];
-                this._topics.Add(topic, topicQosLevel);
+                Topics.Add(topic, topicQosLevel);
             }
 
             return subscribeMessage;

@@ -79,8 +79,8 @@ namespace Piraeus.Grains.Notifications
             }
             else if (!string.IsNullOrEmpty(cacheClaimType))
             {
-                var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
-                var identity = new ClaimsIdentity(principal.Claims);
+                ClaimsPrincipal principal = Thread.CurrentPrincipal as ClaimsPrincipal;
+                ClaimsIdentity identity = new ClaimsIdentity(principal.Claims);
                 if (identity.HasClaim((c) =>
                  {
                      return cacheClaimType.ToLowerInvariant() == c.Type.ToLowerInvariant();

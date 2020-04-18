@@ -1,7 +1,7 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Coap
+{
     public static class CoapConstants
     {
         public class Timeouts

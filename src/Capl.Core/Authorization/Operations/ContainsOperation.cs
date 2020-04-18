@@ -5,12 +5,12 @@ All rights reserved.
 MIT License
 */
 
+using System;
+
 namespace Capl.Authorization.Operations
 {
-    using System;
-
     /// <summary>
-    /// Determines if a string is a substring on another.
+    ///     Determines if a string is a substring on another.
     /// </summary>
     public class ContainsOperation : Operation
     {

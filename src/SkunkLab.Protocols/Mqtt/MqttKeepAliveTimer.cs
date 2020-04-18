@@ -11,17 +11,7 @@ namespace SkunkLab.Protocols.Mqtt
 
         public MqttKeepAliveTimer(int periodMilliseconds)
         {
-            this.period = periodMilliseconds;
-        }
-
-        public event EventHandler OnExpired;
-
-        public void Callback(object state)
-        {
-            if (this.OnExpired != null)
-            {
-                OnExpired(this, new EventArgs());
-            }
+            period = periodMilliseconds;
         }
 
         public void Dispose()
@@ -30,26 +20,34 @@ namespace SkunkLab.Protocols.Mqtt
             GC.SuppressFinalize(this);
         }
 
+        public event EventHandler OnExpired;
+
+        public void Callback(object state)
+        {
+            if (OnExpired != null) {
+                OnExpired(this, new EventArgs());
+            }
+        }
+
         public void Reset()
         {
-            this.timer.Dispose();
-            this.timer = new Timer(new TimerCallback(Callback), null, this.period, period);
+            timer.Dispose();
+            timer = new Timer(Callback, null, period, period);
         }
 
         public void Start()
         {
-            this.timer = new Timer(new TimerCallback(Callback), null, this.period, this.period);
+            timer = new Timer(Callback, null, period, period);
         }
 
         public void Stop()
         {
-            this.timer.Dispose();
+            timer.Dispose();
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
+            if (disposing) {
                 timer.Dispose();
             }
         }

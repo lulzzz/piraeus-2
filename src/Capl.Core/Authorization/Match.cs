@@ -1,11 +1,11 @@
-﻿namespace Capl.Authorization
-{
-    using System;
-    using System.Runtime.Serialization;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
+namespace Capl.Authorization
+{
     [Serializable]
     public class Match : IXmlSerializable
     {
@@ -32,31 +32,24 @@
         }
 
         /// <summary>
-        /// Gets or sets a value for a claim type.
+        ///     Gets or sets a value for a claim type.
         /// </summary>
         public string ClaimType { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether matching is required for evaluation.
+        ///     Gets or sets a value indicating whether matching is required for evaluation.
         /// </summary>
         public bool Required { get; set; }
 
         /// <summary>
-        /// Gets or set the type of match expression
+        ///     Gets or set the type of match expression
         /// </summary>
         public Uri Type { get; set; }
 
         /// <summary>
-        /// Gets or sets a value for claim.
+        ///     Gets or sets a value for claim.
         /// </summary>
         public string Value { get; set; }
-
-        public static Match Load(XmlReader reader)
-        {
-            Match match = new Match();
-            match.ReadXml(reader);
-            return match;
-        }
 
         public XmlSchema GetSchema()
         {
@@ -68,23 +61,20 @@
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Match);
-            this.ClaimType = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.ClaimType);
-            this.Type = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
+            ClaimType = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.ClaimType);
+            Type = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
             string required = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Required);
 
-            if (string.IsNullOrEmpty(required))
-            {
-                this.Required = true;
+            if (string.IsNullOrEmpty(required)) {
+                Required = true;
             }
-            else
-            {
-                this.Required = XmlConvert.ToBoolean(required);
+            else {
+                Required = XmlConvert.ToBoolean(required);
             }
 
-            this.Value = reader.GetElementValue(AuthorizationConstants.Elements.Match);
+            Value = reader.GetElementValue(AuthorizationConstants.Elements.Match);
 
-            if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Match))
-            {
+            if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Match)) {
                 throw new SerializationException(string.Format("Unexpected element {0}", reader.LocalName));
             }
         }
@@ -95,16 +85,22 @@
 
             writer.WriteStartElement(AuthorizationConstants.Elements.Match, AuthorizationConstants.Namespaces.Xmlns);
 
-            writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, this.Type.ToString());
-            writer.WriteAttributeString(AuthorizationConstants.Attributes.ClaimType, this.ClaimType);
-            writer.WriteAttributeString(AuthorizationConstants.Attributes.Required, XmlConvert.ToString(this.Required));
+            writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, Type.ToString());
+            writer.WriteAttributeString(AuthorizationConstants.Attributes.ClaimType, ClaimType);
+            writer.WriteAttributeString(AuthorizationConstants.Attributes.Required, XmlConvert.ToString(Required));
 
-            if (!string.IsNullOrEmpty(this.Value))
-            {
-                writer.WriteString(this.Value);
+            if (!string.IsNullOrEmpty(Value)) {
+                writer.WriteString(Value);
             }
 
             writer.WriteEndElement();
+        }
+
+        public static Match Load(XmlReader reader)
+        {
+            Match match = new Match();
+            match.ReadXml(reader);
+            return match;
         }
     }
 }

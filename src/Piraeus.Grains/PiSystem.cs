@@ -384,13 +384,13 @@ namespace Piraeus.Grains
             List<string> metricLeaseKeyList = new List<string>(metricQuery.Select((c) => c.Key));
             List<string> errorLeaseKeyList = new List<string>(errorQuery.Select((c) => c.Key));
 
-            foreach (var item in metricLeaseKeyList)
+            foreach (string item in metricLeaseKeyList)
             {
                 State.MetricLeases.Remove(item);
                 State.LeaseExpiry.Remove(item);
             }
 
-            foreach (var item in errorLeaseKeyList)
+            foreach (string item in errorLeaseKeyList)
             {
                 State.ErrorLeases.Remove(item);
                 State.LeaseExpiry.Remove(item);

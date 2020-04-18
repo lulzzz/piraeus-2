@@ -12,7 +12,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
         public override async Task<MqttMessage> ProcessAsync()
         {
             Session.IncrementKeepAlive();
-            return await Task.FromResult<MqttMessage>(new PublishAckMessage(PublishAckType.PUBREL, this.Message.MessageId));
+            return await Task.FromResult<MqttMessage>(new PublishAckMessage(PublishAckType.PUBREL, Message.MessageId));
         }
     }
 }

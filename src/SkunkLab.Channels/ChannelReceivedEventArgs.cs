@@ -11,7 +11,8 @@ namespace SkunkLab.Channels
             Message = message;
         }
 
-        public ChannelReceivedEventArgs(string channelId, byte[] message, IEnumerable<KeyValuePair<string, string>> properties)
+        public ChannelReceivedEventArgs(string channelId, byte[] message,
+            IEnumerable<KeyValuePair<string, string>> properties)
         {
             ChannelId = channelId;
             Message = message;

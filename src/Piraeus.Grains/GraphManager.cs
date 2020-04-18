@@ -62,7 +62,7 @@ namespace Piraeus.Grains
 
         public GraphManager(string connectionString, LoggerType loggers, LogLevel logLevel, string instrumentationKey = null)
         {
-            var builder = new ClientBuilder();
+            ClientBuilder builder = new ClientBuilder();
             builder.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IPiSystem).Assembly));
 
             AddStorageProvider(builder, connectionString);
@@ -130,7 +130,7 @@ namespace Piraeus.Grains
 
         private Func<Exception, Task<bool>> CreateRetryFilter(int maxAttempts = 5)
         {
-            var attempt = 0;
+            int attempt = 0;
             return RetryFilter;
 
             async Task<bool> RetryFilter(Exception exception)

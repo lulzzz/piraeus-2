@@ -1,9 +1,9 @@
-﻿namespace Capl.Authorization.Matching
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 
+namespace Capl.Authorization.Matching
+{
     public abstract class MatchExpression
     {
         public abstract Uri Uri { get; }
@@ -13,12 +13,12 @@
             _ = matchType ?? throw new ArgumentNullException(nameof(matchType));
 
             MatchExpression matchExpression;
-            if (matchExpressions == null)
-            {
-                matchExpression = MatchExpressionDictionary.Default[matchType.ToString()]; //CaplConfigurationManager.MatchExpressions[matchType.ToString()];
+            if (matchExpressions == null) {
+                matchExpression =
+                    MatchExpressionDictionary.Default
+                        [matchType.ToString()]; //CaplConfigurationManager.MatchExpressions[matchType.ToString()];
             }
-            else
-            {
+            else {
                 matchExpression = matchExpressions[matchType.ToString()];
             }
 

@@ -9,7 +9,7 @@ using System;
 
 namespace Piraeus.SiloHost.Core
 {
-    public class Program
+    public static class Program
     {
         public static IHostBuilder CreateHostBuilder(string[] args)
         {

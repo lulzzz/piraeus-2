@@ -1,7 +1,7 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     public class ConnectAckMessage : MqttMessage
     {
         public ConnectAckMessage()
@@ -10,8 +10,8 @@
 
         public ConnectAckMessage(bool sessionPresent, ConnectAckCode returnCode)
         {
-            this.SessionPresent = sessionPresent;
-            this.ReturnCode = returnCode;
+            SessionPresent = sessionPresent;
+            ReturnCode = returnCode;
         }
 
         public override bool HasAck => false;
@@ -26,14 +26,14 @@
             byte[] buffer = new byte[4];
 
             buffer[index++] = (0x02 << Constants.Header.MessageTypeOffset) |
-                   0x00 |
-                   0x00 |
-                   0x00;
+                              0x00 |
+                              0x00 |
+                              0x00;
 
             buffer[index++] = 0x02;
 
-            buffer[index++] = this.SessionPresent ? (byte)0x01 : (byte)0x00;
-            buffer[index++] = (byte)(int)this.ReturnCode;
+            buffer[index++] = SessionPresent ? (byte)0x01 : (byte)0x00;
+            buffer[index++] = (byte)(int)ReturnCode;
 
             return buffer;
         }
@@ -44,13 +44,12 @@
 
             int index = 0;
             byte fixedHeader = message[index];
-            base.DecodeFixedHeader(fixedHeader);
+            DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do
-            {
+            do {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -63,14 +62,13 @@
             index = 0;
             byte reserved = buffer[index++];
 
-            if (reserved != 0x00)
-            {
-                this.SessionPresent = Convert.ToBoolean(reserved);
+            if (reserved != 0x00) {
+                SessionPresent = Convert.ToBoolean(reserved);
             }
 
             byte code = buffer[index++];
 
-            this.ReturnCode = (ConnectAckCode)code;
+            ReturnCode = (ConnectAckCode)code;
 
             return connackMessage;
         }

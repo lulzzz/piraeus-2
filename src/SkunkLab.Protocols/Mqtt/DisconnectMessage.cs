@@ -10,9 +10,9 @@
             byte[] buffer = new byte[2];
 
             buffer[index++] = (0x0E << Constants.Header.MessageTypeOffset) |
-                   0x00 |
-                   0x00 |
-                   0x00;
+                              0x00 |
+                              0x00 |
+                              0x00;
 
             buffer[index] = 0x00;
 
@@ -24,12 +24,11 @@
             DisconnectMessage disconnect = new DisconnectMessage();
             int index = 0;
             byte fixedHeader = message[index];
-            base.DecodeFixedHeader(fixedHeader);
+            DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
-            if (remainingLength != 0)
-            {
+            if (remainingLength != 0) {
             }
 
             return disconnect;

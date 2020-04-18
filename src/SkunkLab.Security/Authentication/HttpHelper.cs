@@ -4,13 +4,13 @@ namespace SkunkLab.Security.Authentication
 {
     public static class HttpHelper
     {
-        private static IHttpContextAccessor _accessor;
+        private static IHttpContextAccessor accessor;
 
-        public static HttpContext HttpContext => _accessor.HttpContext;
+        public static HttpContext HttpContext => accessor.HttpContext;
 
         public static void Configure(IHttpContextAccessor httpContextAccessor)
         {
-            _accessor = httpContextAccessor;
+            accessor = httpContextAccessor;
         }
     }
 }

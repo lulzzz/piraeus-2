@@ -56,7 +56,7 @@ namespace Piraeus.Monitor.Pages
                 return;
             else
             {
-                foreach (var item in ltoken.Items)
+                foreach (string item in ltoken.Items)
                 {
                     EventMetadata metadata = adapter.GetMetadataAsync(item).GetAwaiter().GetResult();
                     Container.Add(item, metadata);

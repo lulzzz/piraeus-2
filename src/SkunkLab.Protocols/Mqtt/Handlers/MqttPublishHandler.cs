@@ -11,8 +11,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
         public override async Task<MqttMessage> ProcessAsync()
         {
-            if (!Session.IsConnected)
-            {
+            if (!Session.IsConnected) {
                 Session.Disconnect(Message);
                 return null;
             }
@@ -20,57 +19,50 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
             PublishMessage msg = Message as PublishMessage;
             Session.IncrementKeepAlive();
 
-            if (msg.QualityOfServiceLevel == QualityOfServiceLevelType.AtMostOnce)
-            {
+            if (msg.QualityOfServiceLevel == QualityOfServiceLevelType.AtMostOnce) {
                 Dispatch(msg);
                 return await Task.FromResult<MqttMessage>(null);
             }
 
             MqttMessage response = GetAck(msg);
 
-            if (!Session.IsQuarantined(msg.MessageId))
-            {
+            if (!Session.IsQuarantined(msg.MessageId)) {
                 Session.Quarantine(Message, DirectionType.In);
                 Dispatch(msg);
             }
 
-            return await Task.FromResult<MqttMessage>(response);
+            return await Task.FromResult(response);
         }
 
         private void Dispatch(PublishMessage msg)
         {
             MqttUri uri = new MqttUri(msg.Topic);
-            if (Dispatcher != null)
-            {
+            if (Dispatcher != null) {
                 Dispatcher.Dispatch(uri.Resource, uri.ContentType, msg.Payload);
             }
-            else
-            {
+            else {
                 Session.Publish(msg);
             }
         }
 
         private MqttMessage GetAck(PublishMessage msg)
         {
-            PublishAckType ackType = msg.QualityOfServiceLevel == QualityOfServiceLevelType.AtLeastOnce ? PublishAckType.PUBACK : PublishAckType.PUBREC;
+            PublishAckType ackType = msg.QualityOfServiceLevel == QualityOfServiceLevelType.AtLeastOnce
+                ? PublishAckType.PUBACK
+                : PublishAckType.PUBREC;
 
-            if (ackType == PublishAckType.PUBREC)
-            {
+            if (ackType == PublishAckType.PUBREC) {
                 Session.HoldMessage(msg);
             }
-            else
-            {
+            else {
                 Session.Unquarantine(msg.MessageId);
             }
 
-            if (msg.QualityOfServiceLevel == QualityOfServiceLevelType.AtMostOnce)
-            {
+            if (msg.QualityOfServiceLevel == QualityOfServiceLevelType.AtMostOnce) {
                 return null;
             }
-            else
-            {
-                return new PublishAckMessage(ackType, msg.MessageId);
-            }
+
+            return new PublishAckMessage(ackType, msg.MessageId);
         }
     }
 }

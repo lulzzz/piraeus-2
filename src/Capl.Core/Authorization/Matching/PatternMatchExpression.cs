@@ -1,12 +1,12 @@
-﻿namespace Capl.Authorization.Matching
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
 
+namespace Capl.Authorization.Matching
+{
     /// <summary>
-    /// Matches the string literal of a claim type and optional regular expression of the claim value.
+    ///     Matches the string literal of a claim type and optional regular expression of the claim value.
     /// </summary>
     public class PatternMatchExpression : MatchExpression
     {
@@ -21,23 +21,20 @@
             Regex regex = new Regex(pattern);
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
-            IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim)
+            IEnumerable<Claim> claimSet = ci.FindAll(delegate(Claim claim)
             {
-                return (claimType == claim.Type);
+                return claimType == claim.Type;
             });
 
-            if (pattern == null)
-            {
+            if (pattern == null) {
                 return new List<Claim>(claimSet);
             }
 
             List<Claim> claimList = new List<Claim>();
             IEnumerator<Claim> en = claimSet.GetEnumerator();
 
-            while (en.MoveNext())
-            {
-                if (regex.IsMatch(en.Current.Value))
-                {
+            while (en.MoveNext()) {
+                if (regex.IsMatch(en.Current.Value)) {
                     claimList.Add(en.Current);
                 }
             }

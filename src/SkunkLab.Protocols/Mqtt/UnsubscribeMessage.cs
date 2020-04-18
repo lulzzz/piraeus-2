@@ -1,19 +1,19 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     public class UnsubscribeMessage : MqttMessage
     {
         public UnsubscribeMessage()
         {
-            this.Topics = new List<string>();
+            Topics = new List<string>();
         }
 
         public UnsubscribeMessage(ushort messageId, IEnumerable<string> topics)
         {
-            this.MessageId = messageId;
-            this.Topics = new List<string>(topics);
+            MessageId = messageId;
+            Topics = new List<string>(topics);
         }
 
         public override bool HasAck => true;
@@ -23,25 +23,24 @@
         public override byte[] Encode()
         {
             byte fixedHeader = (0x0A << Constants.Header.MessageTypeOffset) |
-                   0x00 |
-                   0x02 |
-                   0x00;
+                               0x00 |
+                               0x02 |
+                               0x00;
 
             byte[] messageId = new byte[2];
-            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF);
-            messageId[1] = (byte)(this.MessageId & 0x00FF);
+            messageId[0] = (byte)((MessageId >> 8) & 0x00FF);
+            messageId[1] = (byte)(MessageId & 0x00FF);
 
             ByteContainer topicContainer = new ByteContainer();
             int index = 0;
-            while (index < this.Topics.Count)
-            {
-                topicContainer.Add(this.Topics[index]);
+            while (index < Topics.Count) {
+                topicContainer.Add(Topics[index]);
                 index++;
             }
 
             byte[] payload = topicContainer.ToBytes();
 
-            byte[] remainingLengthBytes = base.EncodeRemainingLength(2 + payload.Length);
+            byte[] remainingLengthBytes = EncodeRemainingLength(2 + payload.Length);
 
             ByteContainer container = new ByteContainer();
             container.Add(fixedHeader);
@@ -58,13 +57,12 @@
 
             int index = 0;
             byte fixedHeader = message[index];
-            base.DecodeFixedHeader(fixedHeader);
+            DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do
-            {
+            do {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -77,13 +75,12 @@
             ushort messageId = (ushort)((buffer[0] << 8) & 0xFF00);
             messageId |= buffer[1];
 
-            this.MessageId = messageId;
+            MessageId = messageId;
 
-            while (index < buffer.Length)
-            {
+            while (index < buffer.Length) {
                 string topic = ByteContainer.DecodeString(buffer, index, out int length);
                 index += length;
-                this.Topics.Add(topic);
+                Topics.Add(topic);
             }
 
             return unsubscribeMessage;

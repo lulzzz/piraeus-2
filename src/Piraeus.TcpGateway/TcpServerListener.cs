@@ -118,7 +118,7 @@ namespace Piraeus.TcpGateway
                     try
                     {
                         string[] keysArray = keys.ToArray();
-                        foreach (var key in keysArray)
+                        foreach (string key in keysArray)
                         {
                             if (dict.ContainsKey(key))
                             {

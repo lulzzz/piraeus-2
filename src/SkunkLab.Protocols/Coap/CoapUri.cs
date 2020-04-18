@@ -1,10 +1,10 @@
-﻿using SkunkLab.Protocols.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+using SkunkLab.Protocols.Utilities;
 
 namespace SkunkLab.Protocols.Coap
 {
@@ -18,14 +18,10 @@ namespace SkunkLab.Protocols.Coap
             List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
             NameValueCollection nvc = HttpUtility.ParseQueryString(new Uri(HttpUtility.UrlDecode(uriString)).Query);
 
-            for (int i = 0; i < nvc.Count; i++)
-            {
+            for (int i = 0; i < nvc.Count; i++) {
                 string key = nvc.Keys[i];
                 string[] values = nvc.GetValues(i);
-                foreach (string val in values)
-                {
-                    list.Add(new KeyValuePair<string, string>(key, val));
-                }
+                foreach (string val in values) list.Add(new KeyValuePair<string, string>(key, val));
             }
 
             items = list.ToArray();
@@ -59,23 +55,20 @@ namespace SkunkLab.Protocols.Coap
         public static string Create(string hostname, string resource, bool encryptedChannel)
         {
             string scheme = encryptedChannel ? "coaps" : "coap";
-            return string.Format("{0}://{1}?r={2}", scheme, hostname.ToLower(CultureInfo.InvariantCulture), resource.ToLower(CultureInfo.InvariantCulture));
+            return string.Format("{0}://{1}?r={2}", scheme, hostname.ToLower(CultureInfo.InvariantCulture),
+                resource.ToLower(CultureInfo.InvariantCulture));
         }
 
         private KeyValuePair<string, string>[] BuildIndexes(IEnumerable<string> indexes)
         {
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
-            foreach (string index in indexes)
-            {
-                string[] parts = index.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length != 2)
-                {
+            foreach (string index in indexes) {
+                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }
-                else
-                {
-                    indexList.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
-                }
+
+                indexList.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
             }
 
             return indexList.Count > 0 ? indexList.ToArray() : null;
@@ -90,8 +83,7 @@ namespace SkunkLab.Protocols.Coap
         {
             IEnumerable<string> parameters = GetEnumerableParameters(key);
 
-            if (parameters.Count() > 1)
-            {
+            if (parameters.Count() > 1) {
                 throw new IndexOutOfRangeException(key);
             }
 

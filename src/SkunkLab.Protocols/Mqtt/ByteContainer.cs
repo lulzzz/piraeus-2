@@ -1,9 +1,9 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     internal class ByteContainer
     {
         private readonly List<byte> header;
@@ -17,7 +17,7 @@
 
         public static string DecodeString(byte[] buffer, int index, out int length)
         {
-            length = ((buffer[index++] << 8) & 0xFF00);
+            length = (buffer[index++] << 8) & 0xFF00;
             length |= buffer[index++];
 
             byte[] encodedBytes = new byte[length];
@@ -35,8 +35,7 @@
         public void Add(byte[] array)
         {
             int index = 0;
-            while (index < array.Length)
-            {
+            while (index < array.Length) {
                 header.Add(array[index]);
                 index++;
             }
@@ -44,8 +43,7 @@
 
         public void Add(string value)
         {
-            if (string.IsNullOrEmpty(value))
-            {
+            if (string.IsNullOrEmpty(value)) {
                 return;
             }
 

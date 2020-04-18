@@ -1,7 +1,7 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     public class RetryEventArgs : EventArgs
     {
         public RetryEventArgs(MqttMessage message)

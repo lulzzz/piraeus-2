@@ -1,5 +1,5 @@
-﻿using Org.BouncyCastle.Crypto.Tls;
-using System.Text;
+﻿using System.Text;
+using Org.BouncyCastle.Crypto.Tls;
 
 namespace SkunkLab.Channels.Tcp
 {

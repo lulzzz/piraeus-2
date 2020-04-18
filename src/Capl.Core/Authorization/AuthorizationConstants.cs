@@ -1,11 +1,13 @@
-﻿namespace Capl.Authorization
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Capl.Authorization
 {
     /// <summary>
-    /// Constants used for Access Control
+    ///     Constants used for Access Control
     /// </summary>
     public static class AuthorizationConstants
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public static class Attributes
         {
             public const string ClaimType = "ClaimType";
@@ -27,7 +29,7 @@
             public const string Type = "Type";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public static class Elements
         {
             public const string AuthorizationPolicy = "AuthorizationPolicy";
@@ -51,7 +53,7 @@
             public const string Transforms = "Transforms";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public static class MatchUris
         {
             public const string Any = "http://schemas.authz.org/capl/match#Any";
@@ -63,7 +65,7 @@
             public const string Pattern = "http://schemas.authz.org/capl/match#Pattern";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public static class Namespaces
         {
             public const string AuthorizationOperations = "http://schemas.authz.org/capl/operation";
@@ -73,7 +75,7 @@
             public const string Xmlns = "http://schemas.authz.org/capl";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public static class OperationUris
         {
             public const string BetweenDateTime = "http://schemas.authz.org/capl/operation#BetweenDateTime";
@@ -94,7 +96,8 @@
 
             public const string GreaterThanOrEqual = "http://schemas.authz.org/capl/operation#GreaterThanOrEqual";
 
-            public const string GreaterThanOrEqualDateTime = "http://schemas.authz.org/capl/operation#GreaterThanOrEqualDateTime";
+            public const string GreaterThanOrEqualDateTime =
+                "http://schemas.authz.org/capl/operation#GreaterThanOrEqualDateTime";
 
             public const string LessThan = "http://schemas.authz.org/capl/operation#LessThan";
 
@@ -102,12 +105,13 @@
 
             public const string LessThanOrEqual = "http://schemas.authz.org/capl/operation#LessThanOrEqual";
 
-            public const string LessThanOrEqualDateTime = "http://schemas.authz.org/capl/operation#LessThanOrEqualDateTime";
+            public const string LessThanOrEqualDateTime =
+                "http://schemas.authz.org/capl/operation#LessThanOrEqualDateTime";
 
             public const string NotEqual = "http://schemas.authz.org/capl/operation#NotEqual";
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public static class TransformUris
         {
             public const string Add = "http://schemas.authz.org/capl/transform#Add";

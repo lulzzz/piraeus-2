@@ -18,26 +18,20 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public Action<string, string, byte[]> GetAction(string verb, string parameter, string value)
         {
             string key = GetKey(verb, parameter, value);
-            if (registry.ContainsKey(key))
-            {
+            if (registry.ContainsKey(key)) {
                 return registry[key];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public Action<string, string, byte[]> GetTokenReference(string token)
         {
-            if (tokenReference.ContainsKey(token) && registry.ContainsKey(tokenReference[token]))
-            {
+            if (tokenReference.ContainsKey(token) && registry.ContainsKey(tokenReference[token])) {
                 return registry[tokenReference[token]];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public bool HasParameter(string verb, string parameter, string value)
@@ -65,8 +59,7 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public void SetTokenReference(string token, string verb, string parameter, string value)
         {
             string key = GetKey(verb, parameter, value);
-            if (!tokenReference.ContainsKey(token))
-            {
+            if (!tokenReference.ContainsKey(token)) {
                 tokenReference.Add(token, key);
             }
         }
@@ -79,7 +72,8 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         private string GetKey(string verb, string parameter, string value)
         {
-            return string.Format("{0}-{1}-{2}", verb.ToLowerInvariant(), parameter.ToLowerInvariant(), value.ToLowerInvariant());
+            return string.Format("{0}-{1}-{2}", verb.ToLowerInvariant(), parameter.ToLowerInvariant(),
+                value.ToLowerInvariant());
         }
     }
 }

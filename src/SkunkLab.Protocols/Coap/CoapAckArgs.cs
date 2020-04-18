@@ -1,27 +1,28 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Coap
+{
     [Serializable]
     public class CoapAckArgs : EventArgs
     {
         public CoapAckArgs(ushort messageId, string internalMessageId, byte[] token, CodeType code, string faultMessage)
         {
-            this.MessageId = messageId;
-            this.InternalMessageId = internalMessageId;
-            this.Token = token;
-            this.Code = code;
-            this.FaultMessage = faultMessage;
+            MessageId = messageId;
+            InternalMessageId = internalMessageId;
+            Token = token;
+            Code = code;
+            FaultMessage = faultMessage;
         }
 
-        public CoapAckArgs(ushort messageId, string internalMessageId, byte[] token, CodeType code, string contentType, byte[] responseMessage)
+        public CoapAckArgs(ushort messageId, string internalMessageId, byte[] token, CodeType code, string contentType,
+            byte[] responseMessage)
         {
-            this.MessageId = messageId;
-            this.InternalMessageId = internalMessageId;
-            this.Token = token;
-            this.Code = code;
-            this.ContentType = contentType;
-            this.ResponseMessage = responseMessage;
+            MessageId = messageId;
+            InternalMessageId = internalMessageId;
+            Token = token;
+            Code = code;
+            ContentType = contentType;
+            ResponseMessage = responseMessage;
         }
 
         public CodeType Code { get; internal set; }

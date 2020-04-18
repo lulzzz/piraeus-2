@@ -14,16 +14,13 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
             Session.IncrementKeepAlive();
             MqttMessage message = Session.GetHeldMessage(Message.MessageId);
 
-            if (message != null)
-            {
+            if (message != null) {
                 PublishMessage msg = message as PublishMessage;
                 MqttUri uri = new MqttUri(msg.Topic);
-                if (Dispatcher != null)
-                {
+                if (Dispatcher != null) {
                     Dispatcher.Dispatch(uri.Resource, uri.ContentType, msg.Payload);
                 }
-                else
-                {
+                else {
                     Session.Publish(msg, true);
                 }
             }

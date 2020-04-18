@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Piraeus.Grains.Notifications
 {
-    public class EventSinkFactory
+    public abstract class EventSinkFactory
     {
         private static X509Certificate2 cert;
 

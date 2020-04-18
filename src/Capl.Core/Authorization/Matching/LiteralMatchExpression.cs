@@ -1,11 +1,11 @@
-﻿namespace Capl.Authorization.Matching
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 
+namespace Capl.Authorization.Matching
+{
     /// <summary>
-    /// Matches the string literal of a claim type and optional claim value.
+    ///     Matches the string literal of a claim type and optional claim value.
     /// </summary>
     public class LiteralMatchExpression : MatchExpression
     {
@@ -18,16 +18,13 @@
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
-            IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim)
+            IEnumerable<Claim> claimSet = ci.FindAll(delegate(Claim claim)
             {
-                if (claimValue == null)
-                {
-                    return (claim.Type == claimType);
+                if (claimValue == null) {
+                    return claim.Type == claimType;
                 }
-                else
-                {
-                    return (claim.Type == claimType && claim.Value == claimValue);
-                }
+
+                return claim.Type == claimType && claim.Value == claimValue;
             });
 
             return new List<Claim>(claimSet);

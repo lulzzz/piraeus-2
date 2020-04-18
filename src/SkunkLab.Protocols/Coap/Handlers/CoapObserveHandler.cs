@@ -12,14 +12,13 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         public override async Task<CoapMessage> ProcessAsync()
         {
-            if (!Session.CoapReceiver.IsDup(Message.MessageId))
-            {
+            if (!Session.CoapReceiver.IsDup(Message.MessageId)) {
                 Session.CoapReceiver.CacheId(Message.MessageId);
             }
 
             CoapMessage message = await Dispatcher.ObserveAsync(Message);
 
-            return await Task.FromResult<CoapMessage>(message);
+            return await Task.FromResult(message);
         }
     }
 }

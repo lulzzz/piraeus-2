@@ -5,7 +5,7 @@ namespace SkunkLab.Protocols.Coap.Handlers
     public class CoapResponseHandler : CoapMessageHandler
     {
         public CoapResponseHandler(CoapSession session, CoapMessage message)
-            : base(session, message, null)
+            : base(session, message)
         {
             session.EnsureAuthentication(message);
         }
@@ -14,14 +14,12 @@ namespace SkunkLab.Protocols.Coap.Handlers
         {
             Session.CoapSender.DispatchResponse(Message);
 
-            if (Message.MessageType == CoapMessageType.Acknowledgement)
-            {
-                return await Task.FromResult<CoapResponse>(new CoapResponse(Message.MessageId, ResponseMessageType.Acknowledgement, ResponseCodeType.EmptyMessage));
+            if (Message.MessageType == CoapMessageType.Acknowledgement) {
+                return await Task.FromResult(new CoapResponse(Message.MessageId, ResponseMessageType.Acknowledgement,
+                    ResponseCodeType.EmptyMessage));
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
     }
 }

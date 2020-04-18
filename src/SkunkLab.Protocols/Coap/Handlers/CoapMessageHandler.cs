@@ -17,36 +17,34 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         protected CoapSession Session { get; set; }
 
-        public static CoapMessageHandler Create(CoapSession session, CoapMessage message, ICoapRequestDispatch dispatcher = null)
+        public static CoapMessageHandler Create(CoapSession session, CoapMessage message,
+            ICoapRequestDispatch dispatcher = null)
         {
-            if (message.Code == CodeType.EmptyMessage && message.MessageType == CoapMessageType.Confirmable)
-            {
+            if (message.Code == CodeType.EmptyMessage && message.MessageType == CoapMessageType.Confirmable) {
                 return new CoapPingHandler(session, message);
             }
-            else if (message.Code == CodeType.POST)
-            {
+
+            if (message.Code == CodeType.POST) {
                 return new CoapPostHandler(session, message, dispatcher);
             }
-            else if (message.Code == CodeType.PUT)
-            {
+
+            if (message.Code == CodeType.PUT) {
                 return new CoapPutHandler(session, message, dispatcher);
             }
-            else if (message.Code == CodeType.GET)
-            {
+
+            if (message.Code == CodeType.GET) {
                 return new CoapObserveHandler(session, message, dispatcher);
             }
-            else if (message.Code == CodeType.DELETE)
-            {
+
+            if (message.Code == CodeType.DELETE) {
                 return new CoapDeleteHandler(session, message, dispatcher);
             }
-            else if (message.MessageType == CoapMessageType.Reset)
-            {
+
+            if (message.MessageType == CoapMessageType.Reset) {
                 return new CoapRstHandler(session, message);
             }
-            else
-            {
-                return new CoapResponseHandler(session, message);
-            }
+
+            return new CoapResponseHandler(session, message);
         }
 
         public abstract Task<CoapMessage> ProcessAsync();

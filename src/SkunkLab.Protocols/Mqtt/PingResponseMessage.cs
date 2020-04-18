@@ -2,10 +2,6 @@
 {
     public class PingResponseMessage : MqttMessage
     {
-        public PingResponseMessage()
-        {
-        }
-
         public override bool HasAck => false;
 
         public override byte[] Encode()
@@ -14,9 +10,9 @@
             byte[] buffer = new byte[2];
 
             buffer[index++] = (0x0D << Constants.Header.MessageTypeOffset) |
-                   0x00 |
-                   0x00 |
-                   0x00;
+                              0x00 |
+                              0x00 |
+                              0x00;
 
             buffer[index] = 0x00;
 
@@ -28,12 +24,11 @@
             PingResponseMessage ping = new PingResponseMessage();
             int index = 0;
             byte fixedHeader = message[index];
-            base.DecodeFixedHeader(fixedHeader);
+            DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
-            if (remainingLength != 0)
-            {
+            if (remainingLength != 0) {
             }
 
             return ping;

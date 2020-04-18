@@ -1,7 +1,7 @@
-﻿namespace SkunkLab.Channels.WebSocket
-{
-    using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 
+namespace SkunkLab.Channels.WebSocket
+{
     internal sealed class WebSocketMessage
     {
         public readonly object Data;
@@ -10,8 +10,8 @@
 
         public WebSocketMessage(object data, WebSocketMessageType messageType)
         {
-            this.Data = data;
-            this.MessageType = messageType;
+            Data = data;
+            MessageType = messageType;
         }
     }
 }

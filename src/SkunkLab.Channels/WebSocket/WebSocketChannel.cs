@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace SkunkLab.Channels.WebSocket
 {
@@ -34,12 +34,25 @@ namespace SkunkLab.Channels.WebSocket
 
         public abstract string TypeId { get; }
 
+        public abstract Task AddMessageAsync(byte[] message);
+
+        public abstract Task CloseAsync();
+
+        public abstract void Dispose();
+
+        public abstract Task OpenAsync();
+
+        public abstract Task ReceiveAsync();
+
+        public abstract Task SendAsync(byte[] message);
+
         public static WebSocketChannel Create(HttpContext context, WebSocketConfig config, CancellationToken token)
         {
             return new WebSocketServerChannel(context, config, token);
         }
 
-        public static WebSocketChannel Create(HttpContext context, System.Net.WebSockets.WebSocket socket, WebSocketConfig config, CancellationToken token)
+        public static WebSocketChannel Create(HttpContext context, System.Net.WebSockets.WebSocket socket,
+            WebSocketConfig config, CancellationToken token)
         {
             return new WebSocketServerChannel(context, socket, config, token);
         }
@@ -49,35 +62,26 @@ namespace SkunkLab.Channels.WebSocket
             return new WebSocketClientChannel(endpointUri, config, token);
         }
 
-        public static WebSocketChannel Create(Uri endpointUri, string subProtocol, WebSocketConfig config, CancellationToken token)
+        public static WebSocketChannel Create(Uri endpointUri, string subProtocol, WebSocketConfig config,
+            CancellationToken token)
         {
             return new WebSocketClientChannel(endpointUri, subProtocol, config, token);
         }
 
-        public static WebSocketChannel Create(Uri endpointUri, string securityToken, string subProtocol, WebSocketConfig config, CancellationToken token)
+        public static WebSocketChannel Create(Uri endpointUri, string securityToken, string subProtocol,
+            WebSocketConfig config, CancellationToken token)
         {
             return new WebSocketClientChannel(endpointUri, securityToken, subProtocol, config, token);
         }
 
-        public static WebSocketChannel Create(Uri endpointUri, X509Certificate2 certificate, string subProtocol, WebSocketConfig config, CancellationToken token)
+        public static WebSocketChannel Create(Uri endpointUri, X509Certificate2 certificate, string subProtocol,
+            WebSocketConfig config, CancellationToken token)
         {
             return new WebSocketClientChannel(endpointUri, certificate, subProtocol, config, token);
         }
 
-        public abstract Task AddMessageAsync(byte[] message);
-
-        public abstract Task CloseAsync();
-
-        public abstract void Dispose();
-
         public abstract void Open();
 
-        public abstract Task OpenAsync();
-
-        public abstract Task ReceiveAsync();
-
         public abstract void Send(byte[] message);
-
-        public abstract Task SendAsync(byte[] message);
     }
 }

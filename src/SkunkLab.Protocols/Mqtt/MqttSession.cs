@@ -1,9 +1,9 @@
-﻿using SkunkLab.Protocols.Mqtt.Handlers;
-using SkunkLab.Security.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using SkunkLab.Protocols.Mqtt.Handlers;
+using SkunkLab.Security.Tokens;
 
 namespace SkunkLab.Protocols.Mqtt
 {
@@ -19,17 +19,15 @@ namespace SkunkLab.Protocols.Mqtt
 
         private readonly MqttQuarantineTimer quarantine;
 
-        private ConnectAckCode _code;
-
-        private double _keepaliveSeconds;
-
         private string bootstrapToken;
 
-        private SkunkLab.Security.Tokens.SecurityTokenType bootstrapTokenType;
+        private SecurityTokenType bootstrapTokenType;
 
         private bool disposed;
 
         private DateTime keepaliveExpiry;
+
+        private double keepaliveSeconds;
 
         private Timer keepaliveTimer;
 
@@ -46,6 +44,26 @@ namespace SkunkLab.Protocols.Mqtt
             quarantine.OnRetry += Quarantine_OnRetry;
         }
 
+        public MqttConfig Config { get; set; }
+
+        public ConnectAckCode ConnectResult { get; internal set; }
+
+        public bool HasBootstrapToken { get; internal set; }
+
+        public string Identity { get; set; }
+
+        public List<KeyValuePair<string, string>> Indexes { get; set; }
+
+        public bool IsAuthenticated { get; set; }
+
+        public bool IsConnected { get; internal set; }
+
+        public void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
+        }
+
         public event ConnectionHandler OnConnect;
 
         public event EventHandler<MqttMessageEventArgs> OnDisconnect;
@@ -60,28 +78,9 @@ namespace SkunkLab.Protocols.Mqtt
 
         public event EventHandler<MqttMessageEventArgs> OnUnsubscribe;
 
-        public MqttConfig Config { get; set; }
-
-        public ConnectAckCode ConnectResult
-        {
-            get => _code;
-            internal set => _code = value;
-        }
-
-        public bool HasBootstrapToken { get; internal set; }
-
-        public string Identity { get; set; }
-
-        public List<KeyValuePair<string, string>> Indexes { get; set; }
-
-        public bool IsAuthenticated { get; set; }
-
-        public bool IsConnected { get; internal set; }
-
         public bool Authenticate()
         {
-            if (!HasBootstrapToken)
-            {
+            if (!HasBootstrapToken) {
                 return false;
             }
 
@@ -111,12 +110,6 @@ namespace SkunkLab.Protocols.Mqtt
             return Authenticate(msg.Username, msg.Password);
         }
 
-        public void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
-        }
-
         public ushort NewId()
         {
             return quarantine.NewId();
@@ -128,26 +121,49 @@ namespace SkunkLab.Protocols.Mqtt
             return await handler.ProcessAsync();
         }
 
+        #region Retry Signal
+
+        private void Quarantine_OnRetry(object sender, MqttMessageEventArgs args)
+        {
+            MqttMessage msg = args.Message;
+            msg.Dup = true;
+            OnRetry?.Invoke(this, new MqttMessageEventArgs(msg));
+        }
+
+        #endregion Retry Signal
+
+        protected void Disposing(bool dispose)
+        {
+            if (dispose & !disposed) {
+                quarantine.Dispose();
+                pubContainer.Dispose();
+                qosLevels.Clear();
+                qosLevels = null;
+
+                if (keepaliveTimer != null) {
+                    keepaliveTimer.Dispose();
+                }
+            }
+
+            disposed = true;
+        }
+
         #region QoS Management
 
         public void AddQosLevel(string topic, QualityOfServiceLevelType qos)
         {
-            if (!qosLevels.ContainsKey(topic))
-            {
+            if (!qosLevels.ContainsKey(topic)) {
                 qosLevels.Add(topic, qos);
             }
         }
 
         public QualityOfServiceLevelType? GetQoS(string topic)
         {
-            if (qosLevels.ContainsKey(topic))
-            {
+            if (qosLevels.ContainsKey(topic)) {
                 return qosLevels[topic];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         #endregion QoS Management
@@ -168,8 +184,7 @@ namespace SkunkLab.Protocols.Mqtt
         internal void Publish(MqttMessage message, bool force = false)
         {
             if (message.QualityOfService != QualityOfServiceLevelType.ExactlyOnce
-                || (message.QualityOfService == QualityOfServiceLevelType.ExactlyOnce && force))
-            {
+                || message.QualityOfService == QualityOfServiceLevelType.ExactlyOnce && force) {
                 OnPublish?.Invoke(this, new MqttMessageEventArgs(message));
             }
         }
@@ -190,20 +205,16 @@ namespace SkunkLab.Protocols.Mqtt
 
         internal MqttMessage GetHeldMessage(ushort id)
         {
-            if (pubContainer.ContainsKey(id))
-            {
+            if (pubContainer.ContainsKey(id)) {
                 return pubContainer[id];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         internal void HoldMessage(MqttMessage message)
         {
-            if (!pubContainer.ContainsKey(message.MessageId))
-            {
+            if (!pubContainer.ContainsKey(message.MessageId)) {
                 pubContainer.Add(message.MessageId, message);
             }
         }
@@ -219,13 +230,12 @@ namespace SkunkLab.Protocols.Mqtt
 
         internal double KeepAliveSeconds
         {
-            get => _keepaliveSeconds;
+            get => keepaliveSeconds;
             set
             {
-                _keepaliveSeconds = value;
+                keepaliveSeconds = value;
 
-                if (keepaliveTimer == null)
-                {
+                if (keepaliveTimer == null) {
                     keepaliveTimer = new Timer(Convert.ToDouble(value * 1000));
                     keepaliveTimer.Elapsed += KeepaliveTimer_Elapsed;
                     keepaliveTimer.Start();
@@ -235,7 +245,7 @@ namespace SkunkLab.Protocols.Mqtt
 
         internal void IncrementKeepAlive()
         {
-            keepaliveExpiry = DateTime.UtcNow.AddSeconds(Convert.ToDouble(_keepaliveSeconds));
+            keepaliveExpiry = DateTime.UtcNow.AddSeconds(Convert.ToDouble(keepaliveSeconds));
         }
 
         internal void StopKeepAlive()
@@ -246,8 +256,7 @@ namespace SkunkLab.Protocols.Mqtt
 
         private void KeepaliveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (keepaliveExpiry < DateTime.Now)
-            {
+            if (keepaliveExpiry < DateTime.Now) {
                 OnKeepAlive?.Invoke(this, new MqttMessageEventArgs(new PingRequestMessage()));
             }
         }
@@ -272,34 +281,5 @@ namespace SkunkLab.Protocols.Mqtt
         }
 
         #endregion ID Quarantine
-
-        #region Retry Signal
-
-        private void Quarantine_OnRetry(object sender, MqttMessageEventArgs args)
-        {
-            MqttMessage msg = args.Message;
-            msg.Dup = true;
-            OnRetry?.Invoke(this, new MqttMessageEventArgs(msg));
-        }
-
-        #endregion Retry Signal
-
-        protected void Disposing(bool dispose)
-        {
-            if (dispose & !disposed)
-            {
-                quarantine.Dispose();
-                pubContainer.Dispose();
-                qosLevels.Clear();
-                qosLevels = null;
-
-                if (keepaliveTimer != null)
-                {
-                    keepaliveTimer.Dispose();
-                }
-            }
-
-            disposed = true;
-        }
     }
 }

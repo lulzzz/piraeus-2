@@ -6,7 +6,6 @@ namespace SkunkLab.Protocols.Coap
     public class CoapRstException : Exception
     {
         public CoapRstException()
-            : base()
         {
         }
 

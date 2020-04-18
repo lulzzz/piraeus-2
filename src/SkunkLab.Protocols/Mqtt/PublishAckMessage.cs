@@ -1,7 +1,7 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     public class PublishAckMessage : MqttMessage
     {
         public PublishAckMessage()
@@ -10,29 +10,29 @@
 
         public PublishAckMessage(PublishAckType ackType, ushort messageId)
         {
-            this.AckType = ackType;
-            this.MessageId = messageId;
+            AckType = ackType;
+            MessageId = messageId;
         }
 
         public PublishAckType AckType { get; set; }
 
-        public override bool HasAck => (this.AckType == PublishAckType.PUBREC || this.AckType == PublishAckType.PUBREL);
+        public override bool HasAck => AckType == PublishAckType.PUBREC || AckType == PublishAckType.PUBREL;
 
         public override byte[] Encode()
         {
-            byte ackType = Convert.ToByte((int)this.AckType);
-            byte reserved = this.AckType != PublishAckType.PUBREL ? (byte)0x00 : (byte)0x02;
-            byte fixedHeader = (byte)(ackType << Constants.Header.MessageTypeOffset |
-            0x00 |
-            reserved |
-            0x00);
-            byte[] remainingLength = base.EncodeRemainingLength(2);
+            byte ackType = Convert.ToByte((int)AckType);
+            byte reserved = AckType != PublishAckType.PUBREL ? (byte)0x00 : (byte)0x02;
+            byte fixedHeader = (byte)((ackType << Constants.Header.MessageTypeOffset) |
+                                      0x00 |
+                                      reserved |
+                                      0x00);
+            byte[] remainingLength = EncodeRemainingLength(2);
 
             byte[] buffer = new byte[4];
             buffer[0] = fixedHeader;
             buffer[1] = remainingLength[0];
-            buffer[2] = (byte)((this.MessageId >> 8) & 0x00FF);
-            buffer[3] = (byte)(this.MessageId & 0x00FF);
+            buffer[2] = (byte)((MessageId >> 8) & 0x00FF);
+            buffer[3] = (byte)(MessageId & 0x00FF);
 
             return buffer;
         }
@@ -43,13 +43,12 @@
 
             int index = 0;
             byte fixedHeader = message[index];
-            base.DecodeFixedHeader(fixedHeader);
+            DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do
-            {
+            do {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -62,7 +61,7 @@
             ushort messageId = (ushort)((buffer[0] << 8) & 0xFF00);
             messageId |= buffer[1];
 
-            this.MessageId = messageId;
+            MessageId = messageId;
 
             return pubackMessage;
         }

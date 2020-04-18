@@ -89,8 +89,8 @@ namespace SkunkLab.Storage
                 return default;
             }
 
-            using var ms = new MemoryStream();
-            var formatter = new BinaryFormatter();
+            using MemoryStream ms = new MemoryStream();
+            BinaryFormatter formatter = new BinaryFormatter();
             formatter.Serialize(ms, obj);
             ms.Position = 0;
 

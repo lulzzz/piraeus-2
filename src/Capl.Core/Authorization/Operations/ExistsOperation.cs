@@ -1,28 +1,21 @@
-﻿namespace Capl.Authorization.Operations
-{
-    using System;
+﻿using System;
 
+namespace Capl.Authorization.Operations
+{
     /// <summary>
-    /// Compares a value to determine if it is not null.
+    ///     Compares a value to determine if it is not null.
     /// </summary>
     public class ExistsOperation : Operation
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExistsOperation"/> class.
-        /// </summary>
-        public ExistsOperation()
-        {
-        }
-
         public static Uri OperationUri => new Uri(AuthorizationConstants.OperationUris.Exists);
 
         /// <summary>
-        /// Gets the URI that identifies the operation.
+        ///     Gets the URI that identifies the operation.
         /// </summary>
         public override Uri Uri => new Uri(AuthorizationConstants.OperationUris.Exists);
 
         /// <summary>
-        /// Executes the comparsion.
+        ///     Executes the comparsion.
         /// </summary>
         /// <param name="left">LHS of the expression argument.</param>
         /// <param name="right">RHS of the expression argument.</param>

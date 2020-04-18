@@ -1,15 +1,15 @@
-﻿namespace SkunkLab.Protocols.Coap
-{
-    using System;
+﻿using System;
 
+namespace SkunkLab.Protocols.Coap
+{
     [Serializable]
     public class CoapResetArgs : EventArgs
     {
         public CoapResetArgs(ushort messageId, string internalMessageId, CodeType code)
         {
-            this.MessageId = messageId;
-            this.InternalMessageId = internalMessageId;
-            this.Code = code;
+            MessageId = messageId;
+            InternalMessageId = internalMessageId;
+            Code = code;
         }
 
         public CodeType Code { get; internal set; }

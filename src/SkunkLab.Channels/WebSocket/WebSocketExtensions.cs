@@ -1,14 +1,14 @@
-﻿namespace SkunkLab.Channels.WebSocket
-{
-    using Microsoft.AspNetCore.Http;
-    using System.Net.WebSockets;
-    using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
+namespace SkunkLab.Channels.WebSocket
+{
     public static class WebSocketExtensions
     {
-        public static async Task<WebSocket> AcceptWebSocketRequestAsync(this HttpContext context, WebSocketHandler handler)
+        public static async Task<System.Net.WebSockets.WebSocket> AcceptWebSocketRequestAsync(this HttpContext context,
+            WebSocketHandler handler)
         {
-            WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
+            System.Net.WebSockets.WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
             await handler.ProcessWebSocketRequestAsync(socket);
             return socket;
         }

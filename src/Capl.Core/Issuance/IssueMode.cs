@@ -1,7 +1,7 @@
-﻿namespace Capl.Issuance
-{
-    using System;
+﻿using System;
 
+namespace Capl.Issuance
+{
     [Serializable]
     public enum IssueMode
     {

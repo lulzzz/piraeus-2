@@ -1,37 +1,30 @@
-﻿namespace Capl.Authorization.Transforms
-{
-    using Capl.Authorization;
-    using System;
-    using System.Collections.Generic;
-    using System.Security.Claims;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 
+namespace Capl.Authorization.Transforms
+{
     /// <summary>
-    /// A transform that adds a new claim to a set of claims.
+    ///     A transform that adds a new claim to a set of claims.
     /// </summary>
     public class AddTransformAction : TransformAction
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AddTransformAction"/> class.
-        /// </summary>
-        public AddTransformAction()
-        {
-        }
-
         public static Uri TransformUri => new Uri(AuthorizationConstants.TransformUris.Add);
 
         /// <summary>
-        /// Gets the URI that identifies the add transform action.
+        ///     Gets the URI that identifies the add transform action.
         /// </summary>
         public override Uri Uri => new Uri(AuthorizationConstants.TransformUris.Add);
 
         /// <summary>
-        /// Executes the add transform action.
+        ///     Executes the add transform action.
         /// </summary>
         /// <param name="claimSet">Set of claims to perform the action.</param>
         /// <param name="sourceClaim">The source claims, which is ignored for the add transform action.</param>
         /// <param name="targetClaim">The target claim to be added with this action.</param>
         /// <returns>A transformed set of claims.</returns>
-        public override IEnumerable<Claim> Execute(IEnumerable<Claim> claims, IList<Claim> matchedClaims, LiteralClaim targetClaim)
+        public override IEnumerable<Claim> Execute(IEnumerable<Claim> claims, IList<Claim> matchedClaims,
+            LiteralClaim targetClaim)
         {
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
             _ = matchedClaims ?? throw new ArgumentNullException(nameof(matchedClaims));

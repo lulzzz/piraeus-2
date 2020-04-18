@@ -1,5 +1,5 @@
-﻿using Org.BouncyCastle.Crypto.Tls;
-using System;
+﻿using System;
+using Org.BouncyCastle.Crypto.Tls;
 
 namespace SkunkLab.Channels.Tcp
 {
@@ -9,7 +9,8 @@ namespace SkunkLab.Channels.Tcp
         {
         }
 
-        public PskTlsServer2(TlsCipherFactory cipherFactory, TlsPskIdentityManager pskIdentityManager) : base(cipherFactory, pskIdentityManager)
+        public PskTlsServer2(TlsCipherFactory cipherFactory, TlsPskIdentityManager pskIdentityManager) : base(
+            cipherFactory, pskIdentityManager)
         {
         }
 

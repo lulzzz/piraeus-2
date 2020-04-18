@@ -1,21 +1,19 @@
-﻿namespace SkunkLab.Protocols.Mqtt
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace SkunkLab.Protocols.Mqtt
+{
     public class SubscriptionAckMessage : MqttMessage
     {
-        private readonly QualityOfServiceLevelCollection _qosLevels;
-
         public SubscriptionAckMessage()
         {
-            this._qosLevels = new QualityOfServiceLevelCollection();
+            QualityOfServiceLevels = new QualityOfServiceLevelCollection();
         }
 
         public SubscriptionAckMessage(ushort messageId, IEnumerable<QualityOfServiceLevelType> qosLevels)
         {
-            this.MessageId = messageId;
-            this._qosLevels = new QualityOfServiceLevelCollection(qosLevels);
+            MessageId = messageId;
+            QualityOfServiceLevels = new QualityOfServiceLevelCollection(qosLevels);
         }
 
         public override bool HasAck => false;
@@ -27,24 +25,23 @@
             internal set => base.MessageType = value;
         }
 
-        public QualityOfServiceLevelCollection QualityOfServiceLevels => this._qosLevels;
+        public QualityOfServiceLevelCollection QualityOfServiceLevels { get; }
 
         public override byte[] Encode()
         {
             byte fixedHeader = (0x09 << Constants.Header.MessageTypeOffset) |
-                   0x00 |
-                   0x00 |
-                   0x00;
+                               0x00 |
+                               0x00 |
+                               0x00;
 
             byte[] messageId = new byte[2];
-            messageId[0] = (byte)((this.MessageId >> 8) & 0x00FF);
-            messageId[1] = (byte)(this.MessageId & 0x00FF);
+            messageId[0] = (byte)((MessageId >> 8) & 0x00FF);
+            messageId[1] = (byte)(MessageId & 0x00FF);
 
             ByteContainer qosContainer = new ByteContainer();
             int index = 0;
-            while (index < this._qosLevels.Count)
-            {
-                byte qos = (byte)(int)this._qosLevels[index];
+            while (index < QualityOfServiceLevels.Count) {
+                byte qos = (byte)(int)QualityOfServiceLevels[index];
                 qosContainer.Add(qos);
                 index++;
             }
@@ -68,13 +65,12 @@
 
             int index = 0;
             byte fixedHeader = message[index];
-            base.DecodeFixedHeader(fixedHeader);
+            DecodeFixedHeader(fixedHeader);
 
-            int remainingLength = base.DecodeRemainingLength(message);
+            int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do
-            {
+            do {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -87,12 +83,11 @@
             ushort messageId = (ushort)((buffer[0] << 8) & 0xFF00);
             messageId |= buffer[1];
 
-            this.MessageId = messageId;
+            MessageId = messageId;
 
-            while (index < buffer.Length)
-            {
+            while (index < buffer.Length) {
                 QualityOfServiceLevelType qosLevel = (QualityOfServiceLevelType)buffer[index++];
-                this._qosLevels.Add(qosLevel);
+                QualityOfServiceLevels.Add(qosLevel);
             }
 
             return subackMessage;

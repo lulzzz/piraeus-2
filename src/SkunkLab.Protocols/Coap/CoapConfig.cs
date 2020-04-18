@@ -1,17 +1,17 @@
-﻿using SkunkLab.Security.Authentication;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SkunkLab.Security.Authentication;
 
 namespace SkunkLab.Protocols.Coap
 {
     public sealed class CoapConfig
     {
         public CoapConfig(IAuthenticator authenticator, string authority,
-                        CoapConfigOptions configOptions, bool autoRetry = false,
-                        double keepAliveSeconds = 180,
-                        double ackTimeout = 2.0, double ackRandomFactor = 1.5,
-                        int maxRetransmit = 4, int nstart = 1, double defaultLeisure = 4.0,
-                        double probingRate = 1.0, double maxLatency = 100.0)
+            CoapConfigOptions configOptions, bool autoRetry = false,
+            double keepAliveSeconds = 180,
+            double ackTimeout = 2.0, double ackRandomFactor = 1.5,
+            int maxRetransmit = 4, int nstart = 1, double defaultLeisure = 4.0,
+            double probingRate = 1.0, double maxLatency = 100.0)
         {
             Authenticator = authenticator;
             Authority = authority;
@@ -44,7 +44,8 @@ namespace SkunkLab.Protocols.Coap
         public string DoNotRetainNonconfirmableResponse { get; internal set; }
 
         public TimeSpan ExchangeLifetime =>
-                TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + (2 * MaxLatency.TotalSeconds) + ProcessingDelay.TotalSeconds);
+            TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + 2 * MaxLatency.TotalSeconds +
+                                 ProcessingDelay.TotalSeconds);
 
         public string IdentityClaimType { get; set; }
 
@@ -57,22 +58,24 @@ namespace SkunkLab.Protocols.Coap
         public int MaxRetransmit { get; internal set; }
 
         public TimeSpan MaxRTT =>
-                TimeSpan.FromSeconds((2.0 * MaxLatency.TotalSeconds) + ProcessingDelay.TotalSeconds);
+            TimeSpan.FromSeconds(2.0 * MaxLatency.TotalSeconds + ProcessingDelay.TotalSeconds);
 
         public TimeSpan MaxTransmitSpan
         {
             get
             {
-                double secs = (AckTimeout.TotalSeconds) * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit)) - 1) * AckRandomFactor;
+                double secs = AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit)) - 1) *
+                              AckRandomFactor;
                 return TimeSpan.FromSeconds(secs);
             }
         }
 
         public TimeSpan MaxTransmitWait =>
-                TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) * AckRandomFactor);
+            TimeSpan.FromSeconds(AckTimeout.TotalSeconds * (Math.Pow(2.0, Convert.ToDouble(MaxRetransmit) + 1) - 1) *
+                                 AckRandomFactor);
 
         public TimeSpan NonLifetime =>
-                TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
+            TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
 
         public int NStart { get; internal set; }
 

@@ -28,13 +28,11 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Add(ushort id)
         {
-            if (!container.ContainsKey(id))
-            {
+            if (!container.ContainsKey(id)) {
                 container.Add(id, DateTime.UtcNow.AddMilliseconds(lifetime.TotalMilliseconds));
             }
 
-            if (!timer.Enabled)
-            {
+            if (!timer.Enabled) {
                 timer.Enabled = true;
             }
         }
@@ -48,8 +46,7 @@ namespace SkunkLab.Protocols.Mqtt
         {
             container.Remove(id);
 
-            if (container.Count == 0)
-            {
+            if (container.Count == 0) {
                 timer.Enabled = false;
             }
         }
@@ -59,33 +56,25 @@ namespace SkunkLab.Protocols.Mqtt
             List<ushort> list = new List<ushort>();
             DateTime now = DateTime.UtcNow;
 
-            var query = container.Where((c) => c.Value < now);
+            var query = container.Where(c => c.Value < now);
 
-            if (query != null)
-            {
-                foreach (var item in query)
-                {
-                    if (container.ContainsKey(item.Key))
-                    {
+            if (query != null) {
+                foreach (var item in query) {
+                    if (container.ContainsKey(item.Key)) {
                         list.Add(item.Key);
                     }
                 }
 
                 ushort[] ids = list.ToArray();
 
-                foreach (var item in list)
-                {
-                    container.Remove(item);
-                }
+                foreach (var item in list) container.Remove(item);
 
-                if (ids != null && ids.Length > 0)
-                {
+                if (ids != null && ids.Length > 0) {
                     OnExpired?.Invoke(this, new LifetimeEventArgs(ids));
                 }
             }
 
-            if (container.Count == 0)
-            {
+            if (container.Count == 0) {
                 timer.Enabled = false;
             }
         }
