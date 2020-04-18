@@ -91,7 +91,7 @@ namespace Orleans.Clustering.Redis
         {
             try
             {
-                var data = list.ToArray().Where((x) => x != null)
+                List<Tuple<MembershipEntry, string>> data = list.ToArray().Where((x) => x != null)
                     .Select(x => x.ToMembershipEntryTuple())
                     .ToList();
 
@@ -105,11 +105,11 @@ namespace Orleans.Clustering.Redis
 
         public MembershipTableData ToMembershipTableData(SiloAddress key)
         {
-            var data = list.ToArray().Where((x) => x != null)
+            List<Tuple<MembershipEntry, string>> data = list.ToArray().Where((x) => x != null)
                 .Select(x => x.ToMembershipEntryTuple())
                 .ToList();
 
-            var items = data.TakeWhile((x) => x.Item1.SiloAddress.ToParsableString() == key.ToParsableString()).ToList();
+            List<Tuple<MembershipEntry, string>> items = data.TakeWhile((x) => x.Item1.SiloAddress.ToParsableString() == key.ToParsableString()).ToList();
             return new MembershipTableData(items, tableVersion);
         }
 

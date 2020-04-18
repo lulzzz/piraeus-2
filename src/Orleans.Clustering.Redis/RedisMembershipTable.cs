@@ -235,7 +235,7 @@ namespace Orleans.Clustering.Redis
                     RedisMembershipCollection collection = serializer.Deserialize<RedisMembershipCollection>(val);
                     if (collection.UpdateIAmAlive(clusterId, entry.SiloAddress, entry.IAmAliveTime))
                     {
-                        var collVal = serializer.Serialize(collection);
+                        byte[] collVal = serializer.Serialize(collection);
                         await database.StringSetAsync(clusterId, collVal);
                     }
                 }
@@ -263,7 +263,7 @@ namespace Orleans.Clustering.Redis
                         etag = "0";
                     }
 
-                    var rentry = RedisMembershipEntry.Create(clusterId, entry, etag);
+                    RedisMembershipEntry rentry = RedisMembershipEntry.Create(clusterId, entry, etag);
                     var val = await database.StringGetAsync(clusterId);
 
                     if (!val.IsNull)

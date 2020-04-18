@@ -269,26 +269,26 @@ namespace SkunkLab.Protocols.Coap
 
         protected void LoadOptions()
         {
-            Action<OptionType, byte[]> loadByteArray = (type, array) =>
+            void LoadByteArray(OptionType type, byte[] array)
             {
                 Options.Add(new CoapOption(type, array));
-            };
+            }
 
-            Action<OptionType, string> loadString = (type, value) =>
+            void LoadString(OptionType type, string value)
             {
                 if (value != null) {
                     Options.Add(new CoapOption(type, value));
                 }
-            };
+            }
 
-            Action<OptionType, bool> loadBool = (type, value) =>
+            void LoadBool(OptionType type, bool value)
             {
                 if (value) {
                     Options.Add(new CoapOption(type, null));
                 }
-            };
+            }
 
-            Action<OptionType, uint, bool> loadUint = (type, value, includeZero) =>
+            void LoadUint(OptionType type, uint value, bool includeZero)
             {
                 if (value > 0) {
                     Options.Add(new CoapOption(type, value));
@@ -297,7 +297,7 @@ namespace SkunkLab.Protocols.Coap
                 if (value == 0 && includeZero) {
                     Options.Add(new CoapOption(type, value));
                 }
-            };
+            }
 
             Options.Clear();
 
@@ -307,38 +307,38 @@ namespace SkunkLab.Protocols.Coap
             }
 
             if (Observe.HasValue) {
-                loadUint(OptionType.Observe, Convert.ToUInt32(!Observe.Value), true);
+                LoadUint(OptionType.Observe, Convert.ToUInt32(!Observe.Value), true);
             }
 
             if (NoResponse.HasValue) {
-                loadUint(OptionType.NoResponse, Convert.ToUInt32(NoResponse.Value), false);
+                LoadUint(OptionType.NoResponse, Convert.ToUInt32(NoResponse.Value), false);
             }
 
             if (IfMatch != null) {
-                IfMatch.ForEach(s => loadByteArray(OptionType.IfMatch, s));
+                IfMatch.ForEach(s => LoadByteArray(OptionType.IfMatch, s));
             }
 
             if (ETag != null) {
-                ETag.ForEach(s => loadByteArray(OptionType.ETag, s));
+                ETag.ForEach(s => LoadByteArray(OptionType.ETag, s));
             }
 
-            loadBool(OptionType.IfNoneMatch, IfNoneMatch);
+            LoadBool(OptionType.IfNoneMatch, IfNoneMatch);
 
-            LocationPath.ForEach(s => loadString(OptionType.LocationPath, s));
+            LocationPath.ForEach(s => LoadString(OptionType.LocationPath, s));
 
             if (ContentType.HasValue) {
-                loadUint(OptionType.ContentFormat, (uint)ContentType.Value, true);
+                LoadUint(OptionType.ContentFormat, (uint)ContentType.Value, true);
             }
 
-            loadUint(OptionType.MaxAge, MaxAge, false);
+            LoadUint(OptionType.MaxAge, MaxAge, false);
             if (Accept.HasValue) {
-                loadUint(OptionType.Accept, (uint)Accept.Value, false);
+                LoadUint(OptionType.Accept, (uint)Accept.Value, false);
             }
 
-            LocationQuery.ForEach(s => loadString(OptionType.LocationQuery, s));
-            loadString(OptionType.ProxyUri, ProxyUri);
-            loadString(OptionType.ProxyScheme, ProxyScheme);
-            loadUint(OptionType.Size1, Size1, false);
+            LocationQuery.ForEach(s => LoadString(OptionType.LocationQuery, s));
+            LoadString(OptionType.ProxyUri, ProxyUri);
+            LoadString(OptionType.ProxyScheme, ProxyScheme);
+            LoadUint(OptionType.Size1, Size1, false);
         }
     }
 }
