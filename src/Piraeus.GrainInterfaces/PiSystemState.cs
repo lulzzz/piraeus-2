@@ -1,6 +1,6 @@
-﻿using Piraeus.Core.Metadata;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.GrainInterfaces
 {
@@ -9,9 +9,13 @@ namespace Piraeus.GrainInterfaces
     {
         public Dictionary<string, ISubscription> Subscriptions;
 
-        public PiSystemState()
-        {
-        }
+        public Dictionary<string, IErrorObserver> ErrorLeases { get; set; }
+
+        public Dictionary<string, Tuple<DateTime, string>> LeaseExpiry { get; set; }
+
+        public EventMetadata Metadata { get; set; }
+
+        public Dictionary<string, IMetricObserver> MetricLeases { get; set; }
 
         #region Metrics
 
@@ -26,13 +30,5 @@ namespace Piraeus.GrainInterfaces
         public long MessageCount { get; set; }
 
         #endregion Metrics
-
-        public Dictionary<string, IErrorObserver> ErrorLeases { get; set; }
-
-        public Dictionary<string, Tuple<DateTime, string>> LeaseExpiry { get; set; }
-
-        public EventMetadata Metadata { get; set; }
-
-        public Dictionary<string, IMetricObserver> MetricLeases { get; set; }
     }
 }
