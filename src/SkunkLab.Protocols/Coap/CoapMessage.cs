@@ -87,10 +87,9 @@ namespace SkunkLab.Protocols.Coap
             get => token;
             set
             {
-                if (value != null) {
-                    TokenLength = (byte)value.Length;
-                    token = value;
-                }
+                if (value == null) return;
+                TokenLength = (byte)value.Length;
+                token = value;
             }
         }
 

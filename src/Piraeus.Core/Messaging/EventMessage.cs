@@ -53,7 +53,7 @@ namespace Piraeus.Core.Messaging
             Message = message;
             Timestamp = timeStamp;
             Audit = audit;
-            CacheKey = CacheKey;
+            CacheKey = cacheKey;
         }
 
         public bool Audit { get; set; }
