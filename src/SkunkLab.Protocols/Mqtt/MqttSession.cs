@@ -140,9 +140,7 @@ namespace SkunkLab.Protocols.Mqtt
                 qosLevels.Clear();
                 qosLevels = null;
 
-                if (keepaliveTimer != null) {
-                    keepaliveTimer.Dispose();
-                }
+                keepaliveTimer?.Dispose();
             }
 
             disposed = true;
