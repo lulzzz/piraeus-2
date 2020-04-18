@@ -1,7 +1,8 @@
-﻿using Piraeus.Core.Logging;
+﻿using System;
+using System.Threading.Tasks;
+using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
-using System.Threading.Tasks;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -17,13 +18,13 @@ namespace Piraeus.Grains.Notifications
             this.logger = logger;
         }
 
-        public event System.EventHandler<EventSinkResponseArgs> OnResponse;
+        public event EventHandler<EventSinkResponseArgs> OnResponse;
 
         public abstract Task SendAsync(EventMessage message);
 
         protected virtual void RaiseOnResponse(EventSinkResponseArgs e)
         {
-            System.EventHandler<EventSinkResponseArgs> handler = OnResponse;
+            EventHandler<EventSinkResponseArgs> handler = OnResponse;
             handler?.Invoke(this, e);
         }
     }

@@ -1,15 +1,15 @@
-﻿using Piraeus.Auditing;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
+using System.Web;
+using Piraeus.Auditing;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Mqtt;
 using SkunkLab.Storage;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -38,20 +38,20 @@ namespace Piraeus.Grains.Notifications
             queue = nvc["queue"];
 
             string ttlString = nvc["ttl"];
-            if (!string.IsNullOrEmpty(ttlString))
-            {
+            if (!string.IsNullOrEmpty(ttlString)) {
                 ttl = TimeSpan.Parse(ttlString);
             }
 
             Uri.TryCreate(metadata.SymmetricKey, UriKind.Absolute, out Uri sasUri);
 
-            if (sasUri == null)
-            {
-                storage = QueueStorage.New(string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};", uri.Authority.Split(new char[] { '.' })[0], metadata.SymmetricKey), 10000, 1000);
+            if (sasUri == null) {
+                storage = QueueStorage.New(
+                    string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};",
+                        uri.Authority.Split(new[] {'.'})[0], metadata.SymmetricKey), 10000, 1000);
             }
-            else
-            {
-                string connectionString = string.Format("BlobEndpoint={0};SharedAccessSignature={1}", queue, metadata.SymmetricKey);
+            else {
+                string connectionString = string.Format("BlobEndpoint={0};SharedAccessSignature={1}", queue,
+                    metadata.SymmetricKey);
                 storage = QueueStorage.New(connectionString, 1000, 5120000);
             }
         }
@@ -63,46 +63,46 @@ namespace Piraeus.Grains.Notifications
             EventMessage msg = null;
             loadQueue.Enqueue(message);
 
-            try
-            {
-                while (!loadQueue.IsEmpty)
-                {
+            try {
+                while (!loadQueue.IsEmpty) {
                     bool isdequeued = loadQueue.TryDequeue(out msg);
-                    if (isdequeued)
-                    {
+                    if (isdequeued) {
                         payload = GetPayload(msg);
-                        if (payload == null)
-                        {
-                            await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink because message is null.");
+                        if (payload == null) {
+                            await logger?.LogWarningAsync(
+                                $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink because message is null.");
                             return;
                         }
 
                         await storage.EnqueueAsync(queue, payload, ttl);
 
-                        if (message.Audit)
-                        {
-                            record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                        if (message.Audit) {
+                            record = new MessageAuditRecord(msg.MessageId,
+                                uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
+                                "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, true,
+                                DateTime.UtcNow);
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink.");
-                record = new MessageAuditRecord(msg.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink.");
+                record = new MessageAuditRecord(msg.MessageId,
+                    uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureQueue",
+                    "AzureQueue", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
                 throw;
             }
-            finally
-            {
-                if (record != null && msg.Audit)
+            finally {
+                if (record != null && msg.Audit) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol)
-            {
+            switch (message.Protocol) {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

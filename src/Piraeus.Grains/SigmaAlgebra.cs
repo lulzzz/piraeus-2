@@ -1,12 +1,12 @@
-﻿using Orleans;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Orleans;
 using Orleans.Providers;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.GrainInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Piraeus.Grains
 {
@@ -14,8 +14,7 @@ namespace Piraeus.Grains
     [Serializable]
     public class SigmaAlgebra : Grain<SigmaAlgebraState>, ISigmaAlgebra
     {
-        [NonSerialized]
-        private readonly ILog logger;
+        [NonSerialized] private readonly ILog logger;
 
         public SigmaAlgebra(ILog logger = null)
         {
@@ -28,7 +27,7 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
             bool result = await chain.AddAsync(resourceUriString);
             await logger?.LogInformationAsync($"SigmaAlgebra add '{result}' for '{resourceUriString}'");
-            return await Task.FromResult<bool>(result);
+            return await Task.FromResult(result);
         }
 
         public async Task ClearAsync()
@@ -37,15 +36,14 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
             int cnt = await chain.GetCountAsync();
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 await chain.ClearAsync();
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
                 cnt = await chain.GetCountAsync();
             }
 
-            await logger?.LogInformationAsync($"SigmaAlgebra cleared.");
+            await logger?.LogInformationAsync("SigmaAlgebra cleared.");
             await ClearStateAsync();
         }
 
@@ -55,20 +53,21 @@ namespace Piraeus.Grains
 
             long id = 1;
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
-            if (await chain.ContainsAsync(resourceUriString))
-                return await Task.FromResult<bool>(true);
+            if (await chain.ContainsAsync(resourceUriString)) {
+                return await Task.FromResult(true);
+            }
 
             int cnt = await chain.GetCountAsync();
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
-                if (await chain.ContainsAsync(resourceUriString))
-                    return await Task.FromResult<bool>(true);
+                if (await chain.ContainsAsync(resourceUriString)) {
+                    return await Task.FromResult(true);
+                }
             }
 
-            return await Task.FromResult<bool>(false);
+            return await Task.FromResult(false);
         }
 
         public async Task<int> GetCountAsync()
@@ -78,15 +77,14 @@ namespace Piraeus.Grains
             int cnt = await chain.GetCountAsync();
             int total = cnt;
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
                 cnt = await chain.GetCountAsync();
                 total += cnt;
             }
 
-            return await Task.FromResult<int>(total);
+            return await Task.FromResult(total);
         }
 
         public async Task<List<string>> GetListAsync()
@@ -95,13 +93,13 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
 
             int cnt = await chain.GetCountAsync();
-            if (cnt == 0)
-                return await Task.FromResult<List<string>>(new List<string>());
+            if (cnt == 0) {
+                return await Task.FromResult(new List<string>());
+            }
 
             List<string> list = new List<string>();
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 list.AddRange(await chain.GetListAsync());
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
@@ -109,7 +107,7 @@ namespace Piraeus.Grains
             }
 
             list.Sort();
-            return await Task.FromResult<List<string>>(list);
+            return await Task.FromResult(list);
         }
 
         public async Task<List<string>> GetListAsync(string filter)
@@ -120,13 +118,13 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
 
             int cnt = await chain.GetCountAsync();
-            if (cnt == 0)
-                return await Task.FromResult<List<string>>(new List<string>());
+            if (cnt == 0) {
+                return await Task.FromResult(new List<string>());
+            }
 
             List<string> list = new List<string>();
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 list.AddRange(await chain.GetListAsync(filter));
                 id++;
                 chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
@@ -134,65 +132,65 @@ namespace Piraeus.Grains
             }
 
             list.Sort();
-            return await Task.FromResult<List<string>>(list);
+            return await Task.FromResult(list);
         }
 
         public async Task<List<string>> GetListAsync(int index, int pageSize)
         {
-            if (index < 0)
+            if (index < 0) {
                 throw new IndexOutOfRangeException(nameof(index));
+            }
 
-            if (pageSize < 0)
+            if (pageSize < 0) {
                 throw new IndexOutOfRangeException(nameof(pageSize));
+            }
 
             long id = 1;
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
 
             int cnt = await chain.GetCountAsync();
-            if (cnt == 0)
-                return await Task.FromResult<List<string>>(new List<string>());
+            if (cnt == 0) {
+                return await Task.FromResult(new List<string>());
+            }
 
             List<string> list = new List<string>();
             int numItems = 0;
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 numItems += cnt;
-                if (index > numItems)
-                {
+                if (index > numItems) {
                     id++;
                     chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
                     cnt = await chain.GetCountAsync();
-                    continue;
                 }
-                else
-                {
-                    int stdIndex = index - ((Convert.ToInt32(id) - 1) * 1000);
+                else {
+                    int stdIndex = index - (Convert.ToInt32(id) - 1) * 1000;
                     List<string> chainList = await chain.GetListAsync();
 
-                    if (pageSize <= cnt - index)
-                    {
+                    if (pageSize <= cnt - index) {
                         list.AddRange(chainList.Skip(stdIndex).Take(pageSize));
-                        return await Task.FromResult<List<string>>(list);
+                        return await Task.FromResult(list);
                     }
-                    else if (pageSize > cnt - index)
-                    {
+
+                    if (pageSize > cnt - index) {
                         list.AddRange(chainList.Skip(stdIndex).Take(cnt - index));
-                        pageSize -= (cnt - index);
+                        pageSize -= cnt - index;
                     }
                 }
             }
 
-            return await Task.FromResult<List<string>>(list);
+            return await Task.FromResult(list);
         }
 
         public async Task<List<string>> GetListAsync(int index, int pageSize, string filter)
         {
-            if (index < 0)
+            if (index < 0) {
                 throw new IndexOutOfRangeException(nameof(index));
+            }
 
-            if (pageSize < 0)
+            if (pageSize < 0) {
                 throw new IndexOutOfRangeException(nameof(pageSize));
+            }
 
             _ = filter ?? throw new ArgumentNullException(nameof(filter));
 
@@ -201,41 +199,37 @@ namespace Piraeus.Grains
 
             int cnt = await chain.GetCountAsync();
 
-            if (cnt == 0)
-                return await Task.FromResult<List<string>>(new List<string>());
+            if (cnt == 0) {
+                return await Task.FromResult(new List<string>());
+            }
 
             List<string> list = new List<string>();
 
-            while (cnt > 0)
-            {
+            while (cnt > 0) {
                 int filterCount = +await chain.GetCountAsync(filter);
 
-                if (index > filterCount)
-                {
+                if (index > filterCount) {
                     id++;
                     chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
                     cnt = await chain.GetCountAsync();
-                    continue;
                 }
-                else
-                {
-                    int stdIndex = index - ((Convert.ToInt32(id) - 1) * 1000);
+                else {
+                    int stdIndex = index - (Convert.ToInt32(id) - 1) * 1000;
                     List<string> chainList = await chain.GetListAsync(filter);
 
-                    if (pageSize <= filterCount - index)
-                    {
+                    if (pageSize <= filterCount - index) {
                         list.AddRange(chainList.Skip(stdIndex).Take(pageSize));
-                        return await Task.FromResult<List<string>>(list);
+                        return await Task.FromResult(list);
                     }
-                    else if (pageSize > filterCount - index)
-                    {
+
+                    if (pageSize > filterCount - index) {
                         list.AddRange(chainList.Skip(stdIndex).Take(filterCount - index));
-                        pageSize -= (filterCount - index);
+                        pageSize -= filterCount - index;
                     }
                 }
             }
 
-            return await Task.FromResult<List<string>>(list);
+            return await Task.FromResult(list);
         }
 
         public async Task<ListContinuationToken> GetListAsync(ListContinuationToken token)
@@ -247,26 +241,15 @@ namespace Piraeus.Grains
 
             _ = token.Filter != null ? await chain.GetCountAsync(token.Filter) : await chain.GetCountAsync();
 
-            if (token.Filter != null)
-            {
+            if (token.Filter != null) {
                 List<string> filterItems = await GetListAsync(token.Index, token.PageSize, token.Filter);
-                return await Task.FromResult<ListContinuationToken>(new ListContinuationToken(token.Index + filterItems.Count, token.Quantity, token.PageSize, token.Filter, filterItems));
+                return await Task.FromResult(new ListContinuationToken(token.Index + filterItems.Count, token.Quantity,
+                    token.PageSize, token.Filter, filterItems));
             }
-            else
-            {
-                List<string> items = await GetListAsync(token.Index, token.PageSize);
-                return await Task.FromResult<ListContinuationToken>(new ListContinuationToken(token.Index + items.Count, token.Quantity, token.PageSize, items));
-            }
-        }
 
-        public override Task OnActivateAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
+            List<string> items = await GetListAsync(token.Index, token.PageSize);
+            return await Task.FromResult(new ListContinuationToken(token.Index + items.Count, token.Quantity,
+                token.PageSize, items));
         }
 
         public async Task RemoveAsync(string resourceUriString)
@@ -277,7 +260,17 @@ namespace Piraeus.Grains
             ISigmaAlgebraChain chain = GrainFactory.GetGrain<ISigmaAlgebraChain>(id);
             bool result = await chain.RemoveAsync(resourceUriString);
             await logger?.LogInformationAsync($"SigmaAlgebra removed {result} on {resourceUriString}.");
-            await Task.FromResult<bool>(result);
+            await Task.FromResult(result);
+        }
+
+        public override Task OnActivateAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
         }
     }
 }

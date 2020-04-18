@@ -1,4 +1,9 @@
-﻿using Capl.Authorization;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Capl.Authorization;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Clustering.Redis;
@@ -8,42 +13,33 @@ using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using Piraeus.Core.Utilities;
 using Piraeus.GrainInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Piraeus.Grains
 {
     public class GraphManager
     {
-        private static GraphManager instance;
-
         private readonly IClusterClient client;
 
-        public static GraphManager Instance => instance;
+        public static GraphManager Instance { get; private set; }
 
-        public static bool IsInitialized => instance != null && instance.client != null;
+        public static bool IsInitialized => Instance != null && Instance.client != null;
 
         public static GraphManager Create(IClusterClient client)
         {
-            if (instance == null)
-            {
-                instance = new GraphManager(client);
+            if (Instance == null) {
+                Instance = new GraphManager(client);
             }
 
-            return instance;
+            return Instance;
         }
 
         public static GraphManager Create(OrleansConfig config)
         {
-            if (instance == null)
-            {
-                instance = new GraphManager(config);
+            if (Instance == null) {
+                Instance = new GraphManager(config);
             }
 
-            return instance;
+            return Instance;
         }
 
         #region Static Resource Operations
@@ -56,11 +52,13 @@ namespace Piraeus.Grains
         }
 
         public GraphManager(OrleansConfig config)
-        : this(config.DataConnectionString, config.GetLoggerTypes(), Enum.Parse<LogLevel>(config.LogLevel, true), config.InstrumentationKey)
+            : this(config.DataConnectionString, config.GetLoggerTypes(), Enum.Parse<LogLevel>(config.LogLevel, true),
+                config.InstrumentationKey)
         {
         }
 
-        public GraphManager(string connectionString, LoggerType loggers, LogLevel logLevel, string instrumentationKey = null)
+        public GraphManager(string connectionString, LoggerType loggers, LogLevel logLevel,
+            string instrumentationKey = null)
         {
             ClientBuilder builder = new ClientBuilder();
             builder.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IPiSystem).Assembly));
@@ -72,15 +70,14 @@ namespace Piraeus.Grains
             client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
         }
 
-        private IClientBuilder AddAppInsighlts(IClientBuilder builder, LoggerType loggers, string instrumentationKey = null)
+        private IClientBuilder AddAppInsighlts(IClientBuilder builder, LoggerType loggers,
+            string instrumentationKey = null)
         {
-            if (string.IsNullOrEmpty(instrumentationKey))
-            {
+            if (string.IsNullOrEmpty(instrumentationKey)) {
                 return builder;
             }
 
-            if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
-            {
+            if (loggers.HasFlag(LoggerType.AppInsights)) {
                 builder.AddApplicationInsightsTelemetryConsumer(instrumentationKey);
             }
 
@@ -91,14 +88,12 @@ namespace Piraeus.Grains
         {
             builder.ConfigureLogging(op =>
             {
-                if (loggers.HasFlag(Piraeus.Configuration.LoggerType.Console))
-                {
+                if (loggers.HasFlag(LoggerType.Console)) {
                     op.AddConsole();
                     op.SetMinimumLevel(logLevel);
                 }
 
-                if (loggers.HasFlag(Piraeus.Configuration.LoggerType.Debug))
-                {
+                if (loggers.HasFlag(LoggerType.Debug)) {
                     op.AddDebug();
                     op.SetMinimumLevel(logLevel);
                 }
@@ -109,18 +104,14 @@ namespace Piraeus.Grains
 
         private IClientBuilder AddStorageProvider(IClientBuilder builder, string connectionString)
         {
-            if (string.IsNullOrEmpty(connectionString))
-            {
+            if (string.IsNullOrEmpty(connectionString)) {
                 builder.UseLocalhostClustering();
             }
-            else
-            {
-                if (connectionString.Contains("6379") || connectionString.Contains("6380"))
-                {
+            else {
+                if (connectionString.Contains("6379") || connectionString.Contains("6380")) {
                     builder.UseRedisGatewayListProvider(options => options.ConnectionString = connectionString);
                 }
-                else
-                {
+                else {
                     builder.UseAzureStorageClustering(options => options.ConnectionString = connectionString);
                 }
             }
@@ -136,9 +127,9 @@ namespace Piraeus.Grains
             async Task<bool> RetryFilter(Exception exception)
             {
                 attempt++;
-                Console.WriteLine($"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
-                if (attempt > maxAttempts)
-                {
+                Console.WriteLine(
+                    $"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
+                if (attempt > maxAttempts) {
                     return false;
                 }
 
@@ -149,14 +140,16 @@ namespace Piraeus.Grains
 
         #endregion ctor
 
-        public async Task<string> AddResourceObserverAsync(string resourceUriString, TimeSpan lifetime, MetricObserver observer)
+        public async Task<string> AddResourceObserverAsync(string resourceUriString, TimeSpan lifetime,
+            MetricObserver observer)
         {
             IMetricObserver objRef = await client.CreateObjectReference<IMetricObserver>(observer);
             IPiSystem resource = GetPiSystem(resourceUriString);
             return await resource.AddObserverAsync(lifetime, objRef);
         }
 
-        public async Task<string> AddResourceObserverAsync(string resourceUriString, TimeSpan lifetime, ErrorObserver observer)
+        public async Task<string> AddResourceObserverAsync(string resourceUriString, TimeSpan lifetime,
+            ErrorObserver observer)
         {
             IErrorObserver objRef = await client.CreateObjectReference<IErrorObserver>(observer);
             IPiSystem resource = GetPiSystem(resourceUriString);
@@ -200,7 +193,8 @@ namespace Piraeus.Grains
             await resource.PublishAsync(message);
         }
 
-        public async Task PublishAsync(string resourceUriString, EventMessage message, List<KeyValuePair<string, string>> indexes)
+        public async Task PublishAsync(string resourceUriString, EventMessage message,
+            List<KeyValuePair<string, string>> indexes)
         {
             IPiSystem resource = GetPiSystem(resourceUriString);
             await resource.PublishAsync(message, indexes);
@@ -212,7 +206,8 @@ namespace Piraeus.Grains
             await resource.RemoveObserverAsync(leaseKey);
         }
 
-        public async Task<bool> RenewResourceObserverLeaseAsync(string resourceUriString, string leaseKey, TimeSpan lifetime)
+        public async Task<bool> RenewResourceObserverLeaseAsync(string resourceUriString, string leaseKey,
+            TimeSpan lifetime)
         {
             IPiSystem resource = GetPiSystem(resourceUriString);
             return await resource.RenewObserverLeaseAsync(leaseKey, lifetime);
@@ -221,7 +216,7 @@ namespace Piraeus.Grains
         public async Task<string> SubscribeAsync(string resourceUriString, SubscriptionMetadata metadata)
         {
             Uri uri = new Uri(resourceUriString);
-            string subscriptionUriString = uri.ToCanonicalString(true) + Guid.NewGuid().ToString();
+            string subscriptionUriString = uri.ToCanonicalString(true) + Guid.NewGuid();
             metadata.SubscriptionUriString = subscriptionUriString;
 
             ISubscription subscription = GetSubscription(subscriptionUriString);
@@ -263,21 +258,24 @@ namespace Piraeus.Grains
 
         #region Static Subscription Operations
 
-        public async Task<string> AddSubscriptionObserverAsync(string subscriptionUriString, TimeSpan lifetime, MessageObserver observer)
+        public async Task<string> AddSubscriptionObserverAsync(string subscriptionUriString, TimeSpan lifetime,
+            MessageObserver observer)
         {
             IMessageObserver observerRef = await client.CreateObjectReference<IMessageObserver>(observer);
             ISubscription subscription = GetSubscription(subscriptionUriString);
             return await subscription.AddObserverAsync(lifetime, observerRef);
         }
 
-        public async Task<string> AddSubscriptionObserverAsync(string subscriptionUriString, TimeSpan lifetime, MetricObserver observer)
+        public async Task<string> AddSubscriptionObserverAsync(string subscriptionUriString, TimeSpan lifetime,
+            MetricObserver observer)
         {
             IMetricObserver observerRef = await client.CreateObjectReference<IMetricObserver>(observer);
             ISubscription subscription = GetSubscription(subscriptionUriString);
             return await subscription.AddObserverAsync(lifetime, observerRef);
         }
 
-        public async Task<string> AddSubscriptionObserverAsync(string subscriptionUriString, TimeSpan lifetime, ErrorObserver observer)
+        public async Task<string> AddSubscriptionObserverAsync(string subscriptionUriString, TimeSpan lifetime,
+            ErrorObserver observer)
         {
             IErrorObserver observerRef = await client.CreateObjectReference<IErrorObserver>(observer);
             ISubscription subscription = GetSubscription(subscriptionUriString);
@@ -309,7 +307,8 @@ namespace Piraeus.Grains
             await subscription.RemoveObserverAsync(leaseKey);
         }
 
-        public async Task<bool> RenewObserverLeaseAsync(string subscriptionUriString, string leaseKey, TimeSpan lifetime)
+        public async Task<bool> RenewObserverLeaseAsync(string subscriptionUriString, string leaseKey,
+            TimeSpan lifetime)
         {
             ISubscription subscription = GetSubscription(subscriptionUriString);
             return await subscription.RenewObserverLeaseAsync(leaseKey, lifetime);
@@ -335,8 +334,7 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null)
-            {
+            if (subscriber != null) {
                 await subscriber.AddSubscriptionAsync(subscriptionUriString);
             }
         }
@@ -345,16 +343,14 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null)
-            {
+            if (subscriber != null) {
                 await subscriber.ClearAsync();
             }
         }
 
         public ISubscriber GetSubscriber(string identity)
         {
-            if (string.IsNullOrEmpty(identity))
-            {
+            if (string.IsNullOrEmpty(identity)) {
                 return null;
             }
 
@@ -365,22 +361,18 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null)
-            {
+            if (subscriber != null) {
                 return await subscriber.GetSubscriptionsAsync();
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public async Task RemoveSubscriberSubscriptionAsync(string identity, string subscriptionUriString)
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null)
-            {
+            if (subscriber != null) {
                 await subscriber.RemoveSubscriptionAsync(subscriptionUriString);
             }
         }
@@ -450,20 +442,19 @@ namespace Piraeus.Grains
         {
             IServiceIdentity identity = GetServiceIdentity(key);
             X509Certificate2 cert = new X509Certificate2(path, password);
-            if (cert != null)
-            {
+            if (cert != null) {
                 byte[] certBytes = cert.Export(X509ContentType.Pfx, password);
                 await identity.AddCertificateAsync(certBytes);
             }
         }
 
-        public async Task AddServiceIdentityCertificateAsync(string key, string store, string location, string thumbprint, string password)
+        public async Task AddServiceIdentityCertificateAsync(string key, string store, string location,
+            string thumbprint, string password)
         {
             IServiceIdentity identity = GetServiceIdentity(key);
             X509Certificate2 cert = GetLocalCertificate(store, location, thumbprint);
 
-            if (cert != null)
-            {
+            if (cert != null) {
                 byte[] certBytes = cert.Export(X509ContentType.Pfx, password);
                 await identity.AddCertificateAsync(certBytes);
             }
@@ -482,8 +473,7 @@ namespace Piraeus.Grains
 
         private static X509Certificate2 GetLocalCertificate(string store, string location, string thumbprint)
         {
-            if (string.IsNullOrEmpty(store) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(thumbprint))
-            {
+            if (string.IsNullOrEmpty(store) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(thumbprint)) {
                 return null;
             }
 
@@ -496,14 +486,11 @@ namespace Piraeus.Grains
             certStore.Open(OpenFlags.ReadOnly);
 
             X509Certificate2Collection certCollection =
-              certStore.Certificates.Find(X509FindType.FindByThumbprint,
-                                      thumbprint.ToUpper(), false);
+                certStore.Certificates.Find(X509FindType.FindByThumbprint,
+                    thumbprint.ToUpper(), false);
             X509Certificate2Enumerator enumerator = certCollection.GetEnumerator();
             X509Certificate2 cert = null;
-            while (enumerator.MoveNext())
-            {
-                cert = enumerator.Current;
-            }
+            while (enumerator.MoveNext()) cert = enumerator.Current;
             return cert;
         }
 

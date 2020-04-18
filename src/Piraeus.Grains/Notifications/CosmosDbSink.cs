@@ -1,4 +1,11 @@
-﻿using Microsoft.Azure.Documents;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Threading.Tasks;
+using System.Web;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Piraeus.Auditing;
 using Piraeus.Core.Logging;
@@ -6,13 +13,6 @@ using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Mqtt;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -59,21 +59,16 @@ namespace Piraeus.Grains.Notifications
 
             symmetricKey = metadata.SymmetricKey;
 
-            if (!int.TryParse(nvc["clients"], out clientCount))
-            {
+            if (!int.TryParse(nvc["clients"], out clientCount)) {
                 clientCount = 1;
             }
 
-            if (!int.TryParse(nvc["delay"], out delay))
-            {
+            if (!int.TryParse(nvc["delay"], out delay)) {
                 delay = 1000;
             }
 
             storageArray = new DocumentClient[clientCount];
-            for (int i = 0; i < clientCount; i++)
-            {
-                storageArray[i] = new DocumentClient(documentDBUri, symmetricKey);
-            }
+            for (int i = 0; i < clientCount; i++) storageArray[i] = new DocumentClient(documentDBUri, symmetricKey);
 
             database = GetDatabaseAsync().GetAwaiter().GetResult();
 
@@ -85,98 +80,98 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
             queue.Enqueue(message);
-            try
-            {
-                while (!queue.IsEmpty)
-                {
+            try {
+                while (!queue.IsEmpty) {
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     bool isdequeued = queue.TryDequeue(out EventMessage msg);
 
-                    if (isdequeued)
-                    {
+                    if (isdequeued) {
                         payload = GetPayload(message);
-                        if (payload == null)
-                        {
-                            await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink because message is null.");
+                        if (payload == null) {
+                            await logger?.LogWarningAsync(
+                                $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink because message is null.");
                             continue;
                         }
 
-                        using (MemoryStream stream = new MemoryStream(payload))
-                        {
+                        using (MemoryStream stream = new MemoryStream(payload)) {
                             stream.Position = 0;
-                            if (message.ContentType.Contains("json"))
-                            {
-                                await storageArray[arrayIndex].CreateDocumentAsync(collection.SelfLink, Microsoft.Azure.Documents.Resource.LoadFrom<Document>(stream));
+                            if (message.ContentType.Contains("json")) {
+                                await storageArray[arrayIndex].CreateDocumentAsync(collection.SelfLink,
+                                    JsonSerializable.LoadFrom<Document>(stream));
                             }
-                            else
-                            {
-                                dynamic documentWithAttachment = new
-                                {
+                            else {
+                                dynamic documentWithAttachment = new {
                                     Id = Guid.NewGuid().ToString(),
                                     Timestamp = DateTime.UtcNow
                                 };
 
-                                Document doc = await storageArray[arrayIndex].CreateDocumentAsync(collection.SelfLink, documentWithAttachment);
+                                Document doc = await storageArray[arrayIndex]
+                                    .CreateDocumentAsync(collection.SelfLink, documentWithAttachment);
                                 string slug = GetSlug(documentWithAttachment.Id, message.ContentType);
-                                await storageArray[arrayIndex].CreateAttachmentAsync(doc.AttachmentsLink, stream, new MediaOptions { ContentType = message.ContentType, Slug = slug });
+                                await storageArray[arrayIndex].CreateAttachmentAsync(doc.AttachmentsLink, stream,
+                                    new MediaOptions {ContentType = message.ContentType, Slug = slug});
                             }
                         }
 
-                        if (message.Audit)
-                        {
-                            record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "CosmosDB", "CosmoDB", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                        if (message.Audit) {
+                            record = new MessageAuditRecord(message.MessageId,
+                                uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
+                                "CosmosDB", "CosmoDB", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink.");
-                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "CosmosDB", "CosmosDB", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink.");
+                record = new MessageAuditRecord(message.MessageId,
+                    uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "CosmosDB",
+                    "CosmosDB", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally
-            {
-                if (record != null && message.Audit)
+            finally {
+                if (record != null && message.Audit) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
         private async Task<DocumentCollection> GetCollectionAsync(string dbLink, string id)
         {
             List<DocumentCollection> collections = await ReadCollectionsFeedAsync(dbLink);
-            if (collections != null)
-            {
-                foreach (DocumentCollection collection in collections)
-                    if (collection.Id == id)
+            if (collections != null) {
+                foreach (DocumentCollection collection in collections) {
+                    if (collection.Id == id) {
                         return collection;
+                    }
+                }
             }
 
-            return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection() { Id = id });
+            return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection {Id = id});
         }
 
         private async Task<Database> GetDatabaseAsync()
         {
-            try
-            {
+            try {
                 List<Database> dbs = await ListDatabasesAsync();
 
-                foreach (Database db in dbs)
-                    if (db.Id == databaseId)
+                foreach (Database db in dbs) {
+                    if (db.Id == databaseId) {
                         return db;
+                    }
+                }
 
-                return await storageArray[0].CreateDatabaseAsync(new Database { Id = databaseId });
+                return await storageArray[0].CreateDatabaseAsync(new Database {Id = databaseId});
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink failed to get database.");
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink failed to get database.");
                 throw;
             }
         }
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol)
-            {
+            switch (message.Protocol) {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
@@ -198,18 +193,15 @@ namespace Piraeus.Grains.Notifications
 
         private string GetSlug(string id, string contentType)
         {
-            if (contentType.Contains("text"))
-            {
+            if (contentType.Contains("text")) {
                 return id + ".txt";
             }
-            else if (contentType.Contains("xml"))
-            {
+
+            if (contentType.Contains("xml")) {
                 return id + ".xml";
             }
-            else
-            {
-                return id;
-            }
+
+            return id;
         }
 
         private async Task<List<Database>> ListDatabasesAsync()
@@ -217,23 +209,17 @@ namespace Piraeus.Grains.Notifications
             string continuation = null;
             List<Database> databases = new List<Database>();
 
-            do
-            {
-                FeedOptions options = new FeedOptions
-                {
+            do {
+                FeedOptions options = new FeedOptions {
                     RequestContinuation = continuation,
                     MaxItemCount = 50
                 };
 
                 FeedResponse<Database> response = await storageArray[0].ReadDatabaseFeedAsync(options);
-                foreach (Database db in response)
-                {
-                    databases.Add(db);
-                }
+                foreach (Database db in response) databases.Add(db);
 
                 continuation = response.ResponseContinuation;
-            }
-            while (!string.IsNullOrEmpty(continuation));
+            } while (!string.IsNullOrEmpty(continuation));
 
             return databases;
         }
@@ -242,31 +228,26 @@ namespace Piraeus.Grains.Notifications
         {
             string continuation = null;
             List<DocumentCollection> collections = new List<DocumentCollection>();
-            try
-            {
-                do
-                {
-                    FeedOptions options = new FeedOptions
-                    {
+            try {
+                do {
+                    FeedOptions options = new FeedOptions {
                         RequestContinuation = continuation,
                         MaxItemCount = 50
                     };
 
-                    FeedResponse<DocumentCollection> response = await storageArray[0].ReadDocumentCollectionFeedAsync(databaseSelfLink, options);
+                    FeedResponse<DocumentCollection> response =
+                        await storageArray[0].ReadDocumentCollectionFeedAsync(databaseSelfLink, options);
 
-                    foreach (DocumentCollection col in response)
-                    {
-                        collections.Add(col);
-                    }
+                    foreach (DocumentCollection col in response) collections.Add(col);
 
                     continuation = response.ResponseContinuation;
                 } while (!string.IsNullOrEmpty(continuation));
 
                 return collections;
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink, failed to find collection.");
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink, failed to find collection.");
                 throw;
             }
         }

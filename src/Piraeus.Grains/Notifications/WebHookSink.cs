@@ -1,14 +1,14 @@
-﻿using Piraeus.Auditing;
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Piraeus.Auditing;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Mqtt;
-using System;
-using System.IO;
-using System.Net;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -32,16 +32,15 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
 
-            try
-            {
+            try {
                 payload = GetPayload(message);
-                if (payload == null)
-                {
-                    await logger?.LogWarningAsync("Subscription {0} could not write to web hook sink because payload was null.");
+                if (payload == null) {
+                    await logger?.LogWarningAsync(
+                        "Subscription {0} could not write to web hook sink because payload was null.");
                     return;
                 }
 
-                HttpWebRequest request = HttpWebRequest.Create(address) as HttpWebRequest;
+                HttpWebRequest request = WebRequest.Create(address) as HttpWebRequest;
                 request.ContentType = message.ContentType;
                 request.Method = "POST";
 
@@ -57,38 +56,41 @@ namespace Piraeus.Grains.Notifications
                 if (response.StatusCode == HttpStatusCode.Accepted ||
                     response.StatusCode == HttpStatusCode.OK ||
                     response.StatusCode == HttpStatusCode.NoContent ||
-                    response.StatusCode == HttpStatusCode.Created)
-                {
-                    await logger?.LogInformationAsync($"Subscription {metadata.SubscriptionUriString} web hook request is success.");
-                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                    response.StatusCode == HttpStatusCode.Created) {
+                    await logger?.LogInformationAsync(
+                        $"Subscription {metadata.SubscriptionUriString} web hook request is success.");
+                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length,
+                        MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
-                else
-                {
-                    await logger?.LogWarningAsync($"Subscription {metadata.SubscriptionUriString} web hook request returned an expected status code {response.StatusCode}");
-                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, string.Format("Rest request returned an expected status code {0}", response.StatusCode));
+                else {
+                    await logger?.LogWarningAsync(
+                        $"Subscription {metadata.SubscriptionUriString} web hook request returned an expected status code {response.StatusCode}");
+                    record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length,
+                        MessageDirectionType.Out, false, DateTime.UtcNow,
+                        string.Format("Rest request returned an expected status code {0}", response.StatusCode));
                 }
             }
-            catch (WebException we)
-            {
-                await logger?.LogErrorAsync(we, $"Subscription {metadata.SubscriptionUriString} web hook request sink.");
-                record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
+            catch (WebException we) {
+                await logger?.LogErrorAsync(we,
+                    $"Subscription {metadata.SubscriptionUriString} web hook request sink.");
+                record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length,
+                    MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 await logger?.LogErrorAsync(ex, $"Subscription {metadata.SubscriptionUriString} Web hook event sink.");
-                record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length,
+                    MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally
-            {
-                if (message.Audit && record != null)
+            finally {
+                if (message.Audit && record != null) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol)
-            {
+            switch (message.Protocol) {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
@@ -112,7 +114,7 @@ namespace Piraeus.Grains.Notifications
         {
             byte[] key = Convert.FromBase64String(metadata.SymmetricKey);
 
-            using HMAC hmac = HMACSHA256.Create();
+            using HMAC hmac = HMAC.Create();
             hmac.Key = key;
             return hmac.ComputeHash(payload);
         }

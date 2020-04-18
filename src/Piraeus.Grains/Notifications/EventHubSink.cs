@@ -1,15 +1,15 @@
-﻿using Microsoft.Azure.EventHubs;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
+using System.Web;
+using Microsoft.Azure.EventHubs;
 using Piraeus.Auditing;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Mqtt;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -48,26 +48,23 @@ namespace Piraeus.Grains.Notifications
             keyName = nvc["keyname"];
             partitionId = nvc["partitionid"];
             hubName = nvc["hub"];
-            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName, metadata.SymmetricKey);
+            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}",
+                uri.Authority, keyName, metadata.SymmetricKey);
 
-            if (!int.TryParse(nvc["clients"], out clientCount))
-            {
+            if (!int.TryParse(nvc["clients"], out clientCount)) {
                 clientCount = 1;
             }
 
-            if (!string.IsNullOrEmpty(partitionId))
-            {
+            if (!string.IsNullOrEmpty(partitionId)) {
                 senderArray = new PartitionSender[clientCount];
             }
 
             storageArray = new EventHubClient[clientCount];
-            for (int i = 0; i < clientCount; i++)
-            {
+            for (int i = 0; i < clientCount; i++) {
                 storageArray[i] = EventHubClient.CreateFromConnectionString(connectionString);
 
-                if (!string.IsNullOrEmpty(partitionId))
-                {
-                    senderArray[i] = storageArray[i].CreatePartitionSender(partitionId.ToString());
+                if (!string.IsNullOrEmpty(partitionId)) {
+                    senderArray[i] = storageArray[i].CreatePartitionSender(partitionId);
                 }
             }
         }
@@ -77,51 +74,55 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
 
-            try
-            {
+            try {
                 byte[] msg = GetPayload(message);
                 queue.Enqueue(msg);
 
-                while (!queue.IsEmpty)
-                {
+                while (!queue.IsEmpty) {
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     queue.TryDequeue(out payload);
 
-                    if (payload == null)
-                    {
-                        await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to event hub sink because message is null.");
+                    if (payload == null) {
+                        await logger?.LogWarningAsync(
+                            $"Subscription '{metadata.SubscriptionUriString}' message not written to event hub sink because message is null.");
                         return;
                     }
 
                     EventData data = new EventData(payload);
                     data.Properties.Add("Content-Type", message.ContentType);
 
-                    if (string.IsNullOrEmpty(partitionId))
+                    if (string.IsNullOrEmpty(partitionId)) {
                         await storageArray[arrayIndex].SendAsync(data);
-                    else
+                    }
+                    else {
                         await senderArray[arrayIndex].SendAsync(data);
+                    }
 
-                    if (message.Audit && record != null)
-                        record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                    if (message.Audit && record != null) {
+                        record = new MessageAuditRecord(message.MessageId,
+                            string.Format("sb://{0}/{1}", uri.Authority, hubName), "EventHub", "EventHub",
+                            payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid hub sink.");
-                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}", uri.Authority, hubName), "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid hub sink.");
+                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}", uri.Authority, hubName),
+                    "EventHub", "EventHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow,
+                    ex.Message);
                 throw;
             }
-            finally
-            {
-                if (message.Audit && record != null)
+            finally {
+                if (message.Audit && record != null) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol)
-            {
+            switch (message.Protocol) {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

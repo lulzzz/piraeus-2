@@ -1,4 +1,9 @@
-﻿using Microsoft.Azure.EventGrid;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
+using System.Web;
+using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Rest;
 using Piraeus.Auditing;
@@ -7,11 +12,6 @@ using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Mqtt;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -43,18 +43,14 @@ namespace Piraeus.Grains.Notifications
             topicKey = metadata.SymmetricKey;
             string uriString = new Uri(metadata.SubscriptionUriString).ToString();
             resourceUriString = uriString.Replace("/" + uri.Segments[^1], "");
-            if (!int.TryParse(nvc["clients"], out clientCount))
-            {
+            if (!int.TryParse(nvc["clients"], out clientCount)) {
                 clientCount = 1;
             }
 
             ServiceClientCredentials credentials = new TopicCredentials(topicKey);
 
             clients = new EventGridClient[clientCount];
-            for (int i = 0; i < clientCount; i++)
-            {
-                clients[i] = new EventGridClient(credentials);
-            }
+            for (int i = 0; i < clientCount; i++) clients[i] = new EventGridClient(credentials);
         }
 
         public override async Task SendAsync(EventMessage message)
@@ -62,64 +58,73 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
 
-            try
-            {
+            try {
                 arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                 payload = GetPayload(message);
-                if (payload == null)
-                {
-                    await logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink because message is null.");
+                if (payload == null) {
+                    await logger?.LogWarningAsync(
+                        $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink because message is null.");
                     return;
                 }
 
-                EventGridEvent gridEvent = new EventGridEvent(message.MessageId, resourceUriString, payload, resourceUriString, DateTime.UtcNow, "1.0");
-                IList<EventGridEvent> events = new List<EventGridEvent>(new EventGridEvent[] { gridEvent });
+                EventGridEvent gridEvent = new EventGridEvent(message.MessageId, resourceUriString, payload,
+                    resourceUriString, DateTime.UtcNow, "1.0");
+                IList<EventGridEvent> events = new List<EventGridEvent>(new[] {gridEvent});
                 Task task = clients[arrayIndex].PublishEventsAsync(topicHostname, events);
-                Task innerTask = task.ContinueWith(async (a) => { await FaultTask(message.MessageId, payload, message.Audit); }, TaskContinuationOptions.OnlyOnFaulted);
+                Task innerTask =
+                    task.ContinueWith(async a => { await FaultTask(message.MessageId, payload, message.Audit); },
+                        TaskContinuationOptions.OnlyOnFaulted);
                 await Task.WhenAll(task);
 
-                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(message.MessageId,
+                    uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
+                    "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink.");
-                record = new MessageAuditRecord(message.MessageId, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink.");
+                record = new MessageAuditRecord(message.MessageId,
+                    uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
+                    "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally
-            {
-                if (message.Audit && record != null)
+            finally {
+                if (message.Audit && record != null) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
         private async Task FaultTask(string id, byte[] payload, bool canAudit)
         {
             AuditRecord record = null;
-            try
-            {
+            try {
                 ServiceClientCredentials credentials = new TopicCredentials(topicKey);
                 EventGridClient client = new EventGridClient(credentials);
-                EventGridEvent gridEvent = new EventGridEvent(id, resourceUriString, payload, resourceUriString, DateTime.UtcNow, "1.0");
-                IList<EventGridEvent> events = new List<EventGridEvent>(new EventGridEvent[] { gridEvent });
+                EventGridEvent gridEvent = new EventGridEvent(id, resourceUriString, payload, resourceUriString,
+                    DateTime.UtcNow, "1.0");
+                IList<EventGridEvent> events = new List<EventGridEvent>(new[] {gridEvent});
                 await clients[arrayIndex].PublishEventsAsync(topicHostname, events);
-                record = new MessageAuditRecord(id, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(id,
+                    uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
+                    "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink in fault task.");
-                record = new MessageAuditRecord(id, uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid", "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink in fault task.");
+                record = new MessageAuditRecord(id,
+                    uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
+                    "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally
-            {
-                if (canAudit && record != null)
+            finally {
+                if (canAudit && record != null) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol)
-            {
+            switch (message.Protocol) {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

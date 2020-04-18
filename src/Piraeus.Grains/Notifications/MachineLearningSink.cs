@@ -1,13 +1,13 @@
-﻿using Piraeus.Auditing;
-using Piraeus.Core.Logging;
-using Piraeus.Core.Messaging;
-using Piraeus.Core.Metadata;
-using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Piraeus.Auditing;
+using Piraeus.Core.Logging;
+using Piraeus.Core.Messaging;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -37,32 +37,32 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
 
             HttpClient client = new HttpClient();
-            try
-            {
+            try {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-                HttpContent content = new StringContent(Encoding.UTF8.GetString(message.Message), Encoding.UTF8, "application/json");
+                HttpContent content = new StringContent(Encoding.UTF8.GetString(message.Message), Encoding.UTF8,
+                    "application/json");
                 HttpResponseMessage response = await client.PostAsync(uri, content);
-                if (response.IsSuccessStatusCode)
-                {
+                if (response.IsSuccessStatusCode) {
                     byte[] outMessage = await response.Content.ReadAsByteArrayAsync();
-                    EventMessage output = new EventMessage("application/json", outputPiSystem, message.Protocol, outMessage, DateTime.UtcNow, message.Audit);
+                    EventMessage output = new EventMessage("application/json", outputPiSystem, message.Protocol,
+                        outMessage, DateTime.UtcNow, message.Audit);
                     RaiseOnResponse(new EventSinkResponseArgs(output));
-                    record = new MessageAuditRecord(message.MessageId, $"ai://{uri.Authority}", "MachineLearning", "MachineLearning", message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                    record = new MessageAuditRecord(message.MessageId, $"ai://{uri.Authority}", "MachineLearning",
+                        "MachineLearning", message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
-                else
-                {
-                    record = new MessageAuditRecord(message.MessageId, $"ai://{uri.Authority}", "MachineLearning", "MachineLearning", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow);
+                else {
+                    record = new MessageAuditRecord(message.MessageId, $"ai://{uri.Authority}", "MachineLearning",
+                        "MachineLearning", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow);
                 }
             }
-            catch (Exception ex)
-            {
-                await logger?.LogErrorAsync(ex, $"Subscription {metadata.SubscriptionUriString} machine learning sink.");
-                record = new MessageAuditRecord(message.MessageId, $"ai://{uri.Authority}", "MachineLearning", "MachineLearning", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow);
+            catch (Exception ex) {
+                await logger?.LogErrorAsync(ex,
+                    $"Subscription {metadata.SubscriptionUriString} machine learning sink.");
+                record = new MessageAuditRecord(message.MessageId, $"ai://{uri.Authority}", "MachineLearning",
+                    "MachineLearning", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow);
             }
-            finally
-            {
-                if (record != null && message.Audit)
-                {
+            finally {
+                if (record != null && message.Audit) {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }

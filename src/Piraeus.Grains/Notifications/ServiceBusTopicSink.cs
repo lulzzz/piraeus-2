@@ -1,15 +1,15 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using System;
+using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Web;
+using Microsoft.Azure.ServiceBus;
 using Piraeus.Auditing;
 using Piraeus.Core.Logging;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Mqtt;
-using System;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -36,44 +36,43 @@ namespace Piraeus.Grains.Notifications
             keyName = nvc["keyname"];
             topic = nvc["topic"];
             string symmetricKey = metadata.SymmetricKey;
-            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName, symmetricKey);
+            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}",
+                uri.Authority, keyName, symmetricKey);
         }
 
         public override async Task SendAsync(EventMessage message)
         {
             AuditRecord record = null;
 
-            try
-            {
+            try {
                 byte[] payload = GetPayload(message);
-                if (payload == null)
-                {
-                    Trace.TraceWarning("Subscription {0} could not write to service bus sink because payload was either null or unknown protocol type.");
+                if (payload == null) {
+                    Trace.TraceWarning(
+                        "Subscription {0} could not write to service bus sink because payload was either null or unknown protocol type.");
                     return;
                 }
 
-                if (client == null)
-                {
+                if (client == null) {
                     client = new TopicClient(connectionString, topic);
                 }
 
-                Message brokerMessage = new Message(payload)
-                {
+                Message brokerMessage = new Message(payload) {
                     ContentType = message.ContentType,
                     MessageId = message.MessageId
                 };
                 await client.SendAsync(brokerMessage);
-                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic), "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic),
+                    "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, true,
+                    DateTime.UtcNow);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Trace.TraceError("Service bus failed to send to topic with error {0}", ex.Message);
-                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic), "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic),
+                    "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, false,
+                    DateTime.UtcNow, ex.Message);
             }
-            finally
-            {
-                if (message.Audit && record != null)
-                {
+            finally {
+                if (message.Audit && record != null) {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -81,8 +80,7 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol)
-            {
+            switch (message.Protocol) {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

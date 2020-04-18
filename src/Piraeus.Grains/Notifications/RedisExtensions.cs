@@ -1,9 +1,9 @@
-﻿namespace Piraeus.Grains.Notifications
-{
-    using StackExchange.Redis;
-    using System.IO;
-    using System.Runtime.Serialization.Formatters.Binary;
+﻿using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using StackExchange.Redis;
 
+namespace Piraeus.Grains.Notifications
+{
     public static class RedisExtensions
     {
         public static T Get<T>(this IDatabase database, string key)
@@ -25,8 +25,9 @@
 
         private static T Deserialize<T>(byte[] stream)
         {
-            if (stream == null)
+            if (stream == null) {
                 return default;
+            }
 
             BinaryFormatter binaryFormatter = new BinaryFormatter();
 
@@ -37,8 +38,7 @@
 
         private static byte[] Serialize(object o)
         {
-            if (o == null)
-            {
+            if (o == null) {
                 return null;
             }
 

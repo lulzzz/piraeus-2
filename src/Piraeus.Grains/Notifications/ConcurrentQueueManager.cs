@@ -1,6 +1,6 @@
-﻿using Piraeus.Core.Messaging;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Piraeus.Core.Messaging;
 
 namespace Piraeus.Grains.Notifications
 {
@@ -18,8 +18,7 @@ namespace Piraeus.Grains.Notifications
         public Task<EventMessage> DequeueAsync()
         {
             TaskCompletionSource<EventMessage> tcs = new TaskCompletionSource<EventMessage>();
-            if (!queue.IsEmpty)
-            {
+            if (!queue.IsEmpty) {
                 bool result = queue.TryDequeue(out EventMessage message);
 
                 tcs.SetResult(result ? message : null);
