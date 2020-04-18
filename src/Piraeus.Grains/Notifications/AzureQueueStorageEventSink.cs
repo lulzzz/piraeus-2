@@ -46,12 +46,10 @@ namespace Piraeus.Grains.Notifications
 
             if (sasUri == null) {
                 storage = QueueStorage.New(
-                    string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};",
-                        uri.Authority.Split(new[] {'.'})[0], metadata.SymmetricKey), 10000, 1000);
+                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] {'.'})[0]};AccountKey={metadata.SymmetricKey};", 10000, 1000);
             }
             else {
-                string connectionString = string.Format("BlobEndpoint={0};SharedAccessSignature={1}", queue,
-                    metadata.SymmetricKey);
+                string connectionString = $"BlobEndpoint={queue};SharedAccessSignature={metadata.SymmetricKey}";
                 storage = QueueStorage.New(connectionString, 1000, 5120000);
             }
         }
@@ -66,22 +64,21 @@ namespace Piraeus.Grains.Notifications
             try {
                 while (!loadQueue.IsEmpty) {
                     bool isdequeued = loadQueue.TryDequeue(out msg);
-                    if (isdequeued) {
-                        payload = GetPayload(msg);
-                        if (payload == null) {
-                            await logger?.LogWarningAsync(
-                                $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink because message is null.");
-                            return;
-                        }
+                    if (!isdequeued) continue;
+                    payload = GetPayload(msg);
+                    if (payload == null) {
+                        await logger?.LogWarningAsync(
+                            $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink because message is null.");
+                        return;
+                    }
 
-                        await storage.EnqueueAsync(queue, payload, ttl);
+                    await storage.EnqueueAsync(queue, payload, ttl);
 
-                        if (message.Audit) {
-                            record = new MessageAuditRecord(msg.MessageId,
-                                uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
-                                "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, true,
-                                DateTime.UtcNow);
-                        }
+                    if (message.Audit) {
+                        record = new MessageAuditRecord(msg.MessageId,
+                            uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
+                            "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, true,
+                            DateTime.UtcNow);
                     }
                 }
             }

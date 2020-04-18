@@ -36,8 +36,8 @@ namespace Piraeus.Grains.Notifications
             keyName = nvc["keyname"];
             topic = nvc["topic"];
             string symmetricKey = metadata.SymmetricKey;
-            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}",
-                uri.Authority, keyName, symmetricKey);
+            connectionString =
+                $"Endpoint=sb://{uri.Authority}/;SharedAccessKeyName={keyName};SharedAccessKey={symmetricKey}";
         }
 
         public override async Task SendAsync(EventMessage message)
@@ -67,7 +67,7 @@ namespace Piraeus.Grains.Notifications
             }
             catch (Exception ex) {
                 Trace.TraceError("Service bus failed to send to topic with error {0}", ex.Message);
-                record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}/{1}", uri.Authority, topic),
+                record = new MessageAuditRecord(message.MessageId, $"sb://{uri.Authority}/{topic}",
                     "ServiceBus", "ServiceBus", message.Message.Length, MessageDirectionType.Out, false,
                     DateTime.UtcNow, ex.Message);
             }

@@ -67,7 +67,7 @@ namespace Piraeus.Grains.Notifications
                         $"Subscription {metadata.SubscriptionUriString} web hook request returned an expected status code {response.StatusCode}");
                     record = new MessageAuditRecord(message.MessageId, address, "WebHook", "HTTP", payload.Length,
                         MessageDirectionType.Out, false, DateTime.UtcNow,
-                        string.Format("Rest request returned an expected status code {0}", response.StatusCode));
+                        $"Rest request returned an expected status code {response.StatusCode}");
                 }
             }
             catch (WebException we) {

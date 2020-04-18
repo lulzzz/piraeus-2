@@ -48,8 +48,8 @@ namespace Piraeus.Grains.Notifications
             keyName = nvc["keyname"];
             partitionId = nvc["partitionid"];
             hubName = nvc["hub"];
-            connectionString = string.Format("Endpoint=sb://{0}/;SharedAccessKeyName={1};SharedAccessKey={2}",
-                uri.Authority, keyName, metadata.SymmetricKey);
+            connectionString =
+                $"Endpoint=sb://{uri.Authority}/;SharedAccessKeyName={keyName};SharedAccessKey={metadata.SymmetricKey}";
 
             if (!int.TryParse(nvc["clients"], out clientCount)) {
                 clientCount = 1;
@@ -100,7 +100,7 @@ namespace Piraeus.Grains.Notifications
 
                     if (message.Audit && record != null) {
                         record = new MessageAuditRecord(message.MessageId,
-                            string.Format("sb://{0}/{1}", uri.Authority, hubName), "EventHub", "EventHub",
+                            $"sb://{uri.Authority}/{hubName}", "EventHub", "EventHub",
                             payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }

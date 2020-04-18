@@ -51,7 +51,7 @@ namespace Piraeus.Grains.Notifications
 
             auditor = AuditFactory.CreateSingleton().GetAuditor(AuditType.Message);
             uri = new Uri(metadata.NotifyAddress);
-            documentDBUri = new Uri(string.Format("https://{0}", uri.Authority));
+            documentDBUri = new Uri($"https://{uri.Authority}");
 
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
             databaseId = nvc["database"];
@@ -85,39 +85,39 @@ namespace Piraeus.Grains.Notifications
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     bool isdequeued = queue.TryDequeue(out EventMessage msg);
 
-                    if (isdequeued) {
-                        payload = GetPayload(message);
-                        if (payload == null) {
-                            await logger?.LogWarningAsync(
-                                $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink because message is null.");
-                            continue;
-                        }
+                    if (!isdequeued) continue;
+                    payload = GetPayload(message);
+                    if (payload == null) {
+                        await logger?.LogWarningAsync(
+                            $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink because message is null.");
+                        continue;
+                    }
 
-                        using (MemoryStream stream = new MemoryStream(payload)) {
-                            stream.Position = 0;
-                            if (message.ContentType.Contains("json")) {
-                                await storageArray[arrayIndex].CreateDocumentAsync(collection.SelfLink,
-                                    JsonSerializable.LoadFrom<Document>(stream));
-                            }
-                            else {
-                                dynamic documentWithAttachment = new {
-                                    Id = Guid.NewGuid().ToString(),
-                                    Timestamp = DateTime.UtcNow
-                                };
+                    await using MemoryStream stream = new MemoryStream(payload)
+                    {
+                        Position = 0
+                    };
+                    if (message.ContentType.Contains("json")) {
+                        await storageArray[arrayIndex].CreateDocumentAsync(collection.SelfLink,
+                            JsonSerializable.LoadFrom<Document>(stream));
+                    }
+                    else {
+                        dynamic documentWithAttachment = new {
+                            Id = Guid.NewGuid().ToString(),
+                            Timestamp = DateTime.UtcNow
+                        };
 
-                                Document doc = await storageArray[arrayIndex]
-                                    .CreateDocumentAsync(collection.SelfLink, documentWithAttachment);
-                                string slug = GetSlug(documentWithAttachment.Id, message.ContentType);
-                                await storageArray[arrayIndex].CreateAttachmentAsync(doc.AttachmentsLink, stream,
-                                    new MediaOptions {ContentType = message.ContentType, Slug = slug});
-                            }
-                        }
+                        Document doc = await storageArray[arrayIndex]
+                            .CreateDocumentAsync(collection.SelfLink, documentWithAttachment);
+                        string slug = GetSlug(documentWithAttachment.Id, message.ContentType);
+                        await storageArray[arrayIndex].CreateAttachmentAsync(doc.AttachmentsLink, stream,
+                            new MediaOptions {ContentType = message.ContentType, Slug = slug});
+                    }
 
-                        if (message.Audit) {
-                            record = new MessageAuditRecord(message.MessageId,
-                                uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
-                                "CosmosDB", "CosmoDB", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
-                        }
+                    if (message.Audit) {
+                        record = new MessageAuditRecord(message.MessageId,
+                            uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
+                            "CosmosDB", "CosmoDB", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace Piraeus.Grains.Notifications
                 };
 
                 FeedResponse<Database> response = await storageArray[0].ReadDatabaseFeedAsync(options);
-                foreach (Database db in response) databases.Add(db);
+                databases.AddRange(response);
 
                 continuation = response.ResponseContinuation;
             } while (!string.IsNullOrEmpty(continuation));
@@ -238,7 +238,7 @@ namespace Piraeus.Grains.Notifications
                     FeedResponse<DocumentCollection> response =
                         await storageArray[0].ReadDocumentCollectionFeedAsync(databaseSelfLink, options);
 
-                    foreach (DocumentCollection col in response) collections.Add(col);
+                    collections.AddRange(response);
 
                     continuation = response.ResponseContinuation;
                 } while (!string.IsNullOrEmpty(continuation));

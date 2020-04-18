@@ -52,15 +52,15 @@ namespace Piraeus.Grains.Notifications
             nvc.Remove("audience");
 
             string uriString = nvc.Count == 0
-                ? string.Format("{0}{1}{2}{3}", uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.LocalPath)
-                : string.Format("{0}{1}{2}{3}?", uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.LocalPath);
+                ? $"{uri.Scheme}{Uri.SchemeDelimiter}{uri.Authority}{uri.LocalPath}"
+                : $"{uri.Scheme}{Uri.SchemeDelimiter}{uri.Authority}{uri.LocalPath}?";
 
             StringBuilder builder = new StringBuilder();
             builder.Append(uriString);
             for (int i = 0; i < nvc.Count; i++) {
                 string key = nvc.GetKey(i);
                 string value = nvc[key];
-                builder.Append(string.Format("{0}={1}", key, value));
+                builder.Append($"{key}={value}");
                 if (i < nvc.Count - 1) {
                     builder.Append("&");
                 }
@@ -118,8 +118,7 @@ namespace Piraeus.Grains.Notifications
                 }
                 catch (WebException we) {
                     string faultMessage =
-                        string.Format("subscription '{0}' with status code '{1}' and error message '{2}'",
-                            metadata.SubscriptionUriString, we.Status.ToString(), we.Message);
+                        $"subscription '{metadata.SubscriptionUriString}' with status code '{we.Status.ToString()}' and error message '{we.Message}'";
                     Trace.TraceError(faultMessage);
                     record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length,
                         MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);

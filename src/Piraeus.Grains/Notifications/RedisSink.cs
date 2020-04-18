@@ -48,8 +48,7 @@ namespace Piraeus.Grains.Notifications
 
             uri = new Uri(metadata.NotifyAddress);
 
-            connectionString = string.Format("{0}:6380,password={1},ssl=True,abortConnect=False", uri.Authority,
-                metadata.SymmetricKey);
+            connectionString = $"{uri.Authority}:6380,password={metadata.SymmetricKey},ssl=True,abortConnect=False";
 
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
 
@@ -78,10 +77,11 @@ namespace Piraeus.Grains.Notifications
             if (!string.IsNullOrEmpty(cacheClaimType)) {
                 ClaimsPrincipal principal = Thread.CurrentPrincipal as ClaimsPrincipal;
                 ClaimsIdentity identity = new ClaimsIdentity(principal.Claims);
-                if (identity.HasClaim(c =>
+                if (!identity.HasClaim(c => cacheClaimType.ToLowerInvariant() == c.Type.ToLowerInvariant())) {
+                    return null;
+                }
+
                 {
-                    return cacheClaimType.ToLowerInvariant() == c.Type.ToLowerInvariant();
-                })) {
                     Claim claim =
                         identity.FindFirst(
                             c =>
@@ -91,7 +91,6 @@ namespace Piraeus.Grains.Notifications
                     return claim?.Value;
                 }
 
-                return null;
             }
 
             return null;
@@ -142,7 +141,7 @@ namespace Piraeus.Grains.Notifications
 
                     record = new MessageAuditRecord(msg.MessageId,
                         uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
-                        string.Format("Redis({0})", dbNumber), string.Format("Redis({0})", dbNumber), payload.Length,
+                        $"Redis({dbNumber})", string.Format("Redis({0})", dbNumber), payload.Length,
                         MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
             }
@@ -150,7 +149,7 @@ namespace Piraeus.Grains.Notifications
                 Trace.TraceWarning("Initial Redis write error {0}", ex.Message);
                 record = new MessageAuditRecord(msg.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
-                    string.Format("Redis({0})", dbNumber), string.Format("Redis({0})", dbNumber), payload.Length,
+                    $"Redis({dbNumber})", string.Format("Redis({0})", dbNumber), payload.Length,
                     MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally {
@@ -190,14 +189,14 @@ namespace Piraeus.Grains.Notifications
 
                 record = new MessageAuditRecord(message.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
-                    string.Format("Redis({0})", db.Database), string.Format("Redis({0})", db.Database), payload.Length,
+                    $"Redis({db.Database})", $"Redis({db.Database})", payload.Length,
                     MessageDirectionType.Out, true, DateTime.UtcNow);
             }
             catch (Exception ex) {
                 Trace.TraceError(ex.Message);
                 record = new MessageAuditRecord(message.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
-                    string.Format("Redis({0})", db.Database), string.Format("Redis({0})", db.Database), payload.Length,
+                    $"Redis({db.Database})", $"Redis({db.Database})", payload.Length,
                     MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally {
@@ -205,9 +204,7 @@ namespace Piraeus.Grains.Notifications
                     await auditor?.WriteAuditRecordAsync(record);
                 }
 
-                if (conn != null) {
-                    conn.Dispose();
-                }
+                conn?.Dispose();
             }
         }
 

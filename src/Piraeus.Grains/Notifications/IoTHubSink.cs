@@ -77,7 +77,7 @@ namespace Piraeus.Grains.Notifications
                             method.SetPayloadJson(Encoding.UTF8.GetString(payload));
                             await serviceClient.InvokeDeviceMethodAsync(deviceId, method);
                             record = new MessageAuditRecord(message.MessageId,
-                                string.Format("iothub://{0}", uri.Authority), "IoTHub", "IoTHub", payload.Length,
+                                $"iothub://{uri.Authority}", "IoTHub", "IoTHub", payload.Length,
                                 MessageDirectionType.Out, true, DateTime.UtcNow);
                         }
                         else {
@@ -117,14 +117,14 @@ namespace Piraeus.Grains.Notifications
                     }
 
                     await deviceClient.SendEventAsync(msg);
-                    record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority),
+                    record = new MessageAuditRecord(message.MessageId, $"iothub://{uri.Authority}",
                         "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
                 else {
                     await logger?.LogWarningAsync(
                         $"Subscription '{metadata.SubscriptionUriString}' IoTHub sink has neither service or device client.");
                     Trace.TraceWarning("IoTHub subscription has neither Service or Device client");
-                    record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority),
+                    record = new MessageAuditRecord(message.MessageId, $"iothub://{uri.Authority}",
                         "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow,
                         "IoTHub subscription has neither service or device client");
                 }
@@ -132,7 +132,7 @@ namespace Piraeus.Grains.Notifications
             catch (Exception ex) {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to IoTHub sink.");
-                record = new MessageAuditRecord(message.MessageId, string.Format("iothub://{0}", uri.Authority),
+                record = new MessageAuditRecord(message.MessageId, $"iothub://{uri.Authority}",
                     "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally {
