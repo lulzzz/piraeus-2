@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Orleans;
@@ -8,11 +13,6 @@ using Piraeus.Core.Logging;
 using Piraeus.Grains;
 using SkunkLab.Channels;
 using SkunkLab.Security.Authentication;
-using System;
-using System.Collections.Generic;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Piraeus.WebSocketGateway.Middleware
 {
@@ -45,8 +45,7 @@ namespace Piraeus.WebSocketGateway.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            if (!context.WebSockets.IsWebSocketRequest)
-            {
+            if (!context.WebSockets.IsWebSocketRequest) {
                 return;
             }
 
@@ -74,27 +73,21 @@ namespace Piraeus.WebSocketGateway.Middleware
             logger.LogInformationAsync("Adapter closing.").GetAwaiter();
             ProtocolAdapter adapter = null;
 
-            try
-            {
-                if (container.ContainsKey(e.ChannelId))
-                {
+            try {
+                if (container.ContainsKey(e.ChannelId)) {
                     adapter = container[e.ChannelId];
                     logger.LogInformationAsync("Adapter on close channel id found adapter to dispose.").GetAwaiter();
                 }
-                else
-                {
+                else {
                     logger.LogInformationAsync("Adapter on close did not find a channel id available for the adapter.").GetAwaiter();
                 }
 
-                if ((adapter != null && adapter.Channel != null) && (adapter.Channel.State == ChannelState.Closed || adapter.Channel.State == ChannelState.Aborted || adapter.Channel.State == ChannelState.ClosedReceived || adapter.Channel.State == ChannelState.CloseSent))
-                {
+                if ((adapter != null && adapter.Channel != null) && (adapter.Channel.State == ChannelState.Closed || adapter.Channel.State == ChannelState.Aborted || adapter.Channel.State == ChannelState.ClosedReceived || adapter.Channel.State == ChannelState.CloseSent)) {
                     adapter.Dispose();
                     logger.LogInformationAsync("Adapter disposed.").GetAwaiter();
                 }
-                else
-                {
-                    try
-                    {
+                else {
+                    try {
                         logger.LogInformationAsync("Adpater trying to close channel.").GetAwaiter();
                         adapter.Channel.CloseAsync().GetAwaiter();
                         logger.LogInformationAsync("Adapter has closed the channel").GetAwaiter();
@@ -104,8 +97,7 @@ namespace Piraeus.WebSocketGateway.Middleware
                     logger.LogWarningAsync("Adapter disposed by default").GetAwaiter();
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger.LogErrorAsync(ex, "Adapter on close fault").GetAwaiter();
             }
         }
@@ -114,8 +106,7 @@ namespace Piraeus.WebSocketGateway.Middleware
         {
             logger.LogErrorAsync(e.Error, "Adapter OnError").GetAwaiter();
 
-            if (container.ContainsKey(e.ChannelId))
-            {
+            if (container.ContainsKey(e.ChannelId)) {
                 ProtocolAdapter adapter = container[e.ChannelId];
                 adapter.Channel.CloseAsync().GetAwaiter();
                 logger.LogWarningAsync("Adapter channel closed due to error.").GetAwaiter();

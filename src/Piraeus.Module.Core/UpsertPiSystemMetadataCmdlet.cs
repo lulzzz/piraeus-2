@@ -1,6 +1,6 @@
-﻿using Piraeus.Core.Metadata;
-using System;
+﻿using System;
 using System.Management.Automation;
+using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {

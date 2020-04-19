@@ -20,7 +20,8 @@ namespace SkunkLab.Channels.WebSocket
             }
             else {
                 if (receiveResult.EndOfMessage) {
-                    return receiveResult.MessageType switch {
+                    return receiveResult.MessageType switch
+                    {
                         WebSocketMessageType.Text => new WebSocketMessage(
                             BufferSliceToString(buffer, receiveResult.Count), WebSocketMessageType.Text),
                         WebSocketMessageType.Binary => new WebSocketMessage(
@@ -40,7 +41,8 @@ namespace SkunkLab.Channels.WebSocket
 
                     bytebuffer.Append(BufferSliceToByteArray(buffer, receiveResult.Count));
                     if (receiveResult.EndOfMessage) {
-                        return receiveResult.MessageType switch {
+                        return receiveResult.MessageType switch
+                        {
                             WebSocketMessageType.Text => new WebSocketMessage(bytebuffer.GetString(),
                                 WebSocketMessageType.Text),
                             WebSocketMessageType.Binary => new WebSocketMessage(bytebuffer.GetByteArray(),

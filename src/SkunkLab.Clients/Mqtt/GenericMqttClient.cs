@@ -1,10 +1,10 @@
-﻿using SkunkLab.Channels;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using SkunkLab.Channels;
 using SkunkLab.Protocols;
 using SkunkLab.Protocols.Mqtt;
 using SkunkLab.Protocols.Mqtt.Handlers;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Piraeus.Clients.Mqtt
 {
@@ -49,8 +49,7 @@ namespace Piraeus.Clients.Mqtt
 
             ConnectMessage msg = new ConnectMessage(clientId, username, password, keepaliveSeconds, cleanSession);
 
-            if (!channel.IsConnected)
-            {
+            if (!channel.IsConnected) {
                 await channel.OpenAsync();
                 Task task = channel.ReceiveAsync();
                 await Task.WhenAll(task);
@@ -70,8 +69,7 @@ namespace Piraeus.Clients.Mqtt
             ushort id = session.NewId();
             PublishMessage msg = new PublishMessage(dup, qos, retain, id, topic, data);
 
-            if (qos != QualityOfServiceLevelType.AtMostOnce)
-            {
+            if (qos != QualityOfServiceLevelType.AtMostOnce) {
                 session.Quarantine(msg, DirectionType.In);
             }
 
@@ -93,8 +91,7 @@ namespace Piraeus.Clients.Mqtt
         {
             Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>();
 
-            foreach (var tuple in subscriptions)
-            {
+            foreach (var tuple in subscriptions) {
                 dict.Add(tuple.Item1, tuple.Item2);
                 dispatcher.Register(tuple.Item1, tuple.Item3);
             }
@@ -115,8 +112,7 @@ namespace Piraeus.Clients.Mqtt
             UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
             await channel.SendAsync(msg.Encode());
 
-            foreach (string topic in topics)
-            {
+            foreach (string topic in topics) {
                 dispatcher.Unregister(topic);
             }
         }
@@ -142,8 +138,7 @@ namespace Piraeus.Clients.Mqtt
 
             MqttMessage response = handler.ProcessAsync().GetAwaiter().GetResult();
 
-            if (response != null)
-            {
+            if (response != null) {
                 channel.SendAsync(response.Encode()).GetAwaiter();
             }
         }

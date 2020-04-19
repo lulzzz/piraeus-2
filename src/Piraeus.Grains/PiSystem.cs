@@ -249,7 +249,8 @@ namespace Piraeus.Grains
                         List<Task> taskList = new List<Task>();
 
                         ISubscription[] subscriptions = State.Subscriptions.Values.ToArray();
-                        foreach (var item in subscriptions) taskList.Add(item.NotifyAsync(message, indexes));
+                        foreach (var item in subscriptions)
+                            taskList.Add(item.NotifyAsync(message, indexes));
 
                         await Task.WhenAll(taskList);
                     }

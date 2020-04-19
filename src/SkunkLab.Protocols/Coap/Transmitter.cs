@@ -173,9 +173,11 @@ namespace SkunkLab.Protocols.Coap
                     }
                 }
 
-                foreach (var item in retryRemoveList) retryContainer.Remove(item);
+                foreach (var item in retryRemoveList)
+                    retryContainer.Remove(item);
 
-                foreach (var item in kvpList) retryContainer[item.Key] = item.Value;
+                foreach (var item in kvpList)
+                    retryContainer[item.Key] = item.Value;
             }
         }
 
@@ -185,7 +187,8 @@ namespace SkunkLab.Protocols.Coap
 
             List<ushort> list = new List<ushort>();
             if (query != null && query.Count() > 0) {
-                foreach (var item in query) list.Add(item.Key);
+                foreach (var item in query)
+                    list.Add(item.Key);
             }
 
             foreach (var item in list) {

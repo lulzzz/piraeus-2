@@ -117,7 +117,8 @@ namespace SkunkLab.Protocols.Mqtt
                     }
                 }
 
-                foreach (var item in list) Remove(item);
+                foreach (var item in list)
+                    Remove(item);
             }
             catch { }
         }

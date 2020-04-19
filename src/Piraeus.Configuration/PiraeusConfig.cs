@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using Newtonsoft.Json;
 
 namespace Piraeus.Configuration
 {
@@ -214,8 +214,7 @@ namespace Piraeus.Configuration
         public X509Certificate2 GetClientCertificate()
         {
             string filename = ClientCertificateFilename ?? null;
-            if (filename != null)
-            {
+            if (filename != null) {
                 return new X509Certificate2(File.ReadAllBytes(filename));
             }
 
@@ -223,8 +222,7 @@ namespace Piraeus.Configuration
             string location = ClientCertificateLocation ?? null;
             string thumbprint = ClientCertificateThumbprint ?? null;
 
-            if (store != null && location != null && thumbprint != null)
-            {
+            if (store != null && location != null && thumbprint != null) {
                 return GetCertificateFromStore(store, location, thumbprint);
             }
 
@@ -233,30 +231,24 @@ namespace Piraeus.Configuration
 
         public List<KeyValuePair<string, string>> GetClientIndexes()
         {
-            if (clientIndexes == null)
-            {
-                if (ClientIdentityClaimTypes == null || ClientIdentityClaimKeys == null)
-                {
+            if (clientIndexes == null) {
+                if (ClientIdentityClaimTypes == null || ClientIdentityClaimKeys == null) {
                     return null;
                 }
 
                 string[] claimTypes = ClientIdentityClaimTypes.Split(";", StringSplitOptions.RemoveEmptyEntries);
                 string[] claimKeys = ClientIdentityClaimKeys.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                if (claimTypes == null && claimKeys == null)
-                {
+                if (claimTypes == null && claimKeys == null) {
                     return null;
                 }
-                else if (claimTypes != null && claimKeys != null && claimTypes.Length == claimKeys.Length)
-                {
+                else if (claimTypes != null && claimKeys != null && claimTypes.Length == claimKeys.Length) {
                     clientIndexes = new List<KeyValuePair<string, string>>();
-                    for (int index = 0; index < claimTypes.Length; index++)
-                    {
+                    for (int index = 0; index < claimTypes.Length; index++) {
                         clientIndexes.Add(new KeyValuePair<string, string>(claimTypes[index], claimKeys[index]));
                     }
                 }
-                else
-                {
+                else {
                     throw new IndexOutOfRangeException("Client claim types and values for indexing out of range.");
                 }
             }
@@ -269,34 +261,28 @@ namespace Piraeus.Configuration
             List<KeyValuePair<string, string>> container = new List<KeyValuePair<string, string>>();
 
             List<KeyValuePair<string, string>> clientIndexes = GetClientIndexes();
-            if (clientIndexes == null)
-            {
+            if (clientIndexes == null) {
                 return null;
             }
 
-            foreach (Claim claim in claims)
-            {
+            foreach (Claim claim in claims) {
                 var query = clientIndexes.Where((c) => c.Key == claim.Type.ToLowerInvariant());
-                foreach (KeyValuePair<string, string> kvp in query)
-                {
+                foreach (KeyValuePair<string, string> kvp in query) {
                     container.Add(new KeyValuePair<string, string>(kvp.Value, claim.Value));
                 }
             }
 
-            if (container.Count > 0)
-            {
+            if (container.Count > 0) {
                 return container;
             }
-            else
-            {
+            else {
                 return null;
             }
         }
 
         public LoggerType GetLoggerTypes()
         {
-            if (string.IsNullOrEmpty(LoggerTypes))
-            {
+            if (string.IsNullOrEmpty(LoggerTypes)) {
                 return default;
             }
 
@@ -314,12 +300,10 @@ namespace Piraeus.Configuration
         {
             string code = ManagementApiSecurityCodes;
             string[] result;
-            if (code.Contains(";"))
-            {
+            if (code.Contains(";")) {
                 result = code.Split(";", StringSplitOptions.RemoveEmptyEntries);
             }
-            else
-            {
+            else {
                 result = new string[1];
                 result[0] = code;
             }
@@ -329,8 +313,7 @@ namespace Piraeus.Configuration
         public X509Certificate2 GetServerCerticate()
         {
             string filename = ServerCertificateFilename ?? null;
-            if (!string.IsNullOrEmpty(filename))
-            {
+            if (!string.IsNullOrEmpty(filename)) {
                 return new X509Certificate2(filename, ServerCertificatePassword);
             }
 
@@ -338,8 +321,7 @@ namespace Piraeus.Configuration
             string location = ServerCertificateLocation ?? null;
             string thumbprint = ServerCertificateThumbprint ?? null;
 
-            if (!string.IsNullOrEmpty(store) && !string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(thumbprint))
-            {
+            if (!string.IsNullOrEmpty(store) && !string.IsNullOrEmpty(location) && !string.IsNullOrEmpty(thumbprint)) {
                 return GetCertificateFromStore(store, location, thumbprint);
             }
 
@@ -351,22 +333,18 @@ namespace Piraeus.Configuration
             string[] claimTypes = ServiceIdentityClaimTypes.Split(";", StringSplitOptions.RemoveEmptyEntries);
             string[] claimValues = ServiceIdentityClaimValues.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-            if (claimTypes == null && claimValues == null)
-            {
+            if (claimTypes == null && claimValues == null) {
                 return null;
             }
-            else if (claimTypes != null && claimValues != null && claimTypes.Length == claimTypes.Length)
-            {
+            else if (claimTypes != null && claimValues != null && claimTypes.Length == claimTypes.Length) {
                 List<Claim> list = new List<Claim>();
-                for (int index = 0; index < claimTypes.Length; index++)
-                {
+                for (int index = 0; index < claimTypes.Length; index++) {
                     list.Add(new Claim(claimTypes[index], claimValues[index]));
                 }
 
                 return list;
             }
-            else
-            {
+            else {
                 throw new IndexOutOfRangeException("Service claim types and values out of range.");
             }
         }
@@ -379,22 +357,18 @@ namespace Piraeus.Configuration
 
             X509Store x509Store = new X509Store(storeName, storeLocation);
 
-            try
-            {
+            try {
                 x509Store.Open(OpenFlags.ReadOnly);
                 X509Certificate2Collection collection = x509Store.Certificates;
-                foreach (var item in collection)
-                {
-                    if (item.Thumbprint == thumb)
-                    {
+                foreach (var item in collection) {
+                    if (item.Thumbprint == thumb) {
                         return item;
                     }
                 }
 
                 return null;
             }
-            finally
-            {
+            finally {
                 x509Store.Close();
             }
         }

@@ -70,7 +70,8 @@ namespace Piraeus.Module
                     :
                     uriString;
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

@@ -8,6 +8,8 @@
   <PropertyGroup>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <Version>3.1.6</Version>
+    <Description>Piraeus tcp gateway for dotnet core 3.1.</Description>
   </PropertyGroup>
 
   <ItemGroup>

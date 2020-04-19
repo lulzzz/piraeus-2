@@ -43,8 +43,8 @@ namespace SkunkLab.Security.Authentication
 
         public static string GetParsedClaimValue(string value)
         {
-            string[] parts = value.Split(new[] {','});
-            string[] item = parts[0].Split(new[] {'='});
+            string[] parts = value.Split(new[] { ',' });
+            string[] item = parts[0].Split(new[] { '=' });
             return item[1];
         }
 
@@ -61,7 +61,7 @@ namespace SkunkLab.Security.Authentication
 
             try {
                 X509Chain chain = new X509Chain();
-                X509ChainPolicy policy = new X509ChainPolicy {RevocationMode = mode, RevocationFlag = flag};
+                X509ChainPolicy policy = new X509ChainPolicy { RevocationMode = mode, RevocationFlag = flag };
                 chain.ChainPolicy = policy;
 
                 if (!chain.Build(clientCertificate)) {

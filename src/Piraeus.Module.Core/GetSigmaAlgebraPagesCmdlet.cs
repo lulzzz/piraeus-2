@@ -1,5 +1,5 @@
-﻿using Piraeus.Core.Messaging;
-using System.Management.Automation;
+﻿using System.Management.Automation;
+using Piraeus.Core.Messaging;
 
 namespace Piraeus.Module
 {

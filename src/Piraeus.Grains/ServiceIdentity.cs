@@ -24,7 +24,8 @@ namespace Piraeus.Grains
             }
 
             State.Claims = new List<KeyValuePair<string, string>>();
-            foreach (var claim in claims) State.Claims.Add(new KeyValuePair<string, string>(claim.Key, claim.Value));
+            foreach (var claim in claims)
+                State.Claims.Add(new KeyValuePair<string, string>(claim.Key, claim.Value));
 
             await Task.CompletedTask;
         }

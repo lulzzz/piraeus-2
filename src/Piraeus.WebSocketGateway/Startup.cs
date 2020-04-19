@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -10,7 +11,6 @@ using Piraeus.Extensions.Configuration;
 using Piraeus.Extensions.Logging;
 using Piraeus.Extensions.Orleans;
 using Piraeus.WebSocketGateway.Middleware;
-using System;
 
 namespace Piraeus.WebSocketGateway
 {
@@ -36,8 +36,7 @@ namespace Piraeus.WebSocketGateway
             services.AddTransientOrleansClusterClient(orleansConfig);
             LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights))
-            {
+            if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights)) {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
                     op.InstrumentationKey = config.InstrumentationKey;
@@ -45,10 +44,8 @@ namespace Piraeus.WebSocketGateway
                     op.EnableHeartbeat = true;
                 });
             }
-            else
-            {
-                if (!string.IsNullOrEmpty(config.InstrumentationKey))
-                {
+            else {
+                if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
                     services.AddApplicationInsightsTelemetry(config.InstrumentationKey);
                 }
             }

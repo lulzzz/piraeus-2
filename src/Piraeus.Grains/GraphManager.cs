@@ -490,7 +490,8 @@ namespace Piraeus.Grains
                     thumbprint.ToUpper(), false);
             X509Certificate2Enumerator enumerator = certCollection.GetEnumerator();
             X509Certificate2 cert = null;
-            while (enumerator.MoveNext()) cert = enumerator.Current;
+            while (enumerator.MoveNext())
+                cert = enumerator.Current;
             return cert;
         }
 

@@ -1,17 +1,17 @@
-﻿using Piraeus.Adapters;
-using Piraeus.Configuration;
-using Piraeus.Core;
-using Piraeus.Core.Logging;
-using Piraeus.Grains;
-using SkunkLab.Security.Authentication;
-using SkunkLab.Security.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Piraeus.Adapters;
+using Piraeus.Configuration;
+using Piraeus.Core;
+using Piraeus.Core.Logging;
+using Piraeus.Grains;
+using SkunkLab.Security.Authentication;
+using SkunkLab.Security.Tokens;
 
 namespace Piraeus.TcpGateway
 {
@@ -46,8 +46,7 @@ namespace Piraeus.TcpGateway
             this.orleansConfig = orleansConfig;
             this.logger = logger;
 
-            if (config.ClientTokenType != null && config.ClientSymmetricKey != null)
-            {
+            if (config.ClientTokenType != null && config.ClientSymmetricKey != null) {
                 SecurityTokenType stt = Enum.Parse<SecurityTokenType>(config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
@@ -69,8 +68,7 @@ namespace Piraeus.TcpGateway
             this.orleansConfig = orleansConfig;
             this.logger = logger;
 
-            if (config.ClientTokenType != null && config.ClientSymmetricKey != null)
-            {
+            if (config.ClientTokenType != null && config.ClientSymmetricKey != null) {
                 SecurityTokenType stt = (SecurityTokenType)System.Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
@@ -87,10 +85,8 @@ namespace Piraeus.TcpGateway
 
             await logger?.LogInformationAsync($"<----- TCP Listener started on Address {serverIP} and Port {serverPort} ----->");
 
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
+            while (!token.IsCancellationRequested) {
+                try {
                     TcpClient client = await listener.AcceptTcpClientAsync();
                     client.LingerState = new LingerOption(false, 0);
                     client.NoDelay = true;
@@ -98,8 +94,7 @@ namespace Piraeus.TcpGateway
                     client.Client.UseOnlyOverlappedIO = true;
                     ManageConnection(client);
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     OnError?.Invoke(this, new ServerFailedEventArgs("TCP", serverPort));
                     logger?.LogErrorAsync(ex, "TCP server listener failed to start '{ex.Message}'");
                 }
@@ -110,40 +105,31 @@ namespace Piraeus.TcpGateway
         {
             await logger?.LogInformationAsync($"TCP Listener stopping on Address {serverIP} and Port {serverPort}");
 
-            if (dict != null & dict.Count > 0)
-            {
+            if (dict != null & dict.Count > 0) {
                 var keys = dict.Keys;
-                if (keys != null && keys.Count > 0)
-                {
-                    try
-                    {
+                if (keys != null && keys.Count > 0) {
+                    try {
                         string[] keysArray = keys.ToArray();
-                        foreach (string key in keysArray)
-                        {
-                            if (dict.ContainsKey(key))
-                            {
+                        foreach (string key in keysArray) {
+                            if (dict.ContainsKey(key)) {
                                 ProtocolAdapter adapter = dict[key];
                                 dict.Remove(key);
-                                try
-                                {
+                                try {
                                     adapter.Dispose();
                                     await logger.LogWarningAsync($"TCP Listener stopping and dispose Protcol adapter {key}");
                                 }
-                                catch (Exception ex)
-                                {
+                                catch (Exception ex) {
                                     await logger.LogErrorAsync(ex, "Fault dispose protcol adaper while Stopping TCP Listener");
                                 }
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
+                    catch (Exception ex) {
                         await logger.LogErrorAsync(ex, $"TCP Listener fault during stop.");
                     }
                 }
             }
-            else
-            {
+            else {
                 await logger.LogWarningAsync($"No protocol adapters in TCP Listener dictionary to dispose and remove");
             }
 
@@ -152,17 +138,14 @@ namespace Piraeus.TcpGateway
 
         private async void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs args)
         {
-            try
-            {
-                if (dict.ContainsKey(args.ChannelId))
-                {
+            try {
+                if (dict.ContainsKey(args.ChannelId)) {
                     ProtocolAdapter adapter = dict[args.ChannelId];
                     dict.Remove(args.ChannelId);
                     adapter.Dispose();
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 await logger.LogErrorAsync(ex, "Disposing adapter.");
             }
         }
@@ -171,17 +154,14 @@ namespace Piraeus.TcpGateway
         {
             await logger.LogErrorAsync(args.Error, "Adapter exception.");
 
-            try
-            {
-                if (dict.ContainsKey(args.ChannelId))
-                {
+            try {
+                if (dict.ContainsKey(args.ChannelId)) {
                     ProtocolAdapter adapter = dict[args.ChannelId];
                     dict.Remove(args.ChannelId);
                     adapter.Dispose();
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 await logger.LogErrorAsync(ex, "Adapter disposing");
             }
         }

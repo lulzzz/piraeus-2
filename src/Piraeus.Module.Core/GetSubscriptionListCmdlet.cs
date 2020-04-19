@@ -23,12 +23,10 @@ namespace Piraeus.Module
 
             IEnumerable<string> list = request.Get<IEnumerable<string>>();
 
-            if (list != null)
-            {
+            if (list != null) {
                 WriteObject(list);
             }
-            else
-            {
+            else {
                 WriteObject("Empty");
             }
         }

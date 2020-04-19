@@ -50,7 +50,8 @@ namespace Piraeus.Grains.Notifications
             ServiceClientCredentials credentials = new TopicCredentials(topicKey);
 
             clients = new EventGridClient[clientCount];
-            for (int i = 0; i < clientCount; i++) clients[i] = new EventGridClient(credentials);
+            for (int i = 0; i < clientCount; i++)
+                clients[i] = new EventGridClient(credentials);
         }
 
         public override async Task SendAsync(EventMessage message)
@@ -69,7 +70,7 @@ namespace Piraeus.Grains.Notifications
 
                 EventGridEvent gridEvent = new EventGridEvent(message.MessageId, resourceUriString, payload,
                     resourceUriString, DateTime.UtcNow, "1.0");
-                IList<EventGridEvent> events = new List<EventGridEvent>(new[] {gridEvent});
+                IList<EventGridEvent> events = new List<EventGridEvent>(new[] { gridEvent });
                 Task task = clients[arrayIndex].PublishEventsAsync(topicHostname, events);
                 Task innerTask =
                     task.ContinueWith(async a => { await FaultTask(message.MessageId, payload, message.Audit); },
@@ -102,7 +103,7 @@ namespace Piraeus.Grains.Notifications
                 EventGridClient client = new EventGridClient(credentials);
                 EventGridEvent gridEvent = new EventGridEvent(id, resourceUriString, payload, resourceUriString,
                     DateTime.UtcNow, "1.0");
-                IList<EventGridEvent> events = new List<EventGridEvent>(new[] {gridEvent});
+                IList<EventGridEvent> events = new List<EventGridEvent>(new[] { gridEvent });
                 await clients[arrayIndex].PublishEventsAsync(topicHostname, events);
                 record = new MessageAuditRecord(id,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",

@@ -77,10 +77,12 @@ namespace SkunkLab.Protocols.Coap
 
             List<ushort> list = new List<ushort>();
             if (query != null && query.Count() > 0) {
-                foreach (var item in query) list.Add(item.Key);
+                foreach (var item in query)
+                    list.Add(item.Key);
             }
 
-            foreach (var item in list) container.Remove(item);
+            foreach (var item in list)
+                container.Remove(item);
 
             timer.Enabled = container.Count() > 0;
         }

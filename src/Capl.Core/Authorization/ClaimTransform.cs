@@ -125,7 +125,8 @@ namespace Capl.Authorization
                 }
 
                 if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim)) {
-                    TargetClaim = new LiteralClaim {
+                    TargetClaim = new LiteralClaim
+                    {
                         ClaimType = reader.GetRequiredAttribute(AuthorizationConstants.Attributes.ClaimType)
                     };
 

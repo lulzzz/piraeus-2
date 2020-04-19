@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Piraeus.Configuration;
 using Piraeus.Core.Logging;
 using Piraeus.Extensions.Configuration;
-using System;
 
 namespace Piraeus.SiloHost.Core
 {

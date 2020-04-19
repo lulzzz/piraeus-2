@@ -14,7 +14,7 @@ namespace Capl.Authorization.Operations
             ///the LHS is ignored and the RHS using a normalized string containing 2 xsd:dateTime values.
             ///the current time should be between the 2 dateTime values
 
-            string[] parts = right.Split(new[] {' '});
+            string[] parts = right.Split(new[] { ' ' });
             DateTime startDate = XmlConvert.ToDateTime(parts[0], XmlDateTimeSerializationMode.Utc);
             DateTime endDate = XmlConvert.ToDateTime(parts[1], XmlDateTimeSerializationMode.Utc);
             DateTime now = DateTime.Now;

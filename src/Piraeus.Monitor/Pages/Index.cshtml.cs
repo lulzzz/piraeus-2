@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
 using Piraeus.Monitor.Hubs;
-using System.Collections.Generic;
 
 namespace Piraeus.Monitor.Pages
 {
@@ -41,12 +41,10 @@ namespace Piraeus.Monitor.Pages
         {
             ListContinuationToken ltoken;
 
-            if (index == 0 && quantity == 0)
-            {
+            if (index == 0 && quantity == 0) {
                 ltoken = new ListContinuationToken() { Index = 0, Quantity = 10 };
             }
-            else
-            {
+            else {
                 ltoken = new ListContinuationToken() { Index = index, Quantity = quantity };
             }
 
@@ -54,10 +52,8 @@ namespace Piraeus.Monitor.Pages
 
             if (ltoken == null)
                 return;
-            else
-            {
-                foreach (string item in ltoken.Items)
-                {
+            else {
+                foreach (string item in ltoken.Items) {
                     EventMetadata metadata = adapter.GetMetadataAsync(item).GetAwaiter().GetResult();
                     Container.Add(item, metadata);
                 }

@@ -1,7 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using Piraeus.Clients.Rest;
-using SkunkLab.Channels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -9,6 +6,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Piraeus.Clients.Rest;
+using SkunkLab.Channels;
 
 namespace Samples.Http.Client
 {
@@ -69,16 +69,13 @@ namespace Samples.Http.Client
 
         private static async Task LongPollAsync(string requestUri)
         {
-            while (true)
-            {
+            while (true) {
                 HttpClient client = new HttpClient();
 
                 HttpResponseMessage message = await client.GetAsync(requestUri);
                 if (message.StatusCode == System.Net.HttpStatusCode.OK ||
-                    message.StatusCode == System.Net.HttpStatusCode.Accepted)
-                {
-                    try
-                    {
+                    message.StatusCode == System.Net.HttpStatusCode.Accepted) {
+                    try {
                         long nowTicks = DateTime.Now.Ticks;
                         Console.ForegroundColor = ConsoleColor.Green;
                         string msg = await message.Content.ReadAsStringAsync();
@@ -91,13 +88,11 @@ namespace Samples.Http.Client
 
                         Console.WriteLine($"Latency {latency.TotalMilliseconds} ms - Received message '{messageText}'");
                     }
-                    catch (Exception)
-                    {
+                    catch (Exception) {
                         Console.WriteLine("Cannot read message");
                     }
                 }
-                else
-                {
+                else {
                     Console.WriteLine(message.StatusCode);
                 }
             }
@@ -107,12 +102,10 @@ namespace Samples.Http.Client
         {
             cts = new CancellationTokenSource();
 
-            if (args == null || args.Length == 0)
-            {
+            if (args == null || args.Length == 0) {
                 UseUserInput();
             }
-            else
-            {
+            else {
                 Console.WriteLine("Invalid user input");
                 Console.ReadKey();
                 return;
@@ -154,18 +147,14 @@ namespace Samples.Http.Client
         private static void PrintMessage(string message, ConsoleColor color, bool section = false, bool input = false)
         {
             Console.ForegroundColor = color;
-            if (section)
-            {
+            if (section) {
                 Console.WriteLine($"---   {message} ---");
             }
-            else
-            {
-                if (!input)
-                {
+            else {
+                if (!input) {
                     Console.WriteLine(message);
                 }
-                else
-                {
+                else {
                     Console.Write(message);
                 }
             }
@@ -177,27 +166,22 @@ namespace Samples.Http.Client
         {
             int index = 0;
             bool running = true;
-            while (running)
-            {
+            while (running) {
                 PrintMessage("Do you want to send messages (Y/N) ? ", ConsoleColor.Cyan, false, true);
                 string sendVal = Console.ReadLine().Trim();
-                if (sendVal.ToUpperInvariant() != "Y")
-                {
+                if (sendVal.ToUpperInvariant() != "Y") {
                     break;
                 }
 
                 PrintMessage("Enter # of messages to send ? ", ConsoleColor.Cyan, false, true);
                 string nstring = Console.ReadLine();
-                if (int.TryParse(nstring, out int num))
-                {
+                if (int.TryParse(nstring, out int num)) {
                     PrintMessage("Enter delay between messages in milliseconds ? ", ConsoleColor.Cyan, false, true);
                     string dstring = Console.ReadLine().Trim();
-                    if (int.TryParse(dstring, out int delay))
-                    {
+                    if (int.TryParse(dstring, out int delay)) {
                         startTime = DateTime.Now;
 
-                        for (int i = 0; i < num; i++)
-                        {
+                        for (int i = 0; i < num; i++) {
                             string payloadString = string.Format($"{DateTime.Now.Ticks}:{name}-message {index++}");
                             byte[] payload = Encoding.UTF8.GetBytes(payloadString);
                             string publishEvent = role == "A" ? resourceA : resourceB;
@@ -217,12 +201,10 @@ namespace Samples.Http.Client
         {
             Console.Write("Enter hostname, IP, or Enter for localhost ? ");
             string hostname = Console.ReadLine();
-            if (string.IsNullOrEmpty(hostname))
-            {
+            if (string.IsNullOrEmpty(hostname)) {
                 return "localhost";
             }
-            else
-            {
+            else {
                 return hostname;
             }
         }
@@ -237,12 +219,10 @@ namespace Samples.Http.Client
         {
             Console.Write("Enter role for the client (A/B) ? ");
             string role = Console.ReadLine().ToUpperInvariant();
-            if (role == "A" || role == "B")
-            {
+            if (role == "A" || role == "B") {
                 return role;
             }
-            else
-            {
+            else {
                 return SelectRole();
             }
         }
@@ -250,11 +230,9 @@ namespace Samples.Http.Client
         private static void UseUserInput()
         {
             WriteHeader();
-            if (File.Exists("config.json"))
-            {
+            if (File.Exists("config.json")) {
                 Console.Write("Use config.json file [y/n] ? ");
-                if (Console.ReadLine().ToLowerInvariant() == "y")
-                {
+                if (Console.ReadLine().ToLowerInvariant() == "y") {
                     JObject jobj = JObject.Parse(Encoding.UTF8.GetString(File.ReadAllBytes("config.json")));
                     string dnsName = jobj.Value<string>("dnsName");
                     string loc = jobj.Value<string>("location");
@@ -267,13 +245,11 @@ namespace Samples.Http.Client
                     resourceA = $"http://{hostname}/resource-a";
                     resourceB = $"http://{hostname}/resource-b";
                 }
-                else
-                {
+                else {
                     hostname = SelectHostname();
                 }
             }
-            else
-            {
+            else {
                 hostname = SelectHostname();
             }
 

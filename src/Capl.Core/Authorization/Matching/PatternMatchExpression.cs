@@ -21,8 +21,7 @@ namespace Capl.Authorization.Matching
             Regex regex = new Regex(pattern);
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
-            IEnumerable<Claim> claimSet = ci.FindAll(delegate(Claim claim)
-            {
+            IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
                 return claimType == claim.Type;
             });
 

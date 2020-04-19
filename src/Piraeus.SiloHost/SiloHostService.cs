@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using System;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans.Clustering.Redis;
@@ -7,10 +11,6 @@ using Orleans.Hosting;
 using Orleans.Storage.Redis;
 using Piraeus.Configuration;
 using Piraeus.Core.Logging;
-using System;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Piraeus.SiloHost
 {
@@ -38,8 +38,7 @@ namespace Piraeus.SiloHost
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            if (host != null)
-            {
+            if (host != null) {
                 await host.StopAsync(cancellationToken);
             }
         }
@@ -74,18 +73,15 @@ namespace Piraeus.SiloHost
                     options.ServiceId = orleansConfig.ServiceId;
                 });
 
-            if (string.IsNullOrEmpty(orleansConfig.DataConnectionString))
-            {
+            if (string.IsNullOrEmpty(orleansConfig.DataConnectionString)) {
                 silo.AddMemoryGrainStorage("store");
             }
             else if (orleansConfig.DataConnectionString.Contains("6379") ||
-                orleansConfig.DataConnectionString.Contains("6380"))
-            {
+                orleansConfig.DataConnectionString.Contains("6380")) {
                 silo.UseRedisMembership(options => options.ConnectionString = orleansConfig.DataConnectionString);
                 silo.AddRedisGrainStorage("store", options => options.ConnectionString = orleansConfig.DataConnectionString);
             }
-            else
-            {
+            else {
                 silo.UseAzureStorageClustering(options => options.ConnectionString = orleansConfig.DataConnectionString);
                 silo.AddAzureBlobGrainStorage("store", options => options.ConnectionString = orleansConfig.DataConnectionString);
             }
@@ -109,8 +105,7 @@ namespace Piraeus.SiloHost
                 builder.Services.TryAddSingleton<ILog, Logger>();
             });
 
-            if (!string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
-            {
+            if (!string.IsNullOrEmpty(orleansConfig.InstrumentationKey)) {
                 silo.AddApplicationInsightsTelemetryConsumer(orleansConfig.InstrumentationKey);
             }
 

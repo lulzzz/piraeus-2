@@ -1,15 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
-using Piraeus.Clients.Mqtt;
-using SkunkLab.Channels;
-using SkunkLab.Channels.WebSocket;
-using SkunkLab.Protocols.Mqtt;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Piraeus.Clients.Mqtt;
+using SkunkLab.Channels;
+using SkunkLab.Channels.WebSocket;
+using SkunkLab.Protocols.Mqtt;
 
 namespace Samples.Mqtt.Client
 {
@@ -56,12 +56,10 @@ namespace Samples.Mqtt.Client
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
             cts = new CancellationTokenSource();
 
-            if (args == null || args.Length == 0)
-            {
+            if (args == null || args.Length == 0) {
                 UseUserInput();
             }
-            else
-            {
+            else {
                 Console.WriteLine("Invalid user input");
                 Console.ReadKey();
                 return;
@@ -90,11 +88,9 @@ namespace Samples.Mqtt.Client
         private static void UseUserInput()
         {
             WriteHeader();
-            if (File.Exists("config.json"))
-            {
+            if (File.Exists("config.json")) {
                 Console.Write("Use config.json file [y/n] ? ");
-                if (Console.ReadLine().ToLowerInvariant() == "y")
-                {
+                if (Console.ReadLine().ToLowerInvariant() == "y") {
                     JObject jobj = JObject.Parse(Encoding.UTF8.GetString(File.ReadAllBytes("config.json")));
                     string dnsName = jobj.Value<string>("dnsName");
                     string loc = jobj.Value<string>("location");
@@ -107,13 +103,11 @@ namespace Samples.Mqtt.Client
                     resourceA = $"http://{hostname}/resource-a";
                     resourceB = $"http://{hostname}/resource-b";
                 }
-                else
-                {
+                else {
                     hostname = SelectHostname();
                 }
             }
-            else
-            {
+            else {
                 hostname = SelectHostname();
             }
 
@@ -129,18 +123,14 @@ namespace Samples.Mqtt.Client
         private static void PrintMessage(string message, ConsoleColor color, bool section = false, bool input = false)
         {
             Console.ForegroundColor = color;
-            if (section)
-            {
+            if (section) {
                 Console.WriteLine($"---   {message} ---");
             }
-            else
-            {
-                if (!input)
-                {
+            else {
+                if (!input) {
                     Console.WriteLine(message);
                 }
-                else
-                {
+                else {
                     Console.Write(message);
                 }
             }
@@ -193,14 +183,11 @@ namespace Samples.Mqtt.Client
 
         private static void SendMessages(Task task)
         {
-            try
-            {
-                if (!send)
-                {
+            try {
+                if (!send) {
                     PrintMessage("Do you want to send messages (Y/N) ? ", ConsoleColor.Cyan, false, true);
                     string sendVal = Console.ReadLine();
-                    if (sendVal.ToUpperInvariant() != "Y")
-                    {
+                    if (sendVal.ToUpperInvariant() != "Y") {
                         return;
                     }
                 }
@@ -216,8 +203,7 @@ namespace Samples.Mqtt.Client
                 int delayms = int.Parse(dstring);
 
                 DateTime startTime = DateTime.Now;
-                for (int i = 0; i < numMessages; i++)
-                {
+                for (int i = 0; i < numMessages; i++) {
                     index++;
                     string payloadString = string.Format($"{DateTime.Now.Ticks}:{name}-message {index}");
                     byte[] payload = Encoding.UTF8.GetBytes(payloadString);
@@ -225,8 +211,7 @@ namespace Samples.Mqtt.Client
                     Task pubTask = mqttClient.PublishAsync(QualityOfServiceLevelType.AtMostOnce, publishEvent, "text/plain", payload);
                     Task.WhenAll(pubTask);
 
-                    if (delayms > 0)
-                    {
+                    if (delayms > 0) {
                         Task t = Task.Delay(delayms);
                         Task.WaitAll(t);
                     }
@@ -237,13 +222,11 @@ namespace Samples.Mqtt.Client
 
                 PrintMessage("Send more messages (Y/N) ? ", ConsoleColor.Cyan, false, true);
                 string val = Console.ReadLine();
-                if (val.ToUpperInvariant() == "Y")
-                {
+                if (val.ToUpperInvariant() == "Y") {
                     SendMessages(task);
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 PrintMessage("Error", ConsoleColor.Red, true);
                 PrintMessage(ex.Message, ConsoleColor.Red);
                 Console.ReadKey();
@@ -253,18 +236,15 @@ namespace Samples.Mqtt.Client
         private static async Task StartMqttClientAsync(string token)
         {
             ConnectAckCode code = await MqttConnectAsync(token);
-            if (code != ConnectAckCode.ConnectionAccepted)
-            {
+            if (code != ConnectAckCode.ConnectionAccepted) {
                 return;
             }
 
             string observableEvent = !string.IsNullOrEmpty(pubResource) ? subResource : role == "A" ? resourceB : resourceA;
-            try
-            {
+            try {
                 await mqttClient.SubscribeAsync(observableEvent, QualityOfServiceLevelType.AtLeastOnce, ObserveEvent).ContinueWith(SendMessages);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 PrintMessage("Error", ConsoleColor.Red, true);
                 PrintMessage(ex.Message, ConsoleColor.Red);
                 Console.ReadKey();
@@ -309,12 +289,10 @@ namespace Samples.Mqtt.Client
         private static int SelectChannel()
         {
             string chn = "1";
-            if (chn == "1")
-            {
+            if (chn == "1") {
                 return Convert.ToInt32(chn);
             }
-            else
-            {
+            else {
                 return SelectChannel();
             }
         }
@@ -323,12 +301,10 @@ namespace Samples.Mqtt.Client
         {
             Console.Write("Enter hostname, IP, or Enter for localhost ? ");
             string hostname = Console.ReadLine();
-            if (string.IsNullOrEmpty(hostname))
-            {
+            if (string.IsNullOrEmpty(hostname)) {
                 return "localhost";
             }
-            else
-            {
+            else {
                 return hostname;
             }
         }
@@ -343,12 +319,10 @@ namespace Samples.Mqtt.Client
         {
             Console.Write("Enter role for the client (A/B) ? ");
             string role = Console.ReadLine().ToUpperInvariant();
-            if (role == "A" || role == "B")
-            {
+            if (role == "A" || role == "B") {
                 return role;
             }
-            else
-            {
+            else {
                 return SelectRole();
             }
         }
@@ -380,17 +354,14 @@ namespace Samples.Mqtt.Client
 
         public static IChannel CreateChannel(string token, CancellationTokenSource src)
         {
-            if (channelNum == 1)
-            {
+            if (channelNum == 1) {
                 string uriString = hostname == "localhost" ? "ws://localhost:8081/api/connect" : string.Format("wss://{0}/ws/api/connect", hostname);
 
                 Uri uri = new Uri(uriString);
                 return ChannelFactory.Create(uri, token, "mqtt", new WebSocketConfig(), src.Token);
             }
-            else
-            {
-                if (hostname != "localhost")
-                {
+            else {
+                if (hostname != "localhost") {
                     hostname = string.Format("{0}/tcp", hostname);
                 }
 

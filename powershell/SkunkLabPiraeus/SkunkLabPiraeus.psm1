@@ -154,10 +154,10 @@ function New-PiraeusDeployment
 		$step++
 		New-KubectlApply -Filename "$Path/helm-rbac.yaml" -Namespace "kube-system"
 
-		Update-Step -Step $step -Message "Start Tiller" -Start $start
-		$step++
-		helm init --service-account tiller
-		Set-Timer -Message "...waiting 45 seconds for Tiller to start" -Seconds 45
+		#Update-Step -Step $step -Message "Start Tiller" -Start $start
+		#$step++
+		#helm init --service-account tiller
+		#Set-Timer -Message "...waiting 45 seconds for Tiller to start" -Seconds 45
 		
 		Update-Step -Step $step -Message "Set Node pool label for Piraeus front end" -Start $start
 		$step++

@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
+using Orleans.Configuration;
 using Orleans.Hosting;
 using Piraeus.Configuration;
+using Piraeus.Extensions.Configuration;
 using Piraeus.GrainInterfaces;
 
 namespace Piraeus.Extensions.Orleans

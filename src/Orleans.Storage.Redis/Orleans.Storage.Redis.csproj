@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>3.1.6</Version>
+    <Description>Redis storage provider for Orleans</Description>
   </PropertyGroup>
 
   <ItemGroup>

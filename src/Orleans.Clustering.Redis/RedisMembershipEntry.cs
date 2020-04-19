@@ -46,7 +46,8 @@ namespace Orleans.Clustering.Redis
 
         public static RedisMembershipEntry Create(string deploymentId, MembershipEntry entry, string etag)
         {
-            var ret = new RedisMembershipEntry {
+            var ret = new RedisMembershipEntry
+            {
                 DeploymentId = deploymentId,
                 Address = entry.SiloAddress,
                 IAmAliveTime = entry.IAmAliveTime,
@@ -59,7 +60,7 @@ namespace Orleans.Clustering.Redis
                 UpdateZone = entry.UpdateZone,
                 FaultZone = entry.FaultZone,
                 SuspectingSilos = entry.SuspectTimes?.Select(silo => new SuspectingSilo
-                    {Id = silo.Item1.ToParsableString(), Time = silo.Item2}).ToList()
+                { Id = silo.Item1.ToParsableString(), Time = silo.Item2 }).ToList()
             };
 
             return ret;
@@ -67,7 +68,8 @@ namespace Orleans.Clustering.Redis
 
         public Tuple<MembershipEntry, string> ToMembershipEntryTuple()
         {
-            MembershipEntry entry = new MembershipEntry {
+            MembershipEntry entry = new MembershipEntry
+            {
                 HostName = Hostname,
                 IAmAliveTime = IAmAliveTime ?? DateTime.UtcNow,
                 ProxyPort = ProxyPort,
@@ -87,7 +89,8 @@ namespace Orleans.Clustering.Redis
 
         public Tuple<MembershipEntry, string> ToMembershipEntryTuple(SiloAddress address)
         {
-            MembershipEntry entry = new MembershipEntry {
+            MembershipEntry entry = new MembershipEntry
+            {
                 HostName = Hostname,
                 IAmAliveTime = IAmAliveTime ?? DateTime.UtcNow,
                 ProxyPort = ProxyPort,

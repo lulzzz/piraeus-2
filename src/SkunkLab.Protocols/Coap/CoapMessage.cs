@@ -87,7 +87,8 @@ namespace SkunkLab.Protocols.Coap
             get => token;
             set
             {
-                if (value == null) return;
+                if (value == null)
+                    return;
                 TokenLength = (byte)value.Length;
                 token = value;
             }
@@ -202,11 +203,11 @@ namespace SkunkLab.Protocols.Coap
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
                 if (options != null) {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
-                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length + options.Length, 1);
+                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length + options.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + options.Length + 1, Payload.Length);
                 }
                 else {
-                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length, 1);
+                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + 1, Payload.Length);
                 }
             }
@@ -302,7 +303,8 @@ namespace SkunkLab.Protocols.Coap
 
             if (ResourceUri != null) {
                 IEnumerable<CoapOption> resourceOptions = ResourceUri.DecomposeCoapUri();
-                foreach (CoapOption co in resourceOptions) Options.Add(co);
+                foreach (CoapOption co in resourceOptions)
+                    Options.Add(co);
             }
 
             if (Observe.HasValue) {

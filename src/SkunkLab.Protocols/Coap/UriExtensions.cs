@@ -36,8 +36,9 @@ namespace SkunkLab.Protocols.Coap
             }
 
             if (resource.AbsolutePath != "/") {
-                string[] parts = resource.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string part in parts) options.Add(new CoapOption(OptionType.UriPath, part));
+                string[] parts = resource.AbsolutePath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string part in parts)
+                    options.Add(new CoapOption(OptionType.UriPath, part));
             }
 
             if (!string.IsNullOrEmpty(resource.Query)) {

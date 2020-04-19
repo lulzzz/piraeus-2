@@ -1,0 +1,20 @@
+replicaCount: 1
+dockerized: true
+serviceId: "myservice"
+clusterId: "mycluster"
+loggerTypes: "Console"
+
+image:
+  registry: docker.io
+  ## Image location, NOT including the tag
+  repository: skunklab/piraeus-silo
+  ## Image tag
+  tag: v3.0.2 
+  pullPolicy: IfNotPresent
+
+service: 
+  type: ClusterIP
+
+
+
+

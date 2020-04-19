@@ -92,7 +92,8 @@ namespace Piraeus.Grains.Notifications
                         }
                     }
                     else {
-                        Message serviceMessage = new Message(payload) {
+                        Message serviceMessage = new Message(payload)
+                        {
                             ContentType = message.ContentType,
                             MessageId = message.MessageId
                         };
@@ -107,7 +108,8 @@ namespace Piraeus.Grains.Notifications
                     }
                 }
                 else if (deviceClient != null) {
-                    Microsoft.Azure.Devices.Client.Message msg = new Microsoft.Azure.Devices.Client.Message(payload) {
+                    Microsoft.Azure.Devices.Client.Message msg = new Microsoft.Azure.Devices.Client.Message(payload)
+                    {
                         ContentType = message.ContentType,
                         MessageId = message.MessageId
                     };

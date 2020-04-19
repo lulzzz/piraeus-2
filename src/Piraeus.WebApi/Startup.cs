@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -12,7 +13,6 @@ using Piraeus.Core.Logging;
 using Piraeus.Extensions.Configuration;
 using Piraeus.Extensions.Orleans;
 using SkunkLab.Storage;
-using System;
 
 namespace Piraeus.WebApi
 {
@@ -78,8 +78,7 @@ namespace Piraeus.WebApi
 
             PskStorageAdapter pskAdpater = GetPskAdapter();
 
-            if (pskAdpater != null)
-            {
+            if (pskAdpater != null) {
                 services.AddSingleton<PskStorageAdapter>(pskAdpater);
             }
 
@@ -93,8 +92,7 @@ namespace Piraeus.WebApi
                 log.SetMinimumLevel(Enum.Parse<LogLevel>(pconfig.LogLevel));
             });
 
-            if (!string.IsNullOrEmpty(pconfig.InstrumentationKey))
-            {
+            if (!string.IsNullOrEmpty(pconfig.InstrumentationKey)) {
                 services.AddApplicationInsightsTelemetry(pconfig.InstrumentationKey);
             }
 
@@ -104,18 +102,15 @@ namespace Piraeus.WebApi
 
         private PskStorageAdapter GetPskAdapter()
         {
-            if (!string.IsNullOrEmpty(pconfig.PskRedisConnectionString))
-            {
+            if (!string.IsNullOrEmpty(pconfig.PskRedisConnectionString)) {
                 return PskStorageAdapterFactory.Create(pconfig.PskRedisConnectionString);
             }
 
-            if (!string.IsNullOrEmpty(pconfig.PskKeyVaultClientSecret) && !string.IsNullOrEmpty(pconfig.PskKeyVaultClientId) && !string.IsNullOrEmpty(pconfig.PskKeyVaultAuthority))
-            {
+            if (!string.IsNullOrEmpty(pconfig.PskKeyVaultClientSecret) && !string.IsNullOrEmpty(pconfig.PskKeyVaultClientId) && !string.IsNullOrEmpty(pconfig.PskKeyVaultAuthority)) {
                 return PskStorageAdapterFactory.Create(pconfig.PskKeyVaultAuthority, pconfig.PskKeyVaultClientId, pconfig.PskKeyVaultClientSecret);
             }
 
-            if (!string.IsNullOrEmpty(pconfig.PskKeys))
-            {
+            if (!string.IsNullOrEmpty(pconfig.PskKeys)) {
                 return PskStorageAdapterFactory.Create(pconfig.PskIdentities, pconfig.PskKeys);
             }
 

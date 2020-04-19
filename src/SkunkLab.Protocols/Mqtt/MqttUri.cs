@@ -23,7 +23,8 @@ namespace SkunkLab.Protocols.Mqtt
             for (int i = 0; i < nvc.Count; i++) {
                 string key = nvc.Keys[i];
                 string[] values = nvc.GetValues(i);
-                foreach (string val in values) list.Add(new KeyValuePair<string, string>(key, val));
+                foreach (string val in values)
+                    list.Add(new KeyValuePair<string, string>(key, val));
             }
 
             items = list.ToArray();
@@ -48,7 +49,7 @@ namespace SkunkLab.Protocols.Mqtt
         {
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
             foreach (string index in indexes) {
-                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = index.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }
@@ -62,8 +63,8 @@ namespace SkunkLab.Protocols.Mqtt
         private IEnumerable<string> GetEnumerableParameters(string key)
         {
             return from kv in items
-                where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
-                select kv.Value.ToLower(CultureInfo.InvariantCulture);
+                   where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
+                   select kv.Value.ToLower(CultureInfo.InvariantCulture);
         }
 
         private string GetSingleParameter(string key)

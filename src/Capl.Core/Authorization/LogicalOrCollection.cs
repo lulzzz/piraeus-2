@@ -17,7 +17,7 @@ namespace Capl.Authorization
     [XmlSchemaProvider(null, IsAny = true)]
     public class LogicalOrCollection : LogicalConnectiveCollection
     {
-        public new static LogicalConnectiveCollection Load(XmlReader reader)
+        public static new LogicalConnectiveCollection Load(XmlReader reader)
         {
             LogicalOrCollection loc = new LogicalOrCollection();
             loc.ReadXml(reader);
@@ -111,7 +111,8 @@ namespace Capl.Authorization
 
             writer.WriteAttributeString(AuthorizationConstants.Attributes.Evaluates, XmlConvert.ToString(Evaluates));
 
-            foreach (Term eval in this) eval.WriteXml(writer);
+            foreach (Term eval in this)
+                eval.WriteXml(writer);
 
             writer.WriteEndElement();
         }

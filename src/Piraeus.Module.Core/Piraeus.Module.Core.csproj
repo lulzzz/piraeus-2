@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Piraeus.Module</RootNamespace>
     <AssemblyName>Piraeus.Module.Core</AssemblyName>
+    <Version>3.1.6</Version>
+    <Description>Piraeus powershell cmdlets</Description>
   </PropertyGroup>
 
   <ItemGroup>

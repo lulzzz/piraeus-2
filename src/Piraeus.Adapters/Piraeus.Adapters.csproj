@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Piraeus.Adapters</RootNamespace>
     <AssemblyName>Piraeus.Adapters</AssemblyName>
+    <Version>3.1.6</Version>
+    <Description>Piraeus gateway adapters for channels and protocols.</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -50,7 +50,8 @@ namespace Capl.Authorization
         {
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
-            foreach (Transform transform in this) claims = transform.TransformClaims(claims);
+            foreach (Transform transform in this)
+                claims = transform.TransformClaims(claims);
 
             return claims;
         }
@@ -145,7 +146,8 @@ namespace Capl.Authorization
             writer.WriteStartElement(AuthorizationConstants.Elements.Transforms,
                 AuthorizationConstants.Namespaces.Xmlns);
 
-            foreach (ClaimTransform transform in this) transform.WriteXml(writer);
+            foreach (ClaimTransform transform in this)
+                transform.WriteXml(writer);
 
             writer.WriteEndElement();
         }

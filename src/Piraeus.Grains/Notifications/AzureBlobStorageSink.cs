@@ -82,15 +82,17 @@ namespace Piraeus.Grains.Notifications
             storageArray = new BlobStorage[clientCount];
             if (sasUri == null) {
                 connectionString =
-                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] {'.'})[0]};AccountKey={key};";
+                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] { '.' })[0]};AccountKey={key};";
 
-                for (int i = 0; i < clientCount; i++) storageArray[i] = BlobStorage.New(connectionString, 2048, 102400);
+                for (int i = 0; i < clientCount; i++)
+                    storageArray[i] = BlobStorage.New(connectionString, 2048, 102400);
             }
             else {
                 connectionString =
                     $"BlobEndpoint={(container != "$Root" ? uri.ToString().Replace(uri.LocalPath, "") : uri.ToString())};SharedAccessSignature={key}";
 
-                for (int i = 0; i < clientCount; i++) storageArray[i] = BlobStorage.New(connectionString, 2048, 102400);
+                for (int i = 0; i < clientCount; i++)
+                    storageArray[i] = BlobStorage.New(connectionString, 2048, 102400);
             }
         }
 
@@ -104,7 +106,8 @@ namespace Piraeus.Grains.Notifications
             try {
                 while (!queue.IsEmpty) {
                     bool isdequeued = queue.TryDequeue(out msg);
-                    if (!isdequeued) continue;
+                    if (!isdequeued)
+                        continue;
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
 
                     payload = GetPayload(msg);
@@ -204,7 +207,7 @@ namespace Piraeus.Grains.Notifications
                     }
                 }
                 else {
-                    string[] parts = filename.Split(new[] {'.'});
+                    string[] parts = filename.Split(new[] { '.' });
                     string path2 = parts.Length == 2
                         ? $"{parts[0]}-R.{parts[1]}"
                         : $"{filename}-R";
@@ -232,7 +235,8 @@ namespace Piraeus.Grains.Notifications
 
         private string GetAppendFilename(string contentType)
         {
-            if (appendFilename != null) return appendFilename;
+            if (appendFilename != null)
+                return appendFilename;
             appendFilename = GetBlobName(contentType);
 
             return appendFilename;

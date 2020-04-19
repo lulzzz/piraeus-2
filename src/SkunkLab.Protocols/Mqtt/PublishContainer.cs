@@ -147,7 +147,8 @@ namespace SkunkLab.Protocols.Mqtt
             if (timeContainer.Count > 0) {
                 IEnumerable<KeyValuePair<ushort, DateTime>> items = timeContainer.Where(c => c.Value < DateTime.UtcNow);
                 if (items != null) {
-                    foreach (var item in items) container.Remove(item.Key);
+                    foreach (var item in items)
+                        container.Remove(item.Key);
                 }
             }
 

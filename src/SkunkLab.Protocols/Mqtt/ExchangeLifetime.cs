@@ -67,7 +67,8 @@ namespace SkunkLab.Protocols.Mqtt
 
                 ushort[] ids = list.ToArray();
 
-                foreach (var item in list) container.Remove(item);
+                foreach (var item in list)
+                    container.Remove(item);
 
                 if (ids != null && ids.Length > 0) {
                     OnExpired?.Invoke(this, new LifetimeEventArgs(ids));

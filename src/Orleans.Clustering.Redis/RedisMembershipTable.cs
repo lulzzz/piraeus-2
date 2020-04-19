@@ -1,14 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
 using Orleans.Runtime;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Binary;
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Orleans.Clustering.Redis
 {
@@ -30,12 +30,10 @@ namespace Orleans.Clustering.Redis
         {
             this.logger = logger;
             ConfigurationOptions configOptions;
-            if (!string.IsNullOrEmpty(membershipTableOptions.Value.ConnectionString))
-            {
+            if (!string.IsNullOrEmpty(membershipTableOptions.Value.ConnectionString)) {
                 configOptions = ConfigurationOptions.Parse(membershipTableOptions.Value.ConnectionString);
             }
-            else
-            {
+            else {
                 configOptions = new ConfigurationOptions()
                 {
                     ConnectRetry = membershipTableOptions.Value.ConnectRetry ?? 4,
@@ -48,8 +46,7 @@ namespace Orleans.Clustering.Redis
                 };
             }
 
-            if (membershipTableOptions.Value.IsLocalDocker)
-            {
+            if (membershipTableOptions.Value.IsLocalDocker) {
                 IPAddress address = GetIPAddress(configOptions.EndPoints[0]);
                 EndPoint endpoint = configOptions.EndPoints[0];
                 configOptions.EndPoints.Remove(endpoint);
@@ -75,12 +72,10 @@ namespace Orleans.Clustering.Redis
 
         public async Task DeleteMembershipTableEntries(string clusterId)
         {
-            try
-            {
+            try {
                 await database.KeyDeleteAsync(clusterId);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, "Redis membership table key '{0}' failed delete table entries.", clusterId);
                 throw ex;
             }
@@ -93,11 +88,9 @@ namespace Orleans.Clustering.Redis
 
         public async Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
         {
-            try
-            {
+            try {
                 bool ret;
-                while (true)
-                {
+                while (true) {
                     long ticks = DateTime.UtcNow.Ticks;
                     await database.StringSetAsync("locktoken", ticks.ToString(), new TimeSpan(0, 0, 10));
 
@@ -106,13 +99,11 @@ namespace Orleans.Clustering.Redis
 
                     var val = await database.StringGetAsync(clusterId);
 
-                    if (!val.IsNull)
-                    {
+                    if (!val.IsNull) {
                         collection = serializer.Deserialize<RedisMembershipCollection>(val);
                         collection.Add(rentry);
                     }
-                    else
-                    {
+                    else {
                         collection = new RedisMembershipCollection
                         {
                             rentry
@@ -120,20 +111,17 @@ namespace Orleans.Clustering.Redis
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");
-                    if (tokenValue != ticks.ToString())
-                    {
+                    if (tokenValue != ticks.ToString()) {
                         continue;
                     }
-                    else
-                    {
+                    else {
                         ret = await database.StringSetAsync(clusterId, serializer.Serialize(collection));
                         break;
                     }
                 }
                 return ret;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, "Redis membership table key '{0}' failed insert row.", clusterId);
                 throw ex;
             }
@@ -142,41 +130,34 @@ namespace Orleans.Clustering.Redis
         public async Task<MembershipTableData> ReadAll()
         {
             logger?.LogInformation("It worked !!! :-)");
-            try
-            {
+            try {
                 MembershipTableData data;
-                while (true)
-                {
+                while (true) {
                     long ticks = DateTime.UtcNow.Ticks;
                     await database.StringSetAsync("locktoken", ticks.ToString(), new TimeSpan(0, 0, 10));
 
                     var val = await database.StringGetAsync(clusterId);
 
-                    if (!val.IsNull)
-                    {
+                    if (!val.IsNull) {
                         RedisMembershipCollection collection = serializer.Deserialize<RedisMembershipCollection>(val);
                         data = collection.ToMembershipTableData();
                     }
-                    else
-                    {
+                    else {
                         data = new MembershipTableData(tableVersion);
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");
-                    if (tokenValue != ticks.ToString())
-                    {
+                    if (tokenValue != ticks.ToString()) {
                         continue;
                     }
-                    else
-                    {
+                    else {
                         break;
                     }
                 }
 
                 return data;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, "Redis membership table key '{0}' failed read all.", clusterId);
                 throw ex;
             }
@@ -184,41 +165,34 @@ namespace Orleans.Clustering.Redis
 
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            try
-            {
+            try {
                 MembershipTableData data;
-                while (true)
-                {
+                while (true) {
                     long ticks = DateTime.UtcNow.Ticks;
                     await database.StringSetAsync("locktoken", ticks.ToString(), new TimeSpan(0, 0, 10));
 
                     var val = await database.StringGetAsync(clusterId);
 
-                    if (!val.IsNull)
-                    {
+                    if (!val.IsNull) {
                         RedisMembershipCollection collection = serializer.Deserialize<RedisMembershipCollection>(val);
                         data = collection.ToMembershipTableData();
                     }
-                    else
-                    {
+                    else {
                         data = new MembershipTableData(tableVersion);
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");
-                    if (tokenValue != ticks.ToString())
-                    {
+                    if (tokenValue != ticks.ToString()) {
                         continue;
                     }
-                    else
-                    {
+                    else {
                         break;
                     }
                 }
 
                 return data;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, "Redis membership table key '{0}' failed read row.", clusterId);
                 throw ex;
             }
@@ -226,22 +200,18 @@ namespace Orleans.Clustering.Redis
 
         public async Task UpdateIAmAlive(MembershipEntry entry)
         {
-            try
-            {
+            try {
                 var val = await database.StringGetAsync(clusterId);
 
-                if (!val.IsNull)
-                {
+                if (!val.IsNull) {
                     RedisMembershipCollection collection = serializer.Deserialize<RedisMembershipCollection>(val);
-                    if (collection.UpdateIAmAlive(clusterId, entry.SiloAddress, entry.IAmAliveTime))
-                    {
+                    if (collection.UpdateIAmAlive(clusterId, entry.SiloAddress, entry.IAmAliveTime)) {
                         byte[] collVal = serializer.Serialize(collection);
                         await database.StringSetAsync(clusterId, collVal);
                     }
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, "Redis membership table key '{0}' failed update i-am-alive.", clusterId);
                 throw ex;
             }
@@ -251,39 +221,32 @@ namespace Orleans.Clustering.Redis
         {
             bool ret = false;
 
-            try
-            {
-                while (true)
-                {
+            try {
+                while (true) {
                     long ticks = DateTime.UtcNow.Ticks;
                     await database.StringSetAsync("locktoken", ticks.ToString(), new TimeSpan(0, 0, 10));
 
-                    if (string.IsNullOrEmpty(etag))
-                    {
+                    if (string.IsNullOrEmpty(etag)) {
                         etag = "0";
                     }
 
                     RedisMembershipEntry rentry = RedisMembershipEntry.Create(clusterId, entry, etag);
                     var val = await database.StringGetAsync(clusterId);
 
-                    if (!val.IsNull)
-                    {
+                    if (!val.IsNull) {
                         RedisMembershipCollection collection = serializer.Deserialize<RedisMembershipCollection>(val);
                         var items = collection.Where((x) => x.DeploymentId == clusterId && x.Address.ToParsableString() == rentry.Address.ToParsableString());
-                        if (items != null && items.Count() > 0)
-                        {
+                        if (items != null && items.Count() > 0) {
                             RedisMembershipEntry oldEntry = items.First();
                             rentry.LastIndex = oldEntry.LastIndex++;
                             collection.Remove(oldEntry);
                             collection.Add(rentry);
 
                             string tokenValue = await database.StringGetAsync("locktoken");
-                            if (tokenValue != ticks.ToString())
-                            {
+                            if (tokenValue != ticks.ToString()) {
                                 continue;
                             }
-                            else
-                            {
+                            else {
                                 ret = await database.StringSetAsync(clusterId, serializer.Serialize(collection));
                                 break;
                             }
@@ -293,8 +256,7 @@ namespace Orleans.Clustering.Redis
 
                 return ret;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 logger?.LogError(ex, "Redis membership table key '{0}' failed update row.", clusterId);
                 throw ex;
             }
@@ -303,10 +265,8 @@ namespace Orleans.Clustering.Redis
         private IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++)
-            {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
-                {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
                     return hostInfo.AddressList[index];
                 }
             }
@@ -316,13 +276,11 @@ namespace Orleans.Clustering.Redis
 
         private IPAddress GetIPAddress(EndPoint endpoint)
         {
-            if (endpoint is DnsEndPoint dnsEndpoint)
-            {
+            if (endpoint is DnsEndPoint dnsEndpoint) {
                 return GetIPAddress(dnsEndpoint.Host);
             }
 
-            if (endpoint is IPEndPoint ipEndpoint)
-            {
+            if (endpoint is IPEndPoint ipEndpoint) {
                 return ipEndpoint.Address;
             }
 

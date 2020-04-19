@@ -116,7 +116,8 @@ namespace SkunkLab.Protocols.Coap.Handlers
             if (keepaliveTimestamp <= DateTime.UtcNow) {
                 CoapToken token = CoapToken.Create();
                 ushort id = CoapSender.NewId(token.TokenBytes);
-                CoapRequest ping = new CoapRequest {
+                CoapRequest ping = new CoapRequest
+                {
                     MessageId = id,
                     Token = token.TokenBytes,
                     Code = CodeType.EmptyMessage,

@@ -109,7 +109,8 @@ namespace SkunkLab.Channels.Udp
         public override async Task OpenAsync()
         {
             State = ChannelState.Connecting;
-            client = new UdpClient(Port) {
+            client = new UdpClient(Port)
+            {
                 DontFragment = true
             };
 

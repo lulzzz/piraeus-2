@@ -1,6 +1,6 @@
-﻿using Capl.Authorization;
-using System;
+﻿using System;
 using System.Management.Automation;
+using Capl.Authorization;
 
 namespace Piraeus.Module
 {
@@ -23,10 +23,8 @@ namespace Piraeus.Module
         {
             AuthorizationPolicy policy = new AuthorizationPolicy(EvaluationExpression, new Uri(PolicyID), Delegation);
 
-            if (Transforms != null && Transforms.Length > 0)
-            {
-                foreach (Transform transform in Transforms)
-                {
+            if (Transforms != null && Transforms.Length > 0) {
+                foreach (Transform transform in Transforms) {
                     policy.Transforms.Add(transform);
                 }
             }

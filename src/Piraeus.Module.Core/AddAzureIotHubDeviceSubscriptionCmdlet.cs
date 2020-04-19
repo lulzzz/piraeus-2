@@ -45,7 +45,8 @@ namespace Piraeus.Module
                 uriString = string.Format("{0}&propname={1}&propvalue={1}", uriString, PropertyName, PropertyValue);
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

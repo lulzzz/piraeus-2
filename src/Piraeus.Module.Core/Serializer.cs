@@ -17,7 +17,8 @@ namespace Piraeus.Module
             }
             else if (contentType == "application/xml" || contentType == "text/xml") {
                 XmlSerializer xs = new XmlSerializer(typeof(T));
-                using MemoryStream stream = new MemoryStream(body) {
+                using MemoryStream stream = new MemoryStream(body)
+                {
                     Position = 0
                 };
                 result = (T)xs.Deserialize(stream);

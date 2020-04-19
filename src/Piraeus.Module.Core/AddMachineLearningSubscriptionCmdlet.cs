@@ -3,7 +3,7 @@ using Piraeus.Core.Metadata;
 
 namespace Piraeus.Module
 {
-    [Cmdlet(VerbsCommon.Add, "PiraeusMachineLearningSubscription")]
+    [Cmdlet(VerbsCommon.Add, "PiraeusMLSubscription")]
     public class AddMachineLearningSubscriptionCmdlet : Cmdlet
     {
         [Parameter(HelpMessage = "Azure ML service security key (base64 encoded) for Web service call.",
@@ -33,7 +33,8 @@ namespace Piraeus.Module
             string url =
                 $"{ServiceUrl}/api/resource/subscribe?resourceuristring={ResourceUriString}&r={OutputResourceUriString}";
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = AmlServiceUrl,
                 SymmetricKey = AmlSecurityKey,

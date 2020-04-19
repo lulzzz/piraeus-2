@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,8 +8,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Piraeus.Configuration;
 using Piraeus.Core.Logging;
-using System;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Piraeus.WebSocketGateway
 {
@@ -54,19 +54,16 @@ namespace Piraeus.WebSocketGateway
                         options.Limits.MinResponseDataRate =
                             new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
 
-                        if (!string.IsNullOrEmpty(config.ServerCertificateFilename))
-                        {
+                        if (!string.IsNullOrEmpty(config.ServerCertificateFilename)) {
                             Console.WriteLine("Port for cert with filename");
                             options.ListenAnyIP(config.GetPorts()[0], (a) => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
                         }
-                        else if (!string.IsNullOrEmpty(config.ServerCertificateStore))
-                        {
+                        else if (!string.IsNullOrEmpty(config.ServerCertificateStore)) {
                             Console.WriteLine("Port for cert with store");
                             X509Certificate2 cert = config.GetServerCerticate();
                             options.ListenAnyIP(config.GetPorts()[0], (a) => a.UseHttps(cert));
                         }
-                        else
-                        {
+                        else {
                             Console.WriteLine("Hard coded port 8081");
                             options.ListenAnyIP(8081);
                         }

@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>3.1.6</Version>
+    <Description>Piraeus management web api for dotnet core 3.1.</Description>
   </PropertyGroup>
 
   <ItemGroup>

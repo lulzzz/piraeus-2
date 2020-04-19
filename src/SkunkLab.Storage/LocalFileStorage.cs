@@ -48,8 +48,7 @@ namespace SkunkLab.Storage
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (!File.Exists(path))
-            {
+            if (!File.Exists(path)) {
                 throw new FileNotFoundException(path);
             }
 
@@ -69,16 +68,13 @@ namespace SkunkLab.Storage
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (!File.Exists(path))
-            {
+            if (!File.Exists(path)) {
                 throw new FileNotFoundException(path);
             }
 
-            if (File.Exists(path))
-            {
+            if (File.Exists(path)) {
                 FileInfo info = new FileInfo(path);
-                if (maxSize > 0 && info.Length >= Convert.ToInt64(maxSize))
-                {
+                if (maxSize > 0 && info.Length >= Convert.ToInt64(maxSize)) {
                     RenameFile(path);
                 }
             }
@@ -88,13 +84,11 @@ namespace SkunkLab.Storage
             byte[] crlfBytes = Encoding.UTF8.GetBytes(crlf);
 
             byte[] buffer;
-            if (existing.Length == 0)
-            {
+            if (existing.Length == 0) {
                 buffer = new byte[source.Length];
                 Buffer.BlockCopy(source, 0, buffer, 0, source.Length);
             }
-            else
-            {
+            else {
                 buffer = new byte[crlfBytes.Length + source.Length + existing.Length];
                 Buffer.BlockCopy(existing, 0, buffer, 0, existing.Length);
                 Buffer.BlockCopy(crlfBytes, 0, buffer, existing.Length, crlfBytes.Length);
@@ -108,32 +102,26 @@ namespace SkunkLab.Storage
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (!File.Exists(path))
-            {
+            if (!File.Exists(path)) {
                 throw new FileNotFoundException(path);
             }
 
             byte[] message = null;
 
-            try
-            {
-                if (container.Contains(path.ToLowerInvariant()))
-                {
+            try {
+                if (container.Contains(path.ToLowerInvariant())) {
                     await AccessWaitAsync(path, TimeSpan.FromSeconds(20.0));
                 }
 
                 container.Add(path.ToLowerInvariant());
-                if (!File.Exists(path))
-                {
+                if (!File.Exists(path)) {
                     File.Create(path);
                 }
 
                 using FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
                 int bytesRead = 0;
-                do
-                {
-                    if (token.IsCancellationRequested)
-                    {
+                do {
+                    if (token.IsCancellationRequested) {
                         message = null;
                         break;
                     }
@@ -141,13 +129,11 @@ namespace SkunkLab.Storage
                     byte[] buffer = new byte[ushort.MaxValue];
                     bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                    if (message == null)
-                    {
+                    if (message == null) {
                         message = new byte[bytesRead];
                         Buffer.BlockCopy(buffer, 0, message, 0, bytesRead);
                     }
-                    else
-                    {
+                    else {
                         byte[] temp = new byte[message.Length + buffer.Length];
                         Buffer.BlockCopy(message, 0, temp, 0, message.Length);
                         Buffer.BlockCopy(buffer, 0, temp, message.Length, buffer.Length);
@@ -155,19 +141,15 @@ namespace SkunkLab.Storage
                     }
                 } while (bytesRead > 0);
             }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is TaskCanceledException)
-                {
+            catch (Exception ex) {
+                if (ex.InnerException is TaskCanceledException) {
                     message = null;
                 }
-                else
-                {
+                else {
                     throw ex;
                 }
             }
-            finally
-            {
+            finally {
                 container.Remove(path.ToLowerInvariant());
             }
 
@@ -178,20 +160,17 @@ namespace SkunkLab.Storage
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (maxBytes < 0)
-            {
+            if (maxBytes < 0) {
                 throw new IndexOutOfRangeException("maxBytes");
             }
 
-            if (!File.Exists(path))
-            {
+            if (!File.Exists(path)) {
                 throw new FileNotFoundException("path");
             }
 
             byte[] source = await ReadFileAsync(path, token);
 
-            if (source.Length <= maxBytes)
-            {
+            if (source.Length <= maxBytes) {
                 return;
             }
 
@@ -204,15 +183,12 @@ namespace SkunkLab.Storage
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (!File.Exists(path))
-            {
+            if (!File.Exists(path)) {
                 throw new FileNotFoundException(path);
             }
 
-            try
-            {
-                if (container.Contains(path.ToLowerInvariant()))
-                {
+            try {
+                if (container.Contains(path.ToLowerInvariant())) {
                     await AccessWaitAsync(path, TimeSpan.FromSeconds(20.0));
                 }
 
@@ -220,17 +196,13 @@ namespace SkunkLab.Storage
 
                 queue.Enqueue(source);
 
-                while (queue.Count > 0)
-                {
+                while (queue.Count > 0) {
                     queue.TryDequeue(out byte[] src);
 
-                    using (FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write))
-                    {
+                    using (FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write)) {
                         int offset = 0;
-                        do
-                        {
-                            if (token.IsCancellationRequested)
-                            {
+                        do {
+                            if (token.IsCancellationRequested) {
                                 break;
                             }
 
@@ -243,18 +215,14 @@ namespace SkunkLab.Storage
                     await AccessWaitAsync(path, TimeSpan.FromSeconds(20.0));
                 }
             }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is TaskCanceledException)
-                {
+            catch (Exception ex) {
+                if (ex.InnerException is TaskCanceledException) {
                 }
-                else
-                {
+                else {
                     throw ex;
                 }
             }
-            finally
-            {
+            finally {
                 container.Remove(path.ToLowerInvariant());
             }
         }
@@ -262,11 +230,9 @@ namespace SkunkLab.Storage
         private async Task AccessWaitAsync(string filename, TimeSpan maxWaitTime)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            while (!CanAccess(filename))
-            {
+            while (!CanAccess(filename)) {
                 await Task.Delay(100);
-                if (stopwatch.ElapsedMilliseconds > maxWaitTime.TotalMilliseconds)
-                {
+                if (stopwatch.ElapsedMilliseconds > maxWaitTime.TotalMilliseconds) {
                     break;
                 }
             }

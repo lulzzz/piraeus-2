@@ -1,0 +1,16 @@
+apiVersion: v2
+name: piraeus-silo
+description: A Helm chart for piraeus orleans cluster
+type: application
+version: 0.2.0
+appVersion: 0.2.0
+keywords:
+  - piraeus
+  - orleans
+home: https://github.com/skunklab/piraeus
+sources:
+  - https://github.com/skunklab/piraeus/kubernetes/piraeus-silo
+maintainers:
+  - name: Matt Long
+    email: malong@microsoft.com
+icon: https://avatars2.githubusercontent.com/u/25301165?s=400&v=4

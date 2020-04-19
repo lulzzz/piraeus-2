@@ -81,7 +81,7 @@ namespace Piraeus.Core.Utilities
 
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
             foreach (string index in indexes) {
-                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = index.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }
@@ -134,8 +134,8 @@ namespace Piraeus.Core.Utilities
         private IEnumerable<string> GetEnumerableParameters(string key)
         {
             return from kv in items
-                where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
-                select kv.Value.ToLower(CultureInfo.InvariantCulture);
+                   where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
+                   select kv.Value.ToLower(CultureInfo.InvariantCulture);
         }
 
         private string GetSingleParameter(string key)
@@ -167,7 +167,7 @@ namespace Piraeus.Core.Utilities
             Resource ??= request.Headers[HttpHeaderConstants.RESOURCE_HEADER];
             if (request.Headers.ContainsKey(HttpHeaderConstants.SUBSCRIBE_HEADER)) {
                 string[] arr = request.Headers[HttpHeaderConstants.SUBSCRIBE_HEADER].ToArray();
-                string[] subs = arr[0].Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries);
+                string[] subs = arr[0].Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                 if (subs != null && subs.Count() > 0) {
                     Subscriptions = new List<string>(subs);
                 }
@@ -179,7 +179,7 @@ namespace Piraeus.Core.Utilities
                 List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
 
                 foreach (var val in vals) {
-                    string[] parts = val.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = val.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                     list.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
                 }
 
