@@ -46,8 +46,7 @@ namespace Piraeus.Module
                 uriString = string.Format("{0}&partitionid={1}", uriString, PartitionId);
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

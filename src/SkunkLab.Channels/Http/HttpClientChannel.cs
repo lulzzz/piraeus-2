@@ -180,9 +180,10 @@ namespace SkunkLab.Channels.Http
                 HttpWebRequest request = GetRequest(HttpMethod.Get);
                 Port = request.RequestUri.Port;
                 IsEncrypted = request.RequestUri.Scheme == "https";
-                foreach (var item in observers)
+                foreach (var item in observers) {
                     request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER,
                         item.ResourceUri.ToString().ToLowerInvariant());
+                }
 
                 try {
                     State = ChannelState.Open;

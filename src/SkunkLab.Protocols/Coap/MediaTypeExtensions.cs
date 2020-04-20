@@ -19,8 +19,7 @@ namespace SkunkLab.Protocols.Coap
 
         public static string ConvertToContentType(this MediaType mediaType)
         {
-            return mediaType switch
-            {
+            return mediaType switch {
                 MediaType.Xml => "text/xml",
                 MediaType.TextPlain => "text/plain",
                 MediaType.OctetStream => "application/octet-stream",

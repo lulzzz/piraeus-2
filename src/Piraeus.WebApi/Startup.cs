@@ -30,8 +30,7 @@ namespace Piraeus.WebApi
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
@@ -62,8 +61,7 @@ namespace Piraeus.WebApi
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
+                    options.TokenValidationParameters = new TokenValidationParameters {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
@@ -72,14 +70,15 @@ namespace Piraeus.WebApi
                         ValidIssuer = pconfig.ManagementApiIssuer,
                         ValidAudience = pconfig.ManagementApiAudience,
                         ClockSkew = TimeSpan.FromMinutes(5.0),
-                        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(pconfig.ManagmentApiSymmetricKey))
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Convert.FromBase64String(pconfig.ManagmentApiSymmetricKey))
                     };
                 });
 
             PskStorageAdapter pskAdpater = GetPskAdapter();
 
             if (pskAdpater != null) {
-                services.AddSingleton<PskStorageAdapter>(pskAdpater);
+                services.AddSingleton(pskAdpater);
             }
 
             services.AddPiraeusConfiguration();
@@ -106,8 +105,11 @@ namespace Piraeus.WebApi
                 return PskStorageAdapterFactory.Create(pconfig.PskRedisConnectionString);
             }
 
-            if (!string.IsNullOrEmpty(pconfig.PskKeyVaultClientSecret) && !string.IsNullOrEmpty(pconfig.PskKeyVaultClientId) && !string.IsNullOrEmpty(pconfig.PskKeyVaultAuthority)) {
-                return PskStorageAdapterFactory.Create(pconfig.PskKeyVaultAuthority, pconfig.PskKeyVaultClientId, pconfig.PskKeyVaultClientSecret);
+            if (!string.IsNullOrEmpty(pconfig.PskKeyVaultClientSecret) &&
+                !string.IsNullOrEmpty(pconfig.PskKeyVaultClientId) &&
+                !string.IsNullOrEmpty(pconfig.PskKeyVaultAuthority)) {
+                return PskStorageAdapterFactory.Create(pconfig.PskKeyVaultAuthority, pconfig.PskKeyVaultClientId,
+                    pconfig.PskKeyVaultClientSecret);
             }
 
             if (!string.IsNullOrEmpty(pconfig.PskKeys)) {

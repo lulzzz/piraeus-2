@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using Orleans;
 using Piraeus.Core.Messaging;
 using Piraeus.Core.Metadata;
@@ -17,7 +18,7 @@ namespace Piraeus.Monitor.Hubs
 
         private readonly GraphManager manager;
 
-        private readonly System.Timers.Timer timer;
+        private readonly Timer timer;
 
         public HubAdapter(IClusterClient clusterClient)
         {
@@ -30,7 +31,7 @@ namespace Piraeus.Monitor.Hubs
 
             leaseTime = TimeSpan.FromSeconds(30.0);
             container = new Dictionary<string, string>();
-            timer = new System.Timers.Timer(leaseTime.TotalMilliseconds / 2);
+            timer = new Timer(leaseTime.TotalMilliseconds / 2);
             timer.Elapsed += Timer_Elapsed;
             timer.Start();
         }
@@ -49,8 +50,9 @@ namespace Piraeus.Monitor.Hubs
                 string leaseKey = await manager.AddResourceObserverAsync(resourceUriString, leaseTime, observer);
                 container.Add(resourceUriString, leaseKey);
 
-                if (!timer.Enabled)
+                if (!timer.Enabled) {
                     timer.Enabled = true;
+                }
             }
         }
 
@@ -92,18 +94,18 @@ namespace Piraeus.Monitor.Hubs
             OnNotify?.Invoke(this, new NotificationEventArgs(e.Metrics));
         }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (container.Count == 0)
+            if (container.Count == 0) {
                 timer.Enabled = false;
+            }
 
             KeyValuePair<string, string>[] items = container.ToArray();
 
             List<Task> taskList = new List<Task>();
 
-            foreach (var item in items) {
+            foreach (var item in items)
                 taskList.Add(manager.RenewResourceObserverLeaseAsync(item.Key, item.Value, leaseTime));
-            }
 
             if (taskList.Count > 0) {
                 Task.WhenAll(taskList).GetAwaiter();

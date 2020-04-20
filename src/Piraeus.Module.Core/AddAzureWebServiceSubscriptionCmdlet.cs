@@ -51,27 +51,20 @@ namespace Piraeus.Module
             Uri uri = new Uri(uriString);
 
             string query = !string.IsNullOrEmpty(Issuer) && !string.IsNullOrEmpty(Audience)
-                ?
-                string.Format("issuer={0}&audience={1}", Issuer, Audience)
-                :
-                !string.IsNullOrEmpty(Issuer)
+                ? string.Format("issuer={0}&audience={1}", Issuer, Audience)
+                : !string.IsNullOrEmpty(Issuer)
                     ? string.Format("issuer={0}", Issuer)
-                    :
-                    !string.IsNullOrEmpty(Audience)
+                    : !string.IsNullOrEmpty(Audience)
                         ? string.Format("audience={0}", Audience)
                         : null;
 
             uriString = !string.IsNullOrEmpty(uri.Query) && !string.IsNullOrEmpty(query)
-                ?
-                string.Format("&{0}&{1}", uriString, query)
-                :
-                string.IsNullOrEmpty(uri.Query) && !string.IsNullOrEmpty(query)
+                ? string.Format("&{0}&{1}", uriString, query)
+                : string.IsNullOrEmpty(uri.Query) && !string.IsNullOrEmpty(query)
                     ? string.Format("?{0}&{1}", uriString, query)
-                    :
-                    uriString;
+                    : uriString;
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

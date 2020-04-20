@@ -211,8 +211,7 @@ namespace Piraeus.Adapters
 
                 if (method == "GET") {
                     foreach (var subscription in subscriptions) {
-                        SubscriptionMetadata metadata = new SubscriptionMetadata
-                        {
+                        SubscriptionMetadata metadata = new SubscriptionMetadata {
                             Identity = identity,
                             Indexes = indexes,
                             IsEphemeral = true

@@ -12,25 +12,28 @@
         {
         }
 
-        public static IAuditFactory CreateSingleton()
-        {
-            return instance ??= new AuditFactory();
-        }
-
         public void Add(IAuditor auditor, AuditType type)
         {
-            if (type == AuditType.User)
+            if (type == AuditType.User) {
                 userAuditor = auditor;
-            else
+            }
+            else {
                 messageAuditor = auditor;
+            }
         }
 
         public IAuditor GetAuditor(AuditType type)
         {
-            if (type == AuditType.User)
+            if (type == AuditType.User) {
                 return userAuditor;
-            else
-                return messageAuditor;
+            }
+
+            return messageAuditor;
+        }
+
+        public static IAuditFactory CreateSingleton()
+        {
+            return instance ??= new AuditFactory();
         }
     }
 }

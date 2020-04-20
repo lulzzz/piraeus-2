@@ -196,7 +196,7 @@ namespace Piraeus.UdpGateway
             if (args.RemovedReason == CacheEntryRemovedReason.Expired) {
                 logger?.LogInformationAsync($"Expired {args.CacheItem.Key} removed.");
                 try {
-                    string[] parts = args.CacheItem.Key.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = args.CacheItem.Key.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2) {
                         if (cache.Contains((string)args.CacheItem.Value)) {
                             Tuple<ProtocolAdapter, CancellationTokenSource> tuple =
@@ -255,8 +255,7 @@ namespace Piraeus.UdpGateway
 
         private CacheItemPolicy GetCachePolicy(double expirySeconds)
         {
-            return new CacheItemPolicy
-            {
+            return new CacheItemPolicy {
                 SlidingExpiration = TimeSpan.FromSeconds(expirySeconds),
                 RemovedCallback = CacheItemRemovedCallback
             };

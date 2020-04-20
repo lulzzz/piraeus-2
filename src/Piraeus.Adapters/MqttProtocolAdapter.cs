@@ -283,8 +283,7 @@ namespace Piraeus.Adapters
             try {
                 SubscribeMessage message = args.Message as SubscribeMessage;
 
-                SubscriptionMetadata metadata = new SubscriptionMetadata
-                {
+                SubscriptionMetadata metadata = new SubscriptionMetadata {
                     Identity = session.Identity,
                     Indexes = session.Indexes,
                     IsEphemeral = true

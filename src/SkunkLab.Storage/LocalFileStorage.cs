@@ -206,7 +206,9 @@ namespace SkunkLab.Storage
                                 break;
                             }
 
-                            int length = offset + ushort.MaxValue >= src.Length ? src.Length - offset : offset + ushort.MaxValue;
+                            int length = offset + ushort.MaxValue >= src.Length
+                                ? src.Length - offset
+                                : offset + ushort.MaxValue;
                             await stream.WriteAsync(src, offset, length);
                             offset += length;
                         } while (offset + ushort.MaxValue < src.Length);

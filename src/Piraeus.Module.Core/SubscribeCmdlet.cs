@@ -57,8 +57,7 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 Identity = Identity,
                 Indexes = Indexes,
                 NotifyAddress = NotifyAddress,

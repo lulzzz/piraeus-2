@@ -10,7 +10,8 @@ namespace Piraeus.Core.Messaging
         }
 
         public EventMessage(string contentType, Uri resourceUri, ProtocolType protocol, byte[] message)
-            : this(Guid.NewGuid().ToString(), contentType, resourceUri.ToString(), protocol, message, DateTime.UtcNow, null)
+            : this(Guid.NewGuid().ToString(), contentType, resourceUri.ToString(), protocol, message, DateTime.UtcNow,
+                null)
         {
         }
 
@@ -19,32 +20,39 @@ namespace Piraeus.Core.Messaging
         {
         }
 
-        public EventMessage(string contentType, Uri resourceUri, ProtocolType protocol, byte[] message, DateTime timestamp, bool audit = false)
-            : this(Guid.NewGuid().ToString(), contentType, resourceUri.ToString(), protocol, message, timestamp, null, audit)
+        public EventMessage(string contentType, Uri resourceUri, ProtocolType protocol, byte[] message,
+            DateTime timestamp, bool audit = false)
+            : this(Guid.NewGuid().ToString(), contentType, resourceUri.ToString(), protocol, message, timestamp, null,
+                audit)
         {
         }
 
-        public EventMessage(string contentType, string resourceUri, ProtocolType protocol, byte[] message, DateTime timestamp, bool audit = false)
+        public EventMessage(string contentType, string resourceUri, ProtocolType protocol, byte[] message,
+            DateTime timestamp, bool audit = false)
             : this(Guid.NewGuid().ToString(), contentType, resourceUri, protocol, message, timestamp, null, audit)
         {
         }
 
-        public EventMessage(string messageId, string contentType, Uri resourceUri, ProtocolType protocol, byte[] message, bool audit = false)
+        public EventMessage(string messageId, string contentType, Uri resourceUri, ProtocolType protocol,
+            byte[] message, bool audit = false)
             : this(messageId, contentType, resourceUri.ToString(), protocol, message, DateTime.UtcNow, null, audit)
         {
         }
 
-        public EventMessage(string messageId, string contentType, string resourceUri, ProtocolType protocol, byte[] message, bool audit = false)
+        public EventMessage(string messageId, string contentType, string resourceUri, ProtocolType protocol,
+            byte[] message, bool audit = false)
             : this(messageId, contentType, resourceUri, protocol, message, DateTime.UtcNow, null, audit)
         {
         }
 
-        public EventMessage(string messageId, string contentType, Uri resourceUri, ProtocolType protocol, byte[] message, DateTime timeStamp, bool audit = false)
+        public EventMessage(string messageId, string contentType, Uri resourceUri, ProtocolType protocol,
+            byte[] message, DateTime timeStamp, bool audit = false)
             : this(messageId, contentType, resourceUri.ToString(), protocol, message, timeStamp, null, audit)
         {
         }
 
-        public EventMessage(string messageId, string contentType, string resourceUri, ProtocolType protocol, byte[] message, DateTime timeStamp, string cacheKey, bool audit = false)
+        public EventMessage(string messageId, string contentType, string resourceUri, ProtocolType protocol,
+            byte[] message, DateTime timeStamp, string cacheKey, bool audit = false)
         {
             MessageId = messageId ?? Guid.NewGuid().ToString();
             ContentType = contentType;

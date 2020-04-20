@@ -43,7 +43,7 @@ namespace SkunkLab.Storage
             Dictionary<string, string>.KeyCollection coll = container.Keys;
             string[] keys = new string[container.Count];
             coll.CopyTo(keys, 0);
-            return await Task.FromResult<string[]>(keys);
+            return await Task.FromResult(keys);
         }
 
         public override async Task<string> GetSecretAsync(string key)
@@ -51,11 +51,11 @@ namespace SkunkLab.Storage
             string result = null;
 
             if (container.ContainsKey(key)) {
-                Dictionary<string, string> clone = DeepClone<Dictionary<string, string>>(container);
+                Dictionary<string, string> clone = DeepClone(container);
                 result = clone[key];
             }
 
-            return await Task.FromResult<string>(result);
+            return await Task.FromResult(result);
         }
 
         public override async Task RemoveSecretAsync(string key)

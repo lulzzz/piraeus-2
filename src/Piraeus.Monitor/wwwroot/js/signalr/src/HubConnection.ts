@@ -37,7 +37,7 @@ export class HubConnection {
     private protocol: IHubProtocol;
     private handshakeProtocol: HandshakeProtocol;
     private callbacks: {
-        [invocationId: string]: (invocationEvent: StreamItemMessage | CompletionMessage | null, error?: Error) => void
+        [invocationId: string]: (invocationEvent: StreamItemMessage | CompletionMessage | null, error?: Error) => void;
     };
     private methods: { [name: string]: Array<(...args: any[]) => void> };
     private invocationId: number;
@@ -628,8 +628,8 @@ export class HubConnection {
             }
         };
     },
-    this.;
-    keepAliveIntervalInMilliseconds: number);;
+    this;.;
+    keepAliveIntervalInMilliseconds: number);;;
 }
 
 private;
@@ -651,8 +651,8 @@ serverTimeout();
 }
 
 private;
-invokeClientMethod(invocationMessage:;
-InvocationMessage);
+invokeClientMethod(invocationMessage:;;
+InvocationMessage);;
 {
     const methods = this.methods[invocationMessage.target.toLowerCase()];
     if (methods) {
@@ -826,10 +826,10 @@ reconnect(error ? : Error);
 }
 
 private;
-getNextRetryDelay(previousRetryCount:;
-number, elapsedMilliseconds:;
-number, retryReason:;
-Error);
+getNextRetryDelay(previousRetryCount:;;
+number, elapsedMilliseconds:;;
+number, retryReason:;;
+Error);;
 {
     try {
         return this.reconnectPolicy!.nextRetryDelayInMilliseconds({
@@ -846,8 +846,8 @@ Error);
 }
 
 private;
-cancelCallbacksWithError(error:;
-Error);
+cancelCallbacksWithError(error:;;
+Error);;
 {
     const callbacks = this.callbacks;
     this.callbacks = {};
@@ -860,29 +860,29 @@ Error);
 }
 
 private;
-cleanupPingTimer():;
+cleanupPingTimer():;;
 void {
-    if (this.pingServerHandle);
+    if (this.pingServerHandle);;
 {
     clearTimeout(this.pingServerHandle);
 }
 }
 
 private;
-cleanupTimeout():;
+cleanupTimeout():;;
 void {
-    if (this.timeoutHandle);
+    if (this.timeoutHandle);;
 {
     clearTimeout(this.timeoutHandle);
 }
 }
 
 private;
-createInvocation(methodName:;
-string, args:;
-any[], nonblocking:;
-boolean, streamIds:;
-string[]);:
+createInvocation(methodName:;;
+string, args:;;
+any[], nonblocking:;;
+boolean, streamIds:;;
+string[]);;:
 InvocationMessage;
 {
     if (nonblocking) {
@@ -907,11 +907,11 @@ InvocationMessage;
 }
 
 private;
-launchStreams(streams:;
-Array < IStreamResult < any >> , promiseQueue:;
-Promise < void > );:
+launchStreams(streams:;;
+Array < IStreamResult < any >> , promiseQueue:;;
+Promise < void >  );;:
 void {
-    if (streams.length === 0);
+    if (streams.length === 0);;
 {
     return;
 }
@@ -949,8 +949,8 @@ for (const streamId in streams) {
 }
 
 private;
-replaceStreamingParams(args:;
-any[]);:
+replaceStreamingParams(args:;;
+any[]);;:
 [Array < IStreamResult < any >> , string[]];
 {
     const streams: Array<IStreamResult<any>> = [];
@@ -973,8 +973,8 @@ any[]);:
 }
 
 private;
-isObservable(arg:;
-any);:
+isObservable(arg:;;
+any);;:
 arg;
 is;
 IStreamResult < any >
@@ -984,10 +984,10 @@ IStreamResult < any >
 }
 
 private;
-createStreamInvocation(methodName:;
-string, args:;
-any[], streamIds:;
-string[]);:
+createStreamInvocation(methodName:;;
+string, args:;;
+any[], streamIds:;;
+string[]);;:
 StreamInvocationMessage;
 {
     const invocationId = this.invocationId;
@@ -1003,8 +1003,8 @@ StreamInvocationMessage;
 }
 
 private;
-createCancelInvocation(id:;
-string);:
+createCancelInvocation(id:;;
+string);;:
 CancelInvocationMessage;
 {
     return {
@@ -1014,9 +1014,9 @@ CancelInvocationMessage;
 }
 
 private;
-createStreamItemMessage(id:;
-string, item:;
-any);:
+createStreamItemMessage(id:;;
+string, item:;;
+any);;:
 StreamItemMessage;
 {
     return {
@@ -1027,8 +1027,8 @@ StreamItemMessage;
 }
 
 private;
-createCompletionMessage(id:;
-string, error ? : any, result ? : any);:
+createCompletionMessage(id:;;
+string, error ? : any, result ? : any);;:
 CompletionMessage;
 {
     if (error) {

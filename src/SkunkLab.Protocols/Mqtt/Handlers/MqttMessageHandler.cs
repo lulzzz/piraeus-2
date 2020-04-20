@@ -21,8 +21,7 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
         public static MqttMessageHandler Create(MqttSession session, MqttMessage message,
             IMqttDispatch dispatcher = null)
         {
-            return message.MessageType switch
-            {
+            return message.MessageType switch {
                 MqttMessageType.CONNACK => new MqttConnackHandler(session, message),
                 MqttMessageType.CONNECT => new MqttConnectHandler(session, message),
                 MqttMessageType.DISCONNECT => new MqttDisconnectHandler(session, message),

@@ -20,8 +20,7 @@ namespace Piraeus.HttpGateway
     {
         public void Configure(IApplicationBuilder app)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
@@ -67,8 +66,7 @@ namespace Piraeus.HttpGateway
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
+                    options.TokenValidationParameters = new TokenValidationParameters {
                         ValidateIssuer = !string.IsNullOrEmpty(config.ClientIssuer),
                         ValidateAudience = !string.IsNullOrEmpty(config.ClientAudience),
                         ValidateLifetime = true,

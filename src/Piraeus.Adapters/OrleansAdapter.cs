@@ -67,8 +67,9 @@ namespace Piraeus.Adapters
             IEnumerable<string> subscriptionUriStrings =
                 await graphManager.GetSubscriberSubscriptionsListAsync(identity);
 
-            if (subscriptionUriStrings == null || subscriptionUriStrings.Count() == 0)
+            if (subscriptionUriStrings == null || subscriptionUriStrings.Count() == 0) {
                 return null;
+            }
 
             foreach (var item in subscriptionUriStrings) {
                 if (!durableObservers.ContainsKey(item)) {
@@ -86,13 +87,15 @@ namespace Piraeus.Adapters
 
                     list.Add(resourceUriString);
 
-                    if (!container.ContainsKey(resourceUriString))
+                    if (!container.ContainsKey(resourceUriString)) {
                         container.Add(resourceUriString, new Tuple<string, string>(item, leaseKey));
+                    }
                 }
             }
 
-            if (subscriptionUriStrings.Count() > 0)
+            if (subscriptionUriStrings.Count() > 0) {
                 EnsureLeaseTimer();
+            }
 
             return list.Count == 0 ? null : list;
         }
@@ -125,8 +128,9 @@ namespace Piraeus.Adapters
                     receiveTime, ex.Message);
             }
             finally {
-                if (message.Audit)
+                if (message.Audit) {
                     await auditor?.WriteAuditRecordAsync(record);
+                }
             }
         }
 
@@ -149,8 +153,9 @@ namespace Piraeus.Adapters
 
                 ephemeralObservers.Add(subscriptionUriString, observer);
 
-                if (!container.ContainsKey(resourceUriString))
+                if (!container.ContainsKey(resourceUriString)) {
                     container.Add(resourceUriString, new Tuple<string, string>(subscriptionUriString, leaseKey));
+                }
 
                 EnsureLeaseTimer();
                 logger?.LogDebugAsync(
@@ -236,9 +241,10 @@ namespace Piraeus.Adapters
             Task leaseTask = Task.Factory.StartNew(async () =>
             {
                 if (kvps != null && kvps.Length > 0) {
-                    foreach (var kvp in kvps)
+                    foreach (var kvp in kvps) {
                         await graphManager.RenewObserverLeaseAsync(kvp.Value.Item1, kvp.Value.Item2,
                             TimeSpan.FromSeconds(60.0));
+                    }
                 }
             });
 

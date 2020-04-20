@@ -9,10 +9,10 @@ export declare class LongPollingTransport implements ITransport {
     private readonly logger;
     private readonly logMessageContent;
     private readonly pollAbort;
-    private url: undefined?;
+    private url: undefined?;;
     private running;
-    private receiving: undefined?;
-    private closeError: undefined?;
+    private receiving: undefined?;;
+    private closeError: undefined?;;
     onreceive: ((data: string | ArrayBuffer) => void) | null;
     onclose: ((error?: Error) => void) | null;
     readonly pollAborted: boolean;

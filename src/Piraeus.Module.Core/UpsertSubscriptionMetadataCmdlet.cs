@@ -89,8 +89,7 @@ namespace Piraeus.Module
                 }
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 SubscriptionUriString = SubscriptionUriString,
                 Description = Description,

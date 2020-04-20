@@ -36,7 +36,7 @@ namespace Piraeus.Grains
 
         public async Task UpsertPolicyAsync(AuthorizationPolicy policy)
         {
-            XmlWriterSettings settings = new XmlWriterSettings { OmitXmlDeclaration = true };
+            XmlWriterSettings settings = new XmlWriterSettings {OmitXmlDeclaration = true};
             StringBuilder builder = new StringBuilder();
             using (XmlWriter writer = XmlWriter.Create(builder, settings)) {
                 policy.WriteXml(writer);

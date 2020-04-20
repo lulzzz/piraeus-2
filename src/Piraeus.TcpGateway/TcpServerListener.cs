@@ -35,7 +35,8 @@ namespace Piraeus.TcpGateway
 
         private readonly CancellationToken token;
 
-        public TcpServerListener(IPEndPoint localEP, PiraeusConfig config, OrleansConfig orleansConfig, ILog logger = null, CancellationToken token = default)
+        public TcpServerListener(IPEndPoint localEP, PiraeusConfig config, OrleansConfig orleansConfig,
+            ILog logger = null, CancellationToken token = default)
         {
             serverIP = localEP.Address;
             serverPort = localEP.Port;
@@ -54,12 +55,12 @@ namespace Piraeus.TcpGateway
             }
         }
 
-        public TcpServerListener(IPAddress address, int port, PiraeusConfig config, OrleansConfig orleansConfig, ILog logger = null, CancellationToken token = default)
+        public TcpServerListener(IPAddress address, int port, PiraeusConfig config, OrleansConfig orleansConfig,
+            ILog logger = null, CancellationToken token = default)
         {
             serverIP = address;
             serverPort = port;
-            listener = new TcpListener(address, port)
-            {
+            listener = new TcpListener(address, port) {
                 ExclusiveAddressUse = false
             };
             this.token = token;
@@ -69,7 +70,8 @@ namespace Piraeus.TcpGateway
             this.logger = logger;
 
             if (config.ClientTokenType != null && config.ClientSymmetricKey != null) {
-                SecurityTokenType stt = (SecurityTokenType)System.Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
+                SecurityTokenType stt =
+                    (SecurityTokenType)Enum.Parse(typeof(SecurityTokenType), config.ClientTokenType, true);
                 BasicAuthenticator bauthn = new BasicAuthenticator();
                 bauthn.Add(stt, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
                 authn = bauthn;
@@ -83,7 +85,8 @@ namespace Piraeus.TcpGateway
             listener.ExclusiveAddressUse = false;
             listener.Start();
 
-            await logger?.LogInformationAsync($"<----- TCP Listener started on Address {serverIP} and Port {serverPort} ----->");
+            await logger?.LogInformationAsync(
+                $"<----- TCP Listener started on Address {serverIP} and Port {serverPort} ----->");
 
             while (!token.IsCancellationRequested) {
                 try {
@@ -105,7 +108,7 @@ namespace Piraeus.TcpGateway
         {
             await logger?.LogInformationAsync($"TCP Listener stopping on Address {serverIP} and Port {serverPort}");
 
-            if (dict != null & dict.Count > 0) {
+            if ((dict != null) & (dict.Count > 0)) {
                 var keys = dict.Keys;
                 if (keys != null && keys.Count > 0) {
                     try {
@@ -116,21 +119,23 @@ namespace Piraeus.TcpGateway
                                 dict.Remove(key);
                                 try {
                                     adapter.Dispose();
-                                    await logger.LogWarningAsync($"TCP Listener stopping and dispose Protcol adapter {key}");
+                                    await logger.LogWarningAsync(
+                                        $"TCP Listener stopping and dispose Protcol adapter {key}");
                                 }
                                 catch (Exception ex) {
-                                    await logger.LogErrorAsync(ex, "Fault dispose protcol adaper while Stopping TCP Listener");
+                                    await logger.LogErrorAsync(ex,
+                                        "Fault dispose protcol adaper while Stopping TCP Listener");
                                 }
                             }
                         }
                     }
                     catch (Exception ex) {
-                        await logger.LogErrorAsync(ex, $"TCP Listener fault during stop.");
+                        await logger.LogErrorAsync(ex, "TCP Listener fault during stop.");
                     }
                 }
             }
             else {
-                await logger.LogWarningAsync($"No protocol adapters in TCP Listener dictionary to dispose and remove");
+                await logger.LogWarningAsync("No protocol adapters in TCP Listener dictionary to dispose and remove");
             }
 
             listener.Stop();

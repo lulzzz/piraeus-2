@@ -18,10 +18,11 @@ namespace Piraeus.Module
         protected override void ProcessRecord()
         {
             string url = string.Format("{0}/api/accesscontrol/upsertaccesscontrolpolicy", ServiceUrl);
-            RestRequestBuilder builder = new RestRequestBuilder("PUT", url, RestConstants.ContentType.Xml, false, SecurityToken);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("PUT", url, RestConstants.ContentType.Xml, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
-            request.Put<AuthorizationPolicy>(Policy);
+            request.Put(Policy);
         }
     }
 }

@@ -10,8 +10,8 @@ export declare class ServerSentEventsTransport implements ITransport {
     private readonly logger;
     private readonly logMessageContent;
     private readonly eventSourceConstructor;
-    private eventSource: undefined?;
-    private url: undefined?;
+    private eventSource: undefined?;;
+    private url: undefined?;;
     onreceive: ((data: string | ArrayBuffer) => void) | null;
     onclose: ((error?: Error) => void) | null;
 

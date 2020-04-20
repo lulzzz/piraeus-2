@@ -66,8 +66,7 @@ namespace SkunkLab.Security.Authentication
             try {
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
-                TokenValidationParameters validationParameters = new TokenValidationParameters
-                {
+                TokenValidationParameters validationParameters = new TokenValidationParameters {
                     IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(signingKey)),
                     ValidIssuer = issuer,
                     ValidAudience = audience,

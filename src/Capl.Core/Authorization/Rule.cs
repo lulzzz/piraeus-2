@@ -61,7 +61,7 @@ namespace Capl.Authorization
 
         public override Uri TermId { get; set; }
 
-        public static new Rule Load(XmlReader reader)
+        public new static Rule Load(XmlReader reader)
         {
             Rule rule = new Rule();
             rule.ReadXml(reader);

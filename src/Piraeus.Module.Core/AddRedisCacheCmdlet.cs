@@ -52,8 +52,7 @@ namespace Piraeus.Module
                 uriString = string.Format("{0}?expiry={1}", uriString, Expiry.ToString());
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 Description = Description,

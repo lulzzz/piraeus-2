@@ -44,19 +44,14 @@ namespace Piraeus.Core.Messaging
             Items = items;
         }
 
-        [JsonProperty("filter")]
-        public string Filter { get; set; }
+        [JsonProperty("filter")] public string Filter { get; set; }
 
-        [JsonProperty("index")]
-        public int Index { get; set; }
+        [JsonProperty("index")] public int Index { get; set; }
 
-        [JsonProperty("items")]
-        public List<string> Items { get; set; }
+        [JsonProperty("items")] public List<string> Items { get; set; }
 
-        [JsonProperty("pageSize")]
-        public int PageSize { get; set; }
+        [JsonProperty("pageSize")] public int PageSize { get; set; }
 
-        [JsonProperty("quantity")]
-        public int Quantity { get; set; }
+        [JsonProperty("quantity")] public int Quantity { get; set; }
     }
 }

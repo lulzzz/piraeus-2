@@ -19,9 +19,11 @@ namespace Piraeus.Module
         {
             string url = $"{ServiceUrl}/api/resource/PageSigmaAlgebra";
 
-            RestRequestBuilder builder = new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("POST", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
-            ListContinuationToken listToken = request.Post<ListContinuationToken, ListContinuationToken>(ContinuationToken);
+            ListContinuationToken listToken =
+                request.Post<ListContinuationToken, ListContinuationToken>(ContinuationToken);
 
             WriteObject(listToken);
         }

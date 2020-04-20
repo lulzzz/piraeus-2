@@ -86,8 +86,10 @@ namespace Piraeus.Grains.Notifications
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     bool isdequeued = queue.TryDequeue(out EventMessage msg);
 
-                    if (!isdequeued)
+                    if (!isdequeued) {
                         continue;
+                    }
+
                     payload = GetPayload(message);
                     if (payload == null) {
                         await logger?.LogWarningAsync(
@@ -95,8 +97,7 @@ namespace Piraeus.Grains.Notifications
                         continue;
                     }
 
-                    await using MemoryStream stream = new MemoryStream(payload)
-                    {
+                    await using MemoryStream stream = new MemoryStream(payload) {
                         Position = 0
                     };
                     if (message.ContentType.Contains("json")) {
@@ -113,7 +114,7 @@ namespace Piraeus.Grains.Notifications
                             .CreateDocumentAsync(collection.SelfLink, documentWithAttachment);
                         string slug = GetSlug(documentWithAttachment.Id, message.ContentType);
                         await storageArray[arrayIndex].CreateAttachmentAsync(doc.AttachmentsLink, stream,
-                            new MediaOptions { ContentType = message.ContentType, Slug = slug });
+                            new MediaOptions {ContentType = message.ContentType, Slug = slug});
                     }
 
                     if (message.Audit) {
@@ -148,7 +149,7 @@ namespace Piraeus.Grains.Notifications
                 }
             }
 
-            return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection { Id = id });
+            return await storageArray[0].CreateDocumentCollectionAsync(dbLink, new DocumentCollection {Id = id});
         }
 
         private async Task<Database> GetDatabaseAsync()
@@ -162,7 +163,7 @@ namespace Piraeus.Grains.Notifications
                     }
                 }
 
-                return await storageArray[0].CreateDatabaseAsync(new Database { Id = databaseId });
+                return await storageArray[0].CreateDatabaseAsync(new Database {Id = databaseId});
             }
             catch (Exception ex) {
                 await logger?.LogErrorAsync(ex,
@@ -212,8 +213,7 @@ namespace Piraeus.Grains.Notifications
             List<Database> databases = new List<Database>();
 
             do {
-                FeedOptions options = new FeedOptions
-                {
+                FeedOptions options = new FeedOptions {
                     RequestContinuation = continuation,
                     MaxItemCount = 50
                 };
@@ -233,8 +233,7 @@ namespace Piraeus.Grains.Notifications
             List<DocumentCollection> collections = new List<DocumentCollection>();
             try {
                 do {
-                    FeedOptions options = new FeedOptions
-                    {
+                    FeedOptions options = new FeedOptions {
                         RequestContinuation = continuation,
                         MaxItemCount = 50
                     };

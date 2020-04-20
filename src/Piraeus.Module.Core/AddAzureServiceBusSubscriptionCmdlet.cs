@@ -36,8 +36,7 @@ namespace Piraeus.Module
             string uriString = string.Format("sb://{0}.servicebus.windows.net?topic={1}&keyname={2}", Account, Topic,
                 KeyName);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

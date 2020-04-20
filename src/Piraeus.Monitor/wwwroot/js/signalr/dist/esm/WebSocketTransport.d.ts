@@ -10,7 +10,7 @@ export declare class WebSocketTransport implements ITransport {
     private readonly logMessageContent;
     private readonly webSocketConstructor;
     private readonly httpClient;
-    private webSocket: undefined?;
+    private webSocket: undefined?;;
     onreceive: ((data: string | ArrayBuffer) => void) | null;
     onclose: ((error?: Error) => void) | null;
 

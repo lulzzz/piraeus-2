@@ -40,18 +40,26 @@ namespace Piraeus.Adapters
 
         private IAuditor userAuditor;
 
-        public CoapProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator, IChannel channel, ILog logger, HttpContext context = null)
+        public CoapProtocolAdapter(PiraeusConfig config, GraphManager graphManager, IAuthenticator authenticator,
+            IChannel channel, ILog logger, HttpContext context = null)
         {
             this.context = context;
             this.graphManager = graphManager;
             this.logger = logger;
             this.config = config;
 
-            CoapConfigOptions options = config.ObserveOption && config.NoResponseOption ? CoapConfigOptions.Observe | CoapConfigOptions.NoResponse : config.ObserveOption ? CoapConfigOptions.Observe : config.NoResponseOption ? CoapConfigOptions.NoResponse : CoapConfigOptions.None;
+            CoapConfigOptions options = config.ObserveOption && config.NoResponseOption
+                ?
+                CoapConfigOptions.Observe | CoapConfigOptions.NoResponse
+                : config.ObserveOption
+                    ? CoapConfigOptions.Observe
+                    : config.NoResponseOption
+                        ? CoapConfigOptions.NoResponse
+                        : CoapConfigOptions.None;
             CoapConfig coapConfig = new CoapConfig(authenticator, config.CoapAuthority, options, config.AutoRetry,
                 config.KeepAliveSeconds, config.AckTimeoutSeconds, config.AckRandomFactor,
-                config.MaxRetransmit, config.NStart, config.DefaultLeisure, config.ProbingRate, config.MaxLatencySeconds)
-            {
+                config.MaxRetransmit, config.NStart, config.DefaultLeisure, config.ProbingRate,
+                config.MaxLatencySeconds) {
                 IdentityClaimType = config.ClientIdentityNameClaimType,
                 Indexes = config.GetClientIndexes()
             };
@@ -75,6 +83,34 @@ namespace Piraeus.Adapters
             }
         }
 
+        #region init
+
+        public override void Init()
+        {
+            forcePerReceiveAuthn = Channel as UdpChannel != null;
+            Channel.OpenAsync().GetAwaiter();
+            logger?.LogDebugAsync($"CoAP adapter on channel '{Channel.Id}' is initialized.").GetAwaiter();
+        }
+
+        #endregion init
+
+        private void InitializeAuditor(PiraeusConfig config)
+        {
+            auditFactory = AuditFactory.CreateSingleton();
+            if (config.AuditConnectionString != null &&
+                config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
+                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"),
+                    AuditType.Message);
+                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
+            }
+            else if (config.AuditConnectionString != null) {
+                auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
+                auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
+            }
+
+            userAuditor = auditFactory.GetAuditor(AuditType.User);
+        }
+
         #region public members
 
         public override event System.EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
@@ -86,17 +122,6 @@ namespace Piraeus.Adapters
         public override IChannel Channel { get; set; }
 
         #endregion public members
-
-        #region init
-
-        public override void Init()
-        {
-            forcePerReceiveAuthn = Channel as UdpChannel != null;
-            Channel.OpenAsync().GetAwaiter();
-            logger?.LogDebugAsync($"CoAP adapter on channel '{Channel.Id}' is initialized.").GetAwaiter();
-        }
-
-        #endregion init
 
         #region events
 
@@ -123,23 +148,29 @@ namespace Piraeus.Adapters
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
             session.IsAuthenticated = Channel.IsAuthenticated;
-            logger?.LogDebugAsync($"CoAP protocol channel opening with session authenticated '{session.IsAuthenticated}'.").GetAwaiter();
+            logger?.LogDebugAsync(
+                $"CoAP protocol channel opening with session authenticated '{session.IsAuthenticated}'.").GetAwaiter();
 
             try {
                 if (!Channel.IsAuthenticated && e.Message != null) {
                     CoapMessage msg = CoapMessage.DecodeMessage(e.Message);
                     CoapUri coapUri = new CoapUri(msg.ResourceUri.ToString());
                     session.IsAuthenticated = session.Authenticate(coapUri.TokenType, coapUri.SecurityToken);
-                    logger?.LogDebugAsync($"CoAP protocol channel opening session authenticated '{session.IsAuthenticated}' by authenticator.").GetAwaiter();
+                    logger?.LogDebugAsync(
+                            $"CoAP protocol channel opening session authenticated '{session.IsAuthenticated}' by authenticator.")
+                        .GetAwaiter();
                 }
 
                 if (session.IsAuthenticated) {
-                    IdentityDecoder decoder = new IdentityDecoder(session.Config.IdentityClaimType, context, session.Config.Indexes);
+                    IdentityDecoder decoder = new IdentityDecoder(session.Config.IdentityClaimType, context,
+                        session.Config.Indexes);
                     session.Identity = decoder.Id;
                     session.Indexes = decoder.Indexes;
-                    logger?.LogDebugAsync($"CoAP protocol channel opening with session identity '{session.Identity}'.").GetAwaiter();
+                    logger?.LogDebugAsync($"CoAP protocol channel opening with session identity '{session.Identity}'.")
+                        .GetAwaiter();
 
-                    UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, session.Config.IdentityClaimType, Channel.TypeId, "COAP", "Granted", DateTime.UtcNow);
+                    UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity,
+                        session.Config.IdentityClaimType, Channel.TypeId, "COAP", "Granted", DateTime.UtcNow);
                     userAuditor?.WriteAuditRecordAsync(record).Ignore();
                 }
             }
@@ -165,11 +196,14 @@ namespace Piraeus.Adapters
                 if (!session.IsAuthenticated || forcePerReceiveAuthn) {
                     session.EnsureAuthentication(message, forcePerReceiveAuthn);
 
-                    UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity, session.Config.IdentityClaimType, Channel.TypeId, "COAP", "Granted", DateTime.UtcNow);
+                    UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity,
+                        session.Config.IdentityClaimType, Channel.TypeId, "COAP", "Granted", DateTime.UtcNow);
                     userAuditor?.WriteAuditRecordAsync(record).Ignore();
                 }
 
-                OnObserve?.Invoke(this, new ChannelObserverEventArgs(Channel.Id, message.ResourceUri.ToString(), MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload));
+                OnObserve?.Invoke(this,
+                    new ChannelObserverEventArgs(Channel.Id, message.ResourceUri.ToString(),
+                        MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload));
 
                 Task task = Task.Factory.StartNew(async () =>
                 {
@@ -213,7 +247,8 @@ namespace Piraeus.Adapters
                     try {
                         if (dispatcher != null) {
                             dispatcher.Dispose();
-                            logger?.LogDebugAsync($"CoAP adapter disposed dispatcher on channel {Channel.Id}").GetAwaiter();
+                            logger?.LogDebugAsync($"CoAP adapter disposed dispatcher on channel {Channel.Id}")
+                                .GetAwaiter();
                         }
                     }
                     catch (Exception ex) {
@@ -228,38 +263,26 @@ namespace Piraeus.Adapters
                         }
                     }
                     catch (Exception ex) {
-                        logger?.LogErrorAsync(ex, $"CoAP adapter disposing error on channel '{Channel.Id}'.").GetAwaiter();
+                        logger?.LogErrorAsync(ex, $"CoAP adapter disposing error on channel '{Channel.Id}'.")
+                            .GetAwaiter();
                     }
 
                     try {
                         if (session != null) {
                             session.Dispose();
-                            logger?.LogDebugAsync($"CoAP adapter disposed session.");
+                            logger?.LogDebugAsync("CoAP adapter disposed session.");
                         }
                     }
                     catch (Exception ex) {
-                        logger?.LogErrorAsync(ex, $"CoAP adapter Disposing session on channel '{Channel.Id}'.").GetAwaiter();
+                        logger?.LogErrorAsync(ex, $"CoAP adapter Disposing session on channel '{Channel.Id}'.")
+                            .GetAwaiter();
                     }
                 }
+
                 disposed = true;
             }
         }
 
         #endregion dispose
-
-        private void InitializeAuditor(PiraeusConfig config)
-        {
-            auditFactory = AuditFactory.CreateSingleton();
-            if (config.AuditConnectionString != null && config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
-                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"), AuditType.Message);
-                auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
-            }
-            else if (config.AuditConnectionString != null) {
-                auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
-                auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
-            }
-
-            userAuditor = auditFactory.GetAuditor(AuditType.User);
-        }
     }
 }

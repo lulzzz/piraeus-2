@@ -13,15 +13,12 @@ using Piraeus.Core.Logging;
 using Piraeus.Grains;
 using SkunkLab.Channels;
 using SkunkLab.Security.Authentication;
+using SkunkLab.Security.Tokens;
 
 namespace Piraeus.WebSocketGateway.Middleware
 {
     public class PiraeusWebSocketMiddleware
     {
-        private readonly RequestDelegate next;
-
-        private readonly WebSocketOptions options;
-
         private readonly PiraeusConfig config;
 
         private readonly Dictionary<string, ProtocolAdapter> container;
@@ -29,10 +26,14 @@ namespace Piraeus.WebSocketGateway.Middleware
         private readonly GraphManager graphManager;
 
         private readonly ILog logger;
+        private readonly RequestDelegate next;
+
+        private readonly WebSocketOptions options;
 
         private CancellationTokenSource source;
 
-        public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client, ILog logger, IOptions<WebSocketOptions> options)
+        public PiraeusWebSocketMiddleware(RequestDelegate next, PiraeusConfig config, IClusterClient client,
+            ILog logger, IOptions<WebSocketOptions> options)
         {
             container = new Dictionary<string, ProtocolAdapter>();
             this.next = next;
@@ -50,14 +51,15 @@ namespace Piraeus.WebSocketGateway.Middleware
             }
 
             BasicAuthenticator basicAuthn = new BasicAuthenticator();
-            SkunkLab.Security.Tokens.SecurityTokenType tokenType = Enum.Parse<SkunkLab.Security.Tokens.SecurityTokenType>(config.ClientTokenType, true);
+            SecurityTokenType tokenType = Enum.Parse<SecurityTokenType>(config.ClientTokenType, true);
             basicAuthn.Add(tokenType, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience, context);
             IAuthenticator authn = basicAuthn;
 
             WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
 
             source = new CancellationTokenSource();
-            ProtocolAdapter adapter = ProtocolAdapterFactory.Create(config, graphManager, context, socket, logger, authn, source.Token);
+            ProtocolAdapter adapter =
+                ProtocolAdapterFactory.Create(config, graphManager, context, socket, logger, authn, source.Token);
             container.Add(adapter.Channel.Id, adapter);
             adapter.OnClose += Adapter_OnClose;
             adapter.OnError += Adapter_OnError;
@@ -79,10 +81,15 @@ namespace Piraeus.WebSocketGateway.Middleware
                     logger.LogInformationAsync("Adapter on close channel id found adapter to dispose.").GetAwaiter();
                 }
                 else {
-                    logger.LogInformationAsync("Adapter on close did not find a channel id available for the adapter.").GetAwaiter();
+                    logger.LogInformationAsync("Adapter on close did not find a channel id available for the adapter.")
+                        .GetAwaiter();
                 }
 
-                if ((adapter != null && adapter.Channel != null) && (adapter.Channel.State == ChannelState.Closed || adapter.Channel.State == ChannelState.Aborted || adapter.Channel.State == ChannelState.ClosedReceived || adapter.Channel.State == ChannelState.CloseSent)) {
+                if (adapter != null && adapter.Channel != null && (adapter.Channel.State == ChannelState.Closed ||
+                                                                   adapter.Channel.State == ChannelState.Aborted ||
+                                                                   adapter.Channel.State ==
+                                                                   ChannelState.ClosedReceived ||
+                                                                   adapter.Channel.State == ChannelState.CloseSent)) {
                     adapter.Dispose();
                     logger.LogInformationAsync("Adapter disposed.").GetAwaiter();
                 }
@@ -93,6 +100,7 @@ namespace Piraeus.WebSocketGateway.Middleware
                         logger.LogInformationAsync("Adapter has closed the channel").GetAwaiter();
                     }
                     catch { }
+
                     adapter.Dispose();
                     logger.LogWarningAsync("Adapter disposed by default").GetAwaiter();
                 }

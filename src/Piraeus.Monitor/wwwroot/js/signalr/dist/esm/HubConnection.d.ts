@@ -19,7 +19,7 @@ export declare class HubConnection {
     private readonly cachedPingMessage;
     private readonly connection;
     private readonly logger;
-    private readonly reconnectPolicy: undefined?;
+    private readonly reconnectPolicy: undefined?;;
     private protocol;
     private handshakeProtocol;
     private callbacks;
@@ -31,14 +31,14 @@ export declare class HubConnection {
     private receivedHandshakeResponse;
     private handshakeResolver;
     private handshakeRejecter;
-    private stopDuringStartError: undefined?;
+    private stopDuringStartError: undefined?;;
     private connectionState;
     private connectionStarted;
-    private startPromise: undefined?;
-    private stopPromise: undefined?;
-    private reconnectDelayHandle: undefined?;
-    private timeoutHandle: undefined?;
-    private pingServerHandle: undefined?;
+    private startPromise: undefined?;;
+    private stopPromise: undefined?;;
+    private reconnectDelayHandle: undefined?;;
+    private timeoutHandle: undefined?;;
+    private pingServerHandle: undefined?;;
     /** The server timeout in milliseconds.
      *
      * If this timeout elapses without receiving any messages from the server, the connection will be terminated with an error.

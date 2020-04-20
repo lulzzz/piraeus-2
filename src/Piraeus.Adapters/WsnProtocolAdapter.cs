@@ -174,8 +174,7 @@ namespace Piraeus.Adapters
 
             if (subscriptions != null) {
                 foreach (var sub in subscriptions) {
-                    SubscriptionMetadata metadata = new SubscriptionMetadata
-                    {
+                    SubscriptionMetadata metadata = new SubscriptionMetadata {
                         Identity = identity,
                         Indexes = localIndexes,
                         IsEphemeral = true
@@ -191,8 +190,7 @@ namespace Piraeus.Adapters
             var metadata = graphManager.GetPiSystemMetadataAsync(resource).GetAwaiter().GetResult();
 
             EventMessage msg = new EventMessage(contentType, resource, ProtocolType.WSN, e.Message, DateTime.UtcNow,
-                metadata.Audit)
-            {
+                metadata.Audit) {
                 CacheKey = cacheKey
             };
 

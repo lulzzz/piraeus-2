@@ -390,9 +390,10 @@ namespace Piraeus.Grains
         private async Task NotifyMetricsAsync()
         {
             if (State.MetricLeases.Count > 0) {
-                foreach (var item in State.MetricLeases.Values)
+                foreach (var item in State.MetricLeases.Values) {
                     item.NotifyMetrics(new CommunicationMetrics(State.Metadata.ResourceUriString, State.MessageCount,
                         State.ByteCount, State.ErrorCount, State.LastMessageTimestamp.Value, State.LastErrorTimestamp));
+                }
             }
 
             await Task.CompletedTask;

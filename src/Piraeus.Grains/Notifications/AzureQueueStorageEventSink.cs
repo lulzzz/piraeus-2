@@ -46,7 +46,8 @@ namespace Piraeus.Grains.Notifications
 
             if (sasUri == null) {
                 storage = QueueStorage.New(
-                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] { '.' })[0]};AccountKey={metadata.SymmetricKey};", 10000, 1000);
+                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] {'.'})[0]};AccountKey={metadata.SymmetricKey};",
+                    10000, 1000);
             }
             else {
                 string connectionString = $"BlobEndpoint={queue};SharedAccessSignature={metadata.SymmetricKey}";
@@ -64,8 +65,10 @@ namespace Piraeus.Grains.Notifications
             try {
                 while (!loadQueue.IsEmpty) {
                     bool isdequeued = loadQueue.TryDequeue(out msg);
-                    if (!isdequeued)
+                    if (!isdequeued) {
                         continue;
+                    }
+
                     payload = GetPayload(msg);
                     if (payload == null) {
                         await logger?.LogWarningAsync(

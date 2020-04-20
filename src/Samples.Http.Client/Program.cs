@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Piraeus.Clients.Rest;
 using SkunkLab.Channels;
+using SkunkLab.Security.Tokens;
 
 namespace Samples.Http.Client
 {
@@ -40,9 +42,10 @@ namespace Samples.Http.Client
 
         private static string symmetricKey = "//////////////////////////////////////////8=";
 
-        private static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey, double lifetimeMinutes)
+        private static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey,
+            double lifetimeMinutes)
         {
-            SkunkLab.Security.Tokens.JsonWebToken jwt = new SkunkLab.Security.Tokens.JsonWebToken(new Uri(audience), symmetricKey, issuer, claims, lifetimeMinutes);
+            JsonWebToken jwt = new JsonWebToken(new Uri(audience), symmetricKey, issuer, claims, lifetimeMinutes);
             return jwt.ToString();
         }
 
@@ -58,8 +61,7 @@ namespace Samples.Http.Client
             //string roleClaimType = "http://skunklab.io/role";
             //string symmetricKey = "//////////////////////////////////////////8=";
 
-            List<Claim> claims = new List<Claim>()
-            {
+            List<Claim> claims = new List<Claim> {
                 new Claim(nameClaimType, name),
                 new Claim(roleClaimType, role)
             };
@@ -73,8 +75,8 @@ namespace Samples.Http.Client
                 HttpClient client = new HttpClient();
 
                 HttpResponseMessage message = await client.GetAsync(requestUri);
-                if (message.StatusCode == System.Net.HttpStatusCode.OK ||
-                    message.StatusCode == System.Net.HttpStatusCode.Accepted) {
+                if (message.StatusCode == HttpStatusCode.OK ||
+                    message.StatusCode == HttpStatusCode.Accepted) {
                     try {
                         long nowTicks = DateTime.Now.Ticks;
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -84,7 +86,7 @@ namespace Samples.Http.Client
                         long sendTicks = Convert.ToInt64(ticksString);
                         long ticks = nowTicks - sendTicks;
                         TimeSpan latency = TimeSpan.FromTicks(ticks);
-                        string messageText = msg.Replace(split[0], "").Trim(new char[] { ':', ' ' });
+                        string messageText = msg.Replace(split[0], "").Trim(':', ' ');
 
                         Console.WriteLine($"Latency {latency.TotalMilliseconds} ms - Received message '{messageText}'");
                     }
@@ -111,7 +113,9 @@ namespace Samples.Http.Client
                 return;
             }
 
-            string endpoint = hostname == "localhost" ? $"http://{hostname}:8088/api/connect" : $"https://{hostname}/api/connect";
+            string endpoint = hostname == "localhost"
+                ? $"http://{hostname}:8088/api/connect"
+                : $"https://{hostname}/api/connect";
             string qs = role.ToUpperInvariant() == "A" ? resourceA : resourceB;
             string requestUriString = $"{endpoint}?r={qs}";
             string sub = role.ToUpperInvariant() == "A" ? resourceB : resourceA;
@@ -121,7 +125,7 @@ namespace Samples.Http.Client
             Uri observableResource = role.ToUpperInvariant() == "A" ? new Uri(resourceB) : new Uri(resourceA);
             Observer observer = new HttpObserver(observableResource);
             observer.OnNotify += Observer_OnNotify;
-            restClient = new RestClient(endpoint, token, new Observer[] { observer }, cts.Token);
+            restClient = new RestClient(endpoint, token, new[] {observer}, cts.Token);
 
             RunAsync().Wait();
             Console.WriteLine("Press any key to exit...");
@@ -139,7 +143,7 @@ namespace Samples.Http.Client
             long sendTicks = Convert.ToInt64(ticksString);
             long ticks = nowTicks - sendTicks;
             TimeSpan latency = TimeSpan.FromTicks(ticks);
-            string messageText = msg.Replace(split[0], "").Trim(new char[] { ':', ' ' });
+            string messageText = msg.Replace(split[0], "").Trim(':', ' ');
 
             Console.WriteLine($"Latency {latency.TotalMilliseconds} ms - Received message '{messageText}'");
         }
@@ -191,7 +195,8 @@ namespace Samples.Http.Client
                         }
 
                         DateTime endTime = DateTime.Now;
-                        PrintMessage($"Total send time {endTime.Subtract(startTime).TotalMilliseconds} ms", ConsoleColor.White);
+                        PrintMessage($"Total send time {endTime.Subtract(startTime).TotalMilliseconds} ms",
+                            ConsoleColor.White);
                     }
                 }
             }
@@ -204,9 +209,8 @@ namespace Samples.Http.Client
             if (string.IsNullOrEmpty(hostname)) {
                 return "localhost";
             }
-            else {
-                return hostname;
-            }
+
+            return hostname;
         }
 
         private static string SelectName()
@@ -222,9 +226,8 @@ namespace Samples.Http.Client
             if (role == "A" || role == "B") {
                 return role;
             }
-            else {
-                return SelectRole();
-            }
+
+            return SelectRole();
         }
 
         private static void UseUserInput()

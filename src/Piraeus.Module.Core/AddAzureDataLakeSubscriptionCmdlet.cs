@@ -47,8 +47,7 @@ namespace Piraeus.Module
                 : string.Format("adl://{0}.azuredatalakestore.net?domain={1}&appid={2}&folder={3}&file={4}&clients={5}",
                     Account, Domain, AppId, Folder, Filename, NumClients <= 0 ? 1 : NumClients);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = ClientSecret,

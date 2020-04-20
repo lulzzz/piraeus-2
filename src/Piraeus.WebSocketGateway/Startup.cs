@@ -18,8 +18,7 @@ namespace Piraeus.WebSocketGateway
     {
         public void Configure(IApplicationBuilder app)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
@@ -36,7 +35,7 @@ namespace Piraeus.WebSocketGateway
             services.AddTransientOrleansClusterClient(orleansConfig);
             LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(Piraeus.Configuration.LoggerType.AppInsights)) {
+            if (loggers.HasFlag(LoggerType.AppInsights)) {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
                     op.InstrumentationKey = config.InstrumentationKey;
@@ -49,14 +48,14 @@ namespace Piraeus.WebSocketGateway
                     services.AddApplicationInsightsTelemetry(config.InstrumentationKey);
                 }
             }
+
             services.AddLogging(builder => builder.AddLogging(config));
             services.AddSingleton<ILog, Logger>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
+                    options.TokenValidationParameters = new TokenValidationParameters {
                         ValidateIssuer = !string.IsNullOrEmpty(config.ClientIssuer),
                         ValidateAudience = !string.IsNullOrEmpty(config.ClientAudience),
                         ValidateLifetime = true,

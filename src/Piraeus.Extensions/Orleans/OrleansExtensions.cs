@@ -72,12 +72,10 @@ namespace Piraeus.Extensions.Orleans
                 options.ServiceId = config.ServiceId;
             });
 
-            if (config.DataConnectionString.Contains("6379") || config.DataConnectionString.Contains("6380"))
-            {
+            if (config.DataConnectionString.Contains("6379") || config.DataConnectionString.Contains("6380")) {
                 builder.UseRedisGatewayListProvider(options => options.ConnectionString = config.DataConnectionString);
             }
-            else
-            {
+            else {
                 builder.UseAzureStorageClustering(options => options.ConnectionString = config.DataConnectionString);
             }
 #endif
@@ -119,8 +117,9 @@ namespace Piraeus.Extensions.Orleans
                 attempt++;
                 Console.WriteLine(
                     $"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
-                if (attempt > maxAttempts)
+                if (attempt > maxAttempts) {
                     return false;
+                }
 
                 await Task.Delay(TimeSpan.FromSeconds(4));
                 return true;

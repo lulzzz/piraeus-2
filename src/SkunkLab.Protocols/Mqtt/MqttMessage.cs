@@ -15,8 +15,7 @@ namespace SkunkLab.Protocols.Mqtt
             byte msgType = (byte)(fixedHeader >> 0x04);
 
             MqttMessageType messageType = (MqttMessageType)msgType;
-            MqttMessage mqttMessage = messageType switch
-            {
+            MqttMessage mqttMessage = messageType switch {
                 MqttMessageType.CONNECT => new ConnectMessage(),
                 MqttMessageType.CONNACK => new ConnectAckMessage(),
                 MqttMessageType.PUBLISH => new PublishMessage(),

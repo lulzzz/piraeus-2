@@ -2,13 +2,12 @@
 
 function Add-CertManager
 {
-	param([string]$Namespace = "cert-manager")
-
-    kubectl label namespace $Namespace certmanager.k8s.io/disable-validation="true"
-    kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml" -n "$Namespace" --validate=false
+    #kubectl label namespace $Namespace certmanager.k8s.io/disable-validation="true"
+    #kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml" -n "$Namespace" --validate=false
+    kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.1/cert-manager.yaml
     helm repo add jetstack https://charts.jetstack.io
     helm repo update
-    helm install --name cert-manager --namespace $Namespace --version v0.11.0 --set ingressShim.extraArgs='{--default-issuer-name=letsencrypt-prod,--default-issuer-kind=ClusterIssuer}' jetstack/cert-manager --set webhook.enabled=true 
+    #helm install --name cert-manager --namespace $Namespace --version v0.11.0 --set ingressShim.extraArgs='{--default-issuer-name=letsencrypt-prod,--default-issuer-kind=ClusterIssuer}' jetstack/cert-manager --set webhook.enabled=true 
 }
 
 function Add-Issuer 
@@ -17,7 +16,7 @@ function Add-Issuer
 
     Copy-Item -Path $IssuerPath -Destination $IssuerDestination
 	Update-Yaml -NewValue $Email -MatchString "EMAILREF" -Filename $IssuerDestination           
-	kubectl apply -f $IssuerDestination -n $Namespace
+	kubectl apply -f $IssuerDestination -n $Namespace --validate=false
 	Remove-Item -Path $IssuerDestination
 }
 
@@ -29,7 +28,7 @@ function Add-NGINX
     {
 		try
 		{
-			helm install stable/nginx-ingress --namespace $Namespace --set controller.replicaCount=1
+			helm install nginx stable/nginx-ingress --namespace $Namespace --set controller.replicaCount=1
 			if($LASTEXITCODE -ne 0 )
             {
 				Write-Host "Error installing NGINX, waiting 20 seconds to try install NGINX again..." -ForegroundColor Yellow
@@ -151,7 +150,7 @@ function New-KubectlApply
 	$looper = $true
     while($looper)
     {    
-		kubectl apply -f $Filename -n $Namespace
+		kubectl apply -f $Filename -n $Namespace --validate=false
 		if($LASTEXITCODE -ne 0)
         {
             Write-Host "Waiting 30 to re-apply file..." -ForegroundColor Yellow
@@ -210,7 +209,7 @@ function Set-ApplyYaml
     $looper = $true
     while($looper)
     {
-        kubectl apply -f $File -n $Namespace
+        kubectl apply -f $File -n $Namespace --validate=false
         if($LASTEXITCODE -ne 0)
         {
             Write-Host "kubectl apply failed for $File. Waiting 10 seconds to try again..." -ForegroundColor Yellow
@@ -227,7 +226,7 @@ function Set-Certificate
 {
     param([string]$Dns, [string]$Location, [string]$Path, [string]$Destination, [string]$Namespace = "cert-manager")
 
-        Copy-Item -Path $Path -Destination $Destination
+    Copy-Item -Path $Path -Destination $Destination
 	Update-Yaml -NewValue $Dns -MatchString "INGRESSDNS" -Filename $Destination
 	Update-Yaml -NewValue $Location -MatchString "LOCATION" -Filename $Destination
 	New-KubectlApply -Filename $Destination -Namespace $Namespace

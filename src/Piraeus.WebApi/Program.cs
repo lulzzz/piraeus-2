@@ -20,36 +20,37 @@ namespace Piraeus.WebApi
                 {
                     PiraeusConfig config = WebApiHelpers.GetPiraeusConfig();
                     webBuilder
-                    .ConfigureKestrel((options) =>
-                    {
-                        options.Limits.MaxConcurrentConnections = config.MaxConnections;
-                        options.Limits.MaxConcurrentUpgradedConnections = config.MaxConnections;
-                        options.Limits.MaxRequestBodySize = config.MaxBufferSize;
-                        options.Limits.MinRequestBodyDataRate =
-                    new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
-                        options.Limits.MinResponseDataRate =
-                    new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
-                        X509Certificate2 cert = config.GetServerCerticate();
-                        int[] ports = config.GetPorts();
+                        .ConfigureKestrel(options =>
+                        {
+                            options.Limits.MaxConcurrentConnections = config.MaxConnections;
+                            options.Limits.MaxConcurrentUpgradedConnections = config.MaxConnections;
+                            options.Limits.MaxRequestBodySize = config.MaxBufferSize;
+                            options.Limits.MinRequestBodyDataRate =
+                                new MinDataRate(100, TimeSpan.FromSeconds(10));
+                            options.Limits.MinResponseDataRate =
+                                new MinDataRate(100, TimeSpan.FromSeconds(10));
+                            X509Certificate2 cert = config.GetServerCerticate();
+                            int[] ports = config.GetPorts();
 
-                        foreach (int port in ports) {
-                            if (cert != null) {
-                                options.ListenAnyIP(port, (a) => a.UseHttps(cert));
+                            foreach (int port in ports) {
+                                if (cert != null) {
+                                    options.ListenAnyIP(port, a => a.UseHttps(cert));
+                                }
+                                else {
+                                    IPAddress address = GetIPAddress(Dns.GetHostName());
+                                    options.Listen(address, port);
+                                }
                             }
-                            else {
-                                IPAddress address = GetIPAddress(Dns.GetHostName());
-                                options.Listen(address, port);
-                            }
-                        }
 
-                        if (!string.IsNullOrEmpty(config.ServerCertificateFilename)) {
-                            string[] portStrings = config.Ports.Split(";", StringSplitOptions.RemoveEmptyEntries);
+                            if (!string.IsNullOrEmpty(config.ServerCertificateFilename)) {
+                                string[] portStrings = config.Ports.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                            foreach (string portString in portStrings) {
-                                options.ListenAnyIP(Convert.ToInt32(portString), (a) => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
+                                foreach (string portString in portStrings)
+                                    options.ListenAnyIP(Convert.ToInt32(portString),
+                                        a => a.UseHttps(config.ServerCertificateFilename,
+                                            config.ServerCertificatePassword));
                             }
-                        }
-                    });
+                        });
                     webBuilder.UseStartup<Startup>();
                 });
         }

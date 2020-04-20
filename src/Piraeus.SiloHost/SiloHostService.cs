@@ -16,14 +16,14 @@ namespace Piraeus.SiloHost
 {
     public class SiloHostService : IHostedService
     {
+        private readonly OrleansConfig orleansConfig;
+
+        private ISiloHost host;
+
         public SiloHostService(OrleansConfig orleansConfig)
         {
             this.orleansConfig = orleansConfig;
         }
-
-        private readonly OrleansConfig orleansConfig;
-
-        private ISiloHost host;
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -46,20 +46,20 @@ namespace Piraeus.SiloHost
         private ISiloHost AddLocalSiloHost()
         {
             var builder = new SiloHostBuilder()
-            .UseLocalhostClustering()
-            .Configure<ClusterOptions>(options =>
-            {
-                options.ClusterId = orleansConfig.ClusterId;
-                options.ServiceId = orleansConfig.ServiceId;
-            })
-            .AddMemoryGrainStorage("store")
-            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-            .ConfigureLogging(logging =>
-            {
-                logging.AddConsole();
-                logging.AddDebug();
-                logging.Services.TryAddSingleton<ILog, Logger>();
-            });
+                .UseLocalhostClustering()
+                .Configure<ClusterOptions>(options =>
+                {
+                    options.ClusterId = orleansConfig.ClusterId;
+                    options.ServiceId = orleansConfig.ServiceId;
+                })
+                .AddMemoryGrainStorage("store")
+                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    logging.Services.TryAddSingleton<ILog, Logger>();
+                });
 
             return builder.Build();
         }
@@ -77,29 +77,36 @@ namespace Piraeus.SiloHost
                 silo.AddMemoryGrainStorage("store");
             }
             else if (orleansConfig.DataConnectionString.Contains("6379") ||
-                orleansConfig.DataConnectionString.Contains("6380")) {
+                     orleansConfig.DataConnectionString.Contains("6380")) {
                 silo.UseRedisMembership(options => options.ConnectionString = orleansConfig.DataConnectionString);
-                silo.AddRedisGrainStorage("store", options => options.ConnectionString = orleansConfig.DataConnectionString);
+                silo.AddRedisGrainStorage("store",
+                    options => options.ConnectionString = orleansConfig.DataConnectionString);
             }
             else {
-                silo.UseAzureStorageClustering(options => options.ConnectionString = orleansConfig.DataConnectionString);
-                silo.AddAzureBlobGrainStorage("store", options => options.ConnectionString = orleansConfig.DataConnectionString);
+                silo.UseAzureStorageClustering(options =>
+                    options.ConnectionString = orleansConfig.DataConnectionString);
+                silo.AddAzureBlobGrainStorage("store",
+                    options => options.ConnectionString = orleansConfig.DataConnectionString);
             }
 
-            silo.ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000);
+            silo.ConfigureEndpoints(11111, 30000);
 
             LogLevel orleansLogLevel = Enum.Parse<LogLevel>(orleansConfig.LogLevel);
             var loggers = orleansConfig.GetLoggerTypes();
             silo.ConfigureLogging(builder =>
             {
-                if (loggers.HasFlag(LoggerType.Console))
+                if (loggers.HasFlag(LoggerType.Console)) {
                     builder.AddConsole();
+                }
 
-                if (loggers.HasFlag(LoggerType.Debug))
+                if (loggers.HasFlag(LoggerType.Debug)) {
                     builder.AddDebug();
+                }
 
-                if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                if (loggers.HasFlag(LoggerType.AppInsights) &&
+                    !string.IsNullOrEmpty(orleansConfig.InstrumentationKey)) {
                     builder.AddApplicationInsights(orleansConfig.InstrumentationKey);
+                }
 
                 builder.SetMinimumLevel(orleansLogLevel);
                 builder.Services.TryAddSingleton<ILog, Logger>();

@@ -39,8 +39,7 @@ namespace Piraeus.Module
                     TTL.Value.ToString())
                 : string.Format("https://{0}.queue.core.windows.net?queue={1}", Account, Queue);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

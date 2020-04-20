@@ -51,8 +51,7 @@ namespace Piraeus.Module
                     Container, BlobType.ToString(), NumClients <= 0 ? 1 : NumClients, Filename);
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

@@ -109,8 +109,8 @@ namespace SkunkLab.Protocols.Coap
             buffer[index++] = (byte)((byte)(dv << 0x04) | (byte)vv);
 
             byte[] deltaArray = deltaBuffer.Length == 0 ? null :
-                deltaBuffer.Length == 1 ? new[] { (byte)(delta - 13) } :
-                new[] { (byte)(((delta - 269) >> 8) & 0x00FF), (byte)((delta - 269) & 0x00FF) };
+                deltaBuffer.Length == 1 ? new[] {(byte)(delta - 13)} :
+                new[] {(byte)(((delta - 269) >> 8) & 0x00FF), (byte)((delta - 269) & 0x00FF)};
 
             if (deltaArray != null) {
                 Buffer.BlockCopy(deltaArray, 0, buffer, index, deltaArray.Length);
@@ -118,7 +118,7 @@ namespace SkunkLab.Protocols.Coap
             }
 
             byte[] valueArray = valueBuffer.Length == 0 ? null :
-                valueBuffer.Length == 1 ? new[] { (byte)(valueLength - 13) } : new[]
+                valueBuffer.Length == 1 ? new[] {(byte)(valueLength - 13)} : new[]
                     {(byte)(((valueLength - 269) >> 8) & 0x00FF), (byte)((valueLength - 269) & 0x00FF)};
 
             if (valueArray != null) {

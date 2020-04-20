@@ -16,8 +16,6 @@ namespace Piraeus.Clients.Mqtt
 
         private readonly MqttSession session;
 
-        private ConnectAckCode? code;
-
         public GenericMqttClient(MqttConfig config, IChannel channel, IMqttDispatch dispatcher = null)
         {
             this.dispatcher = dispatcher ?? new GenericMqttDispatcher();
@@ -33,19 +31,20 @@ namespace Piraeus.Clients.Mqtt
             this.channel.OnStateChange += Channel_OnStateChange;
         }
 
+        public bool ChannelConnected => channel.IsConnected;
+
+        public ConnectAckCode? MqttConnectCode { get; private set; }
+
         public event MqttClientChannelErrorHandler OnChannelError;
 
         public event MqttClientChannelStateHandler OnChannelStateChange;
 
-        public bool ChannelConnected => channel.IsConnected;
-
-        public ConnectAckCode? MqttConnectCode => code;
-
         #region MQTT Functions
 
-        public async Task ConnectAsync(string clientId, string username, string password, int keepaliveSeconds, bool cleanSession)
+        public async Task ConnectAsync(string clientId, string username, string password, int keepaliveSeconds,
+            bool cleanSession)
         {
-            code = null;
+            MqttConnectCode = null;
 
             ConnectMessage msg = new ConnectMessage(clientId, username, password, keepaliveSeconds, cleanSession);
 
@@ -76,18 +75,19 @@ namespace Piraeus.Clients.Mqtt
             await channel.SendAsync(msg.Encode());
         }
 
-        public async Task SubscribeAsync(string topic, QualityOfServiceLevelType qos, Action<string, string, byte[]> action)
+        public async Task SubscribeAsync(string topic, QualityOfServiceLevelType qos,
+            Action<string, string, byte[]> action)
         {
-            Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>
-            {
-                { topic, qos }
+            Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType> {
+                {topic, qos}
             };
             dispatcher.Register(topic, action);
             SubscribeMessage msg = new SubscribeMessage(session.NewId(), dict);
             await channel.SendAsync(msg.Encode());
         }
 
-        public async Task SubscribeAsync(Tuple<string, QualityOfServiceLevelType, Action<string, string, byte[]>>[] subscriptions)
+        public async Task SubscribeAsync(
+            Tuple<string, QualityOfServiceLevelType, Action<string, string, byte[]>>[] subscriptions)
         {
             Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>();
 
@@ -102,7 +102,7 @@ namespace Piraeus.Clients.Mqtt
 
         public async Task UnsubscribeAsync(string topic)
         {
-            UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new string[] { topic });
+            UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new[] {topic});
             await channel.SendAsync(msg.Encode());
             dispatcher.Unregister(topic);
         }
@@ -112,9 +112,7 @@ namespace Piraeus.Clients.Mqtt
             UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
             await channel.SendAsync(msg.Encode());
 
-            foreach (string topic in topics) {
-                dispatcher.Unregister(topic);
-            }
+            foreach (string topic in topics) dispatcher.Unregister(topic);
         }
 
         #endregion MQTT Functions
@@ -123,7 +121,7 @@ namespace Piraeus.Clients.Mqtt
 
         private void Channel_OnClose(object sender, ChannelCloseEventArgs args)
         {
-            code = null;
+            MqttConnectCode = null;
         }
 
         private void Channel_OnError(object sender, ChannelErrorEventArgs args)
@@ -154,7 +152,7 @@ namespace Piraeus.Clients.Mqtt
 
         private void Session_OnConnect(object sender, MqttConnectionArgs args)
         {
-            code = args.Code;
+            MqttConnectCode = args.Code;
         }
 
         private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)

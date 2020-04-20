@@ -60,12 +60,6 @@ namespace Orleans.Clustering.Redis
             return list.GetEnumerator();
         }
 
-        public bool HasEntry(RedisMembershipEntry entry)
-        {
-            var items = list.Where((x) => x.DeploymentId == entry.DeploymentId && x.Address.ToParsableString() == entry.Address.ToParsableString());
-            return items.Count() > 0;
-        }
-
         public int IndexOf(RedisMembershipEntry item)
         {
             return list.IndexOf(item);
@@ -86,10 +80,18 @@ namespace Orleans.Clustering.Redis
             list.RemoveAt(index);
         }
 
+        public bool HasEntry(RedisMembershipEntry entry)
+        {
+            var items = list.Where(x =>
+                x.DeploymentId == entry.DeploymentId &&
+                x.Address.ToParsableString() == entry.Address.ToParsableString());
+            return items.Count() > 0;
+        }
+
         public MembershipTableData ToMembershipTableData()
         {
             try {
-                List<Tuple<MembershipEntry, string>> data = list.ToArray().Where((x) => x != null)
+                List<Tuple<MembershipEntry, string>> data = list.ToArray().Where(x => x != null)
                     .Select(x => x.ToMembershipEntryTuple())
                     .ToList();
 
@@ -102,11 +104,12 @@ namespace Orleans.Clustering.Redis
 
         public MembershipTableData ToMembershipTableData(SiloAddress key)
         {
-            List<Tuple<MembershipEntry, string>> data = list.ToArray().Where((x) => x != null)
+            List<Tuple<MembershipEntry, string>> data = list.ToArray().Where(x => x != null)
                 .Select(x => x.ToMembershipEntryTuple())
                 .ToList();
 
-            List<Tuple<MembershipEntry, string>> items = data.TakeWhile((x) => x.Item1.SiloAddress.ToParsableString() == key.ToParsableString()).ToList();
+            List<Tuple<MembershipEntry, string>> items =
+                data.TakeWhile(x => x.Item1.SiloAddress.ToParsableString() == key.ToParsableString()).ToList();
             return new MembershipTableData(items, tableVersion);
         }
 
@@ -114,7 +117,8 @@ namespace Orleans.Clustering.Redis
         {
             bool ret = false;
             string val = iAmAlivetime.ToString();
-            var item = list.ToArray().Where((x) => x != null && x.DeploymentId == clusterId && x.ParsableAddress == address.ToParsableString()).First();
+            var item = list.ToArray().Where(x =>
+                x != null && x.DeploymentId == clusterId && x.ParsableAddress == address.ToParsableString()).First();
             if (item != null) {
                 item.IAmAliveTime = iAmAlivetime;
                 ret = true;

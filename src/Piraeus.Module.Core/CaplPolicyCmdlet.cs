@@ -24,9 +24,7 @@ namespace Piraeus.Module
             AuthorizationPolicy policy = new AuthorizationPolicy(EvaluationExpression, new Uri(PolicyID), Delegation);
 
             if (Transforms != null && Transforms.Length > 0) {
-                foreach (Transform transform in Transforms) {
-                    policy.Transforms.Add(transform);
-                }
+                foreach (Transform transform in Transforms) policy.Transforms.Add(transform);
             }
 
             WriteObject(policy);

@@ -11,7 +11,7 @@ namespace Orleans.Clustering.Redis
         #region Membership Table
 
         public static ISiloHostBuilder UseRedisMembership(this ISiloHostBuilder builder,
-           Action<RedisClusteringOptions> configureOptions)
+            Action<RedisClusteringOptions> configureOptions)
         {
             return builder.ConfigureServices(services => services.UseRedisMembership(configureOptions));
         }
@@ -42,7 +42,8 @@ namespace Orleans.Clustering.Redis
 
         #region Gateway List Provider
 
-        public static IClientBuilder UseRedisGatewayListProvider(this IClientBuilder builder, Action<RedisClusteringOptions> configureOptions)
+        public static IClientBuilder UseRedisGatewayListProvider(this IClientBuilder builder,
+            Action<RedisClusteringOptions> configureOptions)
         {
             return builder.ConfigureServices(services => services.UseRedisGatewayListProvider(configureOptions));
         }
@@ -56,7 +57,8 @@ namespace Orleans.Clustering.Redis
             });
         }
 
-        public static IClientBuilder UseRedisGatewayListProvider(this IClientBuilder builder, Action<OptionsBuilder<RedisClusteringOptions>> configureOptions)
+        public static IClientBuilder UseRedisGatewayListProvider(this IClientBuilder builder,
+            Action<OptionsBuilder<RedisClusteringOptions>> configureOptions)
         {
             return builder.ConfigureServices(services => services.UseRedisGatewayListProvider(configureOptions));
         }

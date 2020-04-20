@@ -26,7 +26,8 @@ namespace Orleans.Clustering.Redis
 
         private readonly BinarySerializer serializer;
 
-        public RedisMembershipTable(ILogger<RedisMembershipTable> logger, IOptions<RedisClusteringOptions> membershipTableOptions, IOptions<ClusterOptions> clusterOptions)
+        public RedisMembershipTable(ILogger<RedisMembershipTable> logger,
+            IOptions<RedisClusteringOptions> membershipTableOptions, IOptions<ClusterOptions> clusterOptions)
         {
             this.logger = logger;
             ConfigurationOptions configOptions;
@@ -34,14 +35,13 @@ namespace Orleans.Clustering.Redis
                 configOptions = ConfigurationOptions.Parse(membershipTableOptions.Value.ConnectionString);
             }
             else {
-                configOptions = new ConfigurationOptions()
-                {
+                configOptions = new ConfigurationOptions {
                     ConnectRetry = membershipTableOptions.Value.ConnectRetry ?? 4,
                     DefaultDatabase = membershipTableOptions.Value.DatabaseNo ?? 2,
                     SyncTimeout = membershipTableOptions.Value.SyncTimeout ?? 10000,
-                    EndPoints =    {
-                                            { membershipTableOptions.Value.Hostname, 6380 }
-                                       },
+                    EndPoints = {
+                        {membershipTableOptions.Value.Hostname, 6380}
+                    },
                     Password = membershipTableOptions.Value.Password
                 };
             }
@@ -104,21 +104,20 @@ namespace Orleans.Clustering.Redis
                         collection.Add(rentry);
                     }
                     else {
-                        collection = new RedisMembershipCollection
-                        {
+                        collection = new RedisMembershipCollection {
                             rentry
                         };
                     }
 
                     string tokenValue = await database.StringGetAsync("locktoken");
                     if (tokenValue != ticks.ToString()) {
-                        continue;
                     }
                     else {
                         ret = await database.StringSetAsync(clusterId, serializer.Serialize(collection));
                         break;
                     }
                 }
+
                 return ret;
             }
             catch (Exception ex) {
@@ -148,7 +147,6 @@ namespace Orleans.Clustering.Redis
 
                     string tokenValue = await database.StringGetAsync("locktoken");
                     if (tokenValue != ticks.ToString()) {
-                        continue;
                     }
                     else {
                         break;
@@ -183,7 +181,6 @@ namespace Orleans.Clustering.Redis
 
                     string tokenValue = await database.StringGetAsync("locktoken");
                     if (tokenValue != ticks.ToString()) {
-                        continue;
                     }
                     else {
                         break;
@@ -235,7 +232,9 @@ namespace Orleans.Clustering.Redis
 
                     if (!val.IsNull) {
                         RedisMembershipCollection collection = serializer.Deserialize<RedisMembershipCollection>(val);
-                        var items = collection.Where((x) => x.DeploymentId == clusterId && x.Address.ToParsableString() == rentry.Address.ToParsableString());
+                        var items = collection.Where(x =>
+                            x.DeploymentId == clusterId &&
+                            x.Address.ToParsableString() == rentry.Address.ToParsableString());
                         if (items != null && items.Count() > 0) {
                             RedisMembershipEntry oldEntry = items.First();
                             rentry.LastIndex = oldEntry.LastIndex++;
@@ -244,7 +243,6 @@ namespace Orleans.Clustering.Redis
 
                             string tokenValue = await database.StringGetAsync("locktoken");
                             if (tokenValue != ticks.ToString()) {
-                                continue;
                             }
                             else {
                                 ret = await database.StringSetAsync(clusterId, serializer.Serialize(collection));

@@ -42,25 +42,25 @@ namespace Piraeus.Monitor.Pages
             ListContinuationToken ltoken;
 
             if (index == 0 && quantity == 0) {
-                ltoken = new ListContinuationToken() { Index = 0, Quantity = 10 };
+                ltoken = new ListContinuationToken {Index = 0, Quantity = 10};
             }
             else {
-                ltoken = new ListContinuationToken() { Index = index, Quantity = quantity };
+                ltoken = new ListContinuationToken {Index = index, Quantity = quantity};
             }
 
             ltoken = adapter.GetPiSystemsAsync(ltoken).GetAwaiter().GetResult();
 
-            if (ltoken == null)
+            if (ltoken == null) {
                 return;
-            else {
-                foreach (string item in ltoken.Items) {
-                    EventMetadata metadata = adapter.GetMetadataAsync(item).GetAwaiter().GetResult();
-                    Container.Add(item, metadata);
-                }
-
-                Index = ltoken.Index;
-                Quantity = ltoken.Quantity;
             }
+
+            foreach (string item in ltoken.Items) {
+                EventMetadata metadata = adapter.GetMetadataAsync(item).GetAwaiter().GetResult();
+                Container.Add(item, metadata);
+            }
+
+            Index = ltoken.Index;
+            Quantity = ltoken.Quantity;
         }
     }
 }

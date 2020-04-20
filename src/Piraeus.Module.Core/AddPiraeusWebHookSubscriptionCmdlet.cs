@@ -27,8 +27,7 @@ namespace Piraeus.Module
         {
             string url = $"{ServiceUrl}/api/resource/subscribe?resourceuristring={ResourceUriString}";
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = Endpoint,
                 SymmetricKey = HmacKey,

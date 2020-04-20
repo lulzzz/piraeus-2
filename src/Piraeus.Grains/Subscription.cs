@@ -459,10 +459,11 @@ namespace Piraeus.Grains
                     return;
                 }
 
-                foreach (var item in State.MetricLeases.Values)
+                foreach (var item in State.MetricLeases.Values) {
                     item.NotifyMetrics(new CommunicationMetrics(State.Metadata.SubscriptionUriString,
                         State.MessageCount, State.ByteCount, State.ErrorCount, State.LastMessageTimestamp.Value,
                         State.LastErrorTimestamp));
+                }
             }
             catch (Exception ex) {
                 await logger?.LogErrorAsync(ex, "Subscription notify metrics.");

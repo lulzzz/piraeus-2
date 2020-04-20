@@ -34,23 +34,25 @@ namespace Piraeus.Module
         [Parameter(HelpMessage = "Maximum duration of a subscription", Mandatory = false)]
         public TimeSpan? MaxSubscriptionDuration { get; set; }
 
-        [Parameter(HelpMessage = "CAPL policy URI ID of the access control policy for publishing messages.", Mandatory = true)]
+        [Parameter(HelpMessage = "CAPL policy URI ID of the access control policy for publishing messages.",
+            Mandatory = true)]
         public string PublishPolicyUriString { get; set; }
 
         [Parameter(HelpMessage = "Require all messages over an encrypted channel.", Mandatory = false)]
         public bool RequireEncryptedChannel { get; set; }
 
-        [Parameter(HelpMessage = "CAPL policy URI ID of the access control policy for subscribing to messages.", Mandatory = true)]
+        [Parameter(HelpMessage = "CAPL policy URI ID of the access control policy for subscribing to messages.",
+            Mandatory = true)]
         public string SubscribePolicyUriString { get; set; }
 
         protected override void ProcessRecord()
         {
             string url = string.Format("{0}/api/resource/UpsertPiSystemMetadata", ServiceUrl);
-            RestRequestBuilder builder = new RestRequestBuilder("PUT", url, RestConstants.ContentType.Json, false, SecurityToken);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("PUT", url, RestConstants.ContentType.Json, false, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
-            EventMetadata metadata = new EventMetadata()
-            {
+            EventMetadata metadata = new EventMetadata {
                 Audit = Audit,
                 Description = Description,
                 DiscoveryUrl = DiscoveryUrl,
@@ -63,7 +65,7 @@ namespace Piraeus.Module
                 SubscribePolicyUriString = SubscribePolicyUriString
             };
 
-            request.Put<EventMetadata>(metadata);
+            request.Put(metadata);
         }
     }
 }

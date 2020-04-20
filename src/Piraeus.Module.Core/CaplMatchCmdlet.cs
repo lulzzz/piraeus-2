@@ -40,7 +40,7 @@ namespace Piraeus.Module
                 throw new ArgumentOutOfRangeException("Type");
             }
 
-            WriteObject(new Match { ClaimType = ClaimType, Required = Required, Type = matchUri });
+            WriteObject(new Match {ClaimType = ClaimType, Required = Required, Type = matchUri});
         }
     }
 }

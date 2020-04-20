@@ -10,7 +10,8 @@ namespace Piraeus.Auditing
 
         private readonly string tableName;
 
-        public AzureTableAuditor(string connectionString, string tableName, long? maxBufferSize = null, int? defaultBufferSize = null)
+        public AzureTableAuditor(string connectionString, string tableName, long? maxBufferSize = null,
+            int? defaultBufferSize = null)
         {
             if (!maxBufferSize.HasValue) {
                 storage = TableStorage.CreateSingleton(connectionString);
@@ -25,7 +26,8 @@ namespace Piraeus.Auditing
         public async Task UpdateAuditRecordAsync(AuditRecord record)
         {
             if (record is UserAuditRecord userRecord) {
-                List<UserAuditRecord> list = await storage.ReadAsync<UserAuditRecord>(tableName, record.PartitionKey, record.RowKey);
+                List<UserAuditRecord> list =
+                    await storage.ReadAsync<UserAuditRecord>(tableName, record.PartitionKey, record.RowKey);
                 if (list?.Count == 1) {
                     UserAuditRecord updateRecord = list[0];
                     updateRecord.LogoutTime = userRecord.LogoutTime;

@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Piraeus.Adapters;
@@ -13,6 +12,7 @@ using Piraeus.Core.Logging;
 using Piraeus.Grains;
 using SkunkLab.Channels;
 using SkunkLab.Security.Authentication;
+using SkunkLab.Security.Tokens;
 
 namespace Piraeus.WebSocketGateway.Controllers
 {
@@ -39,7 +39,7 @@ namespace Piraeus.WebSocketGateway.Controllers
             this.config = config;
             BasicAuthenticator basicAuthn = new BasicAuthenticator();
 
-            SkunkLab.Security.Tokens.SecurityTokenType tokenType = Enum.Parse<SkunkLab.Security.Tokens.SecurityTokenType>(config.ClientTokenType, true);
+            SecurityTokenType tokenType = Enum.Parse<SecurityTokenType>(config.ClientTokenType, true);
             basicAuthn.Add(tokenType, config.ClientSymmetricKey, config.ClientIssuer, config.ClientAudience);
             authn = basicAuthn;
 
@@ -54,7 +54,8 @@ namespace Piraeus.WebSocketGateway.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest) {
                 try {
                     socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                    adapter = ProtocolAdapterFactory.Create(config, graphManager, HttpContext, socket, null, authn, source.Token);
+                    adapter = ProtocolAdapterFactory.Create(config, graphManager, HttpContext, socket, null, authn,
+                        source.Token);
                     adapter.OnClose += Adapter_OnClose;
                     adapter.OnError += Adapter_OnError;
                     adapter.Init();
@@ -68,16 +69,19 @@ namespace Piraeus.WebSocketGateway.Controllers
                     return new HttpResponseMessage(HttpStatusCode.InternalServerError);
                 }
             }
-            else {
-                await logger.LogWarningAsync($"WebSocket status code {HttpStatusCode.NotFound}");
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            }
+
+            await logger.LogWarningAsync($"WebSocket status code {HttpStatusCode.NotFound}");
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 
         private void Adapter_OnClose(object sender, ProtocolAdapterCloseEventArgs e)
         {
             try {
-                if ((adapter != null && adapter.Channel != null) && (adapter.Channel.State == ChannelState.Closed || adapter.Channel.State == ChannelState.Aborted || adapter.Channel.State == ChannelState.ClosedReceived || adapter.Channel.State == ChannelState.CloseSent)) {
+                if (adapter != null && adapter.Channel != null && (adapter.Channel.State == ChannelState.Closed ||
+                                                                   adapter.Channel.State == ChannelState.Aborted ||
+                                                                   adapter.Channel.State ==
+                                                                   ChannelState.ClosedReceived ||
+                                                                   adapter.Channel.State == ChannelState.CloseSent)) {
                     adapter.Dispose();
                     logger.LogDebugAsync("Web socket adapter disposed.").GetAwaiter();
                 }
@@ -87,6 +91,7 @@ namespace Piraeus.WebSocketGateway.Controllers
                         logger.LogDebugAsync("Web socket channel closed.").GetAwaiter();
                     }
                     catch { }
+
                     adapter.Dispose();
                     logger.LogDebugAsync("Web socket adapter disposed.").GetAwaiter();
                 }

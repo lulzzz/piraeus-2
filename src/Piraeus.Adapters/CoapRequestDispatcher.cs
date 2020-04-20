@@ -36,9 +36,10 @@ namespace Piraeus.Adapters
 
         private HashSet<string> coapUnobserved;
 
-        private bool disposedValue = false;
+        private bool disposedValue;
 
-        public CoapRequestDispatcher(CoapSession session, IChannel channel, PiraeusConfig config, GraphManager graphManager, ILog logger = null)
+        public CoapRequestDispatcher(CoapSession session, IChannel channel, PiraeusConfig config,
+            GraphManager graphManager, ILog logger = null)
         {
             this.channel = channel;
             this.session = session;
@@ -75,32 +76,40 @@ namespace Piraeus.Adapters
             }
 
             if (error == null) {
-                ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
-                await logger?.LogDebugAsync($"CoAP delete returning response for '{uri.Resource}' with {rmt} for {session.Identity}.");
+                ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable
+                    ? ResponseMessageType.Acknowledgement
+                    : ResponseMessageType.NonConfirmable;
+                await logger?.LogDebugAsync(
+                    $"CoAP delete returning response for '{uri.Resource}' with {rmt} for {session.Identity}.");
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Deleted, message.Token);
             }
-            else {
-                await logger?.LogDebugAsync($"CoAP delete returning response for '{uri.Resource}' with {ResponseCodeType.EmptyMessage} for {session.Identity}.");
-                return new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage);
-            }
+
+            await logger?.LogDebugAsync(
+                $"CoAP delete returning response for '{uri.Resource}' with {ResponseCodeType.EmptyMessage} for {session.Identity}.");
+            return new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage);
         }
 
         public async Task<CoapMessage> GetAsync(CoapMessage message)
         {
             await logger?.LogDebugAsync($"CoAP get with RST and empty message for {session.Identity}.");
-            return await Task.FromResult<CoapMessage>(new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage, message.Token));
+            return await Task.FromResult<CoapMessage>(new CoapResponse(message.MessageId, ResponseMessageType.Reset,
+                ResponseCodeType.EmptyMessage, message.Token));
         }
 
         public async Task<CoapMessage> ObserveAsync(CoapMessage message)
         {
             if (!message.Observe.HasValue) {
-                await logger?.LogWarningAsync($"CoAP observe received without Observe flag and will return RST for {session.Identity}");
-                await logger?.LogDebugAsync($"Returning RST because GET needs to be observe/unobserve for {session.Identity}");
+                await logger?.LogWarningAsync(
+                    $"CoAP observe received without Observe flag and will return RST for {session.Identity}");
+                await logger?.LogDebugAsync(
+                    $"Returning RST because GET needs to be observe/unobserve for {session.Identity}");
                 return new CoapResponse(message.MessageId, ResponseMessageType.Reset, ResponseCodeType.EmptyMessage);
             }
 
             CoapUri uri = new CoapUri(message.ResourceUri.ToString());
-            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
+            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable
+                ? ResponseMessageType.Acknowledgement
+                : ResponseMessageType.NonConfirmable;
 
             ValidatorResult result = EventValidator.Validate(false, uri.Resource, channel, graphManager);
             if (!result.Validated) {
@@ -115,8 +124,7 @@ namespace Piraeus.Adapters
                 coapObserved.Remove(uri.Resource);
             }
             else {
-                SubscriptionMetadata metadata = new SubscriptionMetadata()
-                {
+                SubscriptionMetadata metadata = new SubscriptionMetadata {
                     IsEphemeral = true,
                     Identity = session.Identity,
                     Indexes = session.Indexes
@@ -138,23 +146,32 @@ namespace Piraeus.Adapters
         {
             try {
                 CoapUri uri = new CoapUri(message.ResourceUri.ToString());
-                ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
+                ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable
+                    ? ResponseMessageType.Acknowledgement
+                    : ResponseMessageType.NonConfirmable;
                 EventMetadata metadata = await graphManager.GetPiSystemMetadataAsync(uri.Resource);
 
                 ValidatorResult result = EventValidator.Validate(true, metadata, null, graphManager);
 
                 if (!result.Validated) {
                     if (metadata.Audit) {
-                        await auditor?.WriteAuditRecordAsync(new MessageAuditRecord("XXXXXXXXXXXX", session.Identity, channel.TypeId, "COAP", message.Payload.Length, MessageDirectionType.In, false, DateTime.UtcNow, "Not authorized, missing resource metadata, or channel encryption requirements")).LogExceptions(logger);
+                        await auditor?.WriteAuditRecordAsync(new MessageAuditRecord("XXXXXXXXXXXX", session.Identity,
+                                channel.TypeId, "COAP", message.Payload.Length, MessageDirectionType.In, false,
+                                DateTime.UtcNow,
+                                "Not authorized, missing resource metadata, or channel encryption requirements"))
+                            .LogExceptions(logger);
                     }
 
                     logger?.LogErrorAsync(result.ErrorMessage);
                     return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Unauthorized, message.Token);
                 }
 
-                string contentType = message.ContentType.HasValue ? message.ContentType.Value.ConvertToContentType() : "application/octet-stream";
+                string contentType = message.ContentType.HasValue
+                    ? message.ContentType.Value.ConvertToContentType()
+                    : "application/octet-stream";
 
-                EventMessage msg = new EventMessage(contentType, uri.Resource, ProtocolType.COAP, message.Encode(), DateTime.UtcNow, metadata.Audit);
+                EventMessage msg = new EventMessage(contentType, uri.Resource, ProtocolType.COAP, message.Encode(),
+                    DateTime.UtcNow, metadata.Audit);
 
                 if (!string.IsNullOrEmpty(uri.CacheKey)) {
                     msg.CacheKey = uri.CacheKey;
@@ -179,7 +196,9 @@ namespace Piraeus.Adapters
         public async Task<CoapMessage> PutAsync(CoapMessage message)
         {
             CoapUri uri = new CoapUri(message.ResourceUri.ToString());
-            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable ? ResponseMessageType.Acknowledgement : ResponseMessageType.NonConfirmable;
+            ResponseMessageType rmt = message.MessageType == CoapMessageType.Confirmable
+                ? ResponseMessageType.Acknowledgement
+                : ResponseMessageType.NonConfirmable;
 
             if (EventValidator.Validate(false, uri.Resource, channel, graphManager).Validated) {
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.Unauthorized, message.Token);
@@ -189,8 +208,7 @@ namespace Piraeus.Adapters
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.NotAcceptable, message.Token);
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata()
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = true,
                 Identity = session.Identity,
                 Indexes = session.Indexes
@@ -223,10 +241,11 @@ namespace Piraeus.Adapters
 
             if (coapUri.Indexes.Contains(new KeyValuePair<string, string>("~", "~"))) {
                 list.Remove(new KeyValuePair<string, string>("~", "~"));
-                var query = config.GetClientIndexes().Where((ck) => ck.Key == session.Config.IdentityClaimType);
+                var query = config.GetClientIndexes().Where(ck => ck.Key == session.Config.IdentityClaimType);
                 if (query.Count() == 1) {
                     query.GetEnumerator().MoveNext();
-                    list.Add(new KeyValuePair<string, string>(query.GetEnumerator().Current.Value, "~" + session.Identity));
+                    list.Add(new KeyValuePair<string, string>(query.GetEnumerator().Current.Value,
+                        "~" + session.Identity));
                 }
             }
 
@@ -247,11 +266,13 @@ namespace Piraeus.Adapters
             AuditRecord record = null;
             try {
                 await channel.SendAsync(message);
-                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
+                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, channel.TypeId, "COAP",
+                    e.Message.Message.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
             catch (Exception ex) {
                 await logger?.LogErrorAsync(ex, $"Fault sending message on channel for {session.Identity}");
-                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, channel.TypeId, "COAP", e.Message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
+                record = new MessageAuditRecord(e.Message.MessageId, session.Identity, channel.TypeId, "COAP",
+                    e.Message.Message.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
             finally {
                 if (e.Message.Audit) {

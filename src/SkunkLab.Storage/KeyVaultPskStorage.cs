@@ -29,8 +29,7 @@ namespace SkunkLab.Storage
                 Authority = authority;
                 ClientId = clientId;
                 ClientSecret = clientSecret;
-                instance = new KeyVaultPskStorage
-                {
+                instance = new KeyVaultPskStorage {
                     client = new KeyVaultClient(GetAccessToken)
                 };
             }

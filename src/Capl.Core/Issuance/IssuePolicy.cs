@@ -69,7 +69,8 @@ namespace Capl.Issuance
 
             if (mode == IssueMode.Unique) {
                 foreach (Claim c in inputClaims) {
-                    ICollection<Claim> claimSet = clone.FindAll(delegate (Claim claim) {
+                    ICollection<Claim> claimSet = clone.FindAll(delegate(Claim claim)
+                    {
                         return c.Type == claim.Type && c.Value == claim.Value && c.Issuer == claim.Issuer;
                     });
 
@@ -79,8 +80,8 @@ namespace Capl.Issuance
                 }
 
                 foreach (ICollection<Claim> claimCollection in list)
-                    foreach (Claim c in claimCollection)
-                        clone.Remove(c);
+                foreach (Claim c in claimCollection)
+                    clone.Remove(c);
             }
 
             return clone;

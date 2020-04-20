@@ -26,13 +26,13 @@ export declare class HttpConnection implements IConnection {
     private readonly httpClient;
     private readonly logger;
     private readonly options;
-    private transport: undefined?;
-    private startInternalPromise: undefined?;
-    private stopPromise: undefined?;
+    private transport: undefined?;;
+    private startInternalPromise: undefined?;;
+    private stopPromise: undefined?;;
     private stopPromiseResolver;
-    private stopError: undefined?;
-    private accessTokenFactory: undefined?;
-    private sendQueue: undefined?;
+    private stopError: undefined?;;
+    private accessTokenFactory: undefined?;;
+    private sendQueue: undefined?;;
     readonly features: any;
     baseUrl: string;
     connectionId?: string;
@@ -70,7 +70,7 @@ export declare class TransportSendQueue {
     private buffer;
     private sendBufferedData;
     private executing;
-    private transportResult: undefined?;
+    private transportResult: undefined?;;
     private sendLoopPromise;
 
     constructor(transport: ITransport);

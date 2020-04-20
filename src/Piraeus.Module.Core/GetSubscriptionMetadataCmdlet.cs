@@ -17,8 +17,10 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            string url = string.Format("{0}/api/Subscription/GetSubscriptionMetadata?subscriptionUriString={1}", ServiceUrl, SubscriptionUriString);
-            RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
+            string url = string.Format("{0}/api/Subscription/GetSubscriptionMetadata?subscriptionUriString={1}",
+                ServiceUrl, SubscriptionUriString);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             SubscriptionMetadata metadata = request.Get<SubscriptionMetadata>();

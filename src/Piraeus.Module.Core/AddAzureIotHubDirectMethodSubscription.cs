@@ -38,8 +38,7 @@ namespace Piraeus.Module
             string uriString = string.Format("iothub://{0}.azure-devices.net?deviceid={1}&keyname={2}&method={3}",
                 Account, DeviceId, KeyName, Method);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata
-            {
+            SubscriptionMetadata metadata = new SubscriptionMetadata {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

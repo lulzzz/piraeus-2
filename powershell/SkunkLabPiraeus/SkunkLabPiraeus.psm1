@@ -150,9 +150,13 @@ function New-PiraeusDeployment
 		$step++
 		Get-AksCredentials -ClusterName $ClusterName -ResourceGroupName $ResourceGroupName
 		
-		Update-Step -Step $step -Message "Apply HELM RBAC" -Start $start
+		Update-Step -Step $step -Message "Create cert-manager namespace" -Start $start
 		$step++
-		New-KubectlApply -Filename "$Path/helm-rbac.yaml" -Namespace "kube-system"
+		kubectl create namespace "cert-manager"
+		
+		#Update-Step -Step $step -Message "Apply HELM RBAC" -Start $start
+		#$step++
+		#New-KubectlApply -Filename "$Path/helm-rbac.yaml" -Namespace "kube-system"
 
 		#Update-Step -Step $step -Message "Start Tiller" -Start $start
 		#$step++
@@ -235,7 +239,7 @@ function New-PiraeusDeployment
 		
 		Update-Step -Step $step -Message "Install Orleans cluster from helm chart" -Start $start
 		$step++
-		helm install "$Path/piraeus-silo" --name piraeus-silo --namespace kube-system --set dataConnectionString=$orleansConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$LogLevel
+		helm install piraeus-silo  "$Path/piraeus-silo" --namespace kube-system --set dataConnectionString=$orleansConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$LogLevel 
 		if($LASTEXITCODE -ne 0 )
 		{
 			Update-Step -Step $step -Message "Waiting for Kubernetes API Services to start" -Start $start
@@ -244,7 +248,7 @@ function New-PiraeusDeployment
 			
 			Update-Step -Step $step -Message "Trying again to install Orleans cluster from helm chart" -Start $start
 			$step++
-			helm install "$Path/piraeus-silo" --name piraeus-silo --namespace kube-system --set dataConnectionString=$orleansConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$LogLevel
+			helm install piraeus-silo "$Path/piraeus-silo" --namespace kube-system --set dataConnectionString=$orleansConnectionString --set instrumentationKey=$siloAIKey --set logLevel=$LogLevel
 		}
 
 		Update-Step -Step $step -Message "Creating App Insights for Piraeus Management API and getting instrumentation key" -Start $start
@@ -253,7 +257,7 @@ function New-PiraeusDeployment
 		
 		Update-Step -Step $step -Message "Install Piraeus Management API from helm chart" -Start $start
 		$step++
-		helm install "$Path/piraeus-mgmt-api" --namespace kube-system --set dataConnectionString="$orleansConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$LogLevel
+		helm install piraeus-mgmt-api "$Path/piraeus-mgmt-api" --namespace kube-system --set dataConnectionString="$orleansConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$LogLevel
 		if($LASTEXITCODE -ne 0 )
 		{
 			Update-Step -Step $step -Message "Waiting for Kubernetes API Services to start" -Start $start
@@ -262,7 +266,7 @@ function New-PiraeusDeployment
 
 			Update-Step -Step $step -Message "Trying again to install Piraeus Management API from helm chart" -Start $start
 			$step++
-			helm install "$Path/piraeus-mgmt-api" --namespace kube-system --set dataConnectionString="$orleansConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$LogLevel
+			helm install piraeus-mgmt-api "$Path/piraeus-mgmt-api" --namespace kube-system --set dataConnectionString="$orleansConnectionString"  --set managementApiIssuer="$apiIssuer" --set managementApiAudience="$apiAudience" --set managmentApiSymmetricKey="$apiSymmetricKey" --set managementApiSecurityCodes="$apiSecurityCodes" --set instrumentationKey=$mgmtAIKey --set logLevel=$LogLevel
 		}
 
 		Update-Step -Step $step -Message "Creating App Insights for Piraeus Web Socket Gateway and getting instrumentation key" -Start $start
@@ -271,7 +275,7 @@ function New-PiraeusDeployment
 
 		Update-Step -Step $step -Message "Install Piraeus Web Socket Gateway from helm chart" -Start $start
 		$step++
-		helm install "$Path/piraeus-websocket" --namespace kube-system --set dataConnectionString="$orleansConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$LogLevel 
+		helm install piraeus-websocket "$Path/piraeus-websocket" --namespace kube-system --set dataConnectionString="$orleansConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$LogLevel 
 		if($LASTEXITCODE -ne 0 )
 		{
 			Update-Step -Step $step -Message "Waiting for Kubernetes API Services to start" -Start $start
@@ -280,7 +284,7 @@ function New-PiraeusDeployment
 
 			Update-Step -Step $step -Message "Trying again to install Piraeus Web Socket Gateway from helm chart" -Start $start
 			$step++
-			helm install "$Path/piraeus-websocket" --namespace kube-system --set dataConnectionString="$orleansConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$LogLevel 
+			helm install piraeus-websocket "$Path/piraeus-websocket" --namespace kube-system --set dataConnectionString="$orleansConnectionString" --set auditConnectionString="$auditConnectionString" --set clientIdentityNameClaimType="$identityClaimType" --set clientIssuer="$issuer" --set clientAudience="$audience" --set clientTokenType="$tokenType" --set clientSymmetricKey="$symmetricKey" --set coapAuthority="$coapAuthority" --set instrumentationKey=$websocketAIKey --set logLevel=$LogLevel 
 		}
 
 		Update-Step -Step $step -Message "Updating the NGINX ingress controller" -Start $start

@@ -45,7 +45,7 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(200);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error deleting pi-system.");
+                logger?.LogError(ex, "Error deleting pi-system.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -66,10 +66,11 @@ namespace Piraeus.WebApi.Controllers
                 else {
                     logger?.LogInformation($"Return pi-system metadata '{resourceUriString}'");
                 }
+
                 return StatusCode(200, metadata);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error getting pi-system metadata.");
+                logger?.LogError(ex, "Error getting pi-system metadata.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -90,10 +91,11 @@ namespace Piraeus.WebApi.Controllers
                 else {
                     logger?.LogInformation("Communication metrics returned.");
                 }
+
                 return StatusCode(200, metrics);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error getting communications metrics.");
+                logger?.LogError(ex, "Error getting communications metrics.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -119,7 +121,7 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(200, list);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error getting subscriptions from pi-system.");
+                logger?.LogError(ex, "Error getting subscriptions from pi-system.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -132,17 +134,18 @@ namespace Piraeus.WebApi.Controllers
             try {
                 List<string> list = await graphManager.GetSigmaAlgebraAsync();
 
-                logger?.LogInformation($"Returning sigma algebra");
+                logger?.LogInformation("Returning sigma algebra");
                 if (list == null || list.Count == 0) {
-                    logger?.LogWarning($"No sigma algebras found.");
+                    logger?.LogWarning("No sigma algebras found.");
                 }
                 else {
                     logger?.LogInformation("Sigma algebras returned.");
                 }
+
                 return StatusCode(200, list.ToArray());
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error getting sigma algebra");
+                logger?.LogError(ex, "Error getting sigma algebra");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -155,17 +158,18 @@ namespace Piraeus.WebApi.Controllers
             try {
                 List<string> list = await graphManager.GetSigmaAlgebraAsync(filter);
 
-                logger?.LogInformation($"Returning sigma algebra");
+                logger?.LogInformation("Returning sigma algebra");
                 if (list == null || list.Count == 0) {
-                    logger?.LogWarning($"No sigma algebras found.");
+                    logger?.LogWarning("No sigma algebras found.");
                 }
                 else {
                     logger?.LogInformation("Sigma algebras returned.");
                 }
+
                 return StatusCode(200, list.ToArray());
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error getting sigma algebra");
+                logger?.LogError(ex, "Error getting sigma algebra");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -178,9 +182,9 @@ namespace Piraeus.WebApi.Controllers
             try {
                 ListContinuationToken continuationToken = await graphManager.GetSigmaAlgebraAsync(token);
 
-                logger?.LogInformation($"Returning sigma algebra");
+                logger?.LogInformation("Returning sigma algebra");
                 if (continuationToken == null) {
-                    logger?.LogWarning($"No sigma algebras found.");
+                    logger?.LogWarning("No sigma algebras found.");
                 }
                 else {
                     logger?.LogInformation("Sigma algebras returned.");
@@ -189,7 +193,7 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(200, continuationToken);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error getting sigma algebra");
+                logger?.LogError(ex, "Error getting sigma algebra");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -204,12 +208,13 @@ namespace Piraeus.WebApi.Controllers
                 _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
                 string subscriptionUriString = await graphManager.SubscribeAsync(resourceUriString, metadata);
-                logger?.LogInformation($"Subscribe to pi-system '{resourceUriString}' with subscriptionId '{subscriptionUriString}'.");
+                logger?.LogInformation(
+                    $"Subscribe to pi-system '{resourceUriString}' with subscriptionId '{subscriptionUriString}'.");
 
                 return StatusCode(200, subscriptionUriString);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error subscribing to pi-system.");
+                logger?.LogError(ex, "Error subscribing to pi-system.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -226,7 +231,7 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(200);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error unsubscribing.");
+                logger?.LogError(ex, "Error unsubscribing.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -243,7 +248,7 @@ namespace Piraeus.WebApi.Controllers
                 return StatusCode(200);
             }
             catch (Exception ex) {
-                logger?.LogError(ex, $"Error upserting pi-system metadata.");
+                logger?.LogError(ex, "Error upserting pi-system metadata.");
                 return StatusCode(500, ex.Message);
             }
         }

@@ -90,7 +90,6 @@ namespace Piraeus.Grains.Notifications
 
                     return claim?.Value;
                 }
-
             }
 
             return null;

@@ -17,8 +17,6 @@ namespace Piraeus.Clients.Mqtt
 
     public class PiraeusMqttClient
     {
-        private readonly IChannel channel;
-
         private readonly IMqttDispatch dispatcher;
 
         private readonly Queue<byte[]> queue;
@@ -39,22 +37,22 @@ namespace Piraeus.Clients.Mqtt
             session.OnDisconnect += Session_OnDisconnect;
             session.OnRetry += Session_OnRetry;
 
-            this.channel = channel;
-            this.channel.OnReceive += Channel_OnReceive;
-            this.channel.OnClose += Channel_OnClose;
-            this.channel.OnError += Channel_OnError;
-            this.channel.OnStateChange += Channel_OnStateChange;
+            this.Channel = channel;
+            this.Channel.OnReceive += Channel_OnReceive;
+            this.Channel.OnClose += Channel_OnClose;
+            this.Channel.OnError += Channel_OnError;
+            this.Channel.OnStateChange += Channel_OnStateChange;
 
             queue = new Queue<byte[]>();
         }
 
+        public IChannel Channel { get; }
+
+        public bool IsConnected => Channel.IsConnected;
+
         public event MqttClientChannelErrorHandler OnChannelError;
 
         public event MqttClientChannelStateHandler OnChannelStateChange;
-
-        public IChannel Channel => channel;
-
-        public bool IsConnected => channel.IsConnected;
 
         public async Task CloseAsync()
         {
@@ -64,7 +62,7 @@ namespace Piraeus.Clients.Mqtt
             }
 
             try {
-                channel.Dispose();
+                Channel.Dispose();
             }
             catch (Exception ex) {
                 Console.WriteLine("Channel close exception {0}", ex.Message);
@@ -74,32 +72,33 @@ namespace Piraeus.Clients.Mqtt
             await Task.CompletedTask;
         }
 
-        public async Task<ConnectAckCode> ConnectAsync(string clientId, string username, string password, int keepaliveSeconds)
+        public async Task<ConnectAckCode> ConnectAsync(string clientId, string username, string password,
+            int keepaliveSeconds)
         {
             code = null;
 
             ConnectMessage msg = new ConnectMessage(clientId, username, password, keepaliveSeconds, true);
 
-            if (!channel.IsConnected) {
+            if (!Channel.IsConnected) {
                 try {
-                    await channel.OpenAsync();
+                    await Channel.OpenAsync();
                 }
                 catch (Exception ex) {
-                    OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                    OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
                     return ConnectAckCode.ServerUnavailable;
                 }
 
                 try {
-                    Receive(channel);
+                    Receive(Channel);
                 }
                 catch (Exception ex) {
-                    OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                    OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
                     return ConnectAckCode.ServerUnavailable;
                 }
             }
 
             try {
-                await channel.SendAsync(msg.Encode());
+                await Channel.SendAsync(msg.Encode());
 
                 DateTime expiry = DateTime.UtcNow.AddMilliseconds(timeoutMilliseconds);
                 while (!code.HasValue) {
@@ -112,7 +111,7 @@ namespace Piraeus.Clients.Mqtt
                 return code.Value;
             }
             catch (Exception ex) {
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
                 return ConnectAckCode.ServerUnavailable;
             }
         }
@@ -120,11 +119,11 @@ namespace Piraeus.Clients.Mqtt
         public async Task DisconnectAsync()
         {
             try {
-                string id = channel.Id;
+                string id = Channel.Id;
                 DisconnectMessage msg = new DisconnectMessage();
 
-                if (channel.IsConnected) {
-                    await channel.SendAsync(msg.Encode());
+                if (Channel.IsConnected) {
+                    await Channel.SendAsync(msg.Encode());
                 }
             }
             catch (Exception ex) {
@@ -134,10 +133,11 @@ namespace Piraeus.Clients.Mqtt
             }
 
             try {
-                channel.Dispose();
+                Channel.Dispose();
             }
             catch (Exception ex) {
-                string channelDisposeMsgError = string.Format("ERROR: MQTT channel dispose after disconnect '{0}'", ex.Message);
+                string channelDisposeMsgError =
+                    string.Format("ERROR: MQTT channel dispose after disconnect '{0}'", ex.Message);
                 Console.WriteLine(channelDisposeMsgError);
                 Trace.TraceError(channelDisposeMsgError);
             }
@@ -149,19 +149,25 @@ namespace Piraeus.Clients.Mqtt
                 }
             }
             catch (Exception ex) {
-                string sessionDisposeMsgError = string.Format("ERROR: MQTT session dispose after disconnect '{0}'", ex.Message);
+                string sessionDisposeMsgError =
+                    string.Format("ERROR: MQTT session dispose after disconnect '{0}'", ex.Message);
                 Console.WriteLine(sessionDisposeMsgError);
                 Trace.TraceError(sessionDisposeMsgError);
             }
         }
 
-        public async Task PublishAsync(QualityOfServiceLevelType qos, string topicUriString, string contentType, byte[] data, string cacheKey = null, IEnumerable<KeyValuePair<string, string>> indexes = null, string messageId = null)
+        public async Task PublishAsync(QualityOfServiceLevelType qos, string topicUriString, string contentType,
+            byte[] data, string cacheKey = null, IEnumerable<KeyValuePair<string, string>> indexes = null,
+            string messageId = null)
         {
             try {
                 string indexString = GetIndexString(indexes);
 
                 UriBuilder builder = new UriBuilder(topicUriString);
-                string queryString = messageId == null ? string.Format("{0}={1}", SkunkLab.Protocols.Utilities.QueryStringConstants.CONTENT_TYPE, contentType) : string.Format("{0}={1}&{2}={3}", QueryStringConstants.CONTENT_TYPE, contentType, QueryStringConstants.MESSAGE_ID, messageId);
+                string queryString = messageId == null
+                    ? string.Format("{0}={1}", QueryStringConstants.CONTENT_TYPE, contentType)
+                    : string.Format("{0}={1}&{2}={3}", QueryStringConstants.CONTENT_TYPE, contentType,
+                        QueryStringConstants.MESSAGE_ID, messageId);
 
                 if (!string.IsNullOrEmpty(cacheKey)) {
                     queryString += string.Format("&{0}={1}", QueryStringConstants.CACHE_KEY, cacheKey);
@@ -173,7 +179,8 @@ namespace Piraeus.Clients.Mqtt
 
                 builder.Query = queryString;
 
-                PublishMessage msg = new PublishMessage(false, qos, false, 0, builder.ToString().ToLowerInvariant(), data);
+                PublishMessage msg =
+                    new PublishMessage(false, qos, false, 0, builder.ToString().ToLowerInvariant(), data);
                 if (qos != QualityOfServiceLevelType.AtMostOnce) {
                     msg.MessageId = session.NewId();
                     session.Quarantine(msg, DirectionType.Out);
@@ -184,11 +191,11 @@ namespace Piraeus.Clients.Mqtt
                 while (queue.Count > 0) {
                     byte[] message = queue.Dequeue();
 
-                    await channel.SendAsync(message);
+                    await Channel.SendAsync(message);
                 }
             }
             catch (Exception ex) {
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
             }
         }
 
@@ -198,26 +205,28 @@ namespace Piraeus.Clients.Mqtt
             dispatcher.Register(uri.ToString(), action);
         }
 
-        public async Task SubscribeAsync(string topicUriString, QualityOfServiceLevelType qos, Action<string, string, byte[]> action)
+        public async Task SubscribeAsync(string topicUriString, QualityOfServiceLevelType qos,
+            Action<string, string, byte[]> action)
         {
             try {
-                Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>
-                {
-                    { topicUriString.ToLowerInvariant(), qos }
+                Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType> {
+                    {topicUriString.ToLowerInvariant(), qos}
                 };
                 dispatcher.Register(topicUriString.ToLowerInvariant(), action);
                 SubscribeMessage msg = new SubscribeMessage(session.NewId(), dict);
-                await channel.SendAsync(msg.Encode());
+                await Channel.SendAsync(msg.Encode());
             }
             catch (Exception ex) {
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
             }
         }
 
-        public async Task SubscribeAsync(Tuple<string, QualityOfServiceLevelType, Action<string, string, byte[]>>[] subscriptions)
+        public async Task SubscribeAsync(
+            Tuple<string, QualityOfServiceLevelType, Action<string, string, byte[]>>[] subscriptions)
         {
             try {
-                Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>();
+                Dictionary<string, QualityOfServiceLevelType>
+                    dict = new Dictionary<string, QualityOfServiceLevelType>();
 
                 foreach (var tuple in subscriptions) {
                     dict.Add(tuple.Item1, tuple.Item2);
@@ -226,10 +235,10 @@ namespace Piraeus.Clients.Mqtt
 
                 SubscribeMessage msg = new SubscribeMessage(session.NewId(), dict);
 
-                await channel.SendAsync(msg.Encode());
+                await Channel.SendAsync(msg.Encode());
             }
             catch (Exception ex) {
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
             }
         }
 
@@ -242,13 +251,13 @@ namespace Piraeus.Clients.Mqtt
         public async Task UnsubscribeAsync(string topic)
         {
             try {
-                UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new string[] { topic });
+                UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new[] {topic});
 
-                await channel.SendAsync(msg.Encode());
+                await Channel.SendAsync(msg.Encode());
                 dispatcher.Unregister(topic);
             }
             catch (Exception ex) {
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
             }
         }
 
@@ -257,13 +266,11 @@ namespace Piraeus.Clients.Mqtt
             try {
                 UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
 
-                await channel.SendAsync(msg.Encode());
-                foreach (string topic in topics) {
-                    dispatcher.Unregister(topic);
-                }
+                await Channel.SendAsync(msg.Encode());
+                foreach (string topic in topics) dispatcher.Unregister(topic);
             }
             catch (Exception ex) {
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
             }
         }
 
@@ -284,7 +291,7 @@ namespace Piraeus.Clients.Mqtt
         {
             try {
                 code = null;
-                channel.Dispose();
+                Channel.Dispose();
             }
             catch (Exception ex) {
                 Trace.TraceWarning("Piraeus MQTT client fault disposing channel.");
@@ -305,13 +312,13 @@ namespace Piraeus.Clients.Mqtt
             try {
                 MqttMessage message = handler.ProcessAsync().GetAwaiter().GetResult();
                 if (message != null) {
-                    channel.SendAsync(message.Encode()).GetAwaiter();
+                    Channel.SendAsync(message.Encode()).GetAwaiter();
                 }
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 Trace.TraceError(ex.Message);
-                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(channel.Id, ex));
+                OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));
             }
         }
 
@@ -350,15 +357,15 @@ namespace Piraeus.Clients.Mqtt
 
         private void Session_OnDisconnect(object sender, MqttMessageEventArgs args)
         {
-            channel.CloseAsync().GetAwaiter();
-            channel.Dispose();
+            Channel.CloseAsync().GetAwaiter();
+            Channel.Dispose();
         }
 
         private void Session_OnKeepAlive(object sender, MqttMessageEventArgs args)
         {
             try {
-                Task task = channel.SendAsync(args.Message.Encode());
-                if (channel.RequireBlocking) {
+                Task task = Channel.SendAsync(args.Message.Encode());
+                if (Channel.RequireBlocking) {
                     Task.WaitAll(task);
                 }
                 else {
@@ -377,7 +384,7 @@ namespace Piraeus.Clients.Mqtt
         {
             MqttMessage msg = args.Message;
             msg.Dup = true;
-            channel.SendAsync(msg.Encode()).GetAwaiter();
+            Channel.SendAsync(msg.Encode()).GetAwaiter();
         }
 
         #endregion Session Events

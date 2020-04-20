@@ -10,6 +10,7 @@ using Piraeus.Clients.Mqtt;
 using SkunkLab.Channels;
 using SkunkLab.Channels.WebSocket;
 using SkunkLab.Protocols.Mqtt;
+using SkunkLab.Security.Tokens;
 
 namespace Samples.Mqtt.Client
 {
@@ -73,7 +74,7 @@ namespace Samples.Mqtt.Client
             channel.OnError += Channel_OnError;
             channel.OnOpen += Channel_OnOpen;
 
-            mqttClient = new PiraeusMqttClient(new SkunkLab.Protocols.Mqtt.MqttConfig(180.0), channel);
+            mqttClient = new PiraeusMqttClient(new MqttConfig(180.0), channel);
 
             Task task = StartMqttClientAsync(token);
             Task.WaitAll(task);
@@ -118,6 +119,28 @@ namespace Samples.Mqtt.Client
 
         #endregion User Input
 
+        #region Channels
+
+        public static IChannel CreateChannel(string token, CancellationTokenSource src)
+        {
+            if (channelNum == 1) {
+                string uriString = hostname == "localhost"
+                    ? "ws://localhost:8081/api/connect"
+                    : string.Format("wss://{0}/ws/api/connect", hostname);
+
+                Uri uri = new Uri(uriString);
+                return ChannelFactory.Create(uri, token, "mqtt", new WebSocketConfig(), src.Token);
+            }
+
+            if (hostname != "localhost") {
+                hostname = string.Format("{0}/tcp", hostname);
+            }
+
+            return ChannelFactory.Create(false, hostname, 8883, 2048, 2048 * 10, src.Token);
+        }
+
+        #endregion Channels
+
         #region Utilities
 
         private static void PrintMessage(string message, ConsoleColor color, bool section = false, bool input = false)
@@ -161,7 +184,8 @@ namespace Samples.Mqtt.Client
             PrintMessage("Trying to connect", ConsoleColor.Cyan, true);
             string sessionId = Guid.NewGuid().ToString();
             ConnectAckCode code = await mqttClient.ConnectAsync(sessionId, "JWT", token, 90);
-            PrintMessage($"MQTT connection code {code}", code == ConnectAckCode.ConnectionAccepted ? ConsoleColor.Green : ConsoleColor.Red, false);
+            PrintMessage($"MQTT connection code {code}",
+                code == ConnectAckCode.ConnectionAccepted ? ConsoleColor.Green : ConsoleColor.Red);
 
             return code;
         }
@@ -176,7 +200,7 @@ namespace Samples.Mqtt.Client
             long sendTicks = Convert.ToInt64(ticksString);
             long ticks = nowTicks - sendTicks;
             TimeSpan latency = TimeSpan.FromTicks(ticks);
-            string messageText = msg.Replace(split[0], "").Trim(new char[] { ':', ' ' });
+            string messageText = msg.Replace(split[0], "").Trim(':', ' ');
 
             Console.WriteLine($"Latency {latency.TotalMilliseconds} ms - Received message '{messageText}'");
         }
@@ -191,6 +215,7 @@ namespace Samples.Mqtt.Client
                         return;
                     }
                 }
+
                 send = true;
 
                 PrintMessage("Enter # of messages to send ? ", ConsoleColor.Cyan, false, true);
@@ -207,8 +232,10 @@ namespace Samples.Mqtt.Client
                     index++;
                     string payloadString = string.Format($"{DateTime.Now.Ticks}:{name}-message {index}");
                     byte[] payload = Encoding.UTF8.GetBytes(payloadString);
-                    string publishEvent = !string.IsNullOrEmpty(pubResource) ? pubResource : role == "A" ? resourceA : resourceB;
-                    Task pubTask = mqttClient.PublishAsync(QualityOfServiceLevelType.AtMostOnce, publishEvent, "text/plain", payload);
+                    string publishEvent = !string.IsNullOrEmpty(pubResource) ? pubResource :
+                        role == "A" ? resourceA : resourceB;
+                    Task pubTask = mqttClient.PublishAsync(QualityOfServiceLevelType.AtMostOnce, publishEvent,
+                        "text/plain", payload);
                     Task.WhenAll(pubTask);
 
                     if (delayms > 0) {
@@ -240,9 +267,11 @@ namespace Samples.Mqtt.Client
                 return;
             }
 
-            string observableEvent = !string.IsNullOrEmpty(pubResource) ? subResource : role == "A" ? resourceB : resourceA;
+            string observableEvent =
+                !string.IsNullOrEmpty(pubResource) ? subResource : role == "A" ? resourceB : resourceA;
             try {
-                await mqttClient.SubscribeAsync(observableEvent, QualityOfServiceLevelType.AtLeastOnce, ObserveEvent).ContinueWith(SendMessages);
+                await mqttClient.SubscribeAsync(observableEvent, QualityOfServiceLevelType.AtLeastOnce, ObserveEvent)
+                    .ContinueWith(SendMessages);
             }
             catch (Exception ex) {
                 PrintMessage("Error", ConsoleColor.Red, true);
@@ -292,9 +321,8 @@ namespace Samples.Mqtt.Client
             if (chn == "1") {
                 return Convert.ToInt32(chn);
             }
-            else {
-                return SelectChannel();
-            }
+
+            return SelectChannel();
         }
 
         private static string SelectHostname()
@@ -304,9 +332,8 @@ namespace Samples.Mqtt.Client
             if (string.IsNullOrEmpty(hostname)) {
                 return "localhost";
             }
-            else {
-                return hostname;
-            }
+
+            return hostname;
         }
 
         private static string SelectName()
@@ -322,25 +349,24 @@ namespace Samples.Mqtt.Client
             if (role == "A" || role == "B") {
                 return role;
             }
-            else {
-                return SelectRole();
-            }
+
+            return SelectRole();
         }
 
         #endregion Inputs
 
         #region Security Token
 
-        private static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey, double lifetimeMinutes)
+        private static string CreateJwt(string audience, string issuer, List<Claim> claims, string symmetricKey,
+            double lifetimeMinutes)
         {
-            SkunkLab.Security.Tokens.JsonWebToken jwt = new SkunkLab.Security.Tokens.JsonWebToken(new Uri(audience), symmetricKey, issuer, claims, lifetimeMinutes);
+            JsonWebToken jwt = new JsonWebToken(new Uri(audience), symmetricKey, issuer, claims, lifetimeMinutes);
             return jwt.ToString();
         }
 
         private static string GetSecurityToken(string name, string role)
         {
-            List<Claim> claims = new List<Claim>()
-            {
+            List<Claim> claims = new List<Claim> {
                 new Claim(nameClaimType, name),
                 new Claim(roleClaimType, role)
             };
@@ -349,26 +375,5 @@ namespace Samples.Mqtt.Client
         }
 
         #endregion Security Token
-
-        #region Channels
-
-        public static IChannel CreateChannel(string token, CancellationTokenSource src)
-        {
-            if (channelNum == 1) {
-                string uriString = hostname == "localhost" ? "ws://localhost:8081/api/connect" : string.Format("wss://{0}/ws/api/connect", hostname);
-
-                Uri uri = new Uri(uriString);
-                return ChannelFactory.Create(uri, token, "mqtt", new WebSocketConfig(), src.Token);
-            }
-            else {
-                if (hostname != "localhost") {
-                    hostname = string.Format("{0}/tcp", hostname);
-                }
-
-                return ChannelFactory.Create(false, hostname, 8883, 2048, 2048 * 10, src.Token);
-            }
-        }
-
-        #endregion Channels
     }
 }

@@ -19,12 +19,15 @@ namespace Piraeus.Module
         {
             string url;
 
-            if (string.IsNullOrEmpty(Filter))
+            if (string.IsNullOrEmpty(Filter)) {
                 url = $"{ServiceUrl}/api/resource/getsigmaalgebra";
-            else
+            }
+            else {
                 url = $"{ServiceUrl}/api/resource/getsigmaalgebrawithfilter?filter={Filter}";
+            }
 
-            RestRequestBuilder builder = new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
+            RestRequestBuilder builder =
+                new RestRequestBuilder("GET", url, RestConstants.ContentType.Json, true, SecurityToken);
             RestRequest request = new RestRequest(builder);
 
             IEnumerable<string> resourceList = request.Get<IEnumerable<string>>();

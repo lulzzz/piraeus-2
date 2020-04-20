@@ -27,19 +27,22 @@ namespace Piraeus.WebSocketGateway
                     LogLevel logLevel = Enum.Parse<LogLevel>(pconfig.LogLevel);
                     var loggers = pconfig.GetLoggerTypes();
 
-                    if (loggers.HasFlag(LoggerType.Console))
+                    if (loggers.HasFlag(LoggerType.Console)) {
                         builder.AddConsole();
+                    }
 
-                    if (loggers.HasFlag(LoggerType.Debug))
+                    if (loggers.HasFlag(LoggerType.Debug)) {
                         builder.AddDebug();
+                    }
 
-                    if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(pconfig.InstrumentationKey))
+                    if (loggers.HasFlag(LoggerType.AppInsights) && !string.IsNullOrEmpty(pconfig.InstrumentationKey)) {
                         builder.AddApplicationInsights(pconfig.InstrumentationKey);
+                    }
 
                     builder.SetMinimumLevel(logLevel);
                     builder.Services.AddSingleton<ILog, Logger>();
                 })
-                .ConfigureWebHost((options) =>
+                .ConfigureWebHost(options =>
                 {
                     options.UseStartup<Startup>();
                     options.UseKestrel();
@@ -50,18 +53,19 @@ namespace Piraeus.WebSocketGateway
                         options.Limits.MaxConcurrentUpgradedConnections = config.MaxConnections;
                         options.Limits.MaxRequestBodySize = config.MaxBufferSize;
                         options.Limits.MinRequestBodyDataRate =
-                            new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
+                            new MinDataRate(100, TimeSpan.FromSeconds(10));
                         options.Limits.MinResponseDataRate =
-                            new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
+                            new MinDataRate(100, TimeSpan.FromSeconds(10));
 
                         if (!string.IsNullOrEmpty(config.ServerCertificateFilename)) {
                             Console.WriteLine("Port for cert with filename");
-                            options.ListenAnyIP(config.GetPorts()[0], (a) => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
+                            options.ListenAnyIP(config.GetPorts()[0],
+                                a => a.UseHttps(config.ServerCertificateFilename, config.ServerCertificatePassword));
                         }
                         else if (!string.IsNullOrEmpty(config.ServerCertificateStore)) {
                             Console.WriteLine("Port for cert with store");
                             X509Certificate2 cert = config.GetServerCerticate();
-                            options.ListenAnyIP(config.GetPorts()[0], (a) => a.UseHttps(cert));
+                            options.ListenAnyIP(config.GetPorts()[0], a => a.UseHttps(cert));
                         }
                         else {
                             Console.WriteLine("Hard coded port 8081");
@@ -79,7 +83,7 @@ namespace Piraeus.WebSocketGateway
 
             IConfigurationRoot root = builder.Build();
             PiraeusConfig config = new PiraeusConfig();
-            ConfigurationBinder.Bind(root, config);
+            root.Bind(config);
 
             return config;
         }

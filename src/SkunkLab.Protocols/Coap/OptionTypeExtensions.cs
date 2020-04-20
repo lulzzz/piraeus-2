@@ -53,7 +53,7 @@ namespace SkunkLab.Protocols.Coap
             }
 
             if (typeValue == 6) {
-                byte[] b = { Convert.ToByte(value) };
+                byte[] b = {Convert.ToByte(value)};
                 return b;
             }
 
@@ -69,13 +69,13 @@ namespace SkunkLab.Protocols.Coap
                 uint val = (uint)value;
                 if (val == 0) {
                     if (typeValue == 12) {
-                        return new[] { (byte)val };
+                        return new[] {(byte)val};
                     }
 
                     return null;
                 }
 
-                return new[] { (byte)val };
+                return new[] {(byte)val};
             }
 
             if (typeValue == 3 || typeValue == 35 || typeValue == 39) {

@@ -34,7 +34,8 @@ namespace Capl.Authorization.Transforms
             }
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
-            IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
+            IEnumerable<Claim> claimSet = ci.FindAll(delegate(Claim claim)
+            {
                 foreach (Claim c in matchedClaims) {
                     if (c.Type == claim.Type && c.Value == claim.Value) {
                         return true;

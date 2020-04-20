@@ -134,8 +134,7 @@ namespace Orleans.Storage.Redis
                 configOptions = ConfigurationOptions.Parse(options.ConnectionString);
             }
             else {
-                configOptions = new ConfigurationOptions
-                {
+                configOptions = new ConfigurationOptions {
                     ConnectRetry = options.ConnectRetry ?? 4,
                     DefaultDatabase = options.DatabaseNo ?? 1,
                     SyncTimeout = options.SyncTimeout ?? 10000,
