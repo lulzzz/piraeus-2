@@ -6,6 +6,8 @@ namespace SkunkLab.Protocols.Coap
 {
     public class CoapMessage
     {
+        internal CoapOptionCollection options;
+
         protected List<byte[]> eTag;
 
         protected List<byte[]> ifMatch;
@@ -15,7 +17,6 @@ namespace SkunkLab.Protocols.Coap
         protected List<string> locationQuery;
 
         protected uint maxAge = 60;
-        internal CoapOptionCollection options;
 
         protected byte[] token;
 
@@ -32,11 +33,20 @@ namespace SkunkLab.Protocols.Coap
             eTag = new List<byte[]>();
         }
 
-        public virtual MediaType? Accept { get; set; }
+        public virtual MediaType? Accept
+        {
+            get; set;
+        }
 
-        public virtual CodeType Code { get; set; }
+        public virtual CodeType Code
+        {
+            get; set;
+        }
 
-        public virtual MediaType? ContentType { get; set; }
+        public virtual MediaType? ContentType
+        {
+            get; set;
+        }
 
         public virtual List<byte[]> ETag
         {
@@ -44,11 +54,17 @@ namespace SkunkLab.Protocols.Coap
             internal set => eTag = value;
         }
 
-        public virtual bool HasContentFormat { get; internal set; }
+        public virtual bool HasContentFormat
+        {
+            get; internal set;
+        }
 
         public virtual List<byte[]> IfMatch => ifMatch;
 
-        public virtual bool IfNoneMatch { get; set; }
+        public virtual bool IfNoneMatch
+        {
+            get; set;
+        }
 
         public virtual List<string> LocationPath => locationPath;
 
@@ -60,27 +76,57 @@ namespace SkunkLab.Protocols.Coap
             set => maxAge = value;
         }
 
-        public virtual byte[] MessageBytes { get; internal set; }
+        public virtual byte[] MessageBytes
+        {
+            get; internal set;
+        }
 
-        public virtual ushort MessageId { get; set; }
+        public virtual ushort MessageId
+        {
+            get; set;
+        }
 
-        public virtual CoapMessageType MessageType { get; set; }
+        public virtual CoapMessageType MessageType
+        {
+            get; set;
+        }
 
-        public NoResponseType? NoResponse { get; set; }
+        public NoResponseType? NoResponse
+        {
+            get; set;
+        }
 
-        public virtual bool? Observe { get; set; }
+        public virtual bool? Observe
+        {
+            get; set;
+        }
 
         public virtual CoapOptionCollection Options => options;
 
-        public virtual byte[] Payload { get; set; }
+        public virtual byte[] Payload
+        {
+            get; set;
+        }
 
-        public virtual string ProxyScheme { get; set; }
+        public virtual string ProxyScheme
+        {
+            get; set;
+        }
 
-        public virtual string ProxyUri { get; set; }
+        public virtual string ProxyUri
+        {
+            get; set;
+        }
 
-        public virtual Uri ResourceUri { get; set; }
+        public virtual Uri ResourceUri
+        {
+            get; set;
+        }
 
-        public virtual uint Size1 { get; set; }
+        public virtual uint Size1
+        {
+            get; set;
+        }
 
         public virtual byte[] Token
         {
@@ -205,11 +251,11 @@ namespace SkunkLab.Protocols.Coap
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
                 if (options != null) {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
-                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length + options.Length, 1);
+                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length + options.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + options.Length + 1, Payload.Length);
                 }
                 else {
-                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length, 1);
+                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + 1, Payload.Length);
                 }
             }

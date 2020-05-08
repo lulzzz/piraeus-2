@@ -44,26 +44,6 @@ namespace SkunkLab.Protocols.Mqtt
             quarantine.OnRetry += Quarantine_OnRetry;
         }
 
-        public MqttConfig Config { get; set; }
-
-        public ConnectAckCode ConnectResult { get; internal set; }
-
-        public bool HasBootstrapToken { get; internal set; }
-
-        public string Identity { get; set; }
-
-        public List<KeyValuePair<string, string>> Indexes { get; set; }
-
-        public bool IsAuthenticated { get; set; }
-
-        public bool IsConnected { get; internal set; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         public event ConnectionHandler OnConnect;
 
         public event EventHandler<MqttMessageEventArgs> OnDisconnect;
@@ -77,6 +57,41 @@ namespace SkunkLab.Protocols.Mqtt
         public event SubscriptionHandler OnSubscribe;
 
         public event EventHandler<MqttMessageEventArgs> OnUnsubscribe;
+
+        public MqttConfig Config
+        {
+            get; set;
+        }
+
+        public ConnectAckCode ConnectResult
+        {
+            get; internal set;
+        }
+
+        public bool HasBootstrapToken
+        {
+            get; internal set;
+        }
+
+        public string Identity
+        {
+            get; set;
+        }
+
+        public List<KeyValuePair<string, string>> Indexes
+        {
+            get; set;
+        }
+
+        public bool IsAuthenticated
+        {
+            get; set;
+        }
+
+        public bool IsConnected
+        {
+            get; internal set;
+        }
 
         public bool Authenticate()
         {
@@ -108,6 +123,12 @@ namespace SkunkLab.Protocols.Mqtt
         public bool Authenticate(ConnectMessage msg)
         {
             return Authenticate(msg.Username, msg.Password);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public ushort NewId()

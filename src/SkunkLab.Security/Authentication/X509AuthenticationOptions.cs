@@ -15,12 +15,21 @@ namespace SkunkLab.Security.Authentication
             Thumbprint = thumbprint;
         }
 
-        public string Location { get; set; }
+        public string Location
+        {
+            get; set;
+        }
 
         public string Scheme => "SkunkLabX509";
 
-        public string StoreName { get; set; }
+        public string StoreName
+        {
+            get; set;
+        }
 
-        public string Thumbprint { get; set; }
+        public string Thumbprint
+        {
+            get; set;
+        }
     }
 }

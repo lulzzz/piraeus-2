@@ -29,11 +29,17 @@ namespace Capl.Authorization
         /// <summary>
         ///     Gets or sets the claim type.
         /// </summary>
-        public string ClaimType { get; set; }
+        public string ClaimType
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets the claim value.
         /// </summary>
-        public string ClaimValue { get; set; }
+        public string ClaimValue
+        {
+            get; set;
+        }
     }
 }

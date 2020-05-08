@@ -10,8 +10,14 @@ namespace Piraeus.TcpGateway
             Port = port;
         }
 
-        public string ChannelType { get; internal set; }
+        public string ChannelType
+        {
+            get; internal set;
+        }
 
-        public int Port { get; internal set; }
+        public int Port
+        {
+            get; internal set;
+        }
     }
 }

@@ -11,6 +11,9 @@ namespace Piraeus.Clients.Mqtt
             SubscribeResults = results;
         }
 
-        public List<Tuple<string, QualityOfServiceLevelType>> SubscribeResults { get; internal set; }
+        public List<Tuple<string, QualityOfServiceLevelType>> SubscribeResults
+        {
+            get; internal set;
+        }
     }
 }

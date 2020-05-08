@@ -46,7 +46,10 @@ namespace SkunkLab.Protocols.Mqtt
             set => Retain = value;
         }
 
-        public string Topic { get; set; }
+        public string Topic
+        {
+            get; set;
+        }
 
         public override byte[] Encode()
         {

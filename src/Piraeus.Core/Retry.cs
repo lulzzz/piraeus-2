@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Piraeus.Core
@@ -58,15 +57,10 @@ namespace Piraeus.Core
                     await Task.Run(retryOperation);
                     break;
                 }
-                catch (Exception ex) {
+                catch {
                     if (attempt == maxRetries) {
-                        Trace.TraceWarning("WARNING: Task failed all retries.");
-                        Trace.TraceError("ERORR: Task retry error {0}", ex.Message);
-                        Trace.TraceError("ERORR: Task retry stack trace {0}", ex.StackTrace);
                         throw;
                     }
-
-                    Trace.TraceWarning("WARNING: Task in retry mode.");
 
                     await Task.Delay(delayMilliseconds);
                     attempt++;

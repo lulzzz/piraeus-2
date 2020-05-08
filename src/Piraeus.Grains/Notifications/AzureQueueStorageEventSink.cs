@@ -46,7 +46,7 @@ namespace Piraeus.Grains.Notifications
 
             if (sasUri == null) {
                 storage = QueueStorage.New(
-                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] {'.'})[0]};AccountKey={metadata.SymmetricKey};",
+                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] { '.' })[0]};AccountKey={metadata.SymmetricKey};",
                     10000, 1000);
             }
             else {

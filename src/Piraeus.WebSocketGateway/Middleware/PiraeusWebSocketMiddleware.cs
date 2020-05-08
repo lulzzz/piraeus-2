@@ -26,6 +26,7 @@ namespace Piraeus.WebSocketGateway.Middleware
         private readonly GraphManager graphManager;
 
         private readonly ILog logger;
+
         private readonly RequestDelegate next;
 
         private readonly WebSocketOptions options;

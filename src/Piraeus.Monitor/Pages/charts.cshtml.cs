@@ -4,7 +4,10 @@ namespace Piraeus.Monitor
 {
     public class ChartsModel : PageModel
     {
-        public string ResourceUriString { get; internal set; }
+        public string ResourceUriString
+        {
+            get; internal set;
+        }
 
         //private readonly HubAdapter adapter;
 

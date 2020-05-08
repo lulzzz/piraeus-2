@@ -31,13 +31,16 @@ namespace Piraeus.Clients.Mqtt
             this.channel.OnStateChange += Channel_OnStateChange;
         }
 
-        public bool ChannelConnected => channel.IsConnected;
-
-        public ConnectAckCode? MqttConnectCode { get; private set; }
-
         public event MqttClientChannelErrorHandler OnChannelError;
 
         public event MqttClientChannelStateHandler OnChannelStateChange;
+
+        public bool ChannelConnected => channel.IsConnected;
+
+        public ConnectAckCode? MqttConnectCode
+        {
+            get; private set;
+        }
 
         #region MQTT Functions
 
@@ -102,7 +105,7 @@ namespace Piraeus.Clients.Mqtt
 
         public async Task UnsubscribeAsync(string topic)
         {
-            UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new[] {topic});
+            UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new[] { topic });
             await channel.SendAsync(msg.Encode());
             dispatcher.Unregister(topic);
         }
@@ -112,7 +115,8 @@ namespace Piraeus.Clients.Mqtt
             UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
             await channel.SendAsync(msg.Encode());
 
-            foreach (string topic in topics) dispatcher.Unregister(topic);
+            foreach (string topic in topics)
+                dispatcher.Unregister(topic);
         }
 
         #endregion MQTT Functions

@@ -40,7 +40,8 @@ namespace SkunkLab.Storage
                 int dbNum = id ?? 0;
                 var keys = server.Keys(dbNum);
                 List<string> list = new List<string>();
-                foreach (var key in keys) list.Add(key.ToString());
+                foreach (var key in keys)
+                    list.Add(key.ToString());
 
                 return await Task.FromResult(list.ToArray());
             }

@@ -291,15 +291,27 @@ namespace SkunkLab.Channels.Tcp
 
         #region Properties
 
-        public override string Id { get; internal set; }
+        public override string Id
+        {
+            get; internal set;
+        }
 
-        public override bool IsAuthenticated { get; internal set; }
+        public override bool IsAuthenticated
+        {
+            get; internal set;
+        }
 
         public override bool IsConnected => State == ChannelState.Open;
 
-        public override bool IsEncrypted { get; internal set; }
+        public override bool IsEncrypted
+        {
+            get; internal set;
+        }
 
-        public override int Port { get; internal set; }
+        public override int Port
+        {
+            get; internal set;
+        }
 
         public override bool RequireBlocking => psk != null;
 

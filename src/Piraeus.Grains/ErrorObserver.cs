@@ -5,11 +5,11 @@ namespace Piraeus.Grains
 {
     public class ErrorObserver : IErrorObserver
     {
+        public event EventHandler<ErrorNotificationEventArgs> OnNotify;
+
         public void NotifyError(string grainId, Exception error)
         {
             OnNotify?.Invoke(this, new ErrorNotificationEventArgs(grainId, error));
         }
-
-        public event EventHandler<ErrorNotificationEventArgs> OnNotify;
     }
 }

@@ -10,8 +10,14 @@ namespace SkunkLab.Channels
             State = state;
         }
 
-        public string ChannelId { get; internal set; }
+        public string ChannelId
+        {
+            get; internal set;
+        }
 
-        public ChannelState State { get; internal set; }
+        public ChannelState State
+        {
+            get; internal set;
+        }
     }
 }

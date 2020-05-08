@@ -39,7 +39,8 @@ namespace Piraeus.Module
                 string.Format("https://{0}.documents.azure.com:443?database={1}&collection={2}&clients={3}", Account,
                     Database, Collection, NumClients <= 0 ? 1 : NumClients);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

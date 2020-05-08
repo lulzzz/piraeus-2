@@ -14,7 +14,10 @@ namespace SkunkLab.Protocols.Mqtt
             MessageId = messageId;
         }
 
-        public PublishAckType AckType { get; set; }
+        public PublishAckType AckType
+        {
+            get; set;
+        }
 
         public override bool HasAck => AckType == PublishAckType.PUBREC || AckType == PublishAckType.PUBREL;
 

@@ -13,13 +13,25 @@ namespace SkunkLab.Protocols.Mqtt
             Direction = direction;
         }
 
-        public int AttemptCount { get; set; }
+        public int AttemptCount
+        {
+            get; set;
+        }
 
-        public DirectionType Direction { get; set; }
+        public DirectionType Direction
+        {
+            get; set;
+        }
 
-        public MqttMessage Message { get; set; }
+        public MqttMessage Message
+        {
+            get; set;
+        }
 
-        public DateTime NextRetryTime { get; set; }
+        public DateTime NextRetryTime
+        {
+            get; set;
+        }
 
         public void Increment(TimeSpan ackTimeout)
         {

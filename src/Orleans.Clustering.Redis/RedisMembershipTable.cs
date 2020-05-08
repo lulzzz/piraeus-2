@@ -35,7 +35,8 @@ namespace Orleans.Clustering.Redis
                 configOptions = ConfigurationOptions.Parse(membershipTableOptions.Value.ConnectionString);
             }
             else {
-                configOptions = new ConfigurationOptions {
+                configOptions = new ConfigurationOptions
+                {
                     ConnectRetry = membershipTableOptions.Value.ConnectRetry ?? 4,
                     DefaultDatabase = membershipTableOptions.Value.DatabaseNo ?? 2,
                     SyncTimeout = membershipTableOptions.Value.SyncTimeout ?? 10000,

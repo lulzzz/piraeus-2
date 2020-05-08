@@ -17,7 +17,7 @@ namespace Capl.Authorization
     [XmlSchemaProvider(null, IsAny = true)]
     public class LogicalAndCollection : LogicalConnectiveCollection
     {
-        public new static LogicalConnectiveCollection Load(XmlReader reader)
+        public static new LogicalConnectiveCollection Load(XmlReader reader)
         {
             LogicalAndCollection lac = new LogicalAndCollection();
             lac.ReadXml(reader);

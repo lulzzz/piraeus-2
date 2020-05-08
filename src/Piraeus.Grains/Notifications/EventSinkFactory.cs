@@ -12,7 +12,10 @@ namespace Piraeus.Grains.Notifications
 
         private static List<Claim> claims;
 
-        public static bool IsInitialized { get; private set; }
+        public static bool IsInitialized
+        {
+            get; private set;
+        }
 
         public static EventSink Create(SubscriptionMetadata metadata, List<Claim> claimset = null,
             X509Certificate2 certificate = null)

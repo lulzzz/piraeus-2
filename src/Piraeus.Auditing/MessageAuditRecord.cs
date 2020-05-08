@@ -26,13 +26,29 @@ namespace Piraeus.Auditing
             Key = Guid.NewGuid().ToString();
         }
 
-        [JsonProperty("channel")] public string Channel { get; set; }
+        [JsonProperty("channel")]
+        public string Channel
+        {
+            get; set;
+        }
 
-        [JsonProperty("direction")] public string Direction { get; set; }
+        [JsonProperty("direction")]
+        public string Direction
+        {
+            get; set;
+        }
 
-        [JsonProperty("error")] public string Error { get; set; }
+        [JsonProperty("error")]
+        public string Error
+        {
+            get; set;
+        }
 
-        [JsonProperty("identity")] public string Identity { get; set; }
+        [JsonProperty("identity")]
+        public string Identity
+        {
+            get; set;
+        }
 
         [JsonProperty("key")]
         public string Key
@@ -41,7 +57,11 @@ namespace Piraeus.Auditing
             set => PartitionKey = value;
         }
 
-        [JsonProperty("length")] public int Length { get; set; }
+        [JsonProperty("length")]
+        public int Length
+        {
+            get; set;
+        }
 
         [JsonProperty("messageId")]
         public string MessageId
@@ -50,11 +70,23 @@ namespace Piraeus.Auditing
             set => RowKey = value;
         }
 
-        [JsonProperty("messageTimestamp")] public DateTime MessageTime { get; set; }
+        [JsonProperty("messageTimestamp")]
+        public DateTime MessageTime
+        {
+            get; set;
+        }
 
-        [JsonProperty("protocol")] public string Protocol { get; set; }
+        [JsonProperty("protocol")]
+        public string Protocol
+        {
+            get; set;
+        }
 
-        [JsonProperty("success")] public bool Success { get; set; }
+        [JsonProperty("success")]
+        public bool Success
+        {
+            get; set;
+        }
 
         public override string ConvertToCsv()
         {

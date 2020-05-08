@@ -11,11 +11,20 @@ namespace SkunkLab.Protocols.Coap.Handlers
             Dispatcher = dispatcher;
         }
 
-        protected ICoapRequestDispatch Dispatcher { get; set; }
+        protected ICoapRequestDispatch Dispatcher
+        {
+            get; set;
+        }
 
-        protected CoapMessage Message { get; set; }
+        protected CoapMessage Message
+        {
+            get; set;
+        }
 
-        protected CoapSession Session { get; set; }
+        protected CoapSession Session
+        {
+            get; set;
+        }
 
         public static CoapMessageHandler Create(CoapSession session, CoapMessage message,
             ICoapRequestDispatch dispatcher = null)

@@ -5,21 +5,6 @@ namespace SkunkLab.Channels
 {
     public interface IChannel : IDisposable
     {
-        string Id { get; }
-
-        bool IsAuthenticated { get; }
-
-        bool IsConnected { get; }
-
-        bool IsEncrypted { get; }
-
-        int Port { get; }
-
-        bool RequireBlocking { get; }
-
-        ChannelState State { get; }
-
-        string TypeId { get; }
         event EventHandler<ChannelCloseEventArgs> OnClose;
 
         event EventHandler<ChannelErrorEventArgs> OnError;
@@ -29,6 +14,46 @@ namespace SkunkLab.Channels
         event EventHandler<ChannelReceivedEventArgs> OnReceive;
 
         event EventHandler<ChannelStateEventArgs> OnStateChange;
+
+        string Id
+        {
+            get;
+        }
+
+        bool IsAuthenticated
+        {
+            get;
+        }
+
+        bool IsConnected
+        {
+            get;
+        }
+
+        bool IsEncrypted
+        {
+            get;
+        }
+
+        int Port
+        {
+            get;
+        }
+
+        bool RequireBlocking
+        {
+            get;
+        }
+
+        ChannelState State
+        {
+            get;
+        }
+
+        string TypeId
+        {
+            get;
+        }
 
         Task AddMessageAsync(byte[] message);
 

@@ -31,7 +31,10 @@ namespace SkunkLab.Protocols.Mqtt
             internal set => base.MessageType = value;
         }
 
-        public IDictionary<string, QualityOfServiceLevelType> Topics { get; }
+        public IDictionary<string, QualityOfServiceLevelType> Topics
+        {
+            get;
+        }
 
         public void AddTopic(string topic, QualityOfServiceLevelType qosLevel)
         {

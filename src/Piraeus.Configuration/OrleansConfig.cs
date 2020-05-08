@@ -21,21 +21,44 @@ namespace Piraeus.Configuration
     [JsonObject]
     public class OrleansConfig
     {
-        [JsonProperty("clusterId")] public string ClusterId { get; set; }
+        [JsonProperty("clusterId")]
+        public string ClusterId
+        {
+            get; set;
+        }
 
-        [JsonProperty("dataConnectionString")] public string DataConnectionString { get; set; }
+        [JsonProperty("dataConnectionString")]
+        public string DataConnectionString
+        {
+            get; set;
+        }
 
-        [JsonProperty("dockerized")] public bool Dockerized { get; set; }
+        [JsonProperty("dockerized")]
+        public bool Dockerized
+        {
+            get; set;
+        }
 
-        [JsonProperty("instrumentationKey")] public string InstrumentationKey { get; set; }
+        [JsonProperty("instrumentationKey")]
+        public string InstrumentationKey
+        {
+            get; set;
+        }
 
-        [JsonProperty("loggerTypes")] public string LoggerTypes { get; set; } = "Console;Debug";
+        [JsonProperty("loggerTypes")]
+        public string LoggerTypes { get; set; } = "Console;Debug";
 
-        [JsonProperty("logLevel")] public string LogLevel { get; set; } = "Warning";
+        [JsonProperty("logLevel")]
+        public string LogLevel { get; set; } = "Warning";
 
-        [JsonProperty("serviceId")] public string ServiceId { get; set; }
+        [JsonProperty("serviceId")]
+        public string ServiceId
+        {
+            get; set;
+        }
 
-        [JsonProperty("servicePointFactor")] public int ServicePointFactor { get; set; } = 24;
+        [JsonProperty("servicePointFactor")]
+        public int ServicePointFactor { get; set; } = 24;
 
         public LoggerType GetLoggerTypes()
         {

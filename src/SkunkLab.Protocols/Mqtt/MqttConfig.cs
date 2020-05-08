@@ -24,24 +24,48 @@ namespace SkunkLab.Protocols.Mqtt
             Indexes = indexes;
         }
 
-        public double AckRandomFactor { get; internal set; }
+        public double AckRandomFactor
+        {
+            get; internal set;
+        }
 
-        public TimeSpan AckTimeout { get; internal set; }
+        public TimeSpan AckTimeout
+        {
+            get; internal set;
+        }
 
-        public IAuthenticator Authenticator { get; set; }
+        public IAuthenticator Authenticator
+        {
+            get; set;
+        }
 
         public TimeSpan ExchangeLifetime =>
             TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + 2 * MaxLatency.TotalSeconds + AckTimeout.TotalSeconds);
 
-        public string IdentityClaimType { get; set; }
+        public string IdentityClaimType
+        {
+            get; set;
+        }
 
-        public List<KeyValuePair<string, string>> Indexes { get; set; }
+        public List<KeyValuePair<string, string>> Indexes
+        {
+            get; set;
+        }
 
-        public double KeepAliveSeconds { get; internal set; }
+        public double KeepAliveSeconds
+        {
+            get; internal set;
+        }
 
-        public TimeSpan MaxLatency { get; internal set; }
+        public TimeSpan MaxLatency
+        {
+            get; internal set;
+        }
 
-        public int MaxRetransmit { get; internal set; }
+        public int MaxRetransmit
+        {
+            get; internal set;
+        }
 
         public TimeSpan MaxTransmitSpan
         {

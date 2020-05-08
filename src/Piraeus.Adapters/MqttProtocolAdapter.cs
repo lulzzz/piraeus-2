@@ -73,13 +73,16 @@ namespace Piraeus.Adapters
             Channel.OnOpen += Channel_OnOpen;
         }
 
-        public override IChannel Channel { get; set; }
-
         public override event System.EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
 
         public override event System.EventHandler<ProtocolAdapterErrorEventArgs> OnError;
 
         public override event System.EventHandler<ChannelObserverEventArgs> OnObserve;
+
+        public override IChannel Channel
+        {
+            get; set;
+        }
 
         public override void Init()
         {
@@ -283,7 +286,8 @@ namespace Piraeus.Adapters
             try {
                 SubscribeMessage message = args.Message as SubscribeMessage;
 
-                SubscriptionMetadata metadata = new SubscriptionMetadata {
+                SubscriptionMetadata metadata = new SubscriptionMetadata
+                {
                     Identity = session.Identity,
                     Indexes = session.Indexes,
                     IsEphemeral = true

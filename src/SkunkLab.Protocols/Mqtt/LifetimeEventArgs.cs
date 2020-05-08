@@ -9,6 +9,9 @@ namespace SkunkLab.Protocols.Mqtt
             Ids = ids;
         }
 
-        public ushort[] Ids { get; internal set; }
+        public ushort[] Ids
+        {
+            get; internal set;
+        }
     }
 }

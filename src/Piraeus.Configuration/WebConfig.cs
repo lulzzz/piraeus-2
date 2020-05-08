@@ -4,9 +4,15 @@
     {
         #region Encrypted Channel
 
-        public virtual string HttpsCertficateFilename { get; set; }
+        public virtual string HttpsCertficateFilename
+        {
+            get; set;
+        }
 
-        public virtual string HttpsCertificatePassword { get; set; }
+        public virtual string HttpsCertificatePassword
+        {
+            get; set;
+        }
 
         #endregion Encrypted Channel
     }

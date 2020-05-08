@@ -40,9 +40,25 @@ namespace SkunkLab.Channels.Udp
             Id = "udp-" + Guid.NewGuid();
         }
 
-        public override string Id { get; internal set; }
+        public override event EventHandler<ChannelCloseEventArgs> OnClose;
 
-        public override bool IsAuthenticated { get; internal set; }
+        public override event EventHandler<ChannelErrorEventArgs> OnError;
+
+        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
+
+        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
+
+        public override string Id
+        {
+            get; internal set;
+        }
+
+        public override bool IsAuthenticated
+        {
+            get; internal set;
+        }
 
         public override bool IsConnected
         {
@@ -56,9 +72,15 @@ namespace SkunkLab.Channels.Udp
             }
         }
 
-        public override bool IsEncrypted { get; internal set; }
+        public override bool IsEncrypted
+        {
+            get; internal set;
+        }
 
-        public override int Port { get; internal set; }
+        public override int Port
+        {
+            get; internal set;
+        }
 
         public override bool RequireBlocking => false;
 
@@ -76,16 +98,6 @@ namespace SkunkLab.Channels.Udp
         }
 
         public override string TypeId => "UDP";
-
-        public override event EventHandler<ChannelCloseEventArgs> OnClose;
-
-        public override event EventHandler<ChannelErrorEventArgs> OnError;
-
-        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
-
-        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
-
-        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
 
         public override async Task AddMessageAsync(byte[] message)
         {
@@ -109,7 +121,8 @@ namespace SkunkLab.Channels.Udp
         public override async Task OpenAsync()
         {
             State = ChannelState.Connecting;
-            client = new UdpClient(Port) {
+            client = new UdpClient(Port)
+            {
                 DontFragment = true
             };
 

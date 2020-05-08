@@ -12,7 +12,7 @@
 RootModule = 'SkunkLabPiraeus.psm1'
 
 # Version number of this module.
-ModuleVersion = '3.1.6.6'
+ModuleVersion = '3.1.6.7'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()

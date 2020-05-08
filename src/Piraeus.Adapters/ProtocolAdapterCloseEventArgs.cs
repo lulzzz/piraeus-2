@@ -9,6 +9,9 @@ namespace Piraeus.Adapters
             ChannelId = channelId;
         }
 
-        public string ChannelId { get; set; }
+        public string ChannelId
+        {
+            get; set;
+        }
     }
 }

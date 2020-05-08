@@ -10,8 +10,14 @@ namespace SkunkLab.Channels
             Error = error;
         }
 
-        public string ChannelId { get; internal set; }
+        public string ChannelId
+        {
+            get; internal set;
+        }
 
-        public Exception Error { get; internal set; }
+        public Exception Error
+        {
+            get; internal set;
+        }
     }
 }

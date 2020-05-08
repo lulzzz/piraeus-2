@@ -17,13 +17,13 @@ namespace Capl.Authorization
 
         public abstract void ReadXml(XmlReader reader);
 
-        public abstract void WriteXml(XmlWriter writer);
-
         /// <summary>
         ///     Transforms a set of claims.
         /// </summary>
         /// <param name="claimSet">Set of claims to transform.</param>
         /// <returns>Transformed set of claims.</returns>
         public abstract IEnumerable<Claim> TransformClaims(IEnumerable<Claim> claims);
+
+        public abstract void WriteXml(XmlWriter writer);
     }
 }

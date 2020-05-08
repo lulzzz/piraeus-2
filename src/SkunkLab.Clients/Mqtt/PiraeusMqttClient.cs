@@ -46,13 +46,16 @@ namespace Piraeus.Clients.Mqtt
             queue = new Queue<byte[]>();
         }
 
-        public IChannel Channel { get; }
-
-        public bool IsConnected => Channel.IsConnected;
-
         public event MqttClientChannelErrorHandler OnChannelError;
 
         public event MqttClientChannelStateHandler OnChannelStateChange;
+
+        public IChannel Channel
+        {
+            get;
+        }
+
+        public bool IsConnected => Channel.IsConnected;
 
         public async Task CloseAsync()
         {
@@ -251,7 +254,7 @@ namespace Piraeus.Clients.Mqtt
         public async Task UnsubscribeAsync(string topic)
         {
             try {
-                UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new[] {topic});
+                UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), new[] { topic });
 
                 await Channel.SendAsync(msg.Encode());
                 dispatcher.Unregister(topic);
@@ -267,7 +270,8 @@ namespace Piraeus.Clients.Mqtt
                 UnsubscribeMessage msg = new UnsubscribeMessage(session.NewId(), topics);
 
                 await Channel.SendAsync(msg.Encode());
-                foreach (string topic in topics) dispatcher.Unregister(topic);
+                foreach (string topic in topics)
+                    dispatcher.Unregister(topic);
             }
             catch (Exception ex) {
                 OnChannelError?.Invoke(this, new ChannelErrorEventArgs(Channel.Id, ex));

@@ -19,21 +19,45 @@ namespace SkunkLab.Channels.Http
 
         public abstract event EventHandler<ChannelStateEventArgs> OnStateChange;
 
-        public abstract string Id { get; internal set; }
+        public abstract string Id
+        {
+            get; internal set;
+        }
 
-        public abstract bool IsAuthenticated { get; internal set; }
+        public abstract bool IsAuthenticated
+        {
+            get; internal set;
+        }
 
-        public abstract bool IsConnected { get; }
+        public abstract bool IsConnected
+        {
+            get;
+        }
 
-        public abstract bool IsEncrypted { get; internal set; }
+        public abstract bool IsEncrypted
+        {
+            get; internal set;
+        }
 
-        public abstract int Port { get; internal set; }
+        public abstract int Port
+        {
+            get; internal set;
+        }
 
-        public abstract bool RequireBlocking { get; }
+        public abstract bool RequireBlocking
+        {
+            get;
+        }
 
-        public abstract ChannelState State { get; internal set; }
+        public abstract ChannelState State
+        {
+            get; internal set;
+        }
 
-        public abstract string TypeId { get; }
+        public abstract string TypeId
+        {
+            get;
+        }
 
         public abstract Task AddMessageAsync(byte[] message);
 

@@ -9,6 +9,9 @@ namespace SkunkLab.Protocols.Coap
             Message = message;
         }
 
-        public CoapMessage Message { get; set; }
+        public CoapMessage Message
+        {
+            get; set;
+        }
     }
 }

@@ -62,7 +62,8 @@ namespace Piraeus.TcpGateway
 
             int[] ports = config.GetPorts();
 
-            foreach (var port in ports) sources.Add(port, new CancellationTokenSource());
+            foreach (var port in ports)
+                sources.Add(port, new CancellationTokenSource());
 
 #if DEBUG
             hostname = "localhost";
@@ -94,7 +95,8 @@ namespace Piraeus.TcpGateway
         public Task StopAsync(CancellationToken cancellationToken)
         {
             TcpServerListener[] servers = listeners.Values.ToArray();
-            foreach (var server in servers) server.StopAsync().Ignore();
+            foreach (var server in servers)
+                server.StopAsync().Ignore();
 
             return Task.CompletedTask;
         }

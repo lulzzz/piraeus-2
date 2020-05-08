@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
@@ -114,9 +113,7 @@ namespace Piraeus.Grains.Notifications
                     string cacheKey = GetKey(msg);
 
                     if (cacheKey == null) {
-                        Trace.TraceWarning("Redis sink has no cache key for subscription '{0}'.",
-                            metadata.SubscriptionUriString);
-                        Trace.TraceError("No cache key found.");
+                        await logger?.LogWarningAsync($"Redis sink has no cache key for '{metadata.SubscriptionUriString}'");
                     }
 
                     payload = GetPayload(msg);
@@ -145,7 +142,7 @@ namespace Piraeus.Grains.Notifications
                 }
             }
             catch (Exception ex) {
-                Trace.TraceWarning("Initial Redis write error {0}", ex.Message);
+                await logger.LogErrorAsync(ex, $"Redis cache sink '{metadata.SubscriptionUriString}'");
                 record = new MessageAuditRecord(msg.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
                     $"Redis({dbNumber})", string.Format("Redis({0})", dbNumber), payload.Length,
@@ -192,7 +189,7 @@ namespace Piraeus.Grains.Notifications
                     MessageDirectionType.Out, true, DateTime.UtcNow);
             }
             catch (Exception ex) {
-                Trace.TraceError(ex.Message);
+                await logger.LogErrorAsync(ex, $"Redis cache sink '{metadata.SubscriptionUriString}'");
                 record = new MessageAuditRecord(message.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
                     $"Redis({db.Database})", $"Redis({db.Database})", payload.Length,

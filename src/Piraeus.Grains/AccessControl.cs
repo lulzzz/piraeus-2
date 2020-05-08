@@ -34,9 +34,14 @@ namespace Piraeus.Grains
             return await Task.FromResult(policy);
         }
 
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
+        }
+
         public async Task UpsertPolicyAsync(AuthorizationPolicy policy)
         {
-            XmlWriterSettings settings = new XmlWriterSettings {OmitXmlDeclaration = true};
+            XmlWriterSettings settings = new XmlWriterSettings { OmitXmlDeclaration = true };
             StringBuilder builder = new StringBuilder();
             using (XmlWriter writer = XmlWriter.Create(builder, settings)) {
                 policy.WriteXml(writer);
@@ -45,11 +50,6 @@ namespace Piraeus.Grains
             }
 
             State.Policy = Encoding.UTF8.GetBytes(builder.ToString());
-            await WriteStateAsync();
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
             await WriteStateAsync();
         }
     }

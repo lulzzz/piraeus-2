@@ -43,15 +43,30 @@ namespace Capl.Authorization
             Expression = evaluationExpression;
         }
 
-        public override Term Expression { get; set; }
+        public override Term Expression
+        {
+            get; set;
+        }
 
-        public override Match MatchExpression { get; set; }
+        public override Match MatchExpression
+        {
+            get; set;
+        }
 
-        public override LiteralClaim TargetClaim { get; set; }
+        public override LiteralClaim TargetClaim
+        {
+            get; set;
+        }
 
-        public override Uri TransformID { get; set; }
+        public override Uri TransformID
+        {
+            get; set;
+        }
 
-        public override Uri Type { get; set; }
+        public override Uri Type
+        {
+            get; set;
+        }
 
         public static ClaimTransform Load(XmlReader reader)
         {
@@ -125,7 +140,8 @@ namespace Capl.Authorization
                 }
 
                 if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim)) {
-                    TargetClaim = new LiteralClaim {
+                    TargetClaim = new LiteralClaim
+                    {
                         ClaimType = reader.GetRequiredAttribute(AuthorizationConstants.Attributes.ClaimType)
                     };
 

@@ -60,6 +60,14 @@ namespace Orleans.Clustering.Redis
             return list.GetEnumerator();
         }
 
+        public bool HasEntry(RedisMembershipEntry entry)
+        {
+            var items = list.Where(x =>
+                x.DeploymentId == entry.DeploymentId &&
+                x.Address.ToParsableString() == entry.Address.ToParsableString());
+            return items.Count() > 0;
+        }
+
         public int IndexOf(RedisMembershipEntry item)
         {
             return list.IndexOf(item);
@@ -78,14 +86,6 @@ namespace Orleans.Clustering.Redis
         public void RemoveAt(int index)
         {
             list.RemoveAt(index);
-        }
-
-        public bool HasEntry(RedisMembershipEntry entry)
-        {
-            var items = list.Where(x =>
-                x.DeploymentId == entry.DeploymentId &&
-                x.Address.ToParsableString() == entry.Address.ToParsableString());
-            return items.Count() > 0;
         }
 
         public MembershipTableData ToMembershipTableData()

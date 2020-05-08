@@ -37,12 +37,6 @@ namespace SkunkLab.Protocols.Coap
             observeContainer = new Dictionary<string, Action<CodeType, string, byte[]>>();
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         public event EventHandler<CoapMessageEventArgs> OnRetry;
 
         public void AddMessage(CoapMessage message)
@@ -82,6 +76,12 @@ namespace SkunkLab.Protocols.Coap
             }
 
             timer.Enabled = container.Count() > 0;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public ushort NewId(byte[] token, bool? observe = null, Action<CodeType, string, byte[]> action = null)

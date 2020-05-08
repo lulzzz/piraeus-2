@@ -49,8 +49,7 @@ namespace Piraeus.Adapters
             this.config = config;
 
             CoapConfigOptions options = config.ObserveOption && config.NoResponseOption
-                ?
-                CoapConfigOptions.Observe | CoapConfigOptions.NoResponse
+                ? CoapConfigOptions.Observe | CoapConfigOptions.NoResponse
                 : config.ObserveOption
                     ? CoapConfigOptions.Observe
                     : config.NoResponseOption
@@ -59,7 +58,8 @@ namespace Piraeus.Adapters
             CoapConfig coapConfig = new CoapConfig(authenticator, config.CoapAuthority, options, config.AutoRetry,
                 config.KeepAliveSeconds, config.AckTimeoutSeconds, config.AckRandomFactor,
                 config.MaxRetransmit, config.NStart, config.DefaultLeisure, config.ProbingRate,
-                config.MaxLatencySeconds) {
+                config.MaxLatencySeconds)
+            {
                 IdentityClaimType = config.ClientIdentityNameClaimType,
                 Indexes = config.GetClientIndexes()
             };
@@ -119,7 +119,10 @@ namespace Piraeus.Adapters
 
         public override event System.EventHandler<ChannelObserverEventArgs> OnObserve;
 
-        public override IChannel Channel { get; set; }
+        public override IChannel Channel
+        {
+            get; set;
+        }
 
         #endregion public members
 

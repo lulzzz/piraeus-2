@@ -9,6 +9,9 @@ namespace SkunkLab.Protocols.Mqtt
             Message = message;
         }
 
-        public MqttMessage Message { get; internal set; }
+        public MqttMessage Message
+        {
+            get; internal set;
+        }
     }
 }

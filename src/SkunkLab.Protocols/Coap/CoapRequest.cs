@@ -39,9 +39,15 @@ namespace SkunkLab.Protocols.Coap
             Payload = payload;
         }
 
-        public MethodType Method { get; set; }
+        public MethodType Method
+        {
+            get; set;
+        }
 
-        public RequestMessageType RequestType { get; set; }
+        public RequestMessageType RequestType
+        {
+            get; set;
+        }
 
         public override void Decode(byte[] message)
         {
@@ -117,11 +123,11 @@ namespace SkunkLab.Protocols.Coap
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
                 if (options != null) {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
-                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length + options.Length, 1);
+                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length + options.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + options.Length + 1, Payload.Length);
                 }
                 else {
-                    Buffer.BlockCopy(new byte[] {0xFF}, 0, buffer, header.Length, 1);
+                    Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + 1, Payload.Length);
                 }
             }

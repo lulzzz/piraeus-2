@@ -64,20 +64,44 @@ namespace Piraeus.Core.Messaging
             CacheKey = cacheKey;
         }
 
-        public bool Audit { get; set; }
+        public bool Audit
+        {
+            get; set;
+        }
 
-        public string CacheKey { get; set; }
+        public string CacheKey
+        {
+            get; set;
+        }
 
-        public string ContentType { get; set; }
+        public string ContentType
+        {
+            get; set;
+        }
 
-        public byte[] Message { get; set; }
+        public byte[] Message
+        {
+            get; set;
+        }
 
-        public string MessageId { get; set; }
+        public string MessageId
+        {
+            get; set;
+        }
 
-        public ProtocolType Protocol { get; set; }
+        public ProtocolType Protocol
+        {
+            get; set;
+        }
 
-        public string ResourceUri { get; set; }
+        public string ResourceUri
+        {
+            get; set;
+        }
 
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp
+        {
+            get; set;
+        }
     }
 }

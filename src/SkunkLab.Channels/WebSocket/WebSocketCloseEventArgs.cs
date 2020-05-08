@@ -10,6 +10,9 @@ namespace SkunkLab.Channels.WebSocket
             Status = status;
         }
 
-        public WebSocketCloseStatus Status { get; internal set; }
+        public WebSocketCloseStatus Status
+        {
+            get; internal set;
+        }
     }
 }

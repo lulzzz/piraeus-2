@@ -45,6 +45,17 @@ namespace Orleans.Storage.Redis
             }
         }
 
+        public void Participate(ISiloLifecycle lifecycle)
+        {
+            try {
+                lifecycle.Subscribe(OptionFormattingUtilities.Name<RedisGrainStorage>(name), options.InitStage, Init);
+                logger.LogInformation($"Lifecycle started for {name}");
+            }
+            catch (Exception ex) {
+                logger.LogError(ex, "Redis grain storage failed participate in lifecycle.");
+            }
+        }
+
         public async Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             string key = grainReference.ToKeyString();
@@ -91,17 +102,6 @@ namespace Orleans.Storage.Redis
             }
         }
 
-        public void Participate(ISiloLifecycle lifecycle)
-        {
-            try {
-                lifecycle.Subscribe(OptionFormattingUtilities.Name<RedisGrainStorage>(name), options.InitStage, Init);
-                logger.LogInformation($"Lifecycle started for {name}");
-            }
-            catch (Exception ex) {
-                logger.LogError(ex, "Redis grain storage failed participate in lifecycle.");
-            }
-        }
-
         private IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
@@ -134,7 +134,8 @@ namespace Orleans.Storage.Redis
                 configOptions = ConfigurationOptions.Parse(options.ConnectionString);
             }
             else {
-                configOptions = new ConfigurationOptions {
+                configOptions = new ConfigurationOptions
+                {
                     ConnectRetry = options.ConnectRetry ?? 4,
                     DefaultDatabase = options.DatabaseNo ?? 1,
                     SyncTimeout = options.SyncTimeout ?? 10000,

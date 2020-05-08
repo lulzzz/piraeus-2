@@ -60,7 +60,8 @@ namespace Piraeus.TcpGateway
         {
             serverIP = address;
             serverPort = port;
-            listener = new TcpListener(address, port) {
+            listener = new TcpListener(address, port)
+            {
                 ExclusiveAddressUse = false
             };
             this.token = token;

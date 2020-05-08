@@ -23,12 +23,6 @@ namespace SkunkLab.Protocols.Coap
             timer.Elapsed += Timer_Elapsed;
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         public void CacheId(ushort id)
         {
             if (!container.ContainsKey(id)) {
@@ -42,6 +36,12 @@ namespace SkunkLab.Protocols.Coap
         {
             container.Clear();
             timer.Enabled = false;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public bool IsDup(ushort id)

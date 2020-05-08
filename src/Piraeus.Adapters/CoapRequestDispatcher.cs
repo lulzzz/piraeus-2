@@ -124,7 +124,8 @@ namespace Piraeus.Adapters
                 coapObserved.Remove(uri.Resource);
             }
             else {
-                SubscriptionMetadata metadata = new SubscriptionMetadata {
+                SubscriptionMetadata metadata = new SubscriptionMetadata
+                {
                     IsEphemeral = true,
                     Identity = session.Identity,
                     Indexes = session.Indexes
@@ -208,7 +209,8 @@ namespace Piraeus.Adapters
                 return new CoapResponse(message.MessageId, rmt, ResponseCodeType.NotAcceptable, message.Token);
             }
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = true,
                 Identity = session.Identity,
                 Indexes = session.Indexes

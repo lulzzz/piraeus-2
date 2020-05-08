@@ -12,8 +12,14 @@ namespace Piraeus.Grains
             Timestamp = DateTime.UtcNow;
         }
 
-        public EventMessage Message { get; internal set; }
+        public EventMessage Message
+        {
+            get; internal set;
+        }
 
-        public DateTime? Timestamp { get; internal set; }
+        public DateTime? Timestamp
+        {
+            get; internal set;
+        }
     }
 }

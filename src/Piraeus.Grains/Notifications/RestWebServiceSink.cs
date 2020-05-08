@@ -78,8 +78,7 @@ namespace Piraeus.Grains.Notifications
             try {
                 payload = GetPayload(message);
                 if (payload == null) {
-                    Trace.TraceWarning(
-                        "Subscription {0} could not write to web service sink because payload was either null or unknown protocol type.");
+                    await logger.LogWarningAsync($"Rest request '{metadata.SubscriptionUriString}' null payload.");
                     return;
                 }
 
@@ -105,12 +104,12 @@ namespace Piraeus.Grains.Notifications
                     using HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
                     if (response.StatusCode == HttpStatusCode.Accepted || response.StatusCode == HttpStatusCode.OK ||
                         response.StatusCode == HttpStatusCode.NoContent) {
-                        Trace.TraceInformation("Rest request is success.");
+                        await logger.LogInformationAsync($"Rest request success {response.StatusCode}");
                         record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP",
                             payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                     else {
-                        Trace.TraceInformation("Rest request returned an expected status code.");
+                        await logger.LogWarningAsync($"Rest request warning {response.StatusCode}");
                         record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP",
                             payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow,
                             string.Format("Rest request returned an expected status code {0}", response.StatusCode));
@@ -118,13 +117,14 @@ namespace Piraeus.Grains.Notifications
                 }
                 catch (WebException we) {
                     string faultMessage =
-                        $"subscription '{metadata.SubscriptionUriString}' with status code '{we.Status.ToString()}' and error message '{we.Message}'";
-                    Trace.TraceError(faultMessage);
+                        $"subscription '{metadata.SubscriptionUriString}' with status code '{we.Status}' and error message '{we.Message}'";
+                    await logger.LogErrorAsync(we, $"Rest request success.");
                     record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length,
                         MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
                 }
             }
             catch (Exception ex) {
+                await logger.LogErrorAsync(ex, $"Rest request success.");
                 record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length,
                     MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }

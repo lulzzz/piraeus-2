@@ -23,17 +23,35 @@ namespace Piraeus.Module
             SecurityKey = securityKey;
         }
 
-        public string BaseUrl { get; internal set; }
+        public string BaseUrl
+        {
+            get; internal set;
+        }
 
-        public string ContentType { get; internal set; }
+        public string ContentType
+        {
+            get; internal set;
+        }
 
-        public bool IsZeroContentLength { get; internal set; }
+        public bool IsZeroContentLength
+        {
+            get; internal set;
+        }
 
-        public string Method { get; internal set; }
+        public string Method
+        {
+            get; internal set;
+        }
 
-        public string SecurityKey { get; internal set; }
+        public string SecurityKey
+        {
+            get; internal set;
+        }
 
-        public string SecurityToken { get; internal set; }
+        public string SecurityToken
+        {
+            get; internal set;
+        }
 
         public HttpWebRequest BuildRequest()
         {

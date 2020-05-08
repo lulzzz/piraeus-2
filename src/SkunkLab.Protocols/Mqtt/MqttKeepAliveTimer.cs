@@ -14,12 +14,6 @@ namespace SkunkLab.Protocols.Mqtt
             period = periodMilliseconds;
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         public event EventHandler OnExpired;
 
         public void Callback(object state)
@@ -27,6 +21,12 @@ namespace SkunkLab.Protocols.Mqtt
             if (OnExpired != null) {
                 OnExpired(this, new EventArgs());
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void Reset()

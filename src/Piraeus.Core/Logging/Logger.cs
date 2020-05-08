@@ -32,50 +32,43 @@ namespace Piraeus.Core.Logging
         public async Task LogCriticalAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogCritical(msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogCritical(msg, args));
         }
 
         public async Task LogDebugAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogDebug(msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogDebug(msg, args));
         }
 
         public async Task LogErrorAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogError(msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogError(msg, args));
         }
 
         public async Task LogErrorAsync(Exception error, string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogError(error, msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogError(error, msg, args));
         }
 
         public async Task LogInformationAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogInformation(msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogInformation(msg, args));
         }
 
         public async Task LogTraceAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogTrace(msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogTrace(msg, args));
         }
 
         public async Task LogWarningAsync(string message, params object[] args)
         {
             string msg = AppendTimestamp(message);
-            Action action = () => logger.LogWarning(msg, args);
-            await Task.Run(action);
+            await Task.Run(() => logger.LogWarning(msg, args));
         }
 
         private string AppendTimestamp(string message)

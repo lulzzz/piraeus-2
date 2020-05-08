@@ -4,6 +4,5 @@
     "serviceId": "myserviceid",
     "loggerTypes": "Console",
     "logLevel": "Warning",
-    "dataConnectionString":
-        "DefaultEndpointsProtocol=https;AccountName=foolishfish;AccountKey=/9pMb963sqzCpECSdHsQYZg6MUuJ+ZbOKBLdb9RAGyQ5hS5sAYxrTzC89I9CaA3J1tPdKlkgbxb0hHtmagyVlA==;EndpointSuffix=core.windows.net"
+    "dataConnectionString": ""
 }

@@ -15,6 +15,9 @@ namespace Piraeus.Grains
             Metrics = metrics;
         }
 
-        public CommunicationMetrics Metrics { get; internal set; }
+        public CommunicationMetrics Metrics
+        {
+            get; internal set;
+        }
     }
 }

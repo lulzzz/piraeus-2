@@ -10,8 +10,14 @@ namespace SkunkLab.Channels
             MessageId = messageId;
         }
 
-        public string ChannelId { get; internal set; }
+        public string ChannelId
+        {
+            get; internal set;
+        }
 
-        public string MessageId { get; internal set; }
+        public string MessageId
+        {
+            get; internal set;
+        }
     }
 }

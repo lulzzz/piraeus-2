@@ -25,8 +25,7 @@ namespace Capl.Authorization.Matching
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
-            IEnumerable<Claim> claimSet = ci.FindAll(delegate(Claim claim)
-            {
+            IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
                 if (claim.Type == claimType) {
                     string claimValue = HttpUtility.HtmlDecode(claim.Value);
                     using (Stream stream = new MemoryStream(Encoding.UTF32.GetBytes(claimValue))) {

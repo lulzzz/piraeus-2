@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Piraeus.Core.Messaging;
 using SkunkLab.Protocols.Coap;
 using SkunkLab.Protocols.Coap.Handlers;
@@ -8,9 +7,12 @@ using SkunkLab.Protocols.Mqtt.Handlers;
 
 namespace Piraeus.Adapters
 {
-    public class ProtocolTransition
+    public abstract class ProtocolTransition
     {
-        public static bool IsEncryptedChannel { get; set; }
+        public static bool IsEncryptedChannel
+        {
+            get; set;
+        }
 
         public static byte[] ConvertToCoap(CoapSession session, EventMessage message, byte[] observableToken = null)
         {
@@ -94,14 +96,8 @@ namespace Piraeus.Adapters
                 CoapUri curi = new CoapUri(msg.ResourceUri.ToString());
                 QualityOfServiceLevelType qos = QualityOfServiceLevelType.AtLeastOnce;
 
-                try {
-                    QualityOfServiceLevelType? qosType = session.GetQoS(curi.Resource);
-                    qos = qosType ?? QualityOfServiceLevelType.AtLeastOnce;
-                }
-                catch (Exception ex) {
-                    Trace.TraceWarning("{0} - Fault in ProtocolTransition.ConvertToMqtt", DateTime.UtcNow.ToString());
-                    Trace.TraceError("{0} - {1} - {2}", DateTime.UtcNow.ToString(""), "ProtocolTransition", ex.Message);
-                }
+                QualityOfServiceLevelType? qosType = session.GetQoS(curi.Resource);
+                qos = qosType ?? QualityOfServiceLevelType.AtLeastOnce;
 
                 PublishMessage pub = new PublishMessage(false, qos, false, session.NewId(), curi.Resource, msg.Payload);
                 return pub.Encode();

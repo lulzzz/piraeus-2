@@ -10,6 +10,9 @@ namespace Piraeus.WebApi.Security
             Policy = policy;
         }
 
-        public AuthorizationPolicy Policy { get; }
+        public AuthorizationPolicy Policy
+        {
+            get;
+        }
     }
 }

@@ -32,7 +32,8 @@ namespace Piraeus.Module
         {
             string uriString = string.Format("eventgrid://{0}?clients={1}", Host, NumClients <= 0 ? 1 : NumClients);
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = TopicKey,

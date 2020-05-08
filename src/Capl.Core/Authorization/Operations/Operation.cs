@@ -10,7 +10,10 @@ namespace Capl.Authorization.Operations
         /// <summary>
         ///     Gets the URI that identifies the operation.
         /// </summary>
-        public abstract Uri Uri { get; }
+        public abstract Uri Uri
+        {
+            get;
+        }
 
         /// <summary>
         ///     Creates an AuthorizationOperation used to compare values.

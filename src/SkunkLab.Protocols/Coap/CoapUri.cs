@@ -37,21 +37,45 @@ namespace SkunkLab.Protocols.Coap
             Indexes = BuildIndexes(GetEnumerableParameters(QueryStringConstants.INDEX));
         }
 
-        public string CacheKey { get; internal set; }
+        public string CacheKey
+        {
+            get; internal set;
+        }
 
-        public string ContentType { get; internal set; }
+        public string ContentType
+        {
+            get; internal set;
+        }
 
-        public IEnumerable<KeyValuePair<string, string>> Indexes { get; internal set; }
+        public IEnumerable<KeyValuePair<string, string>> Indexes
+        {
+            get; internal set;
+        }
 
-        public string MessageId { get; internal set; }
+        public string MessageId
+        {
+            get; internal set;
+        }
 
-        public string Resource { get; internal set; }
+        public string Resource
+        {
+            get; internal set;
+        }
 
-        public string SecurityToken { get; internal set; }
+        public string SecurityToken
+        {
+            get; internal set;
+        }
 
-        public IEnumerable<string> Subscriptions { get; internal set; }
+        public IEnumerable<string> Subscriptions
+        {
+            get; internal set;
+        }
 
-        public string TokenType { get; internal set; }
+        public string TokenType
+        {
+            get; internal set;
+        }
 
         public static string Create(string hostname, string resource, bool encryptedChannel)
         {
@@ -64,7 +88,7 @@ namespace SkunkLab.Protocols.Coap
         {
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
             foreach (string index in indexes) {
-                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = index.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }

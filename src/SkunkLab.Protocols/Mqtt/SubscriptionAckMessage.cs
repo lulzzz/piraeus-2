@@ -25,7 +25,10 @@ namespace SkunkLab.Protocols.Mqtt
             internal set => base.MessageType = value;
         }
 
-        public QualityOfServiceLevelCollection QualityOfServiceLevels { get; }
+        public QualityOfServiceLevelCollection QualityOfServiceLevels
+        {
+            get;
+        }
 
         public override byte[] Encode()
         {

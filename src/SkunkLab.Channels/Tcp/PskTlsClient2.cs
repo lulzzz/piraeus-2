@@ -15,7 +15,10 @@ namespace SkunkLab.Channels.Tcp
         {
         }
 
-        public bool IsHandshakeComplete { get; set; }
+        public bool IsHandshakeComplete
+        {
+            get; set;
+        }
 
         public override ProtocolVersion MinimumVersion => ProtocolVersion.TLSv12;
 

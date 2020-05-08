@@ -20,7 +20,10 @@ namespace Piraeus.Grains
     {
         private readonly IClusterClient client;
 
-        public static GraphManager Instance { get; private set; }
+        public static GraphManager Instance
+        {
+            get; private set;
+        }
 
         public static bool IsInitialized => Instance != null && Instance.client != null;
 

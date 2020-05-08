@@ -13,7 +13,10 @@ namespace SkunkLab.Storage
             this.defaultBufferSize = defaultBufferSize;
         }
 
-        public BufferManager Manager { get; internal set; }
+        public BufferManager Manager
+        {
+            get; internal set;
+        }
 
         public int GetDefaultBufferSize()
         {

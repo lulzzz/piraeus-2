@@ -18,7 +18,7 @@ namespace Capl.Authorization.Matching
         public override IList<Claim> MatchClaims(IEnumerable<Claim> claims, string claimType, string value)
         {
             Claim claim = new Claim(AuthorizationConstants.MatchUris.Any, "Any");
-            return new List<Claim>(new[] {claim});
+            return new List<Claim>(new[] { claim });
         }
     }
 }

@@ -9,6 +9,9 @@ namespace SkunkLab.Channels.WebSocket
             Message = message;
         }
 
-        public byte[] Message { get; internal set; }
+        public byte[] Message
+        {
+            get; internal set;
+        }
     }
 }

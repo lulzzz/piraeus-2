@@ -19,10 +19,19 @@ namespace SkunkLab.Channels
             Properties = properties;
         }
 
-        public string ChannelId { get; internal set; }
+        public string ChannelId
+        {
+            get; internal set;
+        }
 
-        public byte[] Message { get; internal set; }
+        public byte[] Message
+        {
+            get; internal set;
+        }
 
-        public IEnumerable<KeyValuePair<string, string>> Properties { get; internal set; }
+        public IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get; internal set;
+        }
     }
 }

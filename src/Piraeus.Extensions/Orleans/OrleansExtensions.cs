@@ -3,10 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Orleans.Configuration;
 using Orleans.Hosting;
 using Piraeus.Configuration;
-using Piraeus.Extensions.Configuration;
 using Piraeus.GrainInterfaces;
 
 namespace Piraeus.Extensions.Orleans
@@ -49,12 +47,13 @@ namespace Piraeus.Extensions.Orleans
             {
                 var builder = new ClientBuilder();
                 builder.AddOrleansClusterClient(config);
-                IClusterClient client = builder.Build();
-                client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
+
                 if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
 
+                IClusterClient client = builder.Build();
+                client.Connect(CreateRetryFilter()).GetAwaiter().GetResult();
                 return client;
             });
         }

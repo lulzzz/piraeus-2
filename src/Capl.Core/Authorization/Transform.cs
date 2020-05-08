@@ -19,12 +19,18 @@ namespace Capl.Authorization
         ///     processed if the
         ///     evaluation expression evaluates TRUE.
         /// </remarks>
-        public abstract Term Expression { get; set; }
+        public abstract Term Expression
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     A required match expression that matches the input set of claims to determine which claims should be processed.
         /// </summary>
-        public abstract Match MatchExpression { get; set; }
+        public abstract Match MatchExpression
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     An optional target claim that applies to any transform that adds or replaces claims for the transform.
@@ -34,17 +40,26 @@ namespace Capl.Authorization
         ///     The target claims is used for input into the transform, which is used by the normative Add and Replace transforms
         ///     to Add the target claim or replace an existing claim with the target claim.
         /// </remarks>
-        public abstract LiteralClaim TargetClaim { get; set; }
+        public abstract LiteralClaim TargetClaim
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     An optional URI that can identify the transform.
         /// </summary>
-        public abstract Uri TransformID { get; set; }
+        public abstract Uri TransformID
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     A required type the identifies the transform.
         /// </summary>
-        public abstract Uri Type { get; set; }
+        public abstract Uri Type
+        {
+            get; set;
+        }
 
         public abstract void ReadXml(XmlReader reader);
 

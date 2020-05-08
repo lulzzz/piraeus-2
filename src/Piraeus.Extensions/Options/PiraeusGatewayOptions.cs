@@ -31,21 +31,45 @@ namespace Piraeus.Extensions.Options
             SetStorageType();
         }
 
-        public string AppInsightKey { get; set; }
+        public string AppInsightKey
+        {
+            get; set;
+        }
 
-        public string ClusterId { get; set; }
+        public string ClusterId
+        {
+            get; set;
+        }
 
-        public string DataConnectionString { get; set; }
+        public string DataConnectionString
+        {
+            get; set;
+        }
 
-        public bool Dockerized { get; set; }
+        public bool Dockerized
+        {
+            get; set;
+        }
 
-        public LoggerType LoggerTypes { get; set; }
+        public LoggerType LoggerTypes
+        {
+            get; set;
+        }
 
-        public LogLevel LoggingLevel { get; set; }
+        public LogLevel LoggingLevel
+        {
+            get; set;
+        }
 
-        public string ServiceId { get; set; }
+        public string ServiceId
+        {
+            get; set;
+        }
 
-        public OrleansStorageType StorageType { get; set; }
+        public OrleansStorageType StorageType
+        {
+            get; set;
+        }
 
         private OrleansStorageType SetStorageType()
         {

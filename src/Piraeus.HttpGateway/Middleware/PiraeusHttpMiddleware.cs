@@ -34,6 +34,8 @@ namespace Piraeus.HttpGateway.Middleware
             graphManager = new GraphManager(client);
         }
 
+        private delegate void HttpResponseObserverHandler(object sender, ChannelObserverEventArgs args);
+
         private event HttpResponseObserverHandler OnMessage;
 
         public async Task Invoke(HttpContext context)
@@ -82,7 +84,5 @@ namespace Piraeus.HttpGateway.Middleware
                 are.Set();
             };
         }
-
-        private delegate void HttpResponseObserverHandler(object sender, ChannelObserverEventArgs args);
     }
 }

@@ -58,22 +58,34 @@ namespace Capl.Authorization
             }
         }
 
-        public bool Delegation { get; set; }
+        public bool Delegation
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets and sets an evaluation expression.
         /// </summary>
-        public override Term Expression { get; set; }
+        public override Term Expression
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets an operation URI that identifies the policy.
         /// </summary>
-        public Uri PolicyId { get; set; }
+        public Uri PolicyId
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets transforms for the authorization policy.
         /// </summary>
-        public override TransformCollection Transforms { get; internal set; }
+        public override TransformCollection Transforms
+        {
+            get; internal set;
+        }
 
         /// <summary>
         ///     Loads an authorization policy.

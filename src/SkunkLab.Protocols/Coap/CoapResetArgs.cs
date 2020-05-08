@@ -12,10 +12,19 @@ namespace SkunkLab.Protocols.Coap
             Code = code;
         }
 
-        public CodeType Code { get; internal set; }
+        public CodeType Code
+        {
+            get; internal set;
+        }
 
-        public string InternalMessageId { get; internal set; }
+        public string InternalMessageId
+        {
+            get; internal set;
+        }
 
-        public ushort MessageId { get; internal set; }
+        public ushort MessageId
+        {
+            get; internal set;
+        }
     }
 }

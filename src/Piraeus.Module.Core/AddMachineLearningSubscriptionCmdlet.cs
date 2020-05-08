@@ -33,7 +33,8 @@ namespace Piraeus.Module
             string url =
                 $"{ServiceUrl}/api/resource/subscribe?resourceuristring={ResourceUriString}&r={OutputResourceUriString}";
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = AmlServiceUrl,
                 SymmetricKey = AmlSecurityKey,

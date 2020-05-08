@@ -13,15 +13,6 @@ namespace Capl.Issuance
     [KnownType(typeof(IssuePolicy))]
     public abstract class IssuePolicyBase : IXmlSerializable
     {
-        public virtual XmlSchema GetSchema()
-        {
-            return null;
-        }
-
-        public abstract void ReadXml(XmlReader reader);
-
-        public abstract void WriteXml(XmlWriter writer);
-
         public static XmlQualifiedName GetSchema(XmlSchemaSet schemaSet)
         {
             _ = schemaSet ?? throw new ArgumentNullException(nameof(schemaSet));
@@ -38,5 +29,14 @@ namespace Capl.Issuance
 
             return new XmlQualifiedName("IssuePolicyType", IssueConstants.Namespaces.Xmlns);
         }
+
+        public virtual XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public abstract void ReadXml(XmlReader reader);
+
+        public abstract void WriteXml(XmlWriter writer);
     }
 }

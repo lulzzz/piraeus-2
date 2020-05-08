@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -47,28 +46,53 @@ namespace Piraeus.Core.Utilities
             for (int i = 0; i < nvc.Count; i++) {
                 string key = nvc.Keys[i];
                 string[] values = nvc.GetValues(i);
-                foreach (string val in values) list.Add(new KeyValuePair<string, string>(key, val));
+                foreach (string val in values)
+                    list.Add(new KeyValuePair<string, string>(key, val));
             }
 
             items = list.ToArray();
             Read();
         }
 
-        public string CacheKey { get; internal set; }
+        public string CacheKey
+        {
+            get; internal set;
+        }
 
-        public string ContentType { get; internal set; }
+        public string ContentType
+        {
+            get; internal set;
+        }
 
-        public IEnumerable<KeyValuePair<string, string>> Indexes { get; internal set; }
+        public IEnumerable<KeyValuePair<string, string>> Indexes
+        {
+            get; internal set;
+        }
 
-        public string MessageId { get; internal set; }
+        public string MessageId
+        {
+            get; internal set;
+        }
 
-        public string Resource { get; internal set; }
+        public string Resource
+        {
+            get; internal set;
+        }
 
-        public string SecurityToken { get; internal set; }
+        public string SecurityToken
+        {
+            get; internal set;
+        }
 
-        public IEnumerable<string> Subscriptions { get; internal set; }
+        public IEnumerable<string> Subscriptions
+        {
+            get; internal set;
+        }
 
-        public string TokenType { get; internal set; }
+        public string TokenType
+        {
+            get; internal set;
+        }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal KeyValuePair<string, string>[] BuildIndexes(IEnumerable<string> indexes)
@@ -79,7 +103,7 @@ namespace Piraeus.Core.Utilities
 
             List<KeyValuePair<string, string>> indexList = new List<KeyValuePair<string, string>>();
             foreach (string index in indexes) {
-                string[] parts = index.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = index.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length != 2) {
                     throw new IndexOutOfRangeException("indexes");
                 }
@@ -97,7 +121,8 @@ namespace Piraeus.Core.Utilities
                 return;
             }
 
-            foreach (string uriString in uriStrings) CheckUri(uriString);
+            foreach (string uriString in uriStrings)
+                CheckUri(uriString);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -114,24 +139,18 @@ namespace Piraeus.Core.Utilities
 
         private IEnumerable<string> GetEnumerableHeaders(string key, HttpRequestMessage request)
         {
-            try {
-                if (request.Headers.Contains(key)) {
-                    return request.Headers.GetValues(key);
-                }
+            if (request.Headers.Contains(key)) {
+                return request.Headers.GetValues(key);
+            }
 
-                return null;
-            }
-            catch (Exception ex) {
-                Trace.TraceError(ex.Message);
-                throw ex;
-            }
+            return null;
         }
 
         private IEnumerable<string> GetEnumerableParameters(string key)
         {
             return from kv in items
-                where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
-                select kv.Value.ToLower(CultureInfo.InvariantCulture);
+                   where kv.Key.ToLower(CultureInfo.InvariantCulture) == key.ToLower(CultureInfo.InvariantCulture)
+                   select kv.Value.ToLower(CultureInfo.InvariantCulture);
         }
 
         private string GetSingleParameter(string key)
@@ -163,7 +182,7 @@ namespace Piraeus.Core.Utilities
             Resource ??= request.Headers[HttpHeaderConstants.RESOURCE_HEADER];
             if (request.Headers.ContainsKey(HttpHeaderConstants.SUBSCRIBE_HEADER)) {
                 string[] arr = request.Headers[HttpHeaderConstants.SUBSCRIBE_HEADER].ToArray();
-                string[] subs = arr[0].Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries);
+                string[] subs = arr[0].Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                 if (subs != null && subs.Count() > 0) {
                     Subscriptions = new List<string>(subs);
                 }
@@ -174,8 +193,8 @@ namespace Piraeus.Core.Utilities
                 StringValues vals = request.Headers[HttpHeaderConstants.INDEX_HEADER];
                 List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
 
-                foreach (var val in vals) {
-                    string[] parts = val.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string val in vals) {
+                    string[] parts = val.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                     list.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
                 }
 

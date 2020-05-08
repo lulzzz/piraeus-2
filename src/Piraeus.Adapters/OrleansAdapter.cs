@@ -51,12 +51,12 @@ namespace Piraeus.Adapters
             durableObservers = new Dictionary<string, IMessageObserver>();
         }
 
+        public event EventHandler<ObserveMessageEventArgs> OnObserve;
+
         public string Identity
         {
             set => identity = value;
         }
-
-        public event EventHandler<ObserveMessageEventArgs> OnObserve;
 
         public async Task<List<string>> LoadDurableSubscriptionsAsync(string identity)
         {

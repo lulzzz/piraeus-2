@@ -88,17 +88,17 @@ namespace Piraeus.Adapters
             userAuditor = auditFactory.GetAuditor(AuditType.User);
         }
 
-        public override IChannel Channel
-        {
-            get => channel;
-            set => channel = value;
-        }
-
         public override event EventHandler<ProtocolAdapterCloseEventArgs> OnClose;
 
         public override event EventHandler<ProtocolAdapterErrorEventArgs> OnError;
 
         public override event EventHandler<ChannelObserverEventArgs> OnObserve;
+
+        public override IChannel Channel
+        {
+            get => channel;
+            set => channel = value;
+        }
 
         public override void Dispose()
         {
@@ -211,7 +211,8 @@ namespace Piraeus.Adapters
 
                 if (method == "GET") {
                     foreach (var subscription in subscriptions) {
-                        SubscriptionMetadata metadata = new SubscriptionMetadata {
+                        SubscriptionMetadata metadata = new SubscriptionMetadata
+                        {
                             Identity = identity,
                             Indexes = indexes,
                             IsEphemeral = true

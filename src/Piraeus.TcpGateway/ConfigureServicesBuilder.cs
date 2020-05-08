@@ -23,7 +23,10 @@ namespace Piraeus.TcpGateway
             MethodInfo = configureServices;
         }
 
-        public MethodInfo MethodInfo { get; }
+        public MethodInfo MethodInfo
+        {
+            get;
+        }
 
         public IServiceProvider Build(object instance, IServiceCollection services)
         {

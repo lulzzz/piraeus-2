@@ -36,9 +36,7 @@ function New-PiraeusDeployment
 	  [string]$OrleansVmSize, [string]$LogLevel)
 		
 		$env:AZURE_HTTP_USER_AGENT='pid-332e88b9-31d3-5070-af65-de3780ad5c8b'
-  
-		kubectl create namespace "cert-manager"
-		
+				
 		if($GatewayVmSize.Length -eq 0)
 		{
 			$GatewayVmSize = "Standard_D2s_v3"
@@ -152,8 +150,7 @@ function New-PiraeusDeployment
 		
 		Update-Step -Step $step -Message "Create cert-manager namespace" -Start $start
 		$step++
-		kubectl create namespace "cert-manager"
-		
+				
 		#Update-Step -Step $step -Message "Apply HELM RBAC" -Start $start
 		#$step++
 		#New-KubectlApply -Filename "$Path/helm-rbac.yaml" -Namespace "kube-system"

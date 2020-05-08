@@ -21,7 +21,8 @@ namespace Piraeus.Module
 
         protected override void ProcessRecord()
         {
-            Rule rule = new Rule {
+            Rule rule = new Rule
+            {
                 Evaluates = Evaluates,
                 Operation = Operation,
                 MatchExpression = MatchExpression

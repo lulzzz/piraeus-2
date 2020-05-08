@@ -34,22 +34,41 @@ namespace Capl.Authorization
         /// <summary>
         ///     Gets or sets a value for a claim type.
         /// </summary>
-        public string ClaimType { get; set; }
+        public string ClaimType
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets a value indicating whether matching is required for evaluation.
         /// </summary>
-        public bool Required { get; set; }
+        public bool Required
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or set the type of match expression
         /// </summary>
-        public Uri Type { get; set; }
+        public Uri Type
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets a value for claim.
         /// </summary>
-        public string Value { get; set; }
+        public string Value
+        {
+            get; set;
+        }
+
+        public static Match Load(XmlReader reader)
+        {
+            Match match = new Match();
+            match.ReadXml(reader);
+            return match;
+        }
 
         public XmlSchema GetSchema()
         {
@@ -94,13 +113,6 @@ namespace Capl.Authorization
             }
 
             writer.WriteEndElement();
-        }
-
-        public static Match Load(XmlReader reader)
-        {
-            Match match = new Match();
-            match.ReadXml(reader);
-            return match;
         }
     }
 }

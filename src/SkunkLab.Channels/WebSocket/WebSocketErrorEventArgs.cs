@@ -9,6 +9,9 @@ namespace SkunkLab.Channels.WebSocket
             Error = error;
         }
 
-        public Exception Error { get; internal set; }
+        public Exception Error
+        {
+            get; internal set;
+        }
     }
 }

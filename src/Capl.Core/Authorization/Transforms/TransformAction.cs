@@ -19,7 +19,10 @@ namespace Capl.Authorization.Transforms
         /// <summary>
         ///     Gets a unique URI that corresponds to the transform action.
         /// </summary>
-        public abstract Uri Uri { get; }
+        public abstract Uri Uri
+        {
+            get;
+        }
 
         /// <summary>
         ///     Creates a transform action.

@@ -16,9 +16,15 @@ namespace SkunkLab.Protocols.Mqtt
 
         public override bool HasAck => false;
 
-        public ConnectAckCode ReturnCode { get; set; }
+        public ConnectAckCode ReturnCode
+        {
+            get; set;
+        }
 
-        public bool SessionPresent { get; set; }
+        public bool SessionPresent
+        {
+            get; set;
+        }
 
         public override byte[] Encode()
         {

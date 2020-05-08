@@ -17,6 +17,16 @@ namespace SkunkLab.Security.Authentication
             container = new Dictionary<string, Tuple<string, string, string>>();
         }
 
+        public void Add(SecurityTokenType type, string signingKey, string issuer = null, string audience = null,
+            HttpContext context = null)
+        {
+            this.context = context;
+            if (!container.ContainsKey(type.ToString())) {
+                Tuple<string, string, string> tuple = new Tuple<string, string, string>(signingKey, issuer, audience);
+                container.Add(type.ToString(), tuple);
+            }
+        }
+
         public bool Authenticate(SecurityTokenType type, byte[] token)
         {
             if (token != null) {
@@ -39,16 +49,6 @@ namespace SkunkLab.Security.Authentication
             }
 
             return false;
-        }
-
-        public void Add(SecurityTokenType type, string signingKey, string issuer = null, string audience = null,
-            HttpContext context = null)
-        {
-            this.context = context;
-            if (!container.ContainsKey(type.ToString())) {
-                Tuple<string, string, string> tuple = new Tuple<string, string, string>(signingKey, issuer, audience);
-                container.Add(type.ToString(), tuple);
-            }
         }
 
         public void Clear()

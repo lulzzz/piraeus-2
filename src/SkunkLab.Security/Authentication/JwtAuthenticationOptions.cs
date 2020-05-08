@@ -15,12 +15,21 @@ namespace SkunkLab.Security.Authentication
             Audience = audience?.ToLowerInvariant();
         }
 
-        public string Audience { get; set; }
+        public string Audience
+        {
+            get; set;
+        }
 
-        public string Issuer { get; set; }
+        public string Issuer
+        {
+            get; set;
+        }
 
         public string Scheme => "SkunkLabJwt";
 
-        public string SigningKey { get; set; }
+        public string SigningKey
+        {
+            get; set;
+        }
     }
 }

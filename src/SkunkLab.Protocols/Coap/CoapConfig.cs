@@ -27,35 +27,74 @@ namespace SkunkLab.Protocols.Coap
             MaxLatency = TimeSpan.FromSeconds(maxLatency);
         }
 
-        public double AckRandomFactor { get; internal set; }
+        public double AckRandomFactor
+        {
+            get; internal set;
+        }
 
-        public TimeSpan AckTimeout { get; internal set; }
+        public TimeSpan AckTimeout
+        {
+            get; internal set;
+        }
 
-        public IAuthenticator Authenticator { get; set; }
+        public IAuthenticator Authenticator
+        {
+            get; set;
+        }
 
-        public string Authority { get; internal set; }
+        public string Authority
+        {
+            get; internal set;
+        }
 
-        public bool AutoRetry { get; internal set; }
+        public bool AutoRetry
+        {
+            get; internal set;
+        }
 
-        public CoapConfigOptions ConfigOptions { get; internal set; }
+        public CoapConfigOptions ConfigOptions
+        {
+            get; internal set;
+        }
 
-        public TimeSpan DefaultLeisure { get; internal set; }
+        public TimeSpan DefaultLeisure
+        {
+            get; internal set;
+        }
 
-        public string DoNotRetainNonconfirmableResponse { get; internal set; }
+        public string DoNotRetainNonconfirmableResponse
+        {
+            get; internal set;
+        }
 
         public TimeSpan ExchangeLifetime =>
             TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + 2 * MaxLatency.TotalSeconds +
                                  ProcessingDelay.TotalSeconds);
 
-        public string IdentityClaimType { get; set; }
+        public string IdentityClaimType
+        {
+            get; set;
+        }
 
-        public List<KeyValuePair<string, string>> Indexes { get; set; }
+        public List<KeyValuePair<string, string>> Indexes
+        {
+            get; set;
+        }
 
-        public double? KeepAlive { get; internal set; }
+        public double? KeepAlive
+        {
+            get; internal set;
+        }
 
-        public TimeSpan MaxLatency { get; internal set; }
+        public TimeSpan MaxLatency
+        {
+            get; internal set;
+        }
 
-        public int MaxRetransmit { get; internal set; }
+        public int MaxRetransmit
+        {
+            get; internal set;
+        }
 
         public TimeSpan MaxRTT =>
             TimeSpan.FromSeconds(2.0 * MaxLatency.TotalSeconds + ProcessingDelay.TotalSeconds);
@@ -77,9 +116,15 @@ namespace SkunkLab.Protocols.Coap
         public TimeSpan NonLifetime =>
             TimeSpan.FromSeconds(MaxTransmitSpan.TotalSeconds + MaxLatency.TotalSeconds);
 
-        public int NStart { get; internal set; }
+        public int NStart
+        {
+            get; internal set;
+        }
 
-        public double ProbingRate { get; internal set; }
+        public double ProbingRate
+        {
+            get; internal set;
+        }
 
         public TimeSpan ProcessingDelay => AckTimeout;
     }

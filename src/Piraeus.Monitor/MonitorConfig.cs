@@ -7,10 +7,22 @@ namespace Piraeus.Monitor
     [JsonObject]
     public class MonitorConfig
     {
-        [JsonProperty("clientId")] public string ClientId { get; set; }
+        [JsonProperty("clientId")]
+        public string ClientId
+        {
+            get; set;
+        }
 
-        [JsonProperty("domain")] public string Domain { get; set; }
+        [JsonProperty("domain")]
+        public string Domain
+        {
+            get; set;
+        }
 
-        [JsonProperty("tenantId")] public string TenantId { get; set; }
+        [JsonProperty("tenantId")]
+        public string TenantId
+        {
+            get; set;
+        }
     }
 }

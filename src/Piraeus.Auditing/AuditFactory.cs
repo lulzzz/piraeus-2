@@ -12,6 +12,11 @@
         {
         }
 
+        public static IAuditFactory CreateSingleton()
+        {
+            return instance ??= new AuditFactory();
+        }
+
         public void Add(IAuditor auditor, AuditType type)
         {
             if (type == AuditType.User) {
@@ -29,11 +34,6 @@
             }
 
             return messageAuditor;
-        }
-
-        public static IAuditFactory CreateSingleton()
-        {
-            return instance ??= new AuditFactory();
         }
     }
 }

@@ -21,15 +21,30 @@ namespace Piraeus.Monitor.Pages
             Container = new Dictionary<string, EventMetadata>();
         }
 
-        public Dictionary<string, EventMetadata> Container { get; internal set; }
+        public Dictionary<string, EventMetadata> Container
+        {
+            get; internal set;
+        }
 
-        public int Counter { get; set; }
+        public int Counter
+        {
+            get; set;
+        }
 
-        public int Index { get; internal set; }
+        public int Index
+        {
+            get; internal set;
+        }
 
-        public List<string> PiSystems { get; internal set; }
+        public List<string> PiSystems
+        {
+            get; internal set;
+        }
 
-        public int Quantity { get; internal set; }
+        public int Quantity
+        {
+            get; internal set;
+        }
 
         //public void OnGet()
         //{
@@ -42,10 +57,10 @@ namespace Piraeus.Monitor.Pages
             ListContinuationToken ltoken;
 
             if (index == 0 && quantity == 0) {
-                ltoken = new ListContinuationToken {Index = 0, Quantity = 10};
+                ltoken = new ListContinuationToken { Index = 0, Quantity = 10 };
             }
             else {
-                ltoken = new ListContinuationToken {Index = index, Quantity = quantity};
+                ltoken = new ListContinuationToken { Index = index, Quantity = quantity };
             }
 
             ltoken = adapter.GetPiSystemsAsync(ltoken).GetAwaiter().GetResult();

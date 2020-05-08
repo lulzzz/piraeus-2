@@ -93,6 +93,7 @@ namespace Piraeus.Grains
             _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
             try {
+
                 if (State.Metadata != null && metadata.ResourceUriString != this.GetPrimaryKeyString()) {
                     throw new ResourceIdentityMismatchException("Metadata resource mismatch.");
                 }

@@ -46,22 +46,34 @@ namespace Capl.Authorization
             Evaluates = evaluates;
         }
 
-        public string Issuer { get; set; }
+        public string Issuer
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets an expression that matches claims to be evaluted.  The matching claim values
         ///     represent the left hand side operand vlaue of the authorization operation.
         /// </summary>
-        public Match MatchExpression { get; set; }
+        public Match MatchExpression
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets the name of the authorization operation.
         /// </summary>
-        public EvaluationOperation Operation { get; set; }
+        public EvaluationOperation Operation
+        {
+            get; set;
+        }
 
-        public override Uri TermId { get; set; }
+        public override Uri TermId
+        {
+            get; set;
+        }
 
-        public new static Rule Load(XmlReader reader)
+        public static new Rule Load(XmlReader reader)
         {
             Rule rule = new Rule();
             rule.ReadXml(reader);
@@ -78,7 +90,10 @@ namespace Capl.Authorization
         ///     If the evaluation of the operation matches the Evaluates property, then the evaluation of the rule is true;
         ///     otherwise false.
         /// </remarks>
-        public override bool Evaluates { get; set; }
+        public override bool Evaluates
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Evaluates a set of claims using the authorization operation.

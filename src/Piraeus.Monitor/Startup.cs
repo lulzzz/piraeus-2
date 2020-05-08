@@ -29,7 +29,10 @@ namespace Piraeus.Monitor
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration
+        {
+            get;
+        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

@@ -43,6 +43,8 @@ namespace Piraeus.HttpGateway.Controllers
             graphManager = new GraphManager(client);
         }
 
+        private delegate void HttpResponseObserverHandler(object sender, ChannelObserverEventArgs args);
+
         private event HttpResponseObserverHandler OnMessage;
 
         [HttpGet]
@@ -97,7 +99,5 @@ namespace Piraeus.HttpGateway.Controllers
                 are.Set();
             };
         }
-
-        private delegate void HttpResponseObserverHandler(object sender, ChannelObserverEventArgs args);
     }
 }

@@ -19,18 +19,15 @@ namespace Capl.Authorization
         /// <summary>
         ///     Get or sets the truthful evaluation.
         /// </summary>
-        public abstract bool Evaluates { get; set; }
-
-        public abstract Uri TermId { get; set; }
-
-        public virtual XmlSchema GetSchema()
+        public abstract bool Evaluates
         {
-            return null;
+            get; set;
         }
 
-        public abstract void ReadXml(XmlReader reader);
-
-        public abstract void WriteXml(XmlWriter writer);
+        public abstract Uri TermId
+        {
+            get; set;
+        }
 
         public static Term Load(XmlReader reader)
         {
@@ -66,5 +63,14 @@ namespace Capl.Authorization
         }
 
         public abstract bool Evaluate(IEnumerable<Claim> claims);
+
+        public virtual XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public abstract void ReadXml(XmlReader reader);
+
+        public abstract void WriteXml(XmlWriter writer);
     }
 }

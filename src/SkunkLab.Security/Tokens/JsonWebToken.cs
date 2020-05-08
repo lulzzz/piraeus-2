@@ -27,7 +27,8 @@ namespace SkunkLab.Security.Tokens
             SigningKey = new SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
-            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor {
+            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor
+            {
                 Issuer = issuer,
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
@@ -50,7 +51,8 @@ namespace SkunkLab.Security.Tokens
             SigningKey = new SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
-            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor {
+            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor
+            {
                 Issuer = issuer,
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
@@ -74,7 +76,8 @@ namespace SkunkLab.Security.Tokens
             SigningKey = new SymmetricSecurityKey(Convert.FromBase64String(securityKey));
 
             JwtSecurityTokenHandler jwt = new JwtSecurityTokenHandler();
-            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor {
+            SecurityTokenDescriptor msstd = new SecurityTokenDescriptor
+            {
                 Issuer = issuer,
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
@@ -88,13 +91,22 @@ namespace SkunkLab.Security.Tokens
             tokenString = jwt.WriteToken(jwtToken);
         }
 
-        public override string Id { get; }
+        public override string Id
+        {
+            get;
+        }
 
-        public override string Issuer { get; }
+        public override string Issuer
+        {
+            get;
+        }
 
         public override SecurityKey SecurityKey => null;
 
-        public override SecurityKey SigningKey { get; set; }
+        public override SecurityKey SigningKey
+        {
+            get; set;
+        }
 
         public override DateTime ValidFrom => created;
 
@@ -105,7 +117,8 @@ namespace SkunkLab.Security.Tokens
             try {
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
-                TokenValidationParameters validationParameters = new TokenValidationParameters {
+                TokenValidationParameters validationParameters = new TokenValidationParameters
+                {
                     IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(signingKey)),
                     ValidIssuer = issuer,
                     ValidAudience = audience,

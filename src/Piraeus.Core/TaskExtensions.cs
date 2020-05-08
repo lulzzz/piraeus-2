@@ -11,7 +11,8 @@ namespace Piraeus.Core
             task.ContinueWith(t =>
                 {
                     var aggException = t.Exception.Flatten();
-                    foreach (var exception in aggException.InnerExceptions) Console.WriteLine(exception.Message);
+                    foreach (var exception in aggException.InnerExceptions)
+                        Console.WriteLine(exception.Message);
                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }

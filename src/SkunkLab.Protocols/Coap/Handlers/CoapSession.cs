@@ -44,23 +44,44 @@ namespace SkunkLab.Protocols.Coap.Handlers
             }
         }
 
-        public Receiver CoapReceiver { get; internal set; }
-
-        public Transmitter CoapSender { get; internal set; }
-
-        public CoapConfig Config { get; internal set; }
-
-        public bool HasBootstrapToken { get; internal set; }
-
-        public string Identity { get; set; }
-
-        public List<KeyValuePair<string, string>> Indexes { get; set; }
-
-        public bool IsAuthenticated { get; set; }
-
         public event EventHandler<CoapMessageEventArgs> OnKeepAlive;
 
         public event EventHandler<CoapMessageEventArgs> OnRetry;
+
+        public Receiver CoapReceiver
+        {
+            get; internal set;
+        }
+
+        public Transmitter CoapSender
+        {
+            get; internal set;
+        }
+
+        public CoapConfig Config
+        {
+            get; internal set;
+        }
+
+        public bool HasBootstrapToken
+        {
+            get; internal set;
+        }
+
+        public string Identity
+        {
+            get; set;
+        }
+
+        public List<KeyValuePair<string, string>> Indexes
+        {
+            get; set;
+        }
+
+        public bool IsAuthenticated
+        {
+            get; set;
+        }
 
         public bool Authenticate(string tokenType, string token)
         {
@@ -116,7 +137,8 @@ namespace SkunkLab.Protocols.Coap.Handlers
             if (keepaliveTimestamp <= DateTime.UtcNow) {
                 CoapToken token = CoapToken.Create();
                 ushort id = CoapSender.NewId(token.TokenBytes);
-                CoapRequest ping = new CoapRequest {
+                CoapRequest ping = new CoapRequest
+                {
                     MessageId = id,
                     Token = token.TokenBytes,
                     Code = CodeType.EmptyMessage,

@@ -177,35 +177,62 @@ namespace Piraeus.Configuration
         #region Client Certificate (Optional)
 
         [JsonProperty("clientCertificateFilename")]
-        public string ClientCertificateFilename { get; set; }
+        public string ClientCertificateFilename
+        {
+            get; set;
+        }
 
         [JsonProperty("clientCertificateLocation")]
-        public string ClientCertificateLocation { get; set; }
+        public string ClientCertificateLocation
+        {
+            get; set;
+        }
 
         [JsonProperty("clientCertificateStore")]
-        public string ClientCertificateStore { get; set; }
+        public string ClientCertificateStore
+        {
+            get; set;
+        }
 
         [JsonProperty("clientCertificateThumbprint")]
-        public string ClientCertificateThumbprint { get; set; }
+        public string ClientCertificateThumbprint
+        {
+            get; set;
+        }
 
         #endregion Client Certificate (Optional)
 
         #region Service Certificate (Optional)
 
         [JsonProperty("serverCertificateFilename")]
-        public string ServerCertificateFilename { get; set; }
+        public string ServerCertificateFilename
+        {
+            get; set;
+        }
 
         [JsonProperty("serverCertificateLocation")]
-        public string ServerCertificateLocation { get; set; }
+        public string ServerCertificateLocation
+        {
+            get; set;
+        }
 
         [JsonProperty("serverCertificatePassword")]
-        public string ServerCertificatePassword { get; set; }
+        public string ServerCertificatePassword
+        {
+            get; set;
+        }
 
         [JsonProperty("serverCertificateStore")]
-        public string ServerCertificateStore { get; set; }
+        public string ServerCertificateStore
+        {
+            get; set;
+        }
 
         [JsonProperty("serverCertificateThumbprint")]
-        public string ServerCertificateThumbprint { get; set; }
+        public string ServerCertificateThumbprint
+        {
+            get; set;
+        }
 
         #endregion Service Certificate (Optional)
 
@@ -215,22 +242,39 @@ namespace Piraeus.Configuration
 
         [JsonProperty("maxBufferSize")] public int MaxBufferSize { get; set; } = 0x400000;
 
-        [JsonProperty("usePrefixLength")] public bool UsePrefixLength { get; set; }
+        [JsonProperty("usePrefixLength")]
+        public bool UsePrefixLength
+        {
+            get; set;
+        }
 
         #endregion Channels
 
         #region Management API
 
         [JsonProperty("managementApiAudience")]
-        public string ManagementApiAudience { get; set; }
+        public string ManagementApiAudience
+        {
+            get; set;
+        }
 
-        [JsonProperty("managementApiIssuer")] public string ManagementApiIssuer { get; set; }
+        [JsonProperty("managementApiIssuer")]
+        public string ManagementApiIssuer
+        {
+            get; set;
+        }
 
         [JsonProperty("managementApiSecurityCodes")]
-        public string ManagementApiSecurityCodes { get; set; }
+        public string ManagementApiSecurityCodes
+        {
+            get; set;
+        }
 
         [JsonProperty("managmentApiSymmetricKey")]
-        public string ManagmentApiSymmetricKey { get; set; }
+        public string ManagmentApiSymmetricKey
+        {
+            get; set;
+        }
 
         #endregion Management API
 
@@ -240,68 +284,136 @@ namespace Piraeus.Configuration
         public bool TlsCertficateAuthentication;
 
         [JsonProperty("auditConnectionString")]
-        public string AuditConnectionString { get; set; }
+        public string AuditConnectionString
+        {
+            get; set;
+        }
 
-        [JsonProperty("coapAuthority")] public string CoapAuthority { get; set; }
+        [JsonProperty("coapAuthority")]
+        public string CoapAuthority
+        {
+            get; set;
+        }
 
         [JsonProperty("maxConnections")] public int MaxConnections { get; set; } = 10000;
 
-        [JsonProperty("ports")] public string Ports { get; set; }
+        [JsonProperty("ports")]
+        public string Ports
+        {
+            get; set;
+        }
 
         #endregion Gateway
 
         #region PSKs (Optional)
 
-        [JsonProperty("pskIdentities")] public string PskIdentities { get; set; }
+        [JsonProperty("pskIdentities")]
+        public string PskIdentities
+        {
+            get; set;
+        }
 
-        [JsonProperty("pskKeys")] public string PskKeys { get; set; }
+        [JsonProperty("pskKeys")]
+        public string PskKeys
+        {
+            get; set;
+        }
 
-        [JsonProperty("pskKeyVaultAuthority")] public string PskKeyVaultAuthority { get; set; }
+        [JsonProperty("pskKeyVaultAuthority")]
+        public string PskKeyVaultAuthority
+        {
+            get; set;
+        }
 
-        [JsonProperty("pskKeyVaultClientId")] public string PskKeyVaultClientId { get; set; }
+        [JsonProperty("pskKeyVaultClientId")]
+        public string PskKeyVaultClientId
+        {
+            get; set;
+        }
 
         [JsonProperty("pskKeyVaultClientSecret")]
-        public string PskKeyVaultClientSecret { get; set; }
+        public string PskKeyVaultClientSecret
+        {
+            get; set;
+        }
 
         [JsonProperty("pskRedisConnectionString")]
-        public string PskRedisConnectionString { get; set; }
+        public string PskRedisConnectionString
+        {
+            get; set;
+        }
 
-        [JsonProperty("pskStorageType")] public string PskStorageType { get; set; }
+        [JsonProperty("pskStorageType")]
+        public string PskStorageType
+        {
+            get; set;
+        }
 
         #endregion PSKs (Optional)
 
         #region Client Identity
 
         [JsonProperty("clientIdentityClaimKeys")]
-        public string ClientIdentityClaimKeys { get; set; }
+        public string ClientIdentityClaimKeys
+        {
+            get; set;
+        }
 
         [JsonProperty("clientIdentityClaimTypes")]
-        public string ClientIdentityClaimTypes { get; set; }
+        public string ClientIdentityClaimTypes
+        {
+            get; set;
+        }
 
         [JsonProperty("clientIdentityNameClaimType")]
-        public string ClientIdentityNameClaimType { get; set; }
+        public string ClientIdentityNameClaimType
+        {
+            get; set;
+        }
 
         #endregion Client Identity
 
         #region Service Identity
 
         [JsonProperty("serviceIdentityClaimTypes")]
-        public string ServiceIdentityClaimTypes { get; set; }
+        public string ServiceIdentityClaimTypes
+        {
+            get; set;
+        }
 
         [JsonProperty("serviceIdentityClaimValues")]
-        public string ServiceIdentityClaimValues { get; set; }
+        public string ServiceIdentityClaimValues
+        {
+            get; set;
+        }
 
         #endregion Service Identity
 
         #region Client Security
 
-        [JsonProperty("clientAudience")] public string ClientAudience { get; set; }
+        [JsonProperty("clientAudience")]
+        public string ClientAudience
+        {
+            get; set;
+        }
 
-        [JsonProperty("clientIssuer")] public string ClientIssuer { get; set; }
+        [JsonProperty("clientIssuer")]
+        public string ClientIssuer
+        {
+            get; set;
+        }
 
-        [JsonProperty("clientSymmetricKey")] public string ClientSymmetricKey { get; set; }
+        [JsonProperty("clientSymmetricKey")]
+        public string ClientSymmetricKey
+        {
+            get; set;
+        }
 
-        [JsonProperty("clientTokenType")] public string ClientTokenType { get; set; }
+        [JsonProperty("clientTokenType")]
+        public string ClientTokenType
+        {
+            get; set;
+        }
 
         #endregion Client Security
 
@@ -311,7 +423,11 @@ namespace Piraeus.Configuration
 
         [JsonProperty("ackTimeoutSeconds")] public double AckTimeoutSeconds { get; set; } = 2.0;
 
-        [JsonProperty("autoRetry")] public bool AutoRetry { get; set; }
+        [JsonProperty("autoRetry")]
+        public bool AutoRetry
+        {
+            get; set;
+        }
 
         [JsonProperty("defaultLeisure")] public double DefaultLeisure { get; set; } = 4.0;
 
@@ -333,7 +449,11 @@ namespace Piraeus.Configuration
 
         #region Logging
 
-        [JsonProperty("instrumentationKey")] public string InstrumentationKey { get; set; }
+        [JsonProperty("instrumentationKey")]
+        public string InstrumentationKey
+        {
+            get; set;
+        }
 
         [JsonProperty("loggerTypes")] public string LoggerTypes { get; set; } = "Console";
 

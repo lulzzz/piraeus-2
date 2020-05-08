@@ -10,6 +10,9 @@ namespace Piraeus.Monitor.Hubs
             Metrics = metrics;
         }
 
-        public CommunicationMetrics Metrics { get; internal set; }
+        public CommunicationMetrics Metrics
+        {
+            get; internal set;
+        }
     }
 }

@@ -117,6 +117,18 @@ namespace Piraeus.Grains
             return await Task.FromResult(new List<string>(en));
         }
 
+        public override Task OnActivateAsync()
+        {
+            State.Container ??= new List<string>();
+            State.Id = this.GetGrainIdentity().PrimaryKeyLong;
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
+        }
+
         public async Task<bool> RemoveAsync(string resourceUriString)
         {
             bool result = false;
@@ -146,18 +158,6 @@ namespace Piraeus.Grains
             }
 
             return await Task.FromResult(result);
-        }
-
-        public override Task OnActivateAsync()
-        {
-            State.Container ??= new List<string>();
-            State.Id = this.GetGrainIdentity().PrimaryKeyLong;
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
         }
     }
 }

@@ -18,7 +18,10 @@ namespace SkunkLab.Protocols.Mqtt
 
         public override bool HasAck => true;
 
-        public List<string> Topics { get; set; }
+        public List<string> Topics
+        {
+            get; set;
+        }
 
         public override byte[] Encode()
         {

@@ -6,6 +6,9 @@ namespace Piraeus.GrainInterfaces
     [Serializable]
     public class SubscriberState
     {
-        public List<string> Container { get; set; }
+        public List<string> Container
+        {
+            get; set;
+        }
     }
 }

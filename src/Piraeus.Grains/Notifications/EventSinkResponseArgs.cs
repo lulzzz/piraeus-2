@@ -10,6 +10,9 @@ namespace Piraeus.Grains.Notifications
             Message = message;
         }
 
-        public EventMessage Message { get; internal set; }
+        public EventMessage Message
+        {
+            get; internal set;
+        }
     }
 }

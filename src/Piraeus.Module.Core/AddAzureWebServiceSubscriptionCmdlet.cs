@@ -64,7 +64,8 @@ namespace Piraeus.Module
                     ? string.Format("?{0}&{1}", uriString, query)
                     : uriString;
 
-            SubscriptionMetadata metadata = new SubscriptionMetadata {
+            SubscriptionMetadata metadata = new SubscriptionMetadata
+            {
                 IsEphemeral = false,
                 NotifyAddress = uriString,
                 SymmetricKey = Key,

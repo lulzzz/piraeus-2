@@ -18,6 +18,10 @@ namespace Piraeus.Adapters.Utilities
 
         private static List<PolicyHandler> policyHandlers;
 
+        private delegate ValidatorResult MetadataHandler(EventMetadata metadata, bool? encryptedChannel = null);
+
+        private delegate ValidatorResult PolicyHandler(AuthorizationPolicy policy, ClaimsIdentity identity = null);
+
         public static ValidatorResult Validate(bool publish, string resourceUriString, IChannel channel,
             GraphManager graphManager, HttpContext context = null)
         {
@@ -109,9 +113,5 @@ namespace Piraeus.Adapters.Utilities
         {
             return new ValidatorResult(policy != null, "Access control policy is null.");
         }
-
-        private delegate ValidatorResult MetadataHandler(EventMetadata metadata, bool? encryptedChannel = null);
-
-        private delegate ValidatorResult PolicyHandler(AuthorizationPolicy policy, ClaimsIdentity identity = null);
     }
 }

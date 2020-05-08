@@ -5,9 +5,15 @@ namespace SkunkLab.Protocols.Mqtt
 {
     public abstract class MqttMessage
     {
-        public abstract bool HasAck { get; }
+        public abstract bool HasAck
+        {
+            get;
+        }
 
-        public virtual ushort MessageId { get; set; }
+        public virtual ushort MessageId
+        {
+            get; set;
+        }
 
         public static MqttMessage DecodeMessage(byte[] message)
         {
@@ -15,7 +21,8 @@ namespace SkunkLab.Protocols.Mqtt
             byte msgType = (byte)(fixedHeader >> 0x04);
 
             MqttMessageType messageType = (MqttMessageType)msgType;
-            MqttMessage mqttMessage = messageType switch {
+            MqttMessage mqttMessage = messageType switch
+            {
                 MqttMessageType.CONNECT => new ConnectMessage(),
                 MqttMessageType.CONNACK => new ConnectAckMessage(),
                 MqttMessageType.PUBLISH => new PublishMessage(),
@@ -92,15 +99,30 @@ namespace SkunkLab.Protocols.Mqtt
 
         #region Fixed Header
 
-        public bool Dup { get; set; }
+        public bool Dup
+        {
+            get; set;
+        }
 
-        public virtual MqttMessageType MessageType { get; internal set; }
+        public virtual MqttMessageType MessageType
+        {
+            get; internal set;
+        }
 
-        public byte[] Payload { get; set; }
+        public byte[] Payload
+        {
+            get; set;
+        }
 
-        public QualityOfServiceLevelType QualityOfService { get; set; }
+        public QualityOfServiceLevelType QualityOfService
+        {
+            get; set;
+        }
 
-        protected bool Retain { get; set; }
+        protected bool Retain
+        {
+            get; set;
+        }
 
         #endregion Fixed Header
     }

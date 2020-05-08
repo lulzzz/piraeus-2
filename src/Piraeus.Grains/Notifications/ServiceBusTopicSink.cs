@@ -56,7 +56,8 @@ namespace Piraeus.Grains.Notifications
                     client = new TopicClient(connectionString, topic);
                 }
 
-                Message brokerMessage = new Message(payload) {
+                Message brokerMessage = new Message(payload)
+                {
                     ContentType = message.ContentType,
                     MessageId = message.MessageId
                 };

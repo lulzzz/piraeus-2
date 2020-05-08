@@ -19,6 +19,7 @@ namespace SkunkLab.Channels.WebSocket
     public class WebSocketHandler
     {
         private readonly WebSocketConfig config;
+
         private readonly TaskQueue sendQueue = new TaskQueue();
 
         private readonly CancellationToken token;
@@ -29,8 +30,6 @@ namespace SkunkLab.Channels.WebSocket
             this.token = token;
         }
 
-        public System.Net.WebSockets.WebSocket Socket { get; set; }
-
         public event WebSocketCloseHandler OnClose;
 
         public event WebSocketErrorHandler OnError;
@@ -38,6 +37,11 @@ namespace SkunkLab.Channels.WebSocket
         public event WebSocketOpenHandler OnOpen;
 
         public event WebSocketReceiveHandler OnReceive;
+
+        public System.Net.WebSockets.WebSocket Socket
+        {
+            get; set;
+        }
 
         public void Close()
         {

@@ -252,6 +252,16 @@ namespace Piraeus.Grains
                 token.PageSize, items));
         }
 
+        public override Task OnActivateAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override async Task OnDeactivateAsync()
+        {
+            await WriteStateAsync();
+        }
+
         public async Task RemoveAsync(string resourceUriString)
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
@@ -261,16 +271,6 @@ namespace Piraeus.Grains
             bool result = await chain.RemoveAsync(resourceUriString);
             await logger?.LogInformationAsync($"SigmaAlgebra removed {result} on {resourceUriString}.");
             await Task.FromResult(result);
-        }
-
-        public override Task OnActivateAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override async Task OnDeactivateAsync()
-        {
-            await WriteStateAsync();
         }
     }
 }

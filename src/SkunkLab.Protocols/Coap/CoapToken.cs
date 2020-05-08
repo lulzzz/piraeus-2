@@ -20,7 +20,10 @@ namespace SkunkLab.Protocols.Coap
             TokenBytes = tokenBytes;
         }
 
-        public byte[] TokenBytes { get; set; }
+        public byte[] TokenBytes
+        {
+            get; set;
+        }
 
         public string TokenString => Convert.ToBase64String(TokenBytes);
 

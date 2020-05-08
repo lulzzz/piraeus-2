@@ -9,6 +9,9 @@ namespace SkunkLab.Protocols.Mqtt
             Code = code;
         }
 
-        public ConnectAckCode Code { get; internal set; }
+        public ConnectAckCode Code
+        {
+            get; internal set;
+        }
     }
 }

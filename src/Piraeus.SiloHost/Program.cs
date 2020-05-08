@@ -16,9 +16,9 @@ namespace Piraeus.SiloHost.Core
             return Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(builder =>
                 {
-                    var orleansConfig = GetOrleansConfiguration();
+                    OrleansConfig orleansConfig = GetOrleansConfiguration();
                     LogLevel orleansLogLevel = Enum.Parse<LogLevel>(orleansConfig.LogLevel, true);
-                    var loggers = orleansConfig.GetLoggerTypes();
+                    LoggerType loggers = orleansConfig.GetLoggerTypes();
 
                     if (loggers.HasFlag(LoggerType.Console)) {
                         builder.AddConsole();
@@ -46,7 +46,7 @@ namespace Piraeus.SiloHost.Core
 
         private static OrleansConfig GetOrleansConfiguration()
         {
-            var builder = new ConfigurationBuilder()
+            IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddJsonFile("./orleansconfig.json")
                 .AddEnvironmentVariables("OR_");
             IConfigurationRoot root = builder.Build();

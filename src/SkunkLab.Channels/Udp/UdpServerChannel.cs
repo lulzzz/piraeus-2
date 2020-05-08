@@ -27,15 +27,37 @@ namespace SkunkLab.Channels.Udp
             this.token = token;
         }
 
-        public override string Id { get; internal set; }
+        public override event EventHandler<ChannelCloseEventArgs> OnClose;
 
-        public override bool IsAuthenticated { get; internal set; }
+        public override event EventHandler<ChannelErrorEventArgs> OnError;
+
+        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
+
+        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
+
+        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
+
+        public override string Id
+        {
+            get; internal set;
+        }
+
+        public override bool IsAuthenticated
+        {
+            get; internal set;
+        }
 
         public override bool IsConnected => ChannelState.Open == State;
 
-        public override bool IsEncrypted { get; internal set; }
+        public override bool IsEncrypted
+        {
+            get; internal set;
+        }
 
-        public override int Port { get; internal set; }
+        public override int Port
+        {
+            get; internal set;
+        }
 
         public override bool RequireBlocking => false;
 
@@ -53,16 +75,6 @@ namespace SkunkLab.Channels.Udp
         }
 
         public override string TypeId => "UDP";
-
-        public override event EventHandler<ChannelCloseEventArgs> OnClose;
-
-        public override event EventHandler<ChannelErrorEventArgs> OnError;
-
-        public override event EventHandler<ChannelOpenEventArgs> OnOpen;
-
-        public override event EventHandler<ChannelReceivedEventArgs> OnReceive;
-
-        public override event EventHandler<ChannelStateEventArgs> OnStateChange;
 
         public override async Task AddMessageAsync(byte[] message)
         {

@@ -58,7 +58,7 @@ dotnet_diagnostic.CA2235.severity = none
 dotnet_diagnostic.CA0008.severity = none
 
 #leave code block on single line
-csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_blocks = false
 
 #Style - expression bodied member options
 

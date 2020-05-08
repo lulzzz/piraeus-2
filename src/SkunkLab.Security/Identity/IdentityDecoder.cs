@@ -27,9 +27,15 @@ namespace SkunkLab.Security.Identity
             }
         }
 
-        public string Id { get; internal set; }
+        public string Id
+        {
+            get; internal set;
+        }
 
-        public List<KeyValuePair<string, string>> Indexes { get; internal set; }
+        public List<KeyValuePair<string, string>> Indexes
+        {
+            get; internal set;
+        }
 
         private string DecodeClaimType(HttpContext context, string claimType)
         {

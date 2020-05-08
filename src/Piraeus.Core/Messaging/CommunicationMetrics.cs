@@ -23,18 +23,46 @@ namespace Piraeus.Core.Messaging
             LastError = lastError;
         }
 
-        [JsonProperty("byteCount")] public long ByteCount { get; set; }
+        [JsonProperty("byteCount")]
+        public long ByteCount
+        {
+            get; set;
+        }
 
-        [JsonProperty("errorCount")] public long ErrorCount { get; set; }
+        [JsonProperty("errorCount")]
+        public long ErrorCount
+        {
+            get; set;
+        }
 
-        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("id")]
+        public string Id
+        {
+            get; set;
+        }
 
-        [JsonProperty("lastError")] public Exception LastError { get; set; }
+        [JsonProperty("lastError")]
+        public Exception LastError
+        {
+            get; set;
+        }
 
-        [JsonProperty("lastErrorTimestamp")] public DateTime? LastErrorTimestamp { get; set; }
+        [JsonProperty("lastErrorTimestamp")]
+        public DateTime? LastErrorTimestamp
+        {
+            get; set;
+        }
 
-        [JsonProperty("lastMessageTimestamp")] public DateTime? LastMessageTimestamp { get; set; }
+        [JsonProperty("lastMessageTimestamp")]
+        public DateTime? LastMessageTimestamp
+        {
+            get; set;
+        }
 
-        [JsonProperty("messageCount")] public long MessageCount { get; set; }
+        [JsonProperty("messageCount")]
+        public long MessageCount
+        {
+            get; set;
+        }
     }
 }

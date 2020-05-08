@@ -30,6 +30,11 @@ namespace Capl.Authorization
         }
 
         /// <summary>
+        ///     Gets the number of element actually contained in the Capl.Authorization.LogicalConectiveCollection.
+        /// </summary>
+        public int Count => list.Count;
+
+        /// <summary>
         ///     Gets or sets a value indicating whether the truthful evaluation of the logical connective is true or false.
         /// </summary>
         public override bool Evaluates
@@ -39,19 +44,17 @@ namespace Capl.Authorization
         }
 
         /// <summary>
-        ///     Gets or sets and option id for the term.
-        /// </summary>
-        public override Uri TermId { get; set; }
-
-        /// <summary>
-        ///     Gets the number of element actually contained in the Capl.Authorization.LogicalConectiveCollection.
-        /// </summary>
-        public int Count => list.Count;
-
-        /// <summary>
         ///     Gets a value indicating whether the collection is read-only.
         /// </summary>
         public bool IsReadOnly => false;
+
+        /// <summary>
+        ///     Gets or sets and option id for the term.
+        /// </summary>
+        public override Uri TermId
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets the terms to be evaluated by the logical connective.

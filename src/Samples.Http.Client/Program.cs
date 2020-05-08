@@ -125,7 +125,7 @@ namespace Samples.Http.Client
             Uri observableResource = role.ToUpperInvariant() == "A" ? new Uri(resourceB) : new Uri(resourceA);
             Observer observer = new HttpObserver(observableResource);
             observer.OnNotify += Observer_OnNotify;
-            restClient = new RestClient(endpoint, token, new[] {observer}, cts.Token);
+            restClient = new RestClient(endpoint, token, new[] { observer }, cts.Token);
 
             RunAsync().Wait();
             Console.WriteLine("Press any key to exit...");

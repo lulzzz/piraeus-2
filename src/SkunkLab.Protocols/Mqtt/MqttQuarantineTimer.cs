@@ -29,12 +29,6 @@ namespace SkunkLab.Protocols.Mqtt
             timer.Start();
         }
 
-        public void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
-        }
-
         public event EventHandler<MqttMessageEventArgs> OnRetry;
 
         public void Add(MqttMessage message, DirectionType direction)
@@ -59,6 +53,12 @@ namespace SkunkLab.Protocols.Mqtt
         public bool ContainsKey(ushort id)
         {
             return container.ContainsKey(id);
+        }
+
+        public void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
         }
 
         public ushort NewId()

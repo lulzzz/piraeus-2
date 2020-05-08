@@ -44,41 +44,6 @@ namespace SkunkLab.Protocols.Coap
             return list.Contains(item);
         }
 
-        public void CopyTo(CoapOption[] array, int arrayIndex)
-        {
-            list.CopyTo(array, arrayIndex);
-        }
-
-        public IEnumerator<CoapOption> GetEnumerator()
-        {
-            return list.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return list.GetEnumerator();
-        }
-
-        public int IndexOf(CoapOption item)
-        {
-            return list.IndexOf(item);
-        }
-
-        public void Insert(int index, CoapOption item)
-        {
-            list.Insert(index, item);
-        }
-
-        public bool Remove(CoapOption item)
-        {
-            return list.Remove(item);
-        }
-
-        public void RemoveAt(int index)
-        {
-            list.RemoveAt(index);
-        }
-
         public bool ContainsContentFormat()
         {
             foreach (CoapOption item in list) {
@@ -90,6 +55,11 @@ namespace SkunkLab.Protocols.Coap
             return false;
         }
 
+        public void CopyTo(CoapOption[] array, int arrayIndex)
+        {
+            list.CopyTo(array, arrayIndex);
+        }
+
         public string GetContainFormat()
         {
             foreach (CoapOption item in list) {
@@ -99,6 +69,16 @@ namespace SkunkLab.Protocols.Coap
             }
 
             return null;
+        }
+
+        public IEnumerator<CoapOption> GetEnumerator()
+        {
+            return list.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return list.GetEnumerator();
         }
 
         public object GetOptionValue(OptionType type)
@@ -168,6 +148,26 @@ namespace SkunkLab.Protocols.Coap
             }
 
             return builder.Scheme == "http" ? null : builder.Uri;
+        }
+
+        public int IndexOf(CoapOption item)
+        {
+            return list.IndexOf(item);
+        }
+
+        public void Insert(int index, CoapOption item)
+        {
+            list.Insert(index, item);
+        }
+
+        public bool Remove(CoapOption item)
+        {
+            return list.Remove(item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            list.RemoveAt(index);
         }
     }
 }

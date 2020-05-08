@@ -9,6 +9,9 @@ namespace SkunkLab.Channels
             ChannelId = channelId;
         }
 
-        public string ChannelId { get; internal set; }
+        public string ChannelId
+        {
+            get; internal set;
+        }
     }
 }

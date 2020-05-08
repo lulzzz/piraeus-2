@@ -2,12 +2,16 @@
 
 function Add-CertManager
 {
-    #kubectl label namespace $Namespace certmanager.k8s.io/disable-validation="true"
-    #kubectl apply -f "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml" -n "$Namespace" --validate=false
+	kubectl get namespace "cert-manager"
+	
+	if($LastExitCode -ne 0)
+	{	
+		kubectl create namespace "cert-manager"
+	}
+	
     kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.1/cert-manager.yaml
     helm repo add jetstack https://charts.jetstack.io
     helm repo update
-    #helm install --name cert-manager --namespace $Namespace --version v0.11.0 --set ingressShim.extraArgs='{--default-issuer-name=letsencrypt-prod,--default-issuer-kind=ClusterIssuer}' jetstack/cert-manager --set webhook.enabled=true 
 }
 
 function Add-Issuer 
@@ -23,6 +27,13 @@ function Add-Issuer
 function Add-NGINX
 {
 	param([string]$Namespace = "kube-system")
+	
+	kubectl get namespace $Namespace
+	if($LastExitCode -ne 0)
+	{
+		kubectl create namespace $Namespace
+	}
+	
 	$looper = $true
     while($looper)
     {

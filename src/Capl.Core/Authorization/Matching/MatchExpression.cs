@@ -6,7 +6,10 @@ namespace Capl.Authorization.Matching
 {
     public abstract class MatchExpression
     {
-        public abstract Uri Uri { get; }
+        public abstract Uri Uri
+        {
+            get;
+        }
 
         public static MatchExpression Create(Uri matchType, MatchExpressionDictionary matchExpressions)
         {

@@ -72,13 +72,22 @@ namespace SkunkLab.Protocols.Mqtt
             CleanSession = cleanSession;
         }
 
-        public bool CleanSession { get; internal set; }
+        public bool CleanSession
+        {
+            get; internal set;
+        }
 
-        public string ClientId { get; internal set; }
+        public string ClientId
+        {
+            get; internal set;
+        }
 
         public override bool HasAck => true;
 
-        public int KeepAlive { get; internal set; }
+        public int KeepAlive
+        {
+            get; internal set;
+        }
 
         public override MqttMessageType MessageType
         {
@@ -87,23 +96,44 @@ namespace SkunkLab.Protocols.Mqtt
             internal set => base.MessageType = value;
         }
 
-        public string Password { get; internal set; }
+        public string Password
+        {
+            get; internal set;
+        }
 
         public string ProtocolName { get; set; } = "MQTT";
 
         public int ProtocolVersion { get; set; } = 0x04;
 
-        public string Username { get; internal set; }
+        public string Username
+        {
+            get; internal set;
+        }
 
-        public bool WillFlag { get; internal set; }
+        public bool WillFlag
+        {
+            get; internal set;
+        }
 
-        public string WillMessage { get; internal set; }
+        public string WillMessage
+        {
+            get; internal set;
+        }
 
-        public QualityOfServiceLevelType? WillQualityOfServiceLevel { get; internal set; }
+        public QualityOfServiceLevelType? WillQualityOfServiceLevel
+        {
+            get; internal set;
+        }
 
-        public bool WillRetain { get; internal set; }
+        public bool WillRetain
+        {
+            get; internal set;
+        }
 
-        public string WillTopic { get; internal set; }
+        public string WillTopic
+        {
+            get; internal set;
+        }
 
         public override byte[] Encode()
         {

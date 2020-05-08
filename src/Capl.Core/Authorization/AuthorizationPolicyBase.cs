@@ -19,12 +19,18 @@ namespace Capl.Authorization
         /// <summary>
         ///     Gets or sets an evaluation expression.
         /// </summary>
-        public abstract Term Expression { get; set; }
+        public abstract Term Expression
+        {
+            get; set;
+        }
 
         /// <summary>
         ///     Gets or sets a transform collection.
         /// </summary>
-        public abstract TransformCollection Transforms { get; internal set; }
+        public abstract TransformCollection Transforms
+        {
+            get; internal set;
+        }
 
         /// <summary>
         ///     Provides a schema for an authorization policy.

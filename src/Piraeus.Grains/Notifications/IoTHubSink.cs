@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -92,7 +91,8 @@ namespace Piraeus.Grains.Notifications
                         }
                     }
                     else {
-                        Message serviceMessage = new Message(payload) {
+                        Message serviceMessage = new Message(payload)
+                        {
                             ContentType = message.ContentType,
                             MessageId = message.MessageId
                         };
@@ -107,7 +107,8 @@ namespace Piraeus.Grains.Notifications
                     }
                 }
                 else if (deviceClient != null) {
-                    Microsoft.Azure.Devices.Client.Message msg = new Microsoft.Azure.Devices.Client.Message(payload) {
+                    Microsoft.Azure.Devices.Client.Message msg = new Microsoft.Azure.Devices.Client.Message(payload)
+                    {
                         ContentType = message.ContentType,
                         MessageId = message.MessageId
                     };
@@ -123,7 +124,7 @@ namespace Piraeus.Grains.Notifications
                 else {
                     await logger?.LogWarningAsync(
                         $"Subscription '{metadata.SubscriptionUriString}' IoTHub sink has neither service or device client.");
-                    Trace.TraceWarning("IoTHub subscription has neither Service or Device client");
+
                     record = new MessageAuditRecord(message.MessageId, $"iothub://{uri.Authority}",
                         "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow,
                         "IoTHub subscription has neither service or device client");

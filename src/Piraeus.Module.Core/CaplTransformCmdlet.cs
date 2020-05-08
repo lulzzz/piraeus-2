@@ -37,7 +37,8 @@ namespace Piraeus.Module
                 throw new ArgumentOutOfRangeException("Type");
             }
 
-            ClaimTransform transform = new ClaimTransform(uri, MatchExpression, TargetClaim) {
+            ClaimTransform transform = new ClaimTransform(uri, MatchExpression, TargetClaim)
+            {
                 Expression = EvaluationExpression
             };
 

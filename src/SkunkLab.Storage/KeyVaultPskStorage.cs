@@ -8,6 +8,8 @@ namespace SkunkLab.Storage
 {
     public class KeyVaultPskStorage : PskStorageAdapter
     {
+        internal KeyVaultClient client;
+
         private static string Authority;
 
         private static string ClientId;
@@ -17,7 +19,6 @@ namespace SkunkLab.Storage
         private static DateTime expiry;
 
         private static KeyVaultPskStorage instance;
-        internal KeyVaultClient client;
 
         protected KeyVaultPskStorage()
         {
@@ -29,7 +30,8 @@ namespace SkunkLab.Storage
                 Authority = authority;
                 ClientId = clientId;
                 ClientSecret = clientSecret;
-                instance = new KeyVaultPskStorage {
+                instance = new KeyVaultPskStorage
+                {
                     client = new KeyVaultClient(GetAccessToken)
                 };
             }

@@ -80,6 +80,12 @@ namespace SkunkLab.Protocols.Mqtt
             throw new NotImplementedException();
         }
 
+        public void Dispose()
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
+        }
+
         public IEnumerator<KeyValuePair<ushort, MqttMessage>> GetEnumerator()
         {
             return container.GetEnumerator();
@@ -119,12 +125,6 @@ namespace SkunkLab.Protocols.Mqtt
         public bool TryGetValue(ushort key, out MqttMessage value)
         {
             return container.TryGetValue(key, out value);
-        }
-
-        public void Dispose()
-        {
-            Disposing(true);
-            GC.SuppressFinalize(this);
         }
 
         protected void Disposing(bool dispose)

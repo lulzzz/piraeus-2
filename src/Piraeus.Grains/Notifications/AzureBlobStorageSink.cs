@@ -82,7 +82,7 @@ namespace Piraeus.Grains.Notifications
             storageArray = new BlobStorage[clientCount];
             if (sasUri == null) {
                 connectionString =
-                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] {'.'})[0]};AccountKey={key};";
+                    $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] { '.' })[0]};AccountKey={key};";
 
                 for (int i = 0; i < clientCount; i++)
                     storageArray[i] = BlobStorage.New(connectionString, 2048, 102400);
@@ -209,7 +209,7 @@ namespace Piraeus.Grains.Notifications
                     }
                 }
                 else {
-                    string[] parts = filename.Split(new[] {'.'});
+                    string[] parts = filename.Split(new[] { '.' });
                     string path2 = parts.Length == 2
                         ? $"{parts[0]}-R.{parts[1]}"
                         : $"{filename}-R";
