@@ -57,7 +57,8 @@ namespace SkunkLab.Protocols.Mqtt
             ByteContainer payloadContainer = new ByteContainer();
 
             IEnumerator<KeyValuePair<string, QualityOfServiceLevelType>> en = Topics.GetEnumerator();
-            while (en.MoveNext()) {
+            while (en.MoveNext())
+            {
                 string topic = en.Current.Key;
                 QualityOfServiceLevelType qosLevel = Topics[topic];
                 payloadContainer.Add(topic);
@@ -80,7 +81,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void RemoveTopic(string topic)
         {
-            if (Topics.ContainsKey(topic)) {
+            if (Topics.ContainsKey(topic))
+            {
                 Topics.Remove(topic);
             }
         }
@@ -96,7 +98,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -111,7 +114,8 @@ namespace SkunkLab.Protocols.Mqtt
 
             subscribeMessage.MessageId = messageId;
 
-            while (index < buffer.Length) {
+            while (index < buffer.Length)
+            {
                 string topic = ByteContainer.DecodeString(buffer, index, out int length);
                 index += length;
                 QualityOfServiceLevelType topicQosLevel = (QualityOfServiceLevelType)buffer[index++];

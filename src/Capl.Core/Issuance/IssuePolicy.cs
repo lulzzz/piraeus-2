@@ -70,18 +70,22 @@ namespace Capl.Issuance
             foreach (ClaimTransform transform in Transforms)
                 clone = new List<Claim>(transform.TransformClaims(clone.ToArray()));
 
-            if (mode == IssueMode.Unique) {
-                foreach (Claim c in inputClaims) {
+            if (mode == IssueMode.Unique)
+            {
+                foreach (Claim c in inputClaims)
+                {
                     ICollection<Claim> claimSet = clone.FindAll(delegate (Claim claim) {
                         return c.Type == claim.Type && c.Value == claim.Value && c.Issuer == claim.Issuer;
                     });
 
-                    if (claimSet.Count > 0) {
+                    if (claimSet.Count > 0)
+                    {
                         list.Add(claimSet);
                     }
                 }
 
-                foreach (ICollection<Claim> claimCollection in list) {
+                foreach (ICollection<Claim> claimCollection in list)
+                {
                     foreach (Claim c in claimCollection)
                         clone.Remove(c);
                 }
@@ -98,25 +102,32 @@ namespace Capl.Issuance
             policyId = reader.GetOptionalAttribute(IssueConstants.Attributes.PolicyId);
             string mode = reader.GetOptionalAttribute(IssueConstants.Attributes.Mode);
 
-            if (mode == IssueConstants.IssueModes.Aggregate) {
+            if (mode == IssueConstants.IssueModes.Aggregate)
+            {
                 this.mode = IssueMode.Aggregate;
             }
-            else if (mode == IssueConstants.IssueModes.Unique) {
+            else if (mode == IssueConstants.IssueModes.Unique)
+            {
                 this.mode = IssueMode.Unique;
             }
-            else if (mode == null) {
+            else if (mode == null)
+            {
                 this.mode = IssueMode.Aggregate;
             }
-            else {
+            else
+            {
                 throw new IssueModeNotRecognizedException("Issue mode is not recognized.");
             }
 
-            while (reader.Read()) {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms)) {
+            while (reader.Read())
+            {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms))
+                {
                     Transforms = TransformCollection.Load(reader);
                 }
 
-                if (reader.IsRequiredEndElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns)) {
+                if (reader.IsRequiredEndElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns))
+                {
                     break;
                 }
             }
@@ -130,14 +141,17 @@ namespace Capl.Issuance
 
             writer.WriteStartElement(IssueConstants.Elements.IssuePolicy, IssueConstants.Namespaces.Xmlns);
 
-            if (mode == IssueMode.Aggregate) {
+            if (mode == IssueMode.Aggregate)
+            {
                 writer.WriteAttributeString(IssueConstants.Attributes.Mode, IssueConstants.IssueModes.Aggregate);
             }
-            else {
+            else
+            {
                 writer.WriteAttributeString(IssueConstants.Attributes.Mode, IssueConstants.IssueModes.Unique);
             }
 
-            if (policyId != null) {
+            if (policyId != null)
+            {
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.PolicyId, policyId);
             }
 

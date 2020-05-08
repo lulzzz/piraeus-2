@@ -95,7 +95,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         public bool Authenticate()
         {
-            if (!HasBootstrapToken) {
+            if (!HasBootstrapToken)
+            {
                 return false;
             }
 
@@ -155,7 +156,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         protected virtual void Dispose(bool dispose)
         {
-            if (dispose & !disposed) {
+            if (dispose & !disposed)
+            {
                 quarantine.Dispose();
                 pubContainer.Dispose();
                 qosLevels.Clear();
@@ -171,14 +173,16 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void AddQosLevel(string topic, QualityOfServiceLevelType qos)
         {
-            if (!qosLevels.ContainsKey(topic)) {
+            if (!qosLevels.ContainsKey(topic))
+            {
                 qosLevels.Add(topic, qos);
             }
         }
 
         public QualityOfServiceLevelType? GetQoS(string topic)
         {
-            if (qosLevels.ContainsKey(topic)) {
+            if (qosLevels.ContainsKey(topic))
+            {
                 return qosLevels[topic];
             }
 
@@ -203,7 +207,8 @@ namespace SkunkLab.Protocols.Mqtt
         internal void Publish(MqttMessage message, bool force = false)
         {
             if (message.QualityOfService != QualityOfServiceLevelType.ExactlyOnce
-                || message.QualityOfService == QualityOfServiceLevelType.ExactlyOnce && force) {
+                || message.QualityOfService == QualityOfServiceLevelType.ExactlyOnce && force)
+            {
                 OnPublish?.Invoke(this, new MqttMessageEventArgs(message));
             }
         }
@@ -224,7 +229,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         internal MqttMessage GetHeldMessage(ushort id)
         {
-            if (pubContainer.ContainsKey(id)) {
+            if (pubContainer.ContainsKey(id))
+            {
                 return pubContainer[id];
             }
 
@@ -233,7 +239,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         internal void HoldMessage(MqttMessage message)
         {
-            if (!pubContainer.ContainsKey(message.MessageId)) {
+            if (!pubContainer.ContainsKey(message.MessageId))
+            {
                 pubContainer.Add(message.MessageId, message);
             }
         }
@@ -254,7 +261,8 @@ namespace SkunkLab.Protocols.Mqtt
             {
                 keepaliveSeconds = value;
 
-                if (keepaliveTimer == null) {
+                if (keepaliveTimer == null)
+                {
                     keepaliveTimer = new Timer(Convert.ToDouble(value * 1000));
                     keepaliveTimer.Elapsed += KeepaliveTimer_Elapsed;
                     keepaliveTimer.Start();
@@ -275,7 +283,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         private void KeepaliveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (keepaliveExpiry < DateTime.Now) {
+            if (keepaliveExpiry < DateTime.Now)
+            {
                 OnKeepAlive?.Invoke(this, new MqttMessageEventArgs(new PingRequestMessage()));
             }
         }

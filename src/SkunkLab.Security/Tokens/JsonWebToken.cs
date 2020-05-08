@@ -114,7 +114,8 @@ namespace SkunkLab.Security.Tokens
 
         public static void Authenticate(string token, string issuer, string audience, string signingKey)
         {
-            try {
+            try
+            {
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
                 TokenValidationParameters validationParameters = new TokenValidationParameters
@@ -130,11 +131,13 @@ namespace SkunkLab.Security.Tokens
                 Thread.CurrentPrincipal =
                     tokenHandler.ValidateToken(token, validationParameters, out SecurityToken stoken);
             }
-            catch (SecurityTokenValidationException e) {
+            catch (SecurityTokenValidationException e)
+            {
                 Trace.TraceWarning("JWT validation has security token exception.");
                 Trace.TraceError(e.Message);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceWarning("Exception in JWT validation.");
                 Trace.TraceError(ex.Message);
             }

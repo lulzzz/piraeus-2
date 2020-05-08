@@ -41,7 +41,8 @@ namespace Capl.Authorization
         {
             _ = schemaSet ?? throw new ArgumentNullException(nameof(schemaSet));
 
-            using (StringReader reader = new StringReader(Resources.AuthorizationPolicySchema)) {
+            using (StringReader reader = new StringReader(Resources.AuthorizationPolicySchema))
+            {
                 XmlSchema schema = XmlSchema.Read(reader, null);
                 schemaSet.Add(schema);
             }

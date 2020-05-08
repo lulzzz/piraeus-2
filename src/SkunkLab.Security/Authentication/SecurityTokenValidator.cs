@@ -16,11 +16,13 @@ namespace SkunkLab.Security.Authentication
         public static bool Validate(string tokenString, SecurityTokenType tokenType, string securityKey,
             string issuer = null, string audience = null, HttpContext context = null)
         {
-            if (tokenType == SecurityTokenType.NONE) {
+            if (tokenType == SecurityTokenType.NONE)
+            {
                 return false;
             }
 
-            if (tokenType == SecurityTokenType.JWT) {
+            if (tokenType == SecurityTokenType.JWT)
+            {
                 return ValidateJwt(tokenString, securityKey, issuer, audience, context);
             }
 
@@ -31,21 +33,25 @@ namespace SkunkLab.Security.Authentication
 
         private static bool ValidateCertificate(X509Certificate2 cert, HttpContext context = null)
         {
-            try {
+            try
+            {
                 StoreName storeName = StoreName.My;
                 StoreLocation location = StoreLocation.LocalMachine;
 
                 if (X509Util.Validate(storeName, location, X509RevocationMode.Online, X509RevocationFlag.EntireChain,
-                    cert, cert.Thumbprint)) {
+                    cert, cert.Thumbprint))
+                {
                     List<Claim> claimset = X509Util.GetClaimSet(cert);
                     Claim nameClaim = claimset.Find(obj => obj.Type == ClaimTypes.Name);
                     ClaimsIdentity ci = new ClaimsIdentity(claimset);
                     ClaimsPrincipal prin = new ClaimsPrincipal(ci);
 
-                    if (context == null) {
+                    if (context == null)
+                    {
                         Thread.CurrentPrincipal = prin;
                     }
-                    else {
+                    else
+                    {
                         context.User.AddIdentity(ci);
                     }
 
@@ -54,7 +60,8 @@ namespace SkunkLab.Security.Authentication
 
                 return false;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError("X509 validation exception '{0}'", ex.Message);
                 return false;
             }
@@ -63,7 +70,8 @@ namespace SkunkLab.Security.Authentication
         private static bool ValidateJwt(string tokenString, string signingKey, string issuer = null,
             string audience = null, HttpContext context = null)
         {
-            try {
+            try
+            {
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
                 TokenValidationParameters validationParameters = new TokenValidationParameters
@@ -78,16 +86,19 @@ namespace SkunkLab.Security.Authentication
 
                 ClaimsPrincipal prin =
                     tokenHandler.ValidateToken(tokenString, validationParameters, out SecurityToken stoken);
-                if (context == null) {
+                if (context == null)
+                {
                     Thread.CurrentPrincipal = prin;
                 }
-                else {
+                else
+                {
                     context.User.AddIdentity(prin.Identity as ClaimsIdentity);
                 }
 
                 return true;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError("JWT validation exception {0}", ex.Message);
                 return false;
             }

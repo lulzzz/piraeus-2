@@ -19,7 +19,8 @@ namespace Capl.Authorization.Matching
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
             IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
-                if (claimValue == null) {
+                if (claimValue == null)
+                {
                     return claim.Type == claimType;
                 }
 

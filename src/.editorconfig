@@ -24,7 +24,7 @@ csharp_new_line_before_else = true
 #require finally statements to be on a new line after the closing brace
 csharp_new_line_before_finally = true
 #require braces to be on a new line for methods, properties, accessors, lambdas, control_blocks, object_collection_array_initializers, and types (also known as "Allman" style)
-csharp_new_line_before_open_brace = methods, properties, accessors, lambdas, object_collection_array_initializers, types
+csharp_new_line_before_open_brace = methods, properties, accessors, lambdas, object_collection_array_initializers, types, control_blocks
 
 #Formatting - organize using options
 

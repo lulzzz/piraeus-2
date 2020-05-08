@@ -12,7 +12,8 @@ namespace SkunkLab.Protocols.Coap.Handlers
 
         public override async Task<CoapMessage> ProcessAsync()
         {
-            if (!Session.CoapReceiver.IsDup(Message.MessageId)) {
+            if (!Session.CoapReceiver.IsDup(Message.MessageId))
+            {
                 Session.CoapReceiver.CacheId(Message.MessageId);
             }
 

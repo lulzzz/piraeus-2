@@ -20,7 +20,8 @@ namespace SkunkLab.Channels.WebSocket
         public void Append(byte[] segment)
         {
             currentLength += segment.Length;
-            if (currentLength > maxLength) {
+            if (currentLength > maxLength)
+            {
                 throw new InvalidOperationException("Length exceeded.");
             }
 
@@ -31,7 +32,8 @@ namespace SkunkLab.Channels.WebSocket
         {
             byte[] dst = new byte[currentLength];
             int dstOffset = 0;
-            for (int i = 0; i < segments.Count; i++) {
+            for (int i = 0; i < segments.Count; i++)
+            {
                 byte[] src = segments[i];
                 Buffer.BlockCopy(src, 0, dst, dstOffset, src.Length);
                 dstOffset += src.Length;
@@ -44,7 +46,8 @@ namespace SkunkLab.Channels.WebSocket
         {
             StringBuilder builder = new StringBuilder();
             Decoder decoder = Encoding.UTF8.GetDecoder();
-            for (int i = 0; i < segments.Count; i++) {
+            for (int i = 0; i < segments.Count; i++)
+            {
                 bool flush = i == segments.Count - 1;
                 byte[] bytes = segments[i];
                 char[] chars = new char[decoder.GetCharCount(bytes, 0, bytes.Length, flush)];

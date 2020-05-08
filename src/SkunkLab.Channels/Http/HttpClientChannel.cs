@@ -142,7 +142,8 @@ namespace SkunkLab.Channels.Http
             get => state;
             internal set
             {
-                if (value != state) {
+                if (value != state)
+                {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
@@ -161,7 +162,8 @@ namespace SkunkLab.Channels.Http
         {
             State = ChannelState.ClosedReceived;
 
-            if (!internalToken.IsCancellationRequested) {
+            if (!internalToken.IsCancellationRequested)
+            {
                 tokenSource.Cancel();
             }
 
@@ -187,36 +189,43 @@ namespace SkunkLab.Channels.Http
 
         public override async Task ReceiveAsync()
         {
-            while (!internalToken.IsCancellationRequested) {
+            while (!internalToken.IsCancellationRequested)
+            {
                 State = ChannelState.Connecting;
                 HttpWebRequest request = GetRequest(HttpMethod.Get);
                 Port = request.RequestUri.Port;
                 IsEncrypted = request.RequestUri.Scheme == "https";
-                foreach (var item in observers) {
+                foreach (var item in observers)
+                {
                     request.Headers.Add(HttpChannelConstants.SUBSCRIBE_HEADER,
                         item.ResourceUri.ToString().ToLowerInvariant());
                 }
 
-                try {
+                try
+                {
                     State = ChannelState.Open;
                     using HttpWebResponse response =
                         await request.GetResponseAsync().WithCancellation(internalToken) as HttpWebResponse;
                     if (response.StatusCode == HttpStatusCode.OK ||
-                        response.StatusCode == HttpStatusCode.Accepted) {
+                        response.StatusCode == HttpStatusCode.Accepted)
+                    {
                         using Stream stream = response.GetResponseStream();
                         byte[] buffer = new byte[response.ContentLength];
                         await stream.ReadAsync(buffer, 0, buffer.Length);
 
                         string resourceHeader = response.Headers.Get(HttpChannelConstants.RESOURCE_HEADER);
 
-                        if (resourceHeader == null) {
+                        if (resourceHeader == null)
+                        {
                             continue;
                         }
 
                         string resourceUriString = new Uri(resourceHeader).ToString().ToLowerInvariant();
 
-                        foreach (Observer observer in observers) {
-                            if (observer.ResourceUri.ToString().ToLowerInvariant() == resourceUriString) {
+                        foreach (Observer observer in observers)
+                        {
+                            if (observer.ResourceUri.ToString().ToLowerInvariant() == resourceUriString)
+                            {
                                 observer.Update(observer.ResourceUri, response.ContentType, buffer);
                             }
                         }
@@ -227,7 +236,8 @@ namespace SkunkLab.Channels.Http
                         };
                         OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, buffer, list));
                     }
-                    else {
+                    else
+                    {
                         OnError?.Invoke(this,
                             new ChannelErrorEventArgs(Id,
                                 new WebException(string.Format("Unexpected status code {0}", response.StatusCode))));
@@ -235,16 +245,19 @@ namespace SkunkLab.Channels.Http
 
                     State = ChannelState.Closed;
                 }
-                catch (OperationCanceledException) {
+                catch (OperationCanceledException)
+                {
                     State = ChannelState.Aborted;
                 }
-                catch (AggregateException ae) {
+                catch (AggregateException ae)
+                {
                     Trace.TraceError("Http client channel '{0}' receive error '{1}'", Id,
                         ae.Flatten().InnerException.Message);
                     State = ChannelState.Closed;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ae.Flatten()));
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Trace.TraceError("Http client channel '{0}' receive error '{1}'", Id, ex.Message);
                     State = ChannelState.Closed;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
@@ -264,7 +277,8 @@ namespace SkunkLab.Channels.Http
 
         public override async Task SendAsync(byte[] message)
         {
-            try {
+            try
+            {
                 HttpWebRequest request = GetRequest(HttpMethod.Post);
                 request.ContentLength = message.Length;
                 Port = request.RequestUri.Port;
@@ -277,31 +291,37 @@ namespace SkunkLab.Channels.Http
                     await request.GetResponseAsync().WithCancellation(internalToken) as HttpWebResponse;
                 if (response.StatusCode == HttpStatusCode.OK ||
                     response.StatusCode == HttpStatusCode.Accepted ||
-                    response.StatusCode == HttpStatusCode.NoContent) {
+                    response.StatusCode == HttpStatusCode.NoContent)
+                {
                     IsAuthenticated = true;
                     State = ChannelState.CloseSent;
                 }
-                else {
+                else
+                {
                     State = ChannelState.Aborted;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, new WebException(
                         string.Format("Invalid HTTP response status code {0}", response.StatusCode))));
                 }
             }
-            catch (OperationCanceledException oce) {
+            catch (OperationCanceledException oce)
+            {
                 Trace.TraceWarning("Http channel cancelled.");
                 State = ChannelState.Aborted;
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, oce));
             }
-            catch (AggregateException ae) {
+            catch (AggregateException ae)
+            {
                 State = ChannelState.Aborted;
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ae.Flatten()));
             }
-            catch (WebException we) {
+            catch (WebException we)
+            {
                 Trace.TraceError("Channel '{0}' error with '{1}'", Id, we.Message);
                 State = ChannelState.Aborted;
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, we.InnerException));
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError("Channel '{0}' error with '{1}'", Id, ex.Message);
                 State = ChannelState.Aborted;
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
@@ -310,8 +330,10 @@ namespace SkunkLab.Channels.Http
 
         protected void Disposing(bool dispose)
         {
-            if (dispose & !disposed) {
-                if (internalToken.CanBeCanceled) {
+            if (dispose & !disposed)
+            {
+                if (internalToken.CanBeCanceled)
+                {
                     tokenSource.Cancel();
                 }
 
@@ -330,13 +352,15 @@ namespace SkunkLab.Channels.Http
         private HttpWebRequest GetRequest(HttpMethod method)
         {
             HttpWebRequest request = WebRequest.Create(requestUri) as HttpWebRequest;
-            if (method == HttpMethod.Get) {
+            if (method == HttpMethod.Get)
+            {
                 request.ContentLength = 0;
                 request.Method = "GET";
                 request.KeepAlive = true;
                 request.Timeout = int.MaxValue;
             }
-            else if (method == HttpMethod.Post) {
+            else if (method == HttpMethod.Post)
+            {
                 request.Method = "POST";
                 request.ContentType = contentType;
 
@@ -344,24 +368,29 @@ namespace SkunkLab.Channels.Http
 
                 request.Headers.Add(HttpChannelConstants.RESOURCE_HEADER, resourceUri.ToString());
 
-                if (!string.IsNullOrEmpty(cacheKey)) {
+                if (!string.IsNullOrEmpty(cacheKey))
+                {
                     request.Headers.Add(HttpChannelConstants.CACHE_KEY, cacheKey);
                 }
 
-                if (indexes != null) {
+                if (indexes != null)
+                {
                     foreach (KeyValuePair<string, string> index in indexes)
                         request.Headers.Add(HttpChannelConstants.INDEX_HEADER, index.Key + ";" + index.Value);
                 }
             }
-            else {
+            else
+            {
                 throw new HttpRequestException(string.Format("Invalid request verb {0}", method));
             }
 
-            if (!string.IsNullOrEmpty(securityToken)) {
+            if (!string.IsNullOrEmpty(securityToken))
+            {
                 request.Headers.Add("Authorization", string.Format("Bearer {0}", securityToken));
             }
 
-            if (certificate != null) {
+            if (certificate != null)
+            {
                 request.ClientCertificates.Add(certificate);
             }
 

@@ -28,7 +28,8 @@ namespace Capl.Authorization.Operations
         {
             get
             {
-                if (defaultInstance != null) {
+                if (defaultInstance != null)
+                {
                     return defaultInstance;
                 }
 

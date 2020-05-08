@@ -14,18 +14,22 @@ namespace SkunkLab.Protocols.Coap.Handlers
         public override async Task<CoapMessage> ProcessAsync()
         {
             CoapMessage response = null;
-            if (!Session.CoapReceiver.IsDup(Message.MessageId)) {
+            if (!Session.CoapReceiver.IsDup(Message.MessageId))
+            {
                 response = await Dispatcher.PostAsync(Message)
                     .ContinueWith(ExceptionAction, TaskContinuationOptions.OnlyOnFaulted);
             }
-            else {
-                if (Message.MessageType == CoapMessageType.Confirmable) {
+            else
+            {
+                if (Message.MessageType == CoapMessageType.Confirmable)
+                {
                     return await Task.FromResult<CoapMessage>(new CoapResponse(Message.MessageId,
                         ResponseMessageType.Acknowledgement, ResponseCodeType.EmptyMessage));
                 }
             }
 
-            if (response != null && !Message.NoResponse.IsNoResponse(Message.Code)) {
+            if (response != null && !Message.NoResponse.IsNoResponse(Message.Code))
+            {
                 return response;
             }
 

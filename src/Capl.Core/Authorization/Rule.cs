@@ -108,14 +108,18 @@ namespace Capl.Authorization
 
             IList<Claim> list = exp.MatchClaims(claims, MatchExpression.ClaimType, MatchExpression.Value);
 
-            if (list.Count == 0) {
+            if (list.Count == 0)
+            {
                 return !MatchExpression.Required;
             }
 
-            if (Issuer != null) {
+            if (Issuer != null)
+            {
                 int count = list.Count;
-                for (int index = 0; index < count; index++) {
-                    if (list[index].Issuer != Issuer) {
+                for (int index = 0; index < count; index++)
+                {
+                    if (list[index].Issuer != Issuer)
+                    {
                         list.Remove(list[index]);
                         index--;
                         count--;
@@ -125,14 +129,17 @@ namespace Capl.Authorization
 
             Operation operation = Operations.Operation.Create(Operation.Type, null);
 
-            foreach (Claim claim in list) {
+            foreach (Claim claim in list)
+            {
                 bool eval = operation.Execute(claim.Value, Operation.ClaimValue);
 
-                if (Evaluates && eval) {
+                if (Evaluates && eval)
+                {
                     return true;
                 }
 
-                if (!Evaluates && eval) {
+                if (!Evaluates && eval)
+                {
                     return false;
                 }
             }
@@ -151,7 +158,8 @@ namespace Capl.Authorization
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Rule);
             string termId = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.TermId);
 
-            if (!string.IsNullOrEmpty(termId)) {
+            if (!string.IsNullOrEmpty(termId))
+            {
                 TermId = new Uri(termId);
             }
 
@@ -159,20 +167,25 @@ namespace Capl.Authorization
 
             string evaluates = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Evaluates);
 
-            if (!string.IsNullOrEmpty(evaluates)) {
+            if (!string.IsNullOrEmpty(evaluates))
+            {
                 Evaluates = XmlConvert.ToBoolean(evaluates);
             }
 
-            while (reader.Read()) {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Operation)) {
+            while (reader.Read())
+            {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Operation))
+                {
                     Operation = EvaluationOperation.Load(reader);
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Match)) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Match))
+                {
                     MatchExpression = Match.Load(reader);
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Rule)) {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Rule))
+                {
                     return;
                     //break;
                 }
@@ -191,11 +204,13 @@ namespace Capl.Authorization
 
             writer.WriteStartElement(AuthorizationConstants.Elements.Rule, AuthorizationConstants.Namespaces.Xmlns);
 
-            if (Issuer != null) {
+            if (Issuer != null)
+            {
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.Issuer, Issuer);
             }
 
-            if (TermId != null) {
+            if (TermId != null)
+            {
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.TermId, TermId.ToString());
             }
 

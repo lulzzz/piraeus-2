@@ -14,7 +14,8 @@ namespace SkunkLab.Protocols.Coap.Handlers
         {
             Session.CoapSender.DispatchResponse(Message);
 
-            if (Message.MessageType == CoapMessageType.Acknowledgement) {
+            if (Message.MessageType == CoapMessageType.Acknowledgement)
+            {
                 return await Task.FromResult(new CoapResponse(Message.MessageId, ResponseMessageType.Acknowledgement,
                     ResponseCodeType.EmptyMessage));
             }

@@ -11,18 +11,22 @@ namespace SkunkLab.Security.Authentication
         {
             X509Store store = new X509Store(name, location);
 
-            try {
+            try
+            {
                 store.Open(OpenFlags.ReadOnly);
                 X509Certificate2Collection collection = store.Certificates;
-                foreach (var item in collection) {
-                    if (item.Thumbprint == thumbprint) {
+                foreach (var item in collection)
+                {
+                    if (item.Thumbprint == thumbprint)
+                    {
                         return item;
                     }
                 }
 
                 return null;
             }
-            finally {
+            finally
+            {
                 store.Close();
             }
         }
@@ -53,35 +57,42 @@ namespace SkunkLab.Security.Authentication
         {
             X509Certificate2 chainedCertificate = GetCertificate(name, location, thumbprint);
 
-            if (clientCertificate == null || chainedCertificate == null) {
+            if (clientCertificate == null || chainedCertificate == null)
+            {
                 return false;
             }
 
             X509Store store = new X509Store(name, location);
 
-            try {
+            try
+            {
                 X509Chain chain = new X509Chain();
                 X509ChainPolicy policy = new X509ChainPolicy { RevocationMode = mode, RevocationFlag = flag };
                 chain.ChainPolicy = policy;
 
-                if (!chain.Build(clientCertificate)) {
+                if (!chain.Build(clientCertificate))
+                {
                     return false;
                 }
 
                 store.Open(OpenFlags.ReadOnly);
                 X509Certificate2Collection collection = store.Certificates;
 
-                foreach (var item in chain.ChainElements) {
+                foreach (var item in chain.ChainElements)
+                {
                     X509Certificate2Collection certs = collection.Find(X509FindType.FindByThumbprint,
                         item.Certificate.Thumbprint, true);
 
-                    if (certs == null || certs.Count == 0) {
+                    if (certs == null || certs.Count == 0)
+                    {
                         return false;
                     }
 
-                    foreach (X509Certificate2 cert in certs) {
+                    foreach (X509Certificate2 cert in certs)
+                    {
                         if (cert.Thumbprint == chainedCertificate.Thumbprint && cert.NotAfter < DateTime.Now &&
-                            cert.NotBefore > DateTime.Now) {
+                            cert.NotBefore > DateTime.Now)
+                        {
                             return true;
                         }
                     }
@@ -89,7 +100,8 @@ namespace SkunkLab.Security.Authentication
 
                 return false;
             }
-            finally {
+            finally
+            {
                 store.Close();
             }
         }

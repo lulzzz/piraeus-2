@@ -24,7 +24,8 @@ namespace Piraeus.Grains
         public async Task<AuthorizationPolicy> GetPolicyAsync()
         {
             AuthorizationPolicy policy = null;
-            if (State.Policy != null) {
+            if (State.Policy != null)
+            {
                 using MemoryStream stream = new MemoryStream(State.Policy);
                 using XmlReader reader = XmlReader.Create(stream);
                 policy = AuthorizationPolicy.Load(reader);
@@ -43,7 +44,8 @@ namespace Piraeus.Grains
         {
             XmlWriterSettings settings = new XmlWriterSettings { OmitXmlDeclaration = true };
             StringBuilder builder = new StringBuilder();
-            using (XmlWriter writer = XmlWriter.Create(builder, settings)) {
+            using (XmlWriter writer = XmlWriter.Create(builder, settings))
+            {
                 policy.WriteXml(writer);
                 writer.Flush();
                 writer.Close();

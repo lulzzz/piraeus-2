@@ -28,7 +28,8 @@
 
             int remainingLength = DecodeRemainingLength(message);
 
-            if (remainingLength != 0) {
+            if (remainingLength != 0)
+            {
             }
 
             return ping;

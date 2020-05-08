@@ -25,7 +25,8 @@ namespace Piraeus.Grains.Notifications
 
         private static T Deserialize<T>(byte[] stream)
         {
-            if (stream == null) {
+            if (stream == null)
+            {
                 return default;
             }
 
@@ -38,7 +39,8 @@ namespace Piraeus.Grains.Notifications
 
         private static byte[] Serialize(object o)
         {
-            if (o == null) {
+            if (o == null)
+            {
                 return null;
             }
 

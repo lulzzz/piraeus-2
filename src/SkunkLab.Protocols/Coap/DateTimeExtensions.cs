@@ -10,7 +10,8 @@ namespace SkunkLab.Protocols.Coap
         {
             MediaType media = MediaTypeConverter.ConvertToMediaType(contentType);
 
-            switch (media) {
+            switch (media)
+            {
                 case MediaType.TextPlain:
                     return expires.HasValue ? Encoding.UTF8.GetBytes(expires.Value.ToString()) : null;
 

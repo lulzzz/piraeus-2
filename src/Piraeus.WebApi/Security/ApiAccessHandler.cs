@@ -12,7 +12,8 @@ namespace Piraeus.WebApi.Security
             ClaimsPrincipal prin = context.User;
             ClaimsIdentity identity = new ClaimsIdentity(prin.Identity);
 
-            if (requirement.Policy.Evaluate(identity)) {
+            if (requirement.Policy.Evaluate(identity))
+            {
                 context.Succeed(requirement);
             }
 

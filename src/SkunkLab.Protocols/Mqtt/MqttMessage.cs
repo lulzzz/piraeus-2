@@ -67,7 +67,8 @@ namespace SkunkLab.Protocols.Mqtt
             int value = 0;
             index++;
             int digit;
-            do {
+            do
+            {
                 digit = buffer[index++];
                 value += (digit & 127) * multiplier;
                 multiplier *= 128;
@@ -79,18 +80,21 @@ namespace SkunkLab.Protocols.Mqtt
         internal byte[] EncodeRemainingLength(int remainingLength)
         {
             List<byte> list = new List<byte>();
-            do {
+            do
+            {
                 int digit = remainingLength % 128;
                 remainingLength /= 128;
 
-                if (remainingLength > 0) {
+                if (remainingLength > 0)
+                {
                     digit |= 0x80;
                 }
 
                 list.Add((byte)digit);
             } while (remainingLength > 0);
 
-            if (list.Count > 4) {
+            if (list.Count > 4)
+            {
                 throw new InvalidOperationException("Invalid remaining length;");
             }
 

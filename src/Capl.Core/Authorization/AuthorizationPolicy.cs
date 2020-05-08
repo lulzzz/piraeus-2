@@ -50,10 +50,12 @@ namespace Capl.Authorization
             PolicyId = policyId;
             Delegation = delegation;
 
-            if (transforms == null) {
+            if (transforms == null)
+            {
                 Transforms = new TransformCollection();
             }
-            else {
+            else
+            {
                 Transforms = transforms;
             }
         }
@@ -105,13 +107,16 @@ namespace Capl.Authorization
             _ = identity ?? throw new ArgumentNullException(nameof(identity));
 
             List<Claim> claims;
-            if (!Delegation) {
+            if (!Delegation)
+            {
                 claims = new List<Claim>(identity.Claims);
             }
-            else if (identity.Actor != null) {
+            else if (identity.Actor != null)
+            {
                 claims = new List<Claim>(identity.Actor.Claims);
             }
-            else {
+            else
+            {
                 return false;
             }
 
@@ -135,22 +140,27 @@ namespace Capl.Authorization
             PolicyId = new Uri(reader.GetOptionalAttribute(AuthorizationConstants.Attributes.PolicyId));
             string del = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Delegation);
 
-            if (!string.IsNullOrEmpty(del)) {
+            if (!string.IsNullOrEmpty(del))
+            {
                 Delegation = XmlConvert.ToBoolean(del);
             }
 
-            while (reader.Read()) {
+            while (reader.Read())
+            {
                 if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd) ||
                     reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr) ||
-                    reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule)) {
+                    reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule))
+                {
                     Expression = Term.Load(reader);
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms)) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transforms))
+                {
                     Transforms.ReadXml(reader);
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.AuthorizationPolicy)) {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.AuthorizationPolicy))
+                {
                     break;
                 }
             }
@@ -169,7 +179,8 @@ namespace Capl.Authorization
             writer.WriteStartElement(AuthorizationConstants.Elements.AuthorizationPolicy,
                 AuthorizationConstants.Namespaces.Xmlns);
 
-            if (PolicyId != null) {
+            if (PolicyId != null)
+            {
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.PolicyId, PolicyId.ToString());
             }
 
@@ -177,7 +188,8 @@ namespace Capl.Authorization
 
             Expression.WriteXml(writer);
 
-            if (Transforms != null) {
+            if (Transforms != null)
+            {
                 Transforms.WriteXml(writer);
             }
 

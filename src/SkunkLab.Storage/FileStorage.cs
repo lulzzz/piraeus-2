@@ -49,7 +49,8 @@ namespace SkunkLab.Storage
 
             byte[] buffer = null;
 
-            try {
+            try
+            {
                 CloudFileShare choudShare = client.GetShareReference(share);
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
@@ -61,7 +62,8 @@ namespace SkunkLab.Storage
                             ? progress.BytesTransferred
                             : bytesTransferred;
                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                            bytesTransferred <= progress.BytesTransferred) {
+                            bytesTransferred <= progress.BytesTransferred)
+                        {
                             OnDownloadBytesTransferred?.Invoke(this,
                                 new BytesTransferredEventArgs(share, filename, bytesTransferred,
                                     file.Properties.Length));
@@ -72,16 +74,20 @@ namespace SkunkLab.Storage
                 await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default, default, default,
                     progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     buffer = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnDownloadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
@@ -103,7 +109,8 @@ namespace SkunkLab.Storage
 
             byte[] buffer = null;
 
-            try {
+            try
+            {
                 CloudFileShare choudShare = client.GetShareReference(share);
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
@@ -116,7 +123,8 @@ namespace SkunkLab.Storage
                             ? progress.BytesTransferred
                             : bytesTransferred;
                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                            bytesTransferred <= progress.BytesTransferred) {
+                            bytesTransferred <= progress.BytesTransferred)
+                        {
                             OnDownloadBytesTransferred?.Invoke(this,
                                 new BytesTransferredEventArgs(share, filename, bytesTransferred, buffer.Length));
                         }
@@ -125,16 +133,20 @@ namespace SkunkLab.Storage
                 await file.DownloadRangeToByteArrayAsync(buffer, 0, 0, buffer.Length, default, default, default,
                     progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     buffer = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnDownloadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
@@ -156,7 +168,8 @@ namespace SkunkLab.Storage
             double time = watch.Elapsed.TotalMilliseconds;
             long bytesTransferred = 0;
 
-            try {
+            try
+            {
                 CloudFileShare choudShare = client.GetShareReference(share);
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
@@ -168,7 +181,8 @@ namespace SkunkLab.Storage
                             ? progress.BytesTransferred
                             : bytesTransferred;
                         if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                            bytesTransferred <= progress.BytesTransferred) {
+                            bytesTransferred <= progress.BytesTransferred)
+                        {
                             OnDownloadBytesTransferred?.Invoke(this,
                                 new BytesTransferredEventArgs(share, filename, bytesTransferred,
                                     file.Properties.Length));
@@ -177,16 +191,20 @@ namespace SkunkLab.Storage
 
                 await file.DownloadToStreamAsync(stream, default, default, default, progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     stream = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnDownloadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
@@ -202,7 +220,8 @@ namespace SkunkLab.Storage
             _ = share ?? throw new ArgumentNullException(nameof(share));
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
 
-            if (!File.Exists(path)) {
+            if (!File.Exists(path))
+            {
                 throw new FileNotFoundException("path");
             }
 
@@ -220,26 +239,31 @@ namespace SkunkLab.Storage
                         : bytesTransferred;
                     FileInfo info = new FileInfo(path);
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(share, filename, bytesTransferred, info.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudFileShare choudShare = client.GetShareReference(share);
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
                 file.Properties.ContentType = contentType;
                 await file.UploadFromFileAsync(path, default, default, default, progressHandler, token);
             }
-            catch (Exception ex) {
-                if (!(ex.InnerException is TaskCanceledException)) {
+            catch (Exception ex)
+            {
+                if (!(ex.InnerException is TaskCanceledException))
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
@@ -266,29 +290,35 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(share, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudFileShare choudShare = client.GetShareReference(share);
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
                 file.Properties.ContentType = contentType;
                 await file.UploadFromByteArrayAsync(source, 0, source.Length, default, default, default, null, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));
@@ -315,13 +345,15 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(share, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudFileShare choudShare = client.GetShareReference(share);
                 CloudFileDirectory dir = choudShare.GetRootDirectoryReference();
                 CloudFile file = dir.GetFileReference(filename);
@@ -329,16 +361,20 @@ namespace SkunkLab.Storage
                 await file.UploadFromStreamAsync(source, source.Length, default, default, default, progressHandler,
                     token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(share, filename, token.IsCancellationRequested, error));

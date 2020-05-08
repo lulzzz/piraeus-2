@@ -47,7 +47,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);

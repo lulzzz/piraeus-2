@@ -31,13 +31,15 @@ namespace Piraeus.WebApi.Controllers
         [AllowAnonymous]
         public ActionResult<string> Get(string code)
         {
-            try {
+            try
+            {
                 _ = code ?? throw new ArgumentNullException(nameof(code));
 
                 string codeString = HttpUtility.UrlDecode(code);
                 string[] codes = config.GetSecurityCodes();
 
-                if (codes.Contains(codeString)) {
+                if (codes.Contains(codeString))
+                {
                     List<Claim> claims = new List<Claim> {
                         new Claim($"{config.ManagementApiIssuer}/name", Guid.NewGuid().ToString()),
                         new Claim($"{config.ManagementApiIssuer}/role", "manage")
@@ -52,7 +54,8 @@ namespace Piraeus.WebApi.Controllers
                 logger?.LogWarning("Security code mismatch attempting to acquire security token.");
                 throw new IndexOutOfRangeException("Invalid code");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error obtaining security token.");
                 return StatusCode(500, ex.Message);
             }

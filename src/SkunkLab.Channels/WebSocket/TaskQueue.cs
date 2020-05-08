@@ -12,8 +12,10 @@ namespace SkunkLab.Channels.WebSocket
         public Task Enqueue(Func<Task> taskFunc)
         {
             Func<Task, Task> continuationFunction = null;
-            lock (lockObj) {
-                if (continuationFunction == null) {
+            lock (lockObj)
+            {
+                if (continuationFunction == null)
+                {
                     continuationFunction = _ => taskFunc();
                 }
 

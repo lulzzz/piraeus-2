@@ -9,36 +9,44 @@ namespace SkunkLab.Protocols.Coap
         {
             int typeValue = (int)type;
 
-            if (typeValue == 5) {
+            if (typeValue == 5)
+            {
                 return null;
             }
 
-            if (typeValue == 1) {
+            if (typeValue == 1)
+            {
                 return value ?? null;
             }
 
-            if (typeValue == 4) {
+            if (typeValue == 4)
+            {
                 return value;
             }
 
             if (typeValue == 6 || typeValue == 7 || typeValue == 12 || typeValue == 14 || typeValue == 17 ||
-                typeValue == 60) {
-                if (value.Length == 1) {
+                typeValue == 60)
+            {
+                if (value.Length == 1)
+                {
                     return (uint)value[0];
                 }
 
-                if (value.Length == 2) {
+                if (value.Length == 2)
+                {
                     return (uint)value[0] | value[1];
                 }
 
                 return null;
             }
 
-            if (typeValue == 3 || typeValue == 35 || typeValue == 39) {
+            if (typeValue == 3 || typeValue == 35 || typeValue == 39)
+            {
                 return value == null ? null : Encoding.UTF8.GetString(value);
             }
 
-            if (typeValue == 8 || typeValue == 11 || typeValue == 15 || typeValue == 20) {
+            if (typeValue == 8 || typeValue == 11 || typeValue == 15 || typeValue == 20)
+            {
                 return Encoding.UTF8.GetString(value);
             }
 
@@ -48,27 +56,34 @@ namespace SkunkLab.Protocols.Coap
         public static byte[] EncodeOptionValue(this OptionType type, object value)
         {
             int typeValue = (int)type;
-            if (typeValue == 5) {
+            if (typeValue == 5)
+            {
                 return null;
             }
 
-            if (typeValue == 6) {
+            if (typeValue == 6)
+            {
                 byte[] b = { Convert.ToByte(value) };
                 return b;
             }
 
-            if (typeValue == 1) {
+            if (typeValue == 1)
+            {
                 return value == null ? null : (byte[])value;
             }
 
-            if (typeValue == 4) {
+            if (typeValue == 4)
+            {
                 return (byte[])value;
             }
 
-            if (typeValue == 7 || typeValue == 12 || typeValue == 14 || typeValue == 17 || typeValue == 60) {
+            if (typeValue == 7 || typeValue == 12 || typeValue == 14 || typeValue == 17 || typeValue == 60)
+            {
                 uint val = (uint)value;
-                if (val == 0) {
-                    if (typeValue == 12) {
+                if (val == 0)
+                {
+                    if (typeValue == 12)
+                    {
                         return new[] { (byte)val };
                     }
 
@@ -78,11 +93,13 @@ namespace SkunkLab.Protocols.Coap
                 return new[] { (byte)val };
             }
 
-            if (typeValue == 3 || typeValue == 35 || typeValue == 39) {
+            if (typeValue == 3 || typeValue == 35 || typeValue == 39)
+            {
                 return value == null ? null : Encoding.UTF8.GetBytes((string)value);
             }
 
-            if (typeValue == 8 || typeValue == 11 || typeValue == 15 || typeValue == 20) {
+            if (typeValue == 8 || typeValue == 11 || typeValue == 15 || typeValue == 20)
+            {
                 return Encoding.UTF8.GetBytes((string)value);
             }
 

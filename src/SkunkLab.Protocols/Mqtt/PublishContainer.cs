@@ -41,11 +41,13 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Add(ushort key, MqttMessage value)
         {
-            if (!container.ContainsKey(key)) {
+            if (!container.ContainsKey(key))
+            {
                 container.Add(key, value);
                 timeContainer.Add(key, DateTime.UtcNow.AddMilliseconds(exchangeLifetime.TotalMilliseconds));
 
-                if (timer == null) {
+                if (timer == null)
+                {
                     timer = new Timer(exchangeLifetime.TotalMilliseconds);
                     timer.Elapsed += Timer_Elapsed;
                     timer.Start();
@@ -55,7 +57,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Add(KeyValuePair<ushort, MqttMessage> item)
         {
-            if (!container.ContainsKey(item.Key)) {
+            if (!container.ContainsKey(item.Key))
+            {
                 container.Add(item.Key, item.Value);
             }
         }
@@ -101,7 +104,8 @@ namespace SkunkLab.Protocols.Mqtt
             bool result = container.Remove(key);
             timeContainer.Remove(key);
 
-            if (container.Count == 0) {
+            if (container.Count == 0)
+            {
                 timer.Stop();
                 timer = null;
             }
@@ -114,7 +118,8 @@ namespace SkunkLab.Protocols.Mqtt
             bool result = container.Remove(item.Key);
             timeContainer.Remove(item.Key);
 
-            if (container.Count == 0) {
+            if (container.Count == 0)
+            {
                 timer.Stop();
                 timer = null;
             }
@@ -129,9 +134,11 @@ namespace SkunkLab.Protocols.Mqtt
 
         protected void Disposing(bool dispose)
         {
-            if (dispose && !disposed) {
+            if (dispose && !disposed)
+            {
                 disposed = true;
-                if (timer != null) {
+                if (timer != null)
+                {
                     timer.Dispose();
                 }
 
@@ -144,15 +151,18 @@ namespace SkunkLab.Protocols.Mqtt
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (timeContainer.Count > 0) {
+            if (timeContainer.Count > 0)
+            {
                 IEnumerable<KeyValuePair<ushort, DateTime>> items = timeContainer.Where(c => c.Value < DateTime.UtcNow);
-                if (items != null) {
+                if (items != null)
+                {
                     foreach (var item in items)
                         container.Remove(item.Key);
                 }
             }
 
-            if (container.Count == 0) {
+            if (container.Count == 0)
+            {
                 timer.Stop();
                 timer = null;
             }

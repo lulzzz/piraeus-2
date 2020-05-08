@@ -59,11 +59,13 @@ namespace Piraeus.Grains.Notifications
 
             symmetricKey = metadata.SymmetricKey;
 
-            if (!int.TryParse(nvc["clients"], out clientCount)) {
+            if (!int.TryParse(nvc["clients"], out clientCount))
+            {
                 clientCount = 1;
             }
 
-            if (!int.TryParse(nvc["delay"], out delay)) {
+            if (!int.TryParse(nvc["delay"], out delay))
+            {
                 delay = 1000;
             }
 
@@ -81,17 +83,21 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
             queue.Enqueue(message);
-            try {
-                while (!queue.IsEmpty) {
+            try
+            {
+                while (!queue.IsEmpty)
+                {
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     bool isdequeued = queue.TryDequeue(out EventMessage msg);
 
-                    if (!isdequeued) {
+                    if (!isdequeued)
+                    {
                         continue;
                     }
 
                     payload = GetPayload(message);
-                    if (payload == null) {
+                    if (payload == null)
+                    {
                         await logger?.LogWarningAsync(
                             $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink because message is null.");
                         continue;
@@ -101,11 +107,13 @@ namespace Piraeus.Grains.Notifications
                     {
                         Position = 0
                     };
-                    if (message.ContentType.Contains("json")) {
+                    if (message.ContentType.Contains("json"))
+                    {
                         await storageArray[arrayIndex].CreateDocumentAsync(collection.SelfLink,
                             JsonSerializable.LoadFrom<Document>(stream));
                     }
-                    else {
+                    else
+                    {
                         dynamic documentWithAttachment = new {
                             Id = Guid.NewGuid().ToString(),
                             Timestamp = DateTime.UtcNow
@@ -118,22 +126,26 @@ namespace Piraeus.Grains.Notifications
                             new MediaOptions { ContentType = message.ContentType, Slug = slug });
                     }
 
-                    if (message.Audit) {
+                    if (message.Audit)
+                    {
                         record = new MessageAuditRecord(message.MessageId,
                             uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
                             "CosmosDB", "CosmoDB", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink.");
                 record = new MessageAuditRecord(message.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "CosmosDB",
                     "CosmosDB", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (record != null && message.Audit) {
+            finally
+            {
+                if (record != null && message.Audit)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -142,9 +154,12 @@ namespace Piraeus.Grains.Notifications
         private async Task<DocumentCollection> GetCollectionAsync(string dbLink, string id)
         {
             List<DocumentCollection> collections = await ReadCollectionsFeedAsync(dbLink);
-            if (collections != null) {
-                foreach (DocumentCollection collection in collections) {
-                    if (collection.Id == id) {
+            if (collections != null)
+            {
+                foreach (DocumentCollection collection in collections)
+                {
+                    if (collection.Id == id)
+                    {
                         return collection;
                     }
                 }
@@ -155,18 +170,22 @@ namespace Piraeus.Grains.Notifications
 
         private async Task<Database> GetDatabaseAsync()
         {
-            try {
+            try
+            {
                 List<Database> dbs = await ListDatabasesAsync();
 
-                foreach (Database db in dbs) {
-                    if (db.Id == databaseId) {
+                foreach (Database db in dbs)
+                {
+                    if (db.Id == databaseId)
+                    {
                         return db;
                     }
                 }
 
                 return await storageArray[0].CreateDatabaseAsync(new Database { Id = databaseId });
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink failed to get database.");
                 throw;
@@ -175,7 +194,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
@@ -197,11 +217,13 @@ namespace Piraeus.Grains.Notifications
 
         private string GetSlug(string id, string contentType)
         {
-            if (contentType.Contains("text")) {
+            if (contentType.Contains("text"))
+            {
                 return id + ".txt";
             }
 
-            if (contentType.Contains("xml")) {
+            if (contentType.Contains("xml"))
+            {
                 return id + ".xml";
             }
 
@@ -213,7 +235,8 @@ namespace Piraeus.Grains.Notifications
             string continuation = null;
             List<Database> databases = new List<Database>();
 
-            do {
+            do
+            {
                 FeedOptions options = new FeedOptions
                 {
                     RequestContinuation = continuation,
@@ -233,8 +256,10 @@ namespace Piraeus.Grains.Notifications
         {
             string continuation = null;
             List<DocumentCollection> collections = new List<DocumentCollection>();
-            try {
-                do {
+            try
+            {
+                do
+                {
                     FeedOptions options = new FeedOptions
                     {
                         RequestContinuation = continuation,
@@ -251,7 +276,8 @@ namespace Piraeus.Grains.Notifications
 
                 return collections;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to cosmos db sink, failed to find collection.");
                 throw;

@@ -7,23 +7,28 @@ namespace SkunkLab.Protocols.Coap
     {
         public static string ConvertFromMediaType(MediaType? mediaType)
         {
-            if (!mediaType.HasValue) {
+            if (!mediaType.HasValue)
+            {
                 return "application/octet-stream";
             }
 
-            if (mediaType == MediaType.TextPlain) {
+            if (mediaType == MediaType.TextPlain)
+            {
                 return "text/plain";
             }
 
-            if (mediaType == MediaType.Json) {
+            if (mediaType == MediaType.Json)
+            {
                 return "application/json";
             }
 
-            if (mediaType == MediaType.Xml) {
+            if (mediaType == MediaType.Xml)
+            {
                 return "application/xml";
             }
 
-            if (mediaType == MediaType.OctetStream) {
+            if (mediaType == MediaType.OctetStream)
+            {
                 return "application/octet-stream";
             }
 
@@ -37,19 +42,23 @@ namespace SkunkLab.Protocols.Coap
 
             string lower = contentType.ToLower(CultureInfo.InvariantCulture);
 
-            if (lower == "text/plain") {
+            if (lower == "text/plain")
+            {
                 return MediaType.TextPlain;
             }
 
-            if (lower == "application/json" || lower == "text/json") {
+            if (lower == "application/json" || lower == "text/json")
+            {
                 return MediaType.Json;
             }
 
-            if (lower == "application/xml" || lower == "text/xml") {
+            if (lower == "application/xml" || lower == "text/xml")
+            {
                 return MediaType.Xml;
             }
 
-            if (lower == "application/octet-stream") {
+            if (lower == "application/octet-stream")
+            {
                 return MediaType.OctetStream;
             }
 

@@ -56,22 +56,26 @@ namespace Piraeus.Module
         public HttpWebRequest BuildRequest()
         {
             HttpWebRequest request;
-            if (!string.IsNullOrEmpty(SecurityKey)) {
+            if (!string.IsNullOrEmpty(SecurityKey))
+            {
                 string url = string.Format("{0}?key={1}", BaseUrl, SecurityKey);
                 request = (HttpWebRequest)WebRequest.Create(url);
             }
-            else {
+            else
+            {
                 request = (HttpWebRequest)WebRequest.Create(BaseUrl);
             }
 
             request.ContentType = ContentType;
             request.Method = Method;
 
-            if (IsZeroContentLength) {
+            if (IsZeroContentLength)
+            {
                 request.ContentLength = 0;
             }
 
-            if (!string.IsNullOrEmpty(SecurityToken)) {
+            if (!string.IsNullOrEmpty(SecurityToken))
+            {
                 request.Headers.Add("Authorization", string.Format("Bearer {0}", SecurityToken));
             }
 

@@ -22,11 +22,13 @@ namespace Piraeus.Grains.Notifications
         {
             _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
-            if (string.IsNullOrEmpty(metadata.NotifyAddress)) {
+            if (string.IsNullOrEmpty(metadata.NotifyAddress))
+            {
                 throw new NullReferenceException("Subscription metadata has no NotifyAddress for passive event sink.");
             }
 
-            if (!IsInitialized) {
+            if (!IsInitialized)
+            {
                 cert ??= certificate;
                 claims ??= claimset;
             }
@@ -34,39 +36,48 @@ namespace Piraeus.Grains.Notifications
             Uri uri = new Uri(metadata.NotifyAddress);
             IsInitialized = true;
 
-            if (uri.Scheme == "http" || uri.Scheme == "https") {
-                if (uri.Authority.Contains("blob.core.windows.net")) {
+            if (uri.Scheme == "http" || uri.Scheme == "https")
+            {
+                if (uri.Authority.Contains("blob.core.windows.net"))
+                {
                     return new AzureBlobStorageSink(metadata);
                 }
 
-                if (uri.Authority.Contains("queue.core.windows.net")) {
+                if (uri.Authority.Contains("queue.core.windows.net"))
+                {
                     return new AzureQueueStorageSink(metadata);
                 }
 
-                if (uri.Authority.Contains("documents.azure.com")) {
+                if (uri.Authority.Contains("documents.azure.com"))
+                {
                     return new CosmosDBSink(metadata);
                 }
 
                 return new RestWebServiceSink(metadata, claims, cert);
             }
 
-            if (uri.Scheme == "iothub") {
+            if (uri.Scheme == "iothub")
+            {
                 return new IoTHubSink(metadata);
             }
 
-            if (uri.Scheme == "eh") {
+            if (uri.Scheme == "eh")
+            {
                 return new EventHubSink(metadata);
             }
 
-            if (uri.Scheme == "sb") {
+            if (uri.Scheme == "sb")
+            {
                 return new ServiceBusTopicSink(metadata);
             }
 
-            if (uri.Scheme == "eventgrid") {
+            if (uri.Scheme == "eventgrid")
+            {
                 return new EventGridSink(metadata);
             }
 
-            if (uri.Scheme == "redis") {
+            if (uri.Scheme == "redis")
+            {
                 return new RedisSink(metadata);
             }
 

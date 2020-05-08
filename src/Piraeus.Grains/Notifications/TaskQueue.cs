@@ -11,7 +11,8 @@ namespace Piraeus.Grains.Notifications
 
         public Task Enqueue(Func<Task> taskFunc)
         {
-            lock (lockObj) {
+            lock (lockObj)
+            {
                 Func<Task, Task> continuationFunction = _ => taskFunc();
                 Task task = lastQueuedTask
                     .ContinueWith(continuationFunction, TaskContinuationOptions.OnlyOnRanToCompletion).Unwrap();

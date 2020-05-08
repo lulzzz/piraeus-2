@@ -40,7 +40,8 @@ namespace Piraeus.Adapters.Utilities
             bool result = true;
             ValidatorResult vr = null;
 
-            while (result && index < metadataHandlers.Count) {
+            while (result && index < metadataHandlers.Count)
+            {
                 vr = metadataHandlers[index].Invoke(metadata, channel.IsEncrypted);
                 result = vr.Validated;
                 index++;
@@ -55,7 +56,8 @@ namespace Piraeus.Adapters.Utilities
                 : new ClaimsIdentity(context.User.Claims);
 
             index = 0;
-            while (result && index < policyHandlers.Count) {
+            while (result && index < policyHandlers.Count)
+            {
                 vr = policyHandlers[index].Invoke(policy, identity);
                 index++;
             }
@@ -65,7 +67,8 @@ namespace Piraeus.Adapters.Utilities
 
         private static void Init()
         {
-            if (initialized) {
+            if (initialized)
+            {
                 return;
             }
 

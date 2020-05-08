@@ -30,19 +30,23 @@ namespace Capl.Authorization
             _ = localName ?? throw new ArgumentNullException(nameof(localName));
             _ = namespaceUri ?? throw new ArgumentNullException(nameof(namespaceUri));
 
-            if (reader.LocalName != localName) {
+            if (reader.LocalName != localName)
+            {
                 throw new SerializationException(localName);
             }
 
-            if (reader.NamespaceURI != namespaceUri) {
+            if (reader.NamespaceURI != namespaceUri)
+            {
                 throw new SerializationException(localName);
             }
 
-            if (reader.IsEmptyElement) {
+            if (reader.IsEmptyElement)
+            {
                 return null;
             }
 
-            if (reader.NodeType != XmlNodeType.Element) {
+            if (reader.NodeType != XmlNodeType.Element)
+            {
                 throw new SerializationException("Xml reader not positioned on an element to reader the value.");
             }
 
@@ -74,7 +78,8 @@ namespace Capl.Authorization
         {
             string val = reader.GetOptionalAttribute(name);
 
-            if (string.IsNullOrEmpty(val)) {
+            if (string.IsNullOrEmpty(val))
+            {
                 throw new SerializationException(string.Format(CultureInfo.InvariantCulture,
                     "Required attribute {0} not found", name));
             }
@@ -130,16 +135,19 @@ namespace Capl.Authorization
 
             if (reader.IsEmptyElement && reader.LocalName == localName && reader.NamespaceURI == namespaceUri ||
                 reader.NodeType == XmlNodeType.Element && reader.LocalName == localName &&
-                reader.NamespaceURI == namespaceUri) {
+                reader.NamespaceURI == namespaceUri)
+            {
                 return;
             }
 
             reader.MoveToElement();
 
-            while (reader.Read()) {
+            while (reader.Read())
+            {
                 if (reader.IsEmptyElement && reader.LocalName == localName && reader.NamespaceURI == namespaceUri ||
                     reader.NodeType == XmlNodeType.Element && reader.LocalName == localName &&
-                    reader.NamespaceURI == namespaceUri) {
+                    reader.NamespaceURI == namespaceUri)
+                {
                     return;
                 }
             }
@@ -152,12 +160,15 @@ namespace Capl.Authorization
         {
             _ = reader ?? throw new ArgumentNullException(nameof(reader));
 
-            if (reader.NodeType == XmlNodeType.Element) {
+            if (reader.NodeType == XmlNodeType.Element)
+            {
                 return;
             }
 
-            while (reader.Read()) {
-                if (reader.NodeType == XmlNodeType.Element) {
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element)
+                {
                     return;
                 }
             }

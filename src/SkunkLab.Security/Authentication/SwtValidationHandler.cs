@@ -30,19 +30,23 @@ namespace SkunkLab.Security.Authentication
         {
             HttpStatusCode statusCode;
 
-            if (!TryRetrieveToken(request, out string token)) {
+            if (!TryRetrieveToken(request, out string token))
+            {
                 statusCode = HttpStatusCode.Unauthorized;
                 return Task<HttpResponseMessage>.Factory.StartNew(() =>
                     new HttpResponseMessage(statusCode));
             }
 
-            try {
-                if (SecurityTokenValidator.Validate(token, SecurityTokenType.SWT, signingKey, issuer, audience)) {
+            try
+            {
+                if (SecurityTokenValidator.Validate(token, SecurityTokenType.SWT, signingKey, issuer, audience))
+                {
                 }
 
                 return base.SendAsync(request, cancellationToken);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceWarning("Exception in SWT validation.");
                 Trace.TraceError(ex.Message);
                 statusCode = HttpStatusCode.InternalServerError;
@@ -56,7 +60,8 @@ namespace SkunkLab.Security.Authentication
         {
             token = null;
             if (!request.Headers.TryGetValues("Authorization", out IEnumerable<string> authzHeaders) ||
-                authzHeaders.Count() > 1) {
+                authzHeaders.Count() > 1)
+            {
                 return false;
             }
 

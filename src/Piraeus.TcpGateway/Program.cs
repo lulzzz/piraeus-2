@@ -15,7 +15,8 @@ namespace Piraeus.TcpGateway
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddPiraeusConfiguration(out PiraeusConfig config);
-                    if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
+                    if (!string.IsNullOrEmpty(config.InstrumentationKey))
+                    {
                         services.AddApplicationInsightsTelemetry(op =>
                         {
                             op.InstrumentationKey = config.InstrumentationKey;

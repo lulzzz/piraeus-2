@@ -41,8 +41,10 @@ namespace SkunkLab.Protocols.Coap
 
         public void AddMessage(CoapMessage message)
         {
-            if (message.MessageType == CoapMessageType.Confirmable) {
-                if (!retryContainer.ContainsKey(message.MessageId)) {
+            if (message.MessageType == CoapMessageType.Confirmable)
+            {
+                if (!retryContainer.ContainsKey(message.MessageId))
+                {
                     retryContainer.Add(message.MessageId,
                         new Tuple<DateTime, int, CoapMessage>(DateTime.UtcNow.AddMilliseconds(retryMilliseconds), 0,
                             message));
@@ -64,11 +66,13 @@ namespace SkunkLab.Protocols.Coap
             foreach (var item in observeQuery)
                 item.Value(message.Code, MediaTypeConverter.ConvertFromMediaType(message.ContentType), message.Payload);
 
-            if (observeQuery.Count() == 0) {
+            if (observeQuery.Count() == 0)
+            {
                 var query = container.Where(c => c.Value.Item1 == Convert.ToBase64String(message.Token));
                 KeyValuePair<ushort, Tuple<string, DateTime, Action<CodeType, string, byte[]>>>[]
                     kvps = query.ToArray();
-                foreach (var kvp in kvps) {
+                foreach (var kvp in kvps)
+                {
                     kvp.Value.Item3(message.Code, MediaTypeConverter.ConvertFromMediaType(message.ContentType),
                         message.Payload);
                     container.Remove(kvp.Key);
@@ -86,19 +90,22 @@ namespace SkunkLab.Protocols.Coap
 
         public ushort NewId(byte[] token, bool? observe = null, Action<CodeType, string, byte[]> action = null)
         {
-            if (observe.HasValue && observe.Value && action == null) {
+            if (observe.HasValue && observe.Value && action == null)
+            {
                 throw new ArgumentNullException("action");
             }
 
             currentId++;
             currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
 
-            while (container.ContainsKey(currentId)) {
+            while (container.ContainsKey(currentId))
+            {
                 currentId++;
                 currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
             }
 
-            if (observe.HasValue && observe.Value) {
+            if (observe.HasValue && observe.Value)
+            {
                 observeContainer.Add(Convert.ToBase64String(token), action);
             }
 
@@ -123,16 +130,20 @@ namespace SkunkLab.Protocols.Coap
         public void Unobserve(byte[] token)
         {
             string tokenString = Convert.ToBase64String(token);
-            if (observeContainer.ContainsKey(tokenString)) {
+            if (observeContainer.ContainsKey(tokenString))
+            {
                 observeContainer.Remove(tokenString);
             }
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue) {
-                if (disposing) {
-                    if (timer != null) {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (timer != null)
+                    {
                         timer.Stop();
                         timer.Dispose();
                     }
@@ -150,9 +161,11 @@ namespace SkunkLab.Protocols.Coap
         {
             var retryQuery = retryContainer.Where(c => c.Value.Item1 < DateTime.UtcNow);
 
-            if (retryQuery != null) {
+            if (retryQuery != null)
+            {
                 List<ushort> retryUpdateList = new List<ushort>();
-                foreach (var item in retryQuery) {
+                foreach (var item in retryQuery)
+                {
                     OnRetry(this, new CoapMessageEventArgs(item.Value.Item3));
                     retryUpdateList.Add(item.Key);
                 }
@@ -160,12 +173,15 @@ namespace SkunkLab.Protocols.Coap
                 List<ushort> retryRemoveList = new List<ushort>();
                 List<KeyValuePair<ushort, Tuple<DateTime, int, CoapMessage>>> kvpList =
                     new List<KeyValuePair<ushort, Tuple<DateTime, int, CoapMessage>>>();
-                foreach (var item in retryUpdateList) {
+                foreach (var item in retryUpdateList)
+                {
                     Tuple<DateTime, int, CoapMessage> tuple = retryContainer[item];
-                    if (tuple.Item2 + 1 == maxAttempts - 1) {
+                    if (tuple.Item2 + 1 == maxAttempts - 1)
+                    {
                         retryRemoveList.Add(item);
                     }
-                    else {
+                    else
+                    {
                         Tuple<DateTime, int, CoapMessage> t =
                             new Tuple<DateTime, int, CoapMessage>(tuple.Item1.AddMilliseconds(retryMilliseconds),
                                 tuple.Item2 + 1, tuple.Item3);
@@ -186,14 +202,17 @@ namespace SkunkLab.Protocols.Coap
             var query = container.Where(c => c.Value.Item2 < DateTime.UtcNow);
 
             List<ushort> list = new List<ushort>();
-            if (query != null && query.Count() > 0) {
+            if (query != null && query.Count() > 0)
+            {
                 foreach (var item in query)
                     list.Add(item.Key);
             }
 
-            foreach (var item in list) {
+            foreach (var item in list)
+            {
                 container.Remove(item);
-                if (retryContainer.ContainsKey(item)) {
+                if (retryContainer.ContainsKey(item))
+                {
                     retryContainer.Remove(item);
                 }
             }

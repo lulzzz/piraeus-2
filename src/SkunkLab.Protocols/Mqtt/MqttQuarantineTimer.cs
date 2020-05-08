@@ -33,17 +33,21 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Add(MqttMessage message, DirectionType direction)
         {
-            if (message.QualityOfService == QualityOfServiceLevelType.AtMostOnce) {
+            if (message.QualityOfService == QualityOfServiceLevelType.AtMostOnce)
+            {
                 return;
             }
 
-            if (!container.ContainsKey(message.MessageId)) {
-                try {
+            if (!container.ContainsKey(message.MessageId))
+            {
+                try
+                {
                     DateTime timeout = DateTime.UtcNow.AddMilliseconds(config.AckTimeout.TotalMilliseconds);
                     RetryMessageData amd = new RetryMessageData(message, timeout, 0, direction);
                     container.Add(message.MessageId, amd);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Trace.TraceWarning("MQTT quarantine cannot add message id");
                     Trace.TraceError(ex.Message);
                 }
@@ -66,7 +70,8 @@ namespace SkunkLab.Protocols.Mqtt
             currentId++;
             currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
 
-            while (container.ContainsKey(currentId)) {
+            while (container.ContainsKey(currentId))
+            {
                 currentId++;
                 currentId = currentId == ushort.MaxValue ? (ushort)1 : currentId;
             }
@@ -81,13 +86,15 @@ namespace SkunkLab.Protocols.Mqtt
 
         protected void Disposing(bool dispose)
         {
-            if (dispose & !disposed) {
+            if (dispose & !disposed)
+            {
                 disposed = true;
 
                 container.Clear();
                 container = null;
 
-                if (timer != null) {
+                if (timer != null)
+                {
                     timer.Stop();
                     timer.Dispose();
                 }
@@ -96,22 +103,27 @@ namespace SkunkLab.Protocols.Mqtt
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            try {
+            try
+            {
                 List<ushort> list = new List<ushort>();
 
                 KeyValuePair<ushort, RetryMessageData>[] kvps = container.Where(c =>
                     c.Value.NextRetryTime < DateTime.UtcNow
                     && c.Value.Direction == DirectionType.Out).ToArray();
 
-                if (kvps.Length > 0) {
-                    foreach (var item in kvps) {
+                if (kvps.Length > 0)
+                {
+                    foreach (var item in kvps)
+                    {
                         item.Value.Increment(config.AckTimeout);
                         container[item.Key] = item.Value;
 
-                        if (item.Value.AttemptCount >= config.MaxRetransmit) {
+                        if (item.Value.AttemptCount >= config.MaxRetransmit)
+                        {
                             list.Add(item.Key);
                         }
-                        else {
+                        else
+                        {
                             OnRetry?.Invoke(this, new MqttMessageEventArgs(item.Value.Message));
                         }
                     }

@@ -57,11 +57,13 @@ namespace Piraeus.Grains.Notifications
 
             StringBuilder builder = new StringBuilder();
             builder.Append(uriString);
-            for (int i = 0; i < nvc.Count; i++) {
+            for (int i = 0; i < nvc.Count; i++)
+            {
                 string key = nvc.GetKey(i);
                 string value = nvc[key];
                 builder.Append($"{key}={value}");
-                if (i < nvc.Count - 1) {
+                if (i < nvc.Count - 1)
+                {
                     builder.Append("&");
                 }
             }
@@ -75,14 +77,17 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             HttpWebRequest request = null;
             byte[] payload = null;
-            try {
+            try
+            {
                 payload = GetPayload(message);
-                if (payload == null) {
+                if (payload == null)
+                {
                     await logger.LogWarningAsync($"Rest request '{metadata.SubscriptionUriString}' null payload.");
                     return;
                 }
 
-                try {
+                try
+                {
                     request = WebRequest.Create(address) as HttpWebRequest;
                     request.ContentType = message.ContentType;
                     request.Method = "POST";
@@ -93,29 +98,34 @@ namespace Piraeus.Grains.Notifications
                     Stream stream = await request.GetRequestStreamAsync();
                     await stream.WriteAsync(payload, 0, payload.Length);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Trace.TraceError("REST event sink subscription {0} could set request; error {1} ",
                         metadata.SubscriptionUriString, ex.Message);
                     record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length,
                         MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
                 }
 
-                try {
+                try
+                {
                     using HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
                     if (response.StatusCode == HttpStatusCode.Accepted || response.StatusCode == HttpStatusCode.OK ||
-                        response.StatusCode == HttpStatusCode.NoContent) {
+                        response.StatusCode == HttpStatusCode.NoContent)
+                    {
                         await logger.LogInformationAsync($"Rest request success {response.StatusCode}");
                         record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP",
                             payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
-                    else {
+                    else
+                    {
                         await logger.LogWarningAsync($"Rest request warning {response.StatusCode}");
                         record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP",
                             payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow,
                             string.Format("Rest request returned an expected status code {0}", response.StatusCode));
                     }
                 }
-                catch (WebException we) {
+                catch (WebException we)
+                {
                     string faultMessage =
                         $"subscription '{metadata.SubscriptionUriString}' with status code '{we.Status}' and error message '{we.Message}'";
                     await logger.LogErrorAsync(we, $"Rest request success.");
@@ -123,13 +133,16 @@ namespace Piraeus.Grains.Notifications
                         MessageDirectionType.Out, false, DateTime.UtcNow, we.Message);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger.LogErrorAsync(ex, $"Rest request success.");
                 record = new MessageAuditRecord(message.MessageId, address, "WebService", "HTTP", payload.Length,
                     MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (message.Audit && record != null) {
+            finally
+            {
+                if (message.Audit && record != null)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -137,7 +150,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;
@@ -159,18 +173,22 @@ namespace Piraeus.Grains.Notifications
 
         private void SetSecurityToken(HttpWebRequest request)
         {
-            if (!metadata.TokenType.HasValue || metadata.TokenType.Value == SecurityTokenType.None) {
+            if (!metadata.TokenType.HasValue || metadata.TokenType.Value == SecurityTokenType.None)
+            {
                 return;
             }
 
-            if (metadata.TokenType.Value == SecurityTokenType.X509) {
-                if (certificate == null) {
+            if (metadata.TokenType.Value == SecurityTokenType.X509)
+            {
+                if (certificate == null)
+                {
                     throw new InvalidOperationException("X509 client certificates not available to use for REST call.");
                 }
 
                 request.ClientCertificates.Add(certificate);
             }
-            else if (metadata.TokenType.Value == SecurityTokenType.Jwt) {
+            else if (metadata.TokenType.Value == SecurityTokenType.Jwt)
+            {
                 JsonWebToken jwt = new JsonWebToken(metadata.SymmetricKey, claims, 20.0, issuer, audience);
                 token = jwt.ToString();
 
@@ -178,7 +196,8 @@ namespace Piraeus.Grains.Notifications
 
                 request.Headers.Add("Authorization", string.Format("Bearer {0}", token));
             }
-            else {
+            else
+            {
                 throw new InvalidOperationException("No security token type resolved.");
             }
         }

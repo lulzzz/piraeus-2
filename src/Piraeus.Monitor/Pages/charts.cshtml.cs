@@ -13,7 +13,8 @@ namespace Piraeus.Monitor
 
         public void OnGet(string r)
         {
-            if (!string.IsNullOrEmpty(r)) {
+            if (!string.IsNullOrEmpty(r))
+            {
                 ResourceUriString = r;
                 //adapter.AddMetricObserverAsync(r).GetAwaiter();
             }

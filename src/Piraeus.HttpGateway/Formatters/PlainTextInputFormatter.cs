@@ -26,7 +26,8 @@ namespace Piraeus.HttpGateway.Formatters
             var request = context.HttpContext.Request;
             var contentType = context.HttpContext.Request.ContentType;
 
-            if (contentType == CONTENT_TYPE) {
+            if (contentType == CONTENT_TYPE)
+            {
                 using var ms = new MemoryStream();
                 await request.Body.CopyToAsync(ms);
                 var content = ms.ToArray();

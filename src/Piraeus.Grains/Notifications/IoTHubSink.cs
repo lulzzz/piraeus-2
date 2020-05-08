@@ -45,11 +45,13 @@ namespace Piraeus.Grains.Notifications
             propertyName = nvc["propname"];
             propertyValue = nvc["propvalue"];
 
-            if (string.IsNullOrEmpty(methodName)) {
+            if (string.IsNullOrEmpty(methodName))
+            {
                 deviceClient = DeviceClient.CreateFromConnectionString(string.Format(
                     "HostName={0};DeviceId={1};SharedAccessKey={2}", uri.Authority, deviceId, metadata.SymmetricKey));
             }
-            else {
+            else
+            {
                 serviceClient = ServiceClient.CreateFromConnectionString(string.Format(
                     "HostName={0};SharedAccessKeyName={1};SharedAccessKey={2}", uri.Authority, keyName,
                     metadata.SymmetricKey));
@@ -61,17 +63,22 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
 
-            try {
+            try
+            {
                 payload = GetPayload(message);
-                if (payload == null) {
+                if (payload == null)
+                {
                     await logger?.LogWarningAsync(
                         $"Subscription '{metadata.SubscriptionUriString}' message not written to iot hub sink because message is null.");
                     return;
                 }
 
-                if (serviceClient != null) {
-                    if (!string.IsNullOrEmpty(methodName)) {
-                        if (message.ContentType == "application/json") {
+                if (serviceClient != null)
+                {
+                    if (!string.IsNullOrEmpty(methodName))
+                    {
+                        if (message.ContentType == "application/json")
+                        {
                             CloudToDeviceMethod method = new CloudToDeviceMethod(methodName);
                             method.SetPayloadJson(Encoding.UTF8.GetString(payload));
                             await serviceClient.InvokeDeviceMethodAsync(deviceId, method);
@@ -79,7 +86,8 @@ namespace Piraeus.Grains.Notifications
                                 $"iothub://{uri.Authority}", "IoTHub", "IoTHub", payload.Length,
                                 MessageDirectionType.Out, true, DateTime.UtcNow);
                         }
-                        else {
+                        else
+                        {
                             await logger?.LogWarningAsync(
                                 $"Subscription '{metadata.SubscriptionUriString}' cannot send IoTHub direct method sink because content-type is not JSON.");
                             record = new MessageAuditRecord(message.MessageId,
@@ -90,14 +98,16 @@ namespace Piraeus.Grains.Notifications
                                     deviceId));
                         }
                     }
-                    else {
+                    else
+                    {
                         Message serviceMessage = new Message(payload)
                         {
                             ContentType = message.ContentType,
                             MessageId = message.MessageId
                         };
 
-                        if (!string.IsNullOrEmpty(propertyName)) {
+                        if (!string.IsNullOrEmpty(propertyName))
+                        {
                             serviceMessage.Properties.Add(propertyName, propertyValue);
                         }
 
@@ -106,14 +116,16 @@ namespace Piraeus.Grains.Notifications
                             "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }
-                else if (deviceClient != null) {
+                else if (deviceClient != null)
+                {
                     Microsoft.Azure.Devices.Client.Message msg = new Microsoft.Azure.Devices.Client.Message(payload)
                     {
                         ContentType = message.ContentType,
                         MessageId = message.MessageId
                     };
 
-                    if (!string.IsNullOrEmpty(propertyName)) {
+                    if (!string.IsNullOrEmpty(propertyName))
+                    {
                         msg.Properties.Add(propertyName, propertyValue);
                     }
 
@@ -121,7 +133,8 @@ namespace Piraeus.Grains.Notifications
                     record = new MessageAuditRecord(message.MessageId, $"iothub://{uri.Authority}",
                         "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
-                else {
+                else
+                {
                     await logger?.LogWarningAsync(
                         $"Subscription '{metadata.SubscriptionUriString}' IoTHub sink has neither service or device client.");
 
@@ -130,14 +143,17 @@ namespace Piraeus.Grains.Notifications
                         "IoTHub subscription has neither service or device client");
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to IoTHub sink.");
                 record = new MessageAuditRecord(message.MessageId, $"iothub://{uri.Authority}",
                     "IoTHub", "IoTHub", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (record != null && message.Audit) {
+            finally
+            {
+                if (record != null && message.Audit)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -145,7 +161,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

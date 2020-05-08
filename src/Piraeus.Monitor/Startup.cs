@@ -36,10 +36,12 @@ namespace Piraeus.Monitor
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment()) {
+            if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
             }
-            else {
+            else
+            {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
@@ -47,7 +49,8 @@ namespace Piraeus.Monitor
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            if (!string.IsNullOrEmpty(config.TenantId)) {
+            if (!string.IsNullOrEmpty(config.TenantId))
+            {
                 app.UseCookiePolicy();
                 app.UseAuthentication();
             }
@@ -72,7 +75,8 @@ namespace Piraeus.Monitor
 
             if (string.Equals(
                 Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"),
-                "true", StringComparison.OrdinalIgnoreCase)) {
+                "true", StringComparison.OrdinalIgnoreCase))
+            {
                 services.Configure<ForwardedHeadersOptions>(options =>
                 {
                     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
@@ -86,11 +90,13 @@ namespace Piraeus.Monitor
 
                 Console.WriteLine("Forward headers IS CONFIGURED");
             }
-            else {
+            else
+            {
                 Console.WriteLine("Forward headers NOT CONFIGURED");
             }
 
-            if (!string.IsNullOrEmpty(config.TenantId)) {
+            if (!string.IsNullOrEmpty(config.TenantId))
+            {
                 Console.WriteLine($"Using tenantId = {config.TenantId}");
                 //----------------------------------------------------------------
                 services.Configure<CookiePolicyOptions>(options =>
@@ -128,7 +134,8 @@ namespace Piraeus.Monitor
                 {
                     options.EnableEndpointRouting = false;
 
-                    if (!string.IsNullOrEmpty(config.TenantId)) {
+                    if (!string.IsNullOrEmpty(config.TenantId))
+                    {
                         var policy = new AuthorizationPolicyBuilder()
                             .RequireAuthenticatedUser()
                             .Build();

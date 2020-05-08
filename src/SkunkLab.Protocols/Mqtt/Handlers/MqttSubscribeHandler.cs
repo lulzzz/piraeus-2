@@ -12,7 +12,8 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
         public override async Task<MqttMessage> ProcessAsync()
         {
-            if (!Session.IsConnected) {
+            if (!Session.IsConnected)
+            {
                 Session.Disconnect(Message);
                 return null;
             }
@@ -23,7 +24,8 @@ namespace SkunkLab.Protocols.Mqtt.Handlers
 
             List<string> validSubs = Session.Subscribe(Message);
             IEnumerator<KeyValuePair<string, QualityOfServiceLevelType>> en = msg.Topics.GetEnumerator();
-            while (en.MoveNext()) {
+            while (en.MoveNext())
+            {
                 MqttUri uri = new MqttUri(en.Current.Key);
                 QualityOfServiceLevelType qos = validSubs.Contains(uri.ToString())
                     ? en.Current.Value

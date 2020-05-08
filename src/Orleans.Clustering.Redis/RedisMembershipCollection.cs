@@ -30,7 +30,8 @@ namespace Orleans.Clustering.Redis
 
         public void Add(RedisMembershipEntry item)
         {
-            if (!HasEntry(item)) {
+            if (!HasEntry(item))
+            {
                 list.Add(item);
             }
         }
@@ -90,14 +91,16 @@ namespace Orleans.Clustering.Redis
 
         public MembershipTableData ToMembershipTableData()
         {
-            try {
+            try
+            {
                 List<Tuple<MembershipEntry, string>> data = list.ToArray().Where(x => x != null)
                     .Select(x => x.ToMembershipEntryTuple())
                     .ToList();
 
                 return new MembershipTableData(data, tableVersion);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 throw ex;
             }
         }
@@ -119,7 +122,8 @@ namespace Orleans.Clustering.Redis
             string val = iAmAlivetime.ToString();
             var item = list.ToArray().Where(x =>
                 x != null && x.DeploymentId == clusterId && x.ParsableAddress == address.ToParsableString()).First();
-            if (item != null) {
+            if (item != null)
+            {
                 item.IAmAliveTime = iAmAlivetime;
                 ret = true;
             }

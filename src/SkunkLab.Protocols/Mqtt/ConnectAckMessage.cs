@@ -55,7 +55,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -68,7 +69,8 @@ namespace SkunkLab.Protocols.Mqtt
             index = 0;
             byte reserved = buffer[index++];
 
-            if (reserved != 0x00) {
+            if (reserved != 0x00)
+            {
                 SessionPresent = Convert.ToBoolean(reserved);
             }
 

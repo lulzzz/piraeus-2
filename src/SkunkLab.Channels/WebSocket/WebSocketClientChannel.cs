@@ -72,7 +72,8 @@ namespace SkunkLab.Channels.WebSocket
             get => state;
             internal set
             {
-                if (value != state) {
+                if (value != state)
+                {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
@@ -90,12 +91,14 @@ namespace SkunkLab.Channels.WebSocket
 
         public override async Task CloseAsync()
         {
-            if (client != null && client.State == WebSocketState.Open) {
+            if (client != null && client.State == WebSocketState.Open)
+            {
                 State = ChannelState.ClosedReceived;
                 await client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal", token);
             }
 
-            if (State != ChannelState.Closed) {
+            if (State != ChannelState.Closed)
+            {
                 State = ChannelState.Closed;
 
                 OnClose?.Invoke(this, new ChannelCloseEventArgs(Id));
@@ -110,7 +113,8 @@ namespace SkunkLab.Channels.WebSocket
 
         public override void Open()
         {
-            if (client != null) {
+            if (client != null)
+            {
                 sendQueue.Enqueue(() => client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal", token));
 
                 client.Dispose();
@@ -118,32 +122,38 @@ namespace SkunkLab.Channels.WebSocket
 
             client = new ClientWebSocket();
 
-            if (!string.IsNullOrEmpty(subProtocol)) {
+            if (!string.IsNullOrEmpty(subProtocol))
+            {
                 client.Options.AddSubProtocol(subProtocol);
             }
 
-            if (!string.IsNullOrEmpty(securityToken) && subProtocol != "mqtt") {
+            if (!string.IsNullOrEmpty(securityToken) && subProtocol != "mqtt")
+            {
                 client.Options.SetRequestHeader("Authorization", string.Format("Bearer {0}", securityToken));
             }
 
-            if (certificate != null) {
+            if (certificate != null)
+            {
                 client.Options.ClientCertificates.Add(certificate);
             }
 
             State = ChannelState.Connecting;
 
-            try {
+            try
+            {
                 sendQueue.Enqueue(() => client.ConnectAsync(endpoint, token));
                 State = ChannelState.Open;
                 IsAuthenticated = true;
 
                 OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
             }
-            catch (AggregateException ae) {
+            catch (AggregateException ae)
+            {
                 State = ChannelState.Aborted;
                 throw ae.Flatten();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 State = ChannelState.Aborted;
                 throw ex;
             }
@@ -151,36 +161,43 @@ namespace SkunkLab.Channels.WebSocket
 
         public override async Task OpenAsync()
         {
-            if (client != null) {
+            if (client != null)
+            {
                 await client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal", token);
                 client.Dispose();
             }
 
             client = new ClientWebSocket();
 
-            if (!string.IsNullOrEmpty(subProtocol)) {
+            if (!string.IsNullOrEmpty(subProtocol))
+            {
                 client.Options.AddSubProtocol(subProtocol);
             }
 
-            if (!string.IsNullOrEmpty(securityToken)) {
+            if (!string.IsNullOrEmpty(securityToken))
+            {
                 client.Options.SetRequestHeader("Authorization", string.Format("Bearer {0}", securityToken));
             }
 
-            if (certificate != null) {
+            if (certificate != null)
+            {
                 client.Options.ClientCertificates.Add(certificate);
             }
 
             State = ChannelState.Connecting;
-            try {
+            try
+            {
                 await client.ConnectAsync(endpoint, token);
                 State = ChannelState.Open;
                 OnOpen?.Invoke(this, new ChannelOpenEventArgs(Id, null));
             }
-            catch (AggregateException ae) {
+            catch (AggregateException ae)
+            {
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ae.Flatten()));
                 State = ChannelState.Aborted;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 State = ChannelState.Aborted;
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
             }
@@ -188,20 +205,26 @@ namespace SkunkLab.Channels.WebSocket
 
         public override async Task ReceiveAsync()
         {
-            try {
-                while (!token.IsCancellationRequested && IsConnected) {
+            try
+            {
+                while (!token.IsCancellationRequested && IsConnected)
+                {
                     ChannelReceivedEventArgs args = null;
 
                     WebSocketMessage message = await WebSocketMessageReader.ReadMessageAsync(client,
                         new byte[config.ReceiveLoopBufferSize], config.MaxIncomingMessageSize, token);
-                    if (message.Data != null) {
-                        if (message.MessageType == WebSocketMessageType.Binary) {
+                    if (message.Data != null)
+                    {
+                        if (message.MessageType == WebSocketMessageType.Binary)
+                        {
                             args = new ChannelReceivedEventArgs(Id, message.Data as byte[]);
                         }
-                        else if (message.MessageType == WebSocketMessageType.Text) {
+                        else if (message.MessageType == WebSocketMessageType.Text)
+                        {
                             args = new ChannelReceivedEventArgs(Id, Encoding.UTF8.GetBytes(message.Data as string));
                         }
-                        else {
+                        else
+                        {
                             State = ChannelState.ClosedReceived;
                             break;
                         }
@@ -210,7 +233,8 @@ namespace SkunkLab.Channels.WebSocket
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError("Web socket client channel {0} error {1}", Id, ex.Message);
             }
 
@@ -224,24 +248,31 @@ namespace SkunkLab.Channels.WebSocket
 
         public override async Task SendAsync(byte[] message)
         {
-            if (message.Length > config.MaxIncomingMessageSize) {
+            if (message.Length > config.MaxIncomingMessageSize)
+            {
                 throw new InvalidOperationException("Exceeds max message size.");
             }
 
             queue.Enqueue(message);
 
-            try {
-                while (!queue.IsEmpty) {
+            try
+            {
+                while (!queue.IsEmpty)
+                {
                     bool isDequeued = queue.TryDequeue(out byte[] msg);
-                    if (isDequeued) {
-                        if (msg.Length <= config.SendBufferSize) {
+                    if (isDequeued)
+                    {
+                        if (msg.Length <= config.SendBufferSize)
+                        {
                             await sendQueue.Enqueue(() => client.SendAsync(new ArraySegment<byte>(msg),
                                 WebSocketMessageType.Binary, true, token));
                         }
-                        else {
+                        else
+                        {
                             int offset = 0;
                             byte[] buffer = null;
-                            while (msg.Length - offset > config.SendBufferSize) {
+                            while (msg.Length - offset > config.SendBufferSize)
+                            {
                                 buffer = new byte[config.SendBufferSize];
                                 Buffer.BlockCopy(msg, offset, buffer, 0, buffer.Length);
                                 await sendQueue.Enqueue(() => client.SendAsync(new ArraySegment<byte>(buffer),
@@ -257,18 +288,22 @@ namespace SkunkLab.Channels.WebSocket
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError("Web socket client {0} error {1}", Id, ex.Message);
             }
         }
 
         protected void Disposing(bool dispose)
         {
-            if (dispose & !disposed) {
+            if (dispose & !disposed)
+            {
                 disposed = true;
 
-                if (client != null) {
-                    if (client.State == WebSocketState.Open) {
+                if (client != null)
+                {
+                    if (client.State == WebSocketState.Open)
+                    {
                         client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal Disposed", token);
                     }
 

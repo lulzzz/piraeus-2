@@ -21,11 +21,13 @@ namespace SkunkLab.Channels.Tcp
         private bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain,
             SslPolicyErrors sslpolicyerrors)
         {
-            if (sslpolicyerrors != SslPolicyErrors.None) {
+            if (sslpolicyerrors != SslPolicyErrors.None)
+            {
                 return false;
             }
 
-            if (certificate == null) {
+            if (certificate == null)
+            {
                 return false;
             }
 
@@ -131,7 +133,8 @@ namespace SkunkLab.Channels.Tcp
             Id = "tcp-" + Guid.NewGuid();
             this.token.Register(async () => await CloseAsync());
 
-            if (certificate != null) {
+            if (certificate != null)
+            {
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(remoteEndpoint.Address);
                 hostname = ipHostInfo.HostName;
             }
@@ -160,7 +163,8 @@ namespace SkunkLab.Channels.Tcp
             Id = "tcp-" + Guid.NewGuid();
             this.token.Register(async () => await CloseAsync());
 
-            if (certificate != null) {
+            if (certificate != null)
+            {
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(address);
                 hostname = ipHostInfo.HostName;
             }
@@ -320,7 +324,8 @@ namespace SkunkLab.Channels.Tcp
             get => state;
             internal set
             {
-                if (state != value) {
+                if (state != value)
+                {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
@@ -342,14 +347,17 @@ namespace SkunkLab.Channels.Tcp
 
         public override async Task CloseAsync()
         {
-            if (State == ChannelState.Closed || State == ChannelState.ClosedReceived) {
+            if (State == ChannelState.Closed || State == ChannelState.ClosedReceived)
+            {
                 return;
             }
 
             State = ChannelState.ClosedReceived;
 
-            try {
-                if (protocol != null) {
+            try
+            {
+                if (protocol != null)
+                {
                     protocol.Close();
                 }
             }
@@ -358,22 +366,27 @@ namespace SkunkLab.Channels.Tcp
             protocol = null;
 
             if (client != null && client.Client != null && client.Client.Connected &&
-                client.Client.Poll(10, SelectMode.SelectRead)) {
-                if (client.Client.UseOnlyOverlappedIO) {
+                client.Client.Poll(10, SelectMode.SelectRead))
+            {
+                if (client.Client.UseOnlyOverlappedIO)
+                {
                     client.Client.DuplicateAndClose(Process.GetCurrentProcess().Id);
                 }
-                else {
+                else
+                {
                     client.Close();
                 }
             }
 
             client = null;
 
-            if (readConnection != null) {
+            if (readConnection != null)
+            {
                 readConnection.Dispose();
             }
 
-            if (writeConnection != null) {
+            if (writeConnection != null)
+            {
                 writeConnection.Dispose();
             }
 
@@ -395,23 +408,29 @@ namespace SkunkLab.Channels.Tcp
             readConnection = new SemaphoreSlim(1);
             writeConnection = new SemaphoreSlim(1);
 
-            if (localEP != null) {
+            if (localEP != null)
+            {
                 client = new TcpClient(localEP);
             }
-            else {
+            else
+            {
                 client = new TcpClient();
             }
 
-            if (remoteEP != null) {
+            if (remoteEP != null)
+            {
                 await client.ConnectAsync(remoteEP.Address, remoteEP.Port);
             }
-            else if (address != null) {
+            else if (address != null)
+            {
                 await client.ConnectAsync(address, port);
             }
-            else if (!string.IsNullOrEmpty(hostname)) {
+            else if (!string.IsNullOrEmpty(hostname))
+            {
                 await client.ConnectAsync(hostname, port);
             }
-            else {
+            else
+            {
                 State = ChannelState.Aborted;
                 InvalidOperationException ioe =
                     new InvalidOperationException("Tcp client connection parameters not sufficient.");
@@ -421,13 +440,16 @@ namespace SkunkLab.Channels.Tcp
 
             localStream = client.GetStream();
 
-            if (psk != null) {
-                try {
+            if (psk != null)
+            {
+                try
+                {
                     protocol = TlsClientUtil.ConnectPskTlsClient(pskIdentity, psk, localStream);
                     stream = protocol.Stream;
                     IsEncrypted = true;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     State = ChannelState.Aborted;
                     Console.WriteLine("Fault opening TLS connection {0}", ex.Message);
                     Trace.TraceError(ex.Message);
@@ -435,28 +457,33 @@ namespace SkunkLab.Channels.Tcp
                     return;
                 }
             }
-            else if (certificate != null) {
+            else if (certificate != null)
+            {
                 stream = new SslStream(localStream, true, ValidateCertificate);
                 IsEncrypted = true;
 
-                try {
+                try
+                {
                     X509CertificateCollection certificates = new X509CertificateCollection();
                     X509Certificate cert = new X509Certificate(certificate.RawData);
                     certificates.Add(cert);
                     SslStream sslStream = (SslStream)stream;
                     await sslStream.AuthenticateAsClientAsync(hostname, certificates, SslProtocols.Tls12, true);
 
-                    if (!sslStream.IsEncrypted || !sslStream.IsSigned) {
+                    if (!sslStream.IsEncrypted || !sslStream.IsSigned)
+                    {
                         throw new AuthenticationException("SSL stream is not both encrypted and signed.");
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     State = ChannelState.Aborted;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
                     throw;
                 }
             }
-            else {
+            else
+            {
                 stream = localStream;
             }
 
@@ -473,18 +500,23 @@ namespace SkunkLab.Channels.Tcp
             int offset = 0;
             int bytesRead = 0;
 
-            try {
-                while (client.Connected && !token.IsCancellationRequested) {
+            try
+            {
+                while (client.Connected && !token.IsCancellationRequested)
+                {
                     await readConnection.WaitAsync();
 
-                    while (offset < 4) {
-                        if (offset == 0) {
+                    while (offset < 4)
+                    {
+                        if (offset == 0)
+                        {
                             prefix = new byte[4];
                         }
 
                         bytesRead = await stream.ReadAsync(prefix, offset, prefix.Length - offset);
 
-                        if (bytesRead == 0) {
+                        if (bytesRead == 0)
+                        {
                             return;
                         }
 
@@ -494,7 +526,8 @@ namespace SkunkLab.Channels.Tcp
                     prefix = BitConverter.IsLittleEndian ? prefix.Reverse().ToArray() : prefix;
                     remainingLength = BitConverter.ToInt32(prefix, 0);
 
-                    if (remainingLength >= maxBufferSize) {
+                    if (remainingLength >= maxBufferSize)
+                    {
                         throw new IndexOutOfRangeException(
                             "TCP client channel receive message exceeds max buffer size for receiveasync");
                     }
@@ -503,7 +536,8 @@ namespace SkunkLab.Channels.Tcp
 
                     byte[] message = new byte[remainingLength];
 
-                    while (remainingLength > 0) {
+                    while (remainingLength > 0)
+                    {
                         buffer = new byte[remainingLength];
                         bytesRead = await stream.ReadAsync(buffer, 0, remainingLength);
                         remainingLength -= bytesRead;
@@ -517,24 +551,28 @@ namespace SkunkLab.Channels.Tcp
                     readConnection.Release();
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 error = ex;
             }
-            finally {
+            finally
+            {
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, error ?? new TimeoutException("Receiver closing")));
             }
         }
 
         public override async Task SendAsync(byte[] msg)
         {
-            if (msg == null || msg.Length == 0) {
+            if (msg == null || msg.Length == 0)
+            {
                 OnError?.Invoke(this,
                     new ChannelErrorEventArgs(Id,
                         new IndexOutOfRangeException(
                             "TCP client channel cannot send null or 0-length message for sendasync-1")));
             }
 
-            if (msg.Length > maxBufferSize) {
+            if (msg.Length > maxBufferSize)
+            {
                 OnError?.Invoke(this,
                     new ChannelErrorEventArgs(Id,
                         new IndexOutOfRangeException(
@@ -543,26 +581,32 @@ namespace SkunkLab.Channels.Tcp
 
             queue.Enqueue(msg);
 
-            while (queue.Count > 0) {
+            while (queue.Count > 0)
+            {
                 byte[] message = queue.Dequeue();
 
-                try {
+                try
+                {
                     await writeConnection.WaitAsync();
-                    if (protocol != null) {
+                    if (protocol != null)
+                    {
                         stream.Write(msg, 0, msg.Length);
                         stream.Flush();
                     }
-                    else {
+                    else
+                    {
                         await stream.WriteAsync(msg, 0, msg.Length);
                         await stream.FlushAsync();
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Trace.TraceError(ex.Message);
                     State = ChannelState.Aborted;
                     OnError?.Invoke(this, new ChannelErrorEventArgs(Id, ex));
                 }
-                finally {
+                finally
+                {
                     writeConnection.Release();
                 }
             }
@@ -570,14 +614,18 @@ namespace SkunkLab.Channels.Tcp
 
         protected void Disposing(bool dispose)
         {
-            if (dispose & !disposed) {
+            if (dispose & !disposed)
+            {
                 disposed = true;
 
-                if (!(State == ChannelState.Closed || State == ChannelState.ClosedReceived)) {
-                    try {
+                if (!(State == ChannelState.Closed || State == ChannelState.ClosedReceived))
+                {
+                    try
+                    {
                         CloseAsync().GetAwaiter();
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         Console.WriteLine("Exception Dispose/Closing TCP Client {0}", ex.Message);
                         Console.WriteLine("***** Inner Exception {0} *****", ex.InnerException);
                         Console.WriteLine("***** Stack Trace {0} *****", ex.InnerException.StackTrace);

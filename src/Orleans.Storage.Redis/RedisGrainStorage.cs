@@ -36,22 +36,26 @@ namespace Orleans.Storage.Redis
         {
             string key = grainReference.ToKeyString();
 
-            try {
+            try
+            {
                 await database.KeyDeleteAsync(key);
                 logger.LogDebug($"Redis grain state deleted {key}");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger.LogError(ex, "Failed clear state for key '{key}'.");
             }
         }
 
         public void Participate(ISiloLifecycle lifecycle)
         {
-            try {
+            try
+            {
                 lifecycle.Subscribe(OptionFormattingUtilities.Name<RedisGrainStorage>(name), options.InitStage, Init);
                 logger.LogInformation($"Lifecycle started for {name}");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger.LogError(ex, "Redis grain storage failed participate in lifecycle.");
             }
         }
@@ -60,21 +64,26 @@ namespace Orleans.Storage.Redis
         {
             string key = grainReference.ToKeyString();
 
-            try {
+            try
+            {
                 var val = await database.StringGetAsync(key);
 
-                if (!val.IsNull) {
-                    if (options.Serializer == SerializerType.Json) {
+                if (!val.IsNull)
+                {
+                    if (options.Serializer == SerializerType.Json)
+                    {
                         grainState.State = JsonConvert.DeserializeObject(val);
                     }
-                    else {
+                    else
+                    {
                         grainState.State = serializer.Deserialize(val);
                     }
                 }
 
                 logger.LogDebug($"Redis grain state read {key}");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger.LogError(ex, $"Failed read state for key '{key}'.");
             }
         }
@@ -83,21 +92,25 @@ namespace Orleans.Storage.Redis
         {
             var key = grainReference.ToKeyString();
 
-            try {
+            try
+            {
                 var state = grainState.State;
 
-                if (options.Serializer == SerializerType.Json) {
+                if (options.Serializer == SerializerType.Json)
+                {
                     var payload = JsonConvert.SerializeObject(state);
                     await database.StringSetAsync(key, payload);
                 }
-                else {
+                else
+                {
                     var payload = serializer.Serialize(state);
                     await database.StringSetAsync(key, payload);
                 }
 
                 logger.LogDebug($"Redis grain state wrote {key}");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger.LogError(ex, $"Failed write state for key '{key}'");
             }
         }
@@ -105,8 +118,10 @@ namespace Orleans.Storage.Redis
         private IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
                     return hostInfo.AddressList[index];
                 }
             }
@@ -116,11 +131,13 @@ namespace Orleans.Storage.Redis
 
         private IPAddress GetIPAddress(EndPoint endpoint)
         {
-            if (endpoint is DnsEndPoint dnsEndpoint) {
+            if (endpoint is DnsEndPoint dnsEndpoint)
+            {
                 return GetIPAddress(dnsEndpoint.Host);
             }
 
-            if (endpoint is IPEndPoint ipEndpoint) {
+            if (endpoint is IPEndPoint ipEndpoint)
+            {
                 return ipEndpoint.Address;
             }
 
@@ -130,10 +147,12 @@ namespace Orleans.Storage.Redis
         private ConfigurationOptions GetRedisConfiguration()
         {
             ConfigurationOptions configOptions;
-            if (!string.IsNullOrEmpty(options.ConnectionString)) {
+            if (!string.IsNullOrEmpty(options.ConnectionString))
+            {
                 configOptions = ConfigurationOptions.Parse(options.ConnectionString);
             }
-            else {
+            else
+            {
                 configOptions = new ConfigurationOptions
                 {
                     ConnectRetry = options.ConnectRetry ?? 4,
@@ -146,7 +165,8 @@ namespace Orleans.Storage.Redis
                 };
             }
 
-            if (options.IsLocalDocker) {
+            if (options.IsLocalDocker)
+            {
                 IPAddress address = GetIPAddress(configOptions.EndPoints[0]);
                 EndPoint endpoint = configOptions.EndPoints[0];
                 configOptions.EndPoints.Remove(endpoint);
@@ -158,11 +178,13 @@ namespace Orleans.Storage.Redis
 
         private async Task Init(CancellationToken ct)
         {
-            if (options.Serializer == SerializerType.BinaryFormatter) {
+            if (options.Serializer == SerializerType.BinaryFormatter)
+            {
                 serializer = new BinarySerializer();
             }
 
-            if (connection != null && !connection.IsConnected) {
+            if (connection != null && !connection.IsConnected)
+            {
                 await connection.CloseAsync();
             }
 

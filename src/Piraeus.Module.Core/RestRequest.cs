@@ -18,7 +18,8 @@ namespace Piraeus.Module
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST POST operation return status code {0}",
                     response.StatusCode.ToString()));
             }
@@ -30,29 +31,35 @@ namespace Piraeus.Module
             HttpWebRequest request = requestBuilder.BuildRequest();
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST GET operation return status code {0}",
                     response.StatusCode.ToString()));
             }
 
             byte[] buffer = new byte[16384];
             byte[] msg = null;
-            using (Stream stream = response.GetResponseStream()) {
+            using (Stream stream = response.GetResponseStream())
+            {
                 using MemoryStream bufferStream = new MemoryStream();
                 int bytesRead;
-                do {
+                do
+                {
                     bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead > 0) {
+                    if (bytesRead > 0)
+                    {
                         bufferStream.Write(buffer, 0, bytesRead);
                     }
                 } while (bytesRead > 0);
 
-                if (bufferStream != null && bufferStream.Length > 0) {
+                if (bufferStream != null && bufferStream.Length > 0)
+                {
                     msg = bufferStream.ToArray();
                 }
             }
 
-            if (msg != null) {
+            if (msg != null)
+            {
                 return Serializer.Deserialize<T>(contentType, msg);
             }
 
@@ -65,7 +72,8 @@ namespace Piraeus.Module
             request.ContentLength = 0;
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST POST operation return status code {0}",
                     response.StatusCode.ToString()));
             }
@@ -79,19 +87,23 @@ namespace Piraeus.Module
             request.ContentLength = 0;
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST POST operation return status code {0}",
                     response.StatusCode.ToString()));
             }
 
             byte[] buffer = new byte[16384];
             byte[] msg = null;
-            using (Stream responseStream = response.GetResponseStream()) {
+            using (Stream responseStream = response.GetResponseStream())
+            {
                 using MemoryStream bufferStream = new MemoryStream();
                 int bytesRead;
-                do {
+                do
+                {
                     bytesRead = responseStream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead > 0) {
+                    if (bytesRead > 0)
+                    {
                         bufferStream.Write(buffer, 0, bytesRead);
                     }
                 } while (bytesRead > 0);
@@ -115,19 +127,23 @@ namespace Piraeus.Module
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST POST operation return status code {0}",
                     response.StatusCode.ToString()));
             }
 
             byte[] buffer = new byte[16384];
             byte[] msg = null;
-            using (Stream responseStream = response.GetResponseStream()) {
+            using (Stream responseStream = response.GetResponseStream())
+            {
                 using MemoryStream bufferStream = new MemoryStream();
                 int bytesRead;
-                do {
+                do
+                {
                     bytesRead = responseStream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead > 0) {
+                    if (bytesRead > 0)
+                    {
                         bufferStream.Write(buffer, 0, bytesRead);
                     }
                 } while (bytesRead > 0);
@@ -153,7 +169,8 @@ namespace Piraeus.Module
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST POST operation return status code {0}",
                     response.StatusCode.ToString()));
             }
@@ -171,7 +188,8 @@ namespace Piraeus.Module
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode != HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
                 throw new WebException(string.Format("REST PUT operation return status code {0}",
                     response.StatusCode.ToString()));
             }

@@ -17,7 +17,8 @@ namespace Piraeus.Grains
         {
             _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
-            if (State.Container.Count < 1000 && !State.Container.Contains(resourceUriString)) {
+            if (State.Container.Count < 1000 && !State.Container.Contains(resourceUriString))
+            {
                 State.Container.Add(resourceUriString);
                 return await Task.FromResult(true);
             }
@@ -26,8 +27,10 @@ namespace Piraeus.Grains
             nextId++;
 
             ISigmaAlgebraChain nextChain = GrainFactory.GetGrain<ISigmaAlgebraChain>(nextId);
-            while (await nextChain.GetCountAsync() >= 1000) {
-                if (await nextChain.ContainsAsync(resourceUriString)) {
+            while (await nextChain.GetCountAsync() >= 1000)
+            {
+                if (await nextChain.ContainsAsync(resourceUriString))
+                {
                     return await Task.FromResult(false);
                 }
 
@@ -35,7 +38,8 @@ namespace Piraeus.Grains
                 nextChain = GrainFactory.GetGrain<ISigmaAlgebraChain>(nextId);
             }
 
-            if (await nextChain.ContainsAsync(resourceUriString)) {
+            if (await nextChain.ContainsAsync(resourceUriString))
+            {
                 return await Task.FromResult(false);
             }
 
@@ -45,7 +49,8 @@ namespace Piraeus.Grains
 
         public async Task ChainupAsync()
         {
-            if (State.Container.Count == 0) {
+            if (State.Container.Count == 0)
+            {
                 return;
             }
 
@@ -56,18 +61,21 @@ namespace Piraeus.Grains
             int count = State.Container.Count;
             int nextCount = await nextChain.GetCountAsync();
 
-            if (count <= 1000 && nextCount > 0) {
+            if (count <= 1000 && nextCount > 0)
+            {
                 List<string> list = await nextChain.GetListAsync();
                 int qty = 1000 - count;
                 int delta = qty > list.Count ? list.Count : qty;
 
-                for (int i = 0; i < delta; i++) {
+                for (int i = 0; i < delta; i++)
+                {
                     State.Container.Add(list[i]);
                     await nextChain.RemoveAsync(list[i]);
                 }
 
                 nextCount = await nextChain.GetCountAsync();
-                if (nextCount > 0) {
+                if (nextCount > 0)
+                {
                     await nextChain.ChainupAsync();
                 }
             }
@@ -133,27 +141,31 @@ namespace Piraeus.Grains
         {
             bool result = false;
 
-            if (State.Container.Contains(resourceUriString)) {
+            if (State.Container.Contains(resourceUriString))
+            {
                 result = State.Container.Remove(resourceUriString);
                 await ChainupAsync();
                 return await Task.FromResult(result);
             }
 
-            while (!result) {
+            while (!result)
+            {
                 long nextId = State.Id;
                 nextId++;
 
                 ISigmaAlgebraChain nextChain = GrainFactory.GetGrain<ISigmaAlgebraChain>(nextId);
                 int cnt = await nextChain.GetCountAsync();
 
-                if (cnt == 0) {
+                if (cnt == 0)
+                {
                     break;
                 }
 
                 result = await nextChain.RemoveAsync(resourceUriString);
             }
 
-            if (result) {
+            if (result)
+            {
                 await ChainupAsync();
             }
 

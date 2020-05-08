@@ -38,18 +38,21 @@ namespace Piraeus.Grains.Notifications
             queue = nvc["queue"];
 
             string ttlString = nvc["ttl"];
-            if (!string.IsNullOrEmpty(ttlString)) {
+            if (!string.IsNullOrEmpty(ttlString))
+            {
                 ttl = TimeSpan.Parse(ttlString);
             }
 
             Uri.TryCreate(metadata.SymmetricKey, UriKind.Absolute, out Uri sasUri);
 
-            if (sasUri == null) {
+            if (sasUri == null)
+            {
                 storage = QueueStorage.New(
                     $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] { '.' })[0]};AccountKey={metadata.SymmetricKey};",
                     10000, 1000);
             }
-            else {
+            else
+            {
                 string connectionString = $"BlobEndpoint={queue};SharedAccessSignature={metadata.SymmetricKey}";
                 storage = QueueStorage.New(connectionString, 1000, 5120000);
             }
@@ -62,15 +65,19 @@ namespace Piraeus.Grains.Notifications
             EventMessage msg = null;
             loadQueue.Enqueue(message);
 
-            try {
-                while (!loadQueue.IsEmpty) {
+            try
+            {
+                while (!loadQueue.IsEmpty)
+                {
                     bool isdequeued = loadQueue.TryDequeue(out msg);
-                    if (!isdequeued) {
+                    if (!isdequeued)
+                    {
                         continue;
                     }
 
                     payload = GetPayload(msg);
-                    if (payload == null) {
+                    if (payload == null)
+                    {
                         await logger?.LogWarningAsync(
                             $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink because message is null.");
                         return;
@@ -78,7 +85,8 @@ namespace Piraeus.Grains.Notifications
 
                     await storage.EnqueueAsync(queue, payload, ttl);
 
-                    if (message.Audit) {
+                    if (message.Audit)
+                    {
                         record = new MessageAuditRecord(msg.MessageId,
                             uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(),
                             "AzureQueue", "AzureQueue", payload.Length, MessageDirectionType.Out, true,
@@ -86,7 +94,8 @@ namespace Piraeus.Grains.Notifications
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to queue sink.");
                 record = new MessageAuditRecord(msg.MessageId,
@@ -94,8 +103,10 @@ namespace Piraeus.Grains.Notifications
                     "AzureQueue", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
                 throw;
             }
-            finally {
-                if (record != null && msg.Audit) {
+            finally
+            {
+                if (record != null && msg.Audit)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -103,7 +114,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

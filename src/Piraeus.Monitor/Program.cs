@@ -18,10 +18,12 @@ namespace Piraeus.Monitor
                         string hostname = Dns.GetHostName();
                         Console.WriteLine($"Hostname = {hostname}");
                         IPAddress address = GetIPAddress(hostname);
-                        if (hostname == "localhost") {
+                        if (hostname == "localhost")
+                        {
                             options.Listen(address, 44376);
                         }
-                        else {
+                        else
+                        {
                             options.ListenAnyIP(8087);
                             Console.WriteLine("Listening on 8080");
                         }
@@ -38,8 +40,10 @@ namespace Piraeus.Monitor
         private static IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
                     return hostInfo.AddressList[index];
                 }
             }

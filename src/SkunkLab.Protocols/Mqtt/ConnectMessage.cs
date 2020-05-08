@@ -188,7 +188,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -204,10 +205,12 @@ namespace SkunkLab.Protocols.Mqtt
             protocolNameLength |= buffer[index++];
 
             byte[] protocolName = new byte[protocolNameLength];
-            try {
+            try
+            {
                 Buffer.BlockCopy(buffer, index, protocolName, 0, protocolNameLength);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError(ex.Message);
             }
 
@@ -234,19 +237,22 @@ namespace SkunkLab.Protocols.Mqtt
             ClientId = ByteContainer.DecodeString(buffer, index, out int length);
             index += length;
 
-            if (WillFlag) {
+            if (WillFlag)
+            {
                 WillTopic = ByteContainer.DecodeString(buffer, index, out length);
                 index += length;
                 WillMessage = ByteContainer.DecodeString(buffer, index, out length);
                 index += length;
             }
 
-            if (usernameFlag) {
+            if (usernameFlag)
+            {
                 Username = ByteContainer.DecodeString(buffer, index, out length);
                 index += length;
             }
 
-            if (passwordFlag) {
+            if (passwordFlag)
+            {
                 Password = ByteContainer.DecodeString(buffer, index, out _);
             }
 
@@ -258,15 +264,18 @@ namespace SkunkLab.Protocols.Mqtt
             usernameFlag = !string.IsNullOrEmpty(Username);
             passwordFlag = !string.IsNullOrEmpty(Password);
 
-            if (passwordFlag && !usernameFlag) {
+            if (passwordFlag && !usernameFlag)
+            {
             }
 
             if (WillFlag && (string.IsNullOrEmpty(WillTopic) || string.IsNullOrEmpty(WillMessage) ||
-                             !WillQualityOfServiceLevel.HasValue)) {
+                             !WillQualityOfServiceLevel.HasValue))
+            {
             }
 
             willQoS = 0x00;
-            if (WillQualityOfServiceLevel.HasValue) {
+            if (WillQualityOfServiceLevel.HasValue)
+            {
                 willQoS = (byte)(int)WillQualityOfServiceLevel;
             }
 

@@ -28,7 +28,8 @@ namespace Piraeus.Module
                 MatchExpression = MatchExpression
             };
 
-            if (!string.IsNullOrEmpty(Issuer)) {
+            if (!string.IsNullOrEmpty(Issuer))
+            {
                 rule.Issuer = Issuer;
             }
 

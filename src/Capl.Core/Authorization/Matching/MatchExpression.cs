@@ -16,12 +16,14 @@ namespace Capl.Authorization.Matching
             _ = matchType ?? throw new ArgumentNullException(nameof(matchType));
 
             MatchExpression matchExpression;
-            if (matchExpressions == null) {
+            if (matchExpressions == null)
+            {
                 matchExpression =
                     MatchExpressionDictionary.Default
                         [matchType.ToString()]; //CaplConfigurationManager.MatchExpressions[matchType.ToString()];
             }
-            else {
+            else
+            {
                 matchExpression = matchExpressions[matchType.ToString()];
             }
 

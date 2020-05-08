@@ -51,7 +51,8 @@ namespace Piraeus.HttpGateway
             services.AddSingletonOrleansClusterClient(orleansConfig);
             LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(LoggerType.AppInsights)) {
+            if (loggers.HasFlag(LoggerType.AppInsights))
+            {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
                     op.InstrumentationKey = config.InstrumentationKey;

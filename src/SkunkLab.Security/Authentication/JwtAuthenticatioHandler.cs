@@ -21,20 +21,24 @@ namespace SkunkLab.Security.Authentication
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!Request.Headers.TryGetValue(HeaderNames.Authorization, out var authorization)) {
+            if (!Request.Headers.TryGetValue(HeaderNames.Authorization, out var authorization))
+            {
                 return Task.FromResult(AuthenticateResult.Fail("Cannot read authorization header."));
             }
 
             string[] parts = authorization.ToArray()[0].Split(" ");
-            if (parts.Length != 2) {
+            if (parts.Length != 2)
+            {
                 return Task.FromResult(AuthenticateResult.Fail("Invalid JWT security token."));
             }
 
             string tokenString = parts[1];
-            try {
+            try
+            {
                 JsonWebToken.Authenticate(tokenString, Options.Issuer, Options.Audience, Options.SigningKey);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError(ex.Message);
                 return Task.FromResult(AuthenticateResult.Fail("Not authenticated."));
             }

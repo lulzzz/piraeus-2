@@ -54,15 +54,18 @@ namespace SkunkLab.Protocols.Coap
             get
             {
                 int typeValue = (int)Type;
-                if (typeValue == 1 || typeValue == 4) {
+                if (typeValue == 1 || typeValue == 4)
+                {
                     return typeof(byte[]);
                 }
 
-                if (typeValue == 5) {
+                if (typeValue == 5)
+                {
                     return null;
                 }
 
-                if (typeValue == 7 || typeValue == 12 || typeValue == 14 || typeValue == 17 || typeValue == 60) {
+                if (typeValue == 7 || typeValue == 12 || typeValue == 14 || typeValue == 17 || typeValue == 60)
+                {
                     return typeof(uint);
                 }
 
@@ -102,11 +105,13 @@ namespace SkunkLab.Protocols.Coap
             byte[] encodedValue = Type.EncodeOptionValue(Value);
             int valueLength = encodedValue.Length;
 
-            if (delta > ushort.MaxValue) {
+            if (delta > ushort.MaxValue)
+            {
                 throw new InvalidOperationException("Option delta exceeds max length.");
             }
 
-            if (valueLength > ushort.MaxValue) {
+            if (valueLength > ushort.MaxValue)
+            {
                 throw new InvalidOperationException("Option value exceeds max length.");
             }
 
@@ -124,7 +129,8 @@ namespace SkunkLab.Protocols.Coap
                 deltaBuffer.Length == 1 ? new[] { (byte)(delta - 13) } :
                 new[] { (byte)(((delta - 269) >> 8) & 0x00FF), (byte)((delta - 269) & 0x00FF) };
 
-            if (deltaArray != null) {
+            if (deltaArray != null)
+            {
                 Buffer.BlockCopy(deltaArray, 0, buffer, index, deltaArray.Length);
                 index += deltaArray.Length;
             }
@@ -133,7 +139,8 @@ namespace SkunkLab.Protocols.Coap
                 valueBuffer.Length == 1 ? new[] { (byte)(valueLength - 13) } : new[]
                     {(byte)(((valueLength - 269) >> 8) & 0x00FF), (byte)((valueLength - 269) & 0x00FF)};
 
-            if (valueArray != null) {
+            if (valueArray != null)
+            {
                 Buffer.BlockCopy(valueArray, 0, buffer, index, valueArray.Length);
                 index += valueArray.Length;
             }

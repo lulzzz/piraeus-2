@@ -51,19 +51,23 @@ namespace Piraeus.Grains.Notifications
             connectionString =
                 $"Endpoint=sb://{uri.Authority}/;SharedAccessKeyName={keyName};SharedAccessKey={metadata.SymmetricKey}";
 
-            if (!int.TryParse(nvc["clients"], out clientCount)) {
+            if (!int.TryParse(nvc["clients"], out clientCount))
+            {
                 clientCount = 1;
             }
 
-            if (!string.IsNullOrEmpty(partitionId)) {
+            if (!string.IsNullOrEmpty(partitionId))
+            {
                 senderArray = new PartitionSender[clientCount];
             }
 
             storageArray = new EventHubClient[clientCount];
-            for (int i = 0; i < clientCount; i++) {
+            for (int i = 0; i < clientCount; i++)
+            {
                 storageArray[i] = EventHubClient.CreateFromConnectionString(connectionString);
 
-                if (!string.IsNullOrEmpty(partitionId)) {
+                if (!string.IsNullOrEmpty(partitionId))
+                {
                     senderArray[i] = storageArray[i].CreatePartitionSender(partitionId);
                 }
             }
@@ -74,15 +78,18 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
 
-            try {
+            try
+            {
                 byte[] msg = GetPayload(message);
                 queue.Enqueue(msg);
 
-                while (!queue.IsEmpty) {
+                while (!queue.IsEmpty)
+                {
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                     queue.TryDequeue(out payload);
 
-                    if (payload == null) {
+                    if (payload == null)
+                    {
                         await logger?.LogWarningAsync(
                             $"Subscription '{metadata.SubscriptionUriString}' message not written to event hub sink because message is null.");
                         return;
@@ -91,21 +98,25 @@ namespace Piraeus.Grains.Notifications
                     EventData data = new EventData(payload);
                     data.Properties.Add("Content-Type", message.ContentType);
 
-                    if (string.IsNullOrEmpty(partitionId)) {
+                    if (string.IsNullOrEmpty(partitionId))
+                    {
                         await storageArray[arrayIndex].SendAsync(data);
                     }
-                    else {
+                    else
+                    {
                         await senderArray[arrayIndex].SendAsync(data);
                     }
 
-                    if (message.Audit && record != null) {
+                    if (message.Audit && record != null)
+                    {
                         record = new MessageAuditRecord(message.MessageId,
                             $"sb://{uri.Authority}/{hubName}", "EventHub", "EventHub",
                             payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid hub sink.");
                 record = new MessageAuditRecord(message.MessageId, string.Format("sb://{0}", uri.Authority, hubName),
@@ -113,8 +124,10 @@ namespace Piraeus.Grains.Notifications
                     ex.Message);
                 throw;
             }
-            finally {
-                if (message.Audit && record != null) {
+            finally
+            {
+                if (message.Audit && record != null)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -122,7 +135,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

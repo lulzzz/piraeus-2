@@ -35,7 +35,8 @@ namespace SkunkLab.Protocols.Mqtt
         public void Add(byte[] array)
         {
             int index = 0;
-            while (index < array.Length) {
+            while (index < array.Length)
+            {
                 header.Add(array[index]);
                 index++;
             }
@@ -43,7 +44,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Add(string value)
         {
-            if (string.IsNullOrEmpty(value)) {
+            if (string.IsNullOrEmpty(value))
+            {
                 return;
             }
 

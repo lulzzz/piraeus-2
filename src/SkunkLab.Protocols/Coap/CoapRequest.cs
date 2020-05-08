@@ -53,7 +53,8 @@ namespace SkunkLab.Protocols.Coap
         {
             int index = 0;
             byte header = message[index++];
-            if (header >> 0x06 != 1) {
+            if (header >> 0x06 != 1)
+            {
                 throw new CoapVersionMismatchException("Coap Version 1 is only supported version for Coap request.");
             }
 
@@ -71,7 +72,8 @@ namespace SkunkLab.Protocols.Coap
             index += TokenLength;
             int previous = 0;
             bool marker = (message[index] & 0xFF) == 0xFF;
-            while (!marker) {
+            while (!marker)
+            {
                 int delta = message[index] >> 0x04;
                 CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
                 Options.Add(CoapOption);
@@ -79,7 +81,8 @@ namespace SkunkLab.Protocols.Coap
                 marker = (message[index] & 0xFF) == 0xFF;
             }
 
-            if (marker) {
+            if (marker)
+            {
                 index++;
                 Payload = new byte[message.Length - index];
                 Buffer.BlockCopy(message, index, Payload, 0, Payload.Length);
@@ -102,7 +105,8 @@ namespace SkunkLab.Protocols.Coap
             header[index++] = (byte)((MessageId >> 8) & 0x00FF);
             header[index++] = (byte)(MessageId & 0x00FF);
 
-            if (TokenLength > 0) {
+            if (TokenLength > 0)
+            {
                 Buffer.BlockCopy(Token, 0, header, 4, TokenLength);
             }
 
@@ -110,31 +114,37 @@ namespace SkunkLab.Protocols.Coap
 
             byte[] options = null;
 
-            if (Options.Count > 0) {
+            if (Options.Count > 0)
+            {
                 OptionBuilder builder = new OptionBuilder(Options.ToArray());
                 options = builder.Encode();
                 length += options.Length;
             }
 
             byte[] buffer;
-            if (Payload != null) {
+            if (Payload != null)
+            {
                 length += Payload.Length + 1;
                 buffer = new byte[length];
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
-                if (options != null) {
+                if (options != null)
+                {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
                     Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length + options.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + options.Length + 1, Payload.Length);
                 }
-                else {
+                else
+                {
                     Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + 1, Payload.Length);
                 }
             }
-            else {
+            else
+            {
                 buffer = new byte[length];
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
-                if (options != null) {
+                if (options != null)
+                {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
                 }
             }

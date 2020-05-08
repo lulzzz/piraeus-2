@@ -36,7 +36,8 @@ namespace Piraeus.WebSocketGateway
             services.AddTransientOrleansClusterClient(orleansConfig);
             LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(LoggerType.AppInsights)) {
+            if (loggers.HasFlag(LoggerType.AppInsights))
+            {
                 services.AddApplicationInsightsTelemetry(op =>
                 {
                     op.InstrumentationKey = config.InstrumentationKey;
@@ -44,8 +45,10 @@ namespace Piraeus.WebSocketGateway
                     op.EnableHeartbeat = true;
                 });
             }
-            else {
-                if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
+            else
+            {
+                if (!string.IsNullOrEmpty(config.InstrumentationKey))
+                {
                     services.AddApplicationInsightsTelemetry(config.InstrumentationKey);
                 }
             }

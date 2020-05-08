@@ -63,7 +63,8 @@ namespace Piraeus.Adapters
             identity = decoder.Id;
             indexes = decoder.Indexes;
             adapter = new OrleansAdapter(identity, channel.TypeId, "REST", graphManager, logger);
-            if (method == "GET") {
+            if (method == "GET")
+            {
                 adapter.OnObserve += Adapter_OnObserve;
             }
 
@@ -74,12 +75,14 @@ namespace Piraeus.Adapters
 
             auditFactory = AuditFactory.CreateSingleton();
             if (config.AuditConnectionString != null &&
-                config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
+                config.AuditConnectionString.Contains("DefaultEndpointsProtocol"))
+            {
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"),
                     AuditType.Message);
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
             }
-            else if (config.AuditConnectionString != null) {
+            else if (config.AuditConnectionString != null)
+            {
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
             }
@@ -115,28 +118,36 @@ namespace Piraeus.Adapters
 
         protected void Disposing(bool disposing)
         {
-            if (!disposed) {
-                if (disposing) {
-                    try {
-                        if (adapter != null) {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    try
+                    {
+                        if (adapter != null)
+                        {
                             adapter.Dispose();
                             logger?.LogDebugAsync($"HTTP orleans adapter disposed on channel {Channel.Id}")
                                 .GetAwaiter();
                         }
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         logger?.LogErrorAsync(ex,
                             $"REST adapter disposing orleans adapter error on channel '{Channel.Id}'.").GetAwaiter();
                     }
 
-                    try {
-                        if (Channel != null) {
+                    try
+                    {
+                        if (Channel != null)
+                        {
                             string channelId = Channel.Id;
                             Channel.Dispose();
                             logger?.LogDebugAsync($"REST adapter channel {channelId} disposed").GetAwaiter();
                         }
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         logger?.LogErrorAsync(ex, $"REST adapter Disposing channel on channel '{Channel.Id}'.")
                             .GetAwaiter();
                     }
@@ -172,32 +183,40 @@ namespace Piraeus.Adapters
         {
             Exception error = null;
 
-            if (method == "POST" && string.IsNullOrEmpty(resource)) {
+            if (method == "POST" && string.IsNullOrEmpty(resource))
+            {
                 error = new Exception("REST adapter cannot send message without resource.");
             }
 
-            if (method == "POST" && string.IsNullOrEmpty(contentType)) {
+            if (method == "POST" && string.IsNullOrEmpty(contentType))
+            {
                 error = new Exception("REST adapter cannot send message without content-type.");
             }
 
-            if (method == "POST" && (e.Message == null || e.Message.Length == 0)) {
+            if (method == "POST" && (e.Message == null || e.Message.Length == 0))
+            {
                 error = new Exception("REST adapter cannot send empty message.");
             }
 
-            if (method == "GET" && (subscriptions == null || subscriptions.Count() == 0)) {
+            if (method == "GET" && (subscriptions == null || subscriptions.Count() == 0))
+            {
                 error = new Exception("REST adapter cannot subscribe to '0' subscriptions.");
             }
 
-            if (error != null) {
+            if (error != null)
+            {
                 logger?.LogWarningAsync(error.Message).GetAwaiter();
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(channel.Id, error));
                 return;
             }
 
-            try {
-                if (method == "POST") {
+            try
+            {
+                if (method == "POST")
+                {
                     EventMessage message = new EventMessage(contentType, resource, protocolType, e.Message);
-                    if (!string.IsNullOrEmpty(messageUri.CacheKey)) {
+                    if (!string.IsNullOrEmpty(messageUri.CacheKey))
+                    {
                         message.CacheKey = messageUri.CacheKey;
                     }
 
@@ -209,8 +228,10 @@ namespace Piraeus.Adapters
                     OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(Channel.Id));
                 }
 
-                if (method == "GET") {
-                    foreach (var subscription in subscriptions) {
+                if (method == "GET")
+                {
+                    foreach (var subscription in subscriptions)
+                    {
                         SubscriptionMetadata metadata = new SubscriptionMetadata
                         {
                             Identity = identity,
@@ -222,7 +243,8 @@ namespace Piraeus.Adapters
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogErrorAsync($"REST adapter processing error on receive - {ex.Message}");
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(channel.Id, ex));
             }

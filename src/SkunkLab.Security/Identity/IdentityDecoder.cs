@@ -15,12 +15,15 @@ namespace SkunkLab.Security.Identity
         {
             Id = DecodeClaimType(context, identityClaimType);
 
-            if (indexes != null) {
+            if (indexes != null)
+            {
                 Indexes = new List<KeyValuePair<string, string>>();
 
-                foreach (var item in indexes) {
+                foreach (var item in indexes)
+                {
                     string value = DecodeClaimType(context, item.Key);
-                    if (!string.IsNullOrEmpty(value)) {
+                    if (!string.IsNullOrEmpty(value))
+                    {
                         Indexes.Add(new KeyValuePair<string, string>(item.Value, value));
                     }
                 }
@@ -39,17 +42,20 @@ namespace SkunkLab.Security.Identity
 
         private string DecodeClaimType(HttpContext context, string claimType)
         {
-            if (claimType == null) {
+            if (claimType == null)
+            {
                 return null;
             }
 
-            if (context == null) {
+            if (context == null)
+            {
                 return DecodeClaimType(claimType);
             }
 
             IEnumerable<Claim> claims =
                 context.User.Claims.Where(c => c.Type.ToLowerInvariant() == claimType.ToLowerInvariant());
-            if (claims != null && claims.Count() == 1) {
+            if (claims != null && claims.Count() == 1)
+            {
                 return claims.First().Value;
             }
 
@@ -60,11 +66,13 @@ namespace SkunkLab.Security.Identity
         {
             Task<string> task = Task.Factory.StartNew(() =>
             {
-                if (claimType == null) {
+                if (claimType == null)
+                {
                     return null;
                 }
 
-                if (!(Thread.CurrentPrincipal is ClaimsPrincipal principal)) {
+                if (!(Thread.CurrentPrincipal is ClaimsPrincipal principal))
+                {
                     return null;
                 }
 

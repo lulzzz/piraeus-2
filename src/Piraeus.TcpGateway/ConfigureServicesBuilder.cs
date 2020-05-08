@@ -9,13 +9,15 @@ namespace Piraeus.TcpGateway
     {
         public ConfigureServicesBuilder(MethodInfo configureServices)
         {
-            if (configureServices == null) {
+            if (configureServices == null)
+            {
                 throw new ArgumentNullException(nameof(configureServices));
             }
 
             var parameters = configureServices.GetParameters();
             if (parameters.Length > 1 ||
-                parameters.Any(p => p.ParameterType != typeof(IServiceCollection))) {
+                parameters.Any(p => p.ParameterType != typeof(IServiceCollection)))
+            {
                 throw new InvalidOperationException(
                     "ConfigureServices can take at most a single IServiceCollection parameter.");
             }
@@ -40,7 +42,8 @@ namespace Piraeus.TcpGateway
         {
             var parameters = new object[MethodInfo.GetParameters().Length];
 
-            if (parameters.Length > 0) {
+            if (parameters.Length > 0)
+            {
                 parameters[0] = exportServices;
             }
 

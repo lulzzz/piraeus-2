@@ -19,10 +19,12 @@ namespace Piraeus.Module
         {
             string url;
 
-            if (string.IsNullOrEmpty(Filter)) {
+            if (string.IsNullOrEmpty(Filter))
+            {
                 url = $"{ServiceUrl}/api/resource/getsigmaalgebra";
             }
-            else {
+            else
+            {
                 url = $"{ServiceUrl}/api/resource/getsigmaalgebrawithfilter?filter={Filter}";
             }
 

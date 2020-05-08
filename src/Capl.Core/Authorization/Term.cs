@@ -37,25 +37,29 @@ namespace Capl.Authorization
 
             reader.MoveToStartElement();
 
-            if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule)) {
+            if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule))
+            {
                 Rule rule = new Rule();
                 rule.ReadXml(reader);
                 evalExp = rule;
             }
 
-            if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd)) {
+            if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd))
+            {
                 LogicalAndCollection logicalAnd = new LogicalAndCollection();
                 logicalAnd.ReadXml(reader);
                 evalExp = logicalAnd;
             }
 
-            if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr)) {
+            if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr))
+            {
                 LogicalOrCollection logicalOr = new LogicalOrCollection();
                 logicalOr.ReadXml(reader);
                 evalExp = logicalOr;
             }
 
-            if (evalExp != null) {
+            if (evalExp != null)
+            {
                 return evalExp;
             }
 

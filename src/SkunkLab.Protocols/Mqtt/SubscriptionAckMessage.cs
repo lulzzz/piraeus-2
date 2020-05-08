@@ -43,7 +43,8 @@ namespace SkunkLab.Protocols.Mqtt
 
             ByteContainer qosContainer = new ByteContainer();
             int index = 0;
-            while (index < QualityOfServiceLevels.Count) {
+            while (index < QualityOfServiceLevels.Count)
+            {
                 byte qos = (byte)(int)QualityOfServiceLevels[index];
                 qosContainer.Add(qos);
                 index++;
@@ -73,7 +74,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -88,7 +90,8 @@ namespace SkunkLab.Protocols.Mqtt
 
             MessageId = messageId;
 
-            while (index < buffer.Length) {
+            while (index < buffer.Length)
+            {
                 QualityOfServiceLevelType qosLevel = (QualityOfServiceLevelType)buffer[index++];
                 QualityOfServiceLevels.Add(qosLevel);
             }

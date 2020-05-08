@@ -51,7 +51,8 @@ namespace Piraeus.Clients.Mqtt
 
             ConnectMessage msg = new ConnectMessage(clientId, username, password, keepaliveSeconds, cleanSession);
 
-            if (!channel.IsConnected) {
+            if (!channel.IsConnected)
+            {
                 await channel.OpenAsync();
                 Task task = channel.ReceiveAsync();
                 await Task.WhenAll(task);
@@ -71,7 +72,8 @@ namespace Piraeus.Clients.Mqtt
             ushort id = session.NewId();
             PublishMessage msg = new PublishMessage(dup, qos, retain, id, topic, data);
 
-            if (qos != QualityOfServiceLevelType.AtMostOnce) {
+            if (qos != QualityOfServiceLevelType.AtMostOnce)
+            {
                 session.Quarantine(msg, DirectionType.In);
             }
 
@@ -94,7 +96,8 @@ namespace Piraeus.Clients.Mqtt
         {
             Dictionary<string, QualityOfServiceLevelType> dict = new Dictionary<string, QualityOfServiceLevelType>();
 
-            foreach (var tuple in subscriptions) {
+            foreach (var tuple in subscriptions)
+            {
                 dict.Add(tuple.Item1, tuple.Item2);
                 dispatcher.Register(tuple.Item1, tuple.Item3);
             }
@@ -140,7 +143,8 @@ namespace Piraeus.Clients.Mqtt
 
             MqttMessage response = handler.ProcessAsync().GetAwaiter().GetResult();
 
-            if (response != null) {
+            if (response != null)
+            {
                 channel.SendAsync(response.Encode()).GetAwaiter();
             }
         }

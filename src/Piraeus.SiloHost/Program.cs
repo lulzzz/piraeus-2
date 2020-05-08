@@ -20,16 +20,19 @@ namespace Piraeus.SiloHost.Core
                     LogLevel orleansLogLevel = Enum.Parse<LogLevel>(orleansConfig.LogLevel, true);
                     LoggerType loggers = orleansConfig.GetLoggerTypes();
 
-                    if (loggers.HasFlag(LoggerType.Console)) {
+                    if (loggers.HasFlag(LoggerType.Console))
+                    {
                         builder.AddConsole();
                     }
 
-                    if (loggers.HasFlag(LoggerType.Debug)) {
+                    if (loggers.HasFlag(LoggerType.Debug))
+                    {
                         builder.AddDebug();
                     }
 
                     if (loggers.HasFlag(LoggerType.AppInsights) &&
-                        !string.IsNullOrEmpty(orleansConfig.InstrumentationKey)) {
+                        !string.IsNullOrEmpty(orleansConfig.InstrumentationKey))
+                    {
                         builder.AddApplicationInsights(orleansConfig.InstrumentationKey);
                     }
 

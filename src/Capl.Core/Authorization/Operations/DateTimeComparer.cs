@@ -22,11 +22,13 @@ namespace Capl.Authorization.Operations
             DateTime left = XmlConvert.ToDateTime((string)x, XmlDateTimeSerializationMode.Utc);
             DateTime right = XmlConvert.ToDateTime((string)y, XmlDateTimeSerializationMode.Utc);
 
-            if (left == right) {
+            if (left == right)
+            {
                 return 0;
             }
 
-            if (left < right) {
+            if (left < right)
+            {
                 return -1;
             }
 

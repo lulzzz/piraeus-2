@@ -63,7 +63,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, TcpClient client, int blockSize = 0x4000,
             int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpServerChannel(client, maxBufferSize, token);
             }
 
@@ -74,7 +75,8 @@ namespace SkunkLab.Channels.Tcp
             string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000,
             CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(address, port, localEP, pskIdentity, psk, maxBufferSize, token);
             }
 
@@ -85,7 +87,8 @@ namespace SkunkLab.Channels.Tcp
             string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000,
             CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(hostname, port, localEP, pskIdentity, psk, maxBufferSize, token);
             }
 
@@ -95,7 +98,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, string pskIdentity, byte[] psk,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(hostname, port, null, pskIdentity, psk, maxBufferSize, token);
             }
 
@@ -105,7 +109,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, string pskIdentity,
             byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(address, port, null, pskIdentity, psk, maxBufferSize, token);
             }
 
@@ -115,7 +120,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, string pskIdentity, byte[] psk,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(remoteEndpoint, null, pskIdentity, psk, maxBufferSize, token);
             }
 
@@ -126,7 +132,8 @@ namespace SkunkLab.Channels.Tcp
             string pskIdentity, byte[] psk, int blockSize = 0x4000, int maxBufferSize = 0x400000,
             CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(remoteEndpoint, localEP, pskIdentity, psk, maxBufferSize, token);
             }
 
@@ -136,7 +143,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, TcpClient client, X509Certificate2 certificate,
             bool clientAuth, int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpServerChannel(client, certificate, clientAuth, maxBufferSize, token);
             }
 
@@ -146,7 +154,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, TcpClient client, TlsPskIdentityManager pskManager,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpServerChannel(client, pskManager, maxBufferSize, token);
             }
 
@@ -156,7 +165,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, int blockSize = 0x4000,
             int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(hostname, port, maxBufferSize, token);
             }
 
@@ -166,7 +176,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, IPEndPoint localEP,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(hostname, port, localEP, maxBufferSize, token);
             }
 
@@ -176,7 +187,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, int blockSize = 0x4000,
             int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(remoteEndpoint, maxBufferSize, token);
             }
 
@@ -186,7 +198,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, IPEndPoint localEP,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(remoteEndpoint, localEP, maxBufferSize, token);
             }
 
@@ -196,7 +209,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, int blockSize = 0x4000,
             int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(address, port, maxBufferSize, token);
             }
 
@@ -206,7 +220,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, IPEndPoint localEP,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(address, port, localEP, maxBufferSize, token);
             }
 
@@ -216,7 +231,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, string hostname, int port, X509Certificate2 certificate,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(hostname, port, certificate, maxBufferSize, token);
             }
 
@@ -227,7 +243,8 @@ namespace SkunkLab.Channels.Tcp
             X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000,
             CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(hostname, port, localEP, certificate, maxBufferSize, token);
             }
 
@@ -237,7 +254,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPEndPoint remoteEndpoint, X509Certificate2 certificate,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(remoteEndpoint, certificate, maxBufferSize, token);
             }
 
@@ -248,7 +266,8 @@ namespace SkunkLab.Channels.Tcp
             X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000,
             CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(remoteEndpoint, localEP, certificate, maxBufferSize, token);
             }
 
@@ -258,7 +277,8 @@ namespace SkunkLab.Channels.Tcp
         public static TcpChannel Create(bool usePrefixLength, IPAddress address, int port, X509Certificate2 certificate,
             int blockSize = 0x4000, int maxBufferSize = 0x400000, CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(address, port, certificate, maxBufferSize, token);
             }
 
@@ -269,7 +289,8 @@ namespace SkunkLab.Channels.Tcp
             X509Certificate2 certificate, int blockSize = 0x4000, int maxBufferSize = 0x400000,
             CancellationToken token = default)
         {
-            if (usePrefixLength) {
+            if (usePrefixLength)
+            {
                 return new TcpClientChannel(address, port, localEP, certificate, maxBufferSize, token);
             }
 

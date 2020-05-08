@@ -76,7 +76,8 @@ namespace Piraeus.Adapters
             session = new CoapSession(coapConfig, context);
             logger?.LogDebugAsync("CoAP protocol session open.").GetAwaiter();
 
-            if (Channel.State != ChannelState.Open) {
+            if (Channel.State != ChannelState.Open)
+            {
                 Channel.OpenAsync().GetAwaiter();
                 Channel.ReceiveAsync();
                 logger?.LogDebugAsync("CoAP protocol channel opened and receiving.").GetAwaiter();
@@ -98,12 +99,14 @@ namespace Piraeus.Adapters
         {
             auditFactory = AuditFactory.CreateSingleton();
             if (config.AuditConnectionString != null &&
-                config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
+                config.AuditConnectionString.Contains("DefaultEndpointsProtocol"))
+            {
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"),
                     AuditType.Message);
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
             }
-            else if (config.AuditConnectionString != null) {
+            else if (config.AuditConnectionString != null)
+            {
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
             }
@@ -130,7 +133,8 @@ namespace Piraeus.Adapters
 
         private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
         {
-            if (!closing) {
+            if (!closing)
+            {
                 closing = true;
 
                 logger?.LogWarningAsync("CoAP adapter closing channel.");
@@ -154,8 +158,10 @@ namespace Piraeus.Adapters
             logger?.LogDebugAsync(
                 $"CoAP protocol channel opening with session authenticated '{session.IsAuthenticated}'.").GetAwaiter();
 
-            try {
-                if (!Channel.IsAuthenticated && e.Message != null) {
+            try
+            {
+                if (!Channel.IsAuthenticated && e.Message != null)
+                {
                     CoapMessage msg = CoapMessage.DecodeMessage(e.Message);
                     CoapUri coapUri = new CoapUri(msg.ResourceUri.ToString());
                     session.IsAuthenticated = session.Authenticate(coapUri.TokenType, coapUri.SecurityToken);
@@ -164,7 +170,8 @@ namespace Piraeus.Adapters
                         .GetAwaiter();
                 }
 
-                if (session.IsAuthenticated) {
+                if (session.IsAuthenticated)
+                {
                     IdentityDecoder decoder = new IdentityDecoder(session.Config.IdentityClaimType, context,
                         session.Config.Indexes);
                     session.Identity = decoder.Id;
@@ -177,26 +184,31 @@ namespace Piraeus.Adapters
                     userAuditor?.WriteAuditRecordAsync(record).Ignore();
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogErrorAsync(ex, $"CoAP adapter opening channel '{Channel.Id}'.").GetAwaiter();
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
             }
 
-            if (!session.IsAuthenticated && e.Message != null) {
+            if (!session.IsAuthenticated && e.Message != null)
+            {
                 logger?.LogWarningAsync("CoAP adpater closing due to unauthenticated user.");
                 Channel.CloseAsync().Ignore();
             }
-            else {
+            else
+            {
                 dispatcher = new CoapRequestDispatcher(session, Channel, config, graphManager, logger);
             }
         }
 
         private void Channel_OnReceive(object sender, ChannelReceivedEventArgs e)
         {
-            try {
+            try
+            {
                 CoapMessage message = CoapMessage.DecodeMessage(e.Message);
 
-                if (!session.IsAuthenticated || forcePerReceiveAuthn) {
+                if (!session.IsAuthenticated || forcePerReceiveAuthn)
+                {
                     session.EnsureAuthentication(message, forcePerReceiveAuthn);
 
                     UserAuditRecord record = new UserAuditRecord(Channel.Id, session.Identity,
@@ -213,7 +225,8 @@ namespace Piraeus.Adapters
                     CoapMessageHandler handler = CoapMessageHandler.Create(session, message, dispatcher);
                     CoapMessage msg = await handler.ProcessAsync();
 
-                    if (msg != null) {
+                    if (msg != null)
+                    {
                         byte[] payload = msg.Encode();
                         await Channel.SendAsync(payload);
                     }
@@ -221,7 +234,8 @@ namespace Piraeus.Adapters
 
                 task.LogExceptions();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogErrorAsync(ex, $"CoAP adapter receiveing on channel '{Channel.Id}'.").GetAwaiter();
                 OnError?.Invoke(this, new ProtocolAdapterErrorEventArgs(Channel.Id, ex));
                 Channel.CloseAsync().Ignore();
@@ -245,38 +259,49 @@ namespace Piraeus.Adapters
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed) {
-                if (disposing) {
-                    try {
-                        if (dispatcher != null) {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    try
+                    {
+                        if (dispatcher != null)
+                        {
                             dispatcher.Dispose();
                             logger?.LogDebugAsync($"CoAP adapter disposed dispatcher on channel {Channel.Id}")
                                 .GetAwaiter();
                         }
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         logger?.LogErrorAsync(ex, $"CoAP adapter error on channel '{Channel.Id}'.").GetAwaiter();
                     }
 
-                    try {
-                        if (Channel != null) {
+                    try
+                    {
+                        if (Channel != null)
+                        {
                             string channelId = Channel.Id;
                             Channel.Dispose();
                             logger?.LogDebugAsync($"CoAP adapter channel {channelId} disposed.");
                         }
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         logger?.LogErrorAsync(ex, $"CoAP adapter disposing error on channel '{Channel.Id}'.")
                             .GetAwaiter();
                     }
 
-                    try {
-                        if (session != null) {
+                    try
+                    {
+                        if (session != null)
+                        {
                             session.Dispose();
                             logger?.LogDebugAsync("CoAP adapter disposed session.");
                         }
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         logger?.LogErrorAsync(ex, $"CoAP adapter Disposing session on channel '{Channel.Id}'.")
                             .GetAwaiter();
                     }

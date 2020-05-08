@@ -23,10 +23,12 @@ namespace Piraeus.WebApi.Controllers
 
         public ResourceController(IClusterClient clusterClient, Logger logger = null)
         {
-            if (!GraphManager.IsInitialized) {
+            if (!GraphManager.IsInitialized)
+            {
                 graphManager = GraphManager.Create(clusterClient);
             }
-            else {
+            else
+            {
                 graphManager = GraphManager.Instance;
             }
 
@@ -37,14 +39,16 @@ namespace Piraeus.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> DeletePiSystem(string resourceUriString)
         {
-            try {
+            try
+            {
                 _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
                 await graphManager.ClearPiSystemAsync(resourceUriString);
                 logger?.LogInformation($"Deleted pi-system '{resourceUriString}'.");
                 return StatusCode(200);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error deleting pi-system.");
                 return StatusCode(500, ex.Message);
             }
@@ -55,21 +59,25 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<EventMetadata>> GetPiSystemMetadata(string resourceUriString)
         {
-            try {
+            try
+            {
                 _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
                 EventMetadata metadata = await graphManager.GetPiSystemMetadataAsync(resourceUriString);
 
-                if (metadata == null) {
+                if (metadata == null)
+                {
                     logger?.LogWarning($"Pi-system metadata '{resourceUriString}' is null.");
                 }
-                else {
+                else
+                {
                     logger?.LogInformation($"Return pi-system metadata '{resourceUriString}'");
                 }
 
                 return StatusCode(200, metadata);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting pi-system metadata.");
                 return StatusCode(500, ex.Message);
             }
@@ -80,21 +88,25 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<CommunicationMetrics>> GetPiSystemMetrics(string resourceUriString)
         {
-            try {
+            try
+            {
                 _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
                 CommunicationMetrics metrics = await graphManager.GetPiSystemMetricsAsync(resourceUriString);
                 logger?.LogInformation($"Returning communication metrics for pi-system '{resourceUriString}'.");
-                if (metrics == null) {
+                if (metrics == null)
+                {
                     logger?.LogWarning($"Communication metrics for '{resourceUriString}' is null.");
                 }
-                else {
+                else
+                {
                     logger?.LogInformation("Communication metrics returned.");
                 }
 
                 return StatusCode(200, metrics);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting communications metrics.");
                 return StatusCode(500, ex.Message);
             }
@@ -105,22 +117,26 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<IEnumerable<string>>> GetPiSystemSubscriptionList(string resourceUriString)
         {
-            try {
+            try
+            {
                 _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
 
                 IPiSystem pisystem = graphManager.GetPiSystem(resourceUriString);
 
-                if (pisystem == null) {
+                if (pisystem == null)
+                {
                     logger?.LogWarning($"Pi-system '{resourceUriString}' is null.");
                 }
-                else {
+                else
+                {
                     logger?.LogInformation($"Returned pi-system '{resourceUriString}'.");
                 }
 
                 IEnumerable<string> list = await pisystem.GetSubscriptionListAsync();
                 return StatusCode(200, list);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting subscriptions from pi-system.");
                 return StatusCode(500, ex.Message);
             }
@@ -131,20 +147,24 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<IEnumerable<string>>> GetSigmaAlgebra()
         {
-            try {
+            try
+            {
                 List<string> list = await graphManager.GetSigmaAlgebraAsync();
 
                 logger?.LogInformation("Returning sigma algebra");
-                if (list == null || list.Count == 0) {
+                if (list == null || list.Count == 0)
+                {
                     logger?.LogWarning("No sigma algebras found.");
                 }
-                else {
+                else
+                {
                     logger?.LogInformation("Sigma algebras returned.");
                 }
 
                 return StatusCode(200, list.ToArray());
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting sigma algebra");
                 return StatusCode(500, ex.Message);
             }
@@ -155,20 +175,24 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<IEnumerable<string>>> GetSigmaAlgebra(string filter)
         {
-            try {
+            try
+            {
                 List<string> list = await graphManager.GetSigmaAlgebraAsync(filter);
 
                 logger?.LogInformation("Returning sigma algebra");
-                if (list == null || list.Count == 0) {
+                if (list == null || list.Count == 0)
+                {
                     logger?.LogWarning("No sigma algebras found.");
                 }
-                else {
+                else
+                {
                     logger?.LogInformation("Sigma algebras returned.");
                 }
 
                 return StatusCode(200, list.ToArray());
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting sigma algebra");
                 return StatusCode(500, ex.Message);
             }
@@ -179,20 +203,24 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<ListContinuationToken>> GetSigmaAlgebra(ListContinuationToken token)
         {
-            try {
+            try
+            {
                 ListContinuationToken continuationToken = await graphManager.GetSigmaAlgebraAsync(token);
 
                 logger?.LogInformation("Returning sigma algebra");
-                if (continuationToken == null) {
+                if (continuationToken == null)
+                {
                     logger?.LogWarning("No sigma algebras found.");
                 }
-                else {
+                else
+                {
                     logger?.LogInformation("Sigma algebras returned.");
                 }
 
                 return StatusCode(200, continuationToken);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting sigma algebra");
                 return StatusCode(500, ex.Message);
             }
@@ -203,7 +231,8 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<string>> Subscribe(string resourceUriString, SubscriptionMetadata metadata)
         {
-            try {
+            try
+            {
                 _ = resourceUriString ?? throw new ArgumentNullException(nameof(resourceUriString));
                 _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
@@ -213,7 +242,8 @@ namespace Piraeus.WebApi.Controllers
 
                 return StatusCode(200, subscriptionUriString);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error subscribing to pi-system.");
                 return StatusCode(500, ex.Message);
             }
@@ -223,14 +253,16 @@ namespace Piraeus.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> Unsubscribe(string subscriptionUriString)
         {
-            try {
+            try
+            {
                 _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
 
                 await graphManager.UnsubscribeAsync(subscriptionUriString.ToLowerInvariant());
                 logger?.LogInformation($"Unsubscribed subscription '{subscriptionUriString}'.");
                 return StatusCode(200);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error unsubscribing.");
                 return StatusCode(500, ex.Message);
             }
@@ -240,14 +272,16 @@ namespace Piraeus.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> UpsertPiSystemMetadata(EventMetadata metadata)
         {
-            try {
+            try
+            {
                 _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
                 await graphManager.UpsertPiSystemMetadataAsync(metadata);
                 logger?.LogInformation($"Upserted pi-system metadata for '{metadata.ResourceUriString}'.");
                 return StatusCode(200);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error upserting pi-system metadata.");
                 return StatusCode(500, ex.Message);
             }

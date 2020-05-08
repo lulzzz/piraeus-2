@@ -72,7 +72,8 @@ namespace Piraeus.TcpGateway
 #endif
 
             int index = 0;
-            while (index < ports.Length) {
+            while (index < ports.Length)
+            {
                 listeners.Add(ports[index],
                     new TcpServerListener(new IPEndPoint(GetIPAddress(hostname), ports[index]), config, orleansConfig,
                         logger, sources[ports[index]].Token));
@@ -82,7 +83,8 @@ namespace Piraeus.TcpGateway
 
             KeyValuePair<int, TcpServerListener>[] tcpKvps = listeners.ToArray();
 
-            foreach (var item in tcpKvps) {
+            foreach (var item in tcpKvps)
+            {
                 item.Value.OnError += Listener_OnError;
                 item.Value.StartAsync().LogExceptions(logger);
                 logger?.LogInformation($"TCP listener started on port {item.Key}");
@@ -104,8 +106,10 @@ namespace Piraeus.TcpGateway
         private IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
                     logger?.LogInformation($"IP address '{hostInfo.AddressList[index]}'.");
                     return hostInfo.AddressList[index];
                 }
@@ -117,20 +121,24 @@ namespace Piraeus.TcpGateway
 
         private void Listener_OnError(object sender, ServerFailedEventArgs e)
         {
-            try {
+            try
+            {
                 logger?.LogError($"TCP server faulted on channel type '{e.ChannelType}' and port '{e.Port}'.");
-                if (sources.ContainsKey(e.Port)) {
+                if (sources.ContainsKey(e.Port))
+                {
                     logger?.LogInformation(
                         $"Sending cancellation on on channel type '{e.ChannelType}' and port '{e.Port}'.");
                     sources[e.Port].Cancel();
                 }
-                else {
+                else
+                {
                     logger?.LogInformation(
                         $"Cancellation unavailable on channel type '{e.ChannelType}' and port '{e.Port}'.");
                     return;
                 }
 
-                if (listeners.ContainsKey(e.Port)) {
+                if (listeners.ContainsKey(e.Port))
+                {
                     logger?.LogInformation(
                         $"Stopping TCP server on channel type '{e.ChannelType}' and port '{e.Port}'.");
                     listeners[e.Port].StopAsync().Ignore();
@@ -148,7 +156,8 @@ namespace Piraeus.TcpGateway
                             logger, sources[e.Port].Token));
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex,
                     $"Faulted handling a TCP server failed event on channel type '{e.ChannelType}' and port '{e.Port}'.");
             }

@@ -17,13 +17,15 @@ namespace SkunkLab.Storage
             string[] keyParts = keys.Split(keys, StringSplitOptions.RemoveEmptyEntries);
             string[] valueParts = values.Split(values, StringSplitOptions.RemoveEmptyEntries);
 
-            if (keyParts.Length != valueParts.Length) {
+            if (keyParts.Length != valueParts.Length)
+            {
                 throw new IndexOutOfRangeException("Number of PSK identities does not match number of keys.");
             }
 
             container = new Dictionary<string, string>();
             int index = 0;
-            while (index < keyParts.Length) {
+            while (index < keyParts.Length)
+            {
                 container.Add(keyParts[index], valueParts[index]);
                 index++;
             }
@@ -31,7 +33,8 @@ namespace SkunkLab.Storage
 
         public static EnvironmentVariablePskStorage CreateSingleton(string keys, string values)
         {
-            if (instance == null) {
+            if (instance == null)
+            {
                 instance = new EnvironmentVariablePskStorage(keys, values);
             }
 
@@ -50,7 +53,8 @@ namespace SkunkLab.Storage
         {
             string result = null;
 
-            if (container.ContainsKey(key)) {
+            if (container.ContainsKey(key))
+            {
                 Dictionary<string, string> clone = DeepClone(container);
                 result = clone[key];
             }
@@ -60,7 +64,8 @@ namespace SkunkLab.Storage
 
         public override async Task RemoveSecretAsync(string key)
         {
-            if (container.ContainsKey(key)) {
+            if (container.ContainsKey(key))
+            {
                 container.Remove(key);
             }
 
@@ -69,7 +74,8 @@ namespace SkunkLab.Storage
 
         public override async Task SetSecretAsync(string key, string value)
         {
-            if (!container.ContainsKey(key)) {
+            if (!container.ContainsKey(key))
+            {
                 container.Add(key, value);
             }
 
@@ -78,7 +84,8 @@ namespace SkunkLab.Storage
 
         private T DeepClone<T>(T obj)
         {
-            if (obj == null) {
+            if (obj == null)
+            {
                 return default;
             }
 

@@ -18,7 +18,8 @@ namespace Piraeus.Extensions.Orleans
             services.AddSingleton(serviceProvider =>
             {
                 var builder = new ClientBuilder();
-                if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
+                if (!string.IsNullOrEmpty(config.InstrumentationKey))
+                {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
 
@@ -48,7 +49,8 @@ namespace Piraeus.Extensions.Orleans
                 var builder = new ClientBuilder();
                 builder.AddOrleansClusterClient(config);
 
-                if (!string.IsNullOrEmpty(config.InstrumentationKey)) {
+                if (!string.IsNullOrEmpty(config.InstrumentationKey))
+                {
                     builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
                 }
 
@@ -81,23 +83,27 @@ namespace Piraeus.Extensions.Orleans
 
             LoggerType loggers = config.GetLoggerTypes();
 
-            if (loggers.HasFlag(LoggerType.AppInsights)) {
+            if (loggers.HasFlag(LoggerType.AppInsights))
+            {
                 builder.AddApplicationInsightsTelemetryConsumer(config.InstrumentationKey);
             }
 
             builder.ConfigureLogging(op =>
             {
-                if (loggers.HasFlag(LoggerType.AppInsights)) {
+                if (loggers.HasFlag(LoggerType.AppInsights))
+                {
                     op.AddApplicationInsights(config.InstrumentationKey);
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
 
-                if (loggers.HasFlag(LoggerType.Console)) {
+                if (loggers.HasFlag(LoggerType.Console))
+                {
                     op.AddConsole();
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
 
-                if (loggers.HasFlag(LoggerType.Debug)) {
+                if (loggers.HasFlag(LoggerType.Debug))
+                {
                     op.AddDebug();
                     op.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel, true));
                 }
@@ -116,7 +122,8 @@ namespace Piraeus.Extensions.Orleans
                 attempt++;
                 Console.WriteLine(
                     $"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
-                if (attempt > maxAttempts) {
+                if (attempt > maxAttempts)
+                {
                     return false;
                 }
 

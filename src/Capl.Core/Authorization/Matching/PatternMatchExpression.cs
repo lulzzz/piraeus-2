@@ -25,15 +25,18 @@ namespace Capl.Authorization.Matching
                 return claimType == claim.Type;
             });
 
-            if (pattern == null) {
+            if (pattern == null)
+            {
                 return new List<Claim>(claimSet);
             }
 
             List<Claim> claimList = new List<Claim>();
             IEnumerator<Claim> en = claimSet.GetEnumerator();
 
-            while (en.MoveNext()) {
-                if (regex.IsMatch(en.Current.Value)) {
+            while (en.MoveNext())
+            {
+                if (regex.IsMatch(en.Current.Value))
+                {
                     claimList.Add(en.Current);
                 }
             }

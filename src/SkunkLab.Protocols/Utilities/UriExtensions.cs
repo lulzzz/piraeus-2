@@ -9,14 +9,17 @@ namespace SkunkLab.Protocols.Utilities
             string uriString = uri.ToString().ToLowerInvariant();
             string result;
 
-            if (string.IsNullOrEmpty(uri.Query)) {
+            if (string.IsNullOrEmpty(uri.Query))
+            {
                 result = GetBase(uriString, uri, trailingWhack);
             }
-            else {
+            else
+            {
                 result = GetFromQuery(uriString, uri);
             }
 
-            if (!removeLastSegment) {
+            if (!removeLastSegment)
+            {
                 return result;
             }
 
@@ -28,7 +31,8 @@ namespace SkunkLab.Protocols.Utilities
         {
             bool isTrailing = uri.Segments[^1] == "/";
 
-            if (trailingWhack) {
+            if (trailingWhack)
+            {
                 return isTrailing ? uriString : uriString + "/";
             }
 

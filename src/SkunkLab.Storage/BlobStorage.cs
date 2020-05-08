@@ -31,7 +31,8 @@ namespace SkunkLab.Storage
             client.DefaultRequestOptions.RetryPolicy = new ExponentialRetry(TimeSpan.FromMilliseconds(10000), 8);
             client.DefaultRequestOptions.MaximumExecutionTime = TimeSpan.FromMinutes(5.0);
 
-            if (bufferManager != null) {
+            if (bufferManager != null)
+            {
                 client.BufferManager = bufferManager;
             }
         }
@@ -46,7 +47,8 @@ namespace SkunkLab.Storage
             client.DefaultRequestOptions.RetryPolicy = new ExponentialRetry(TimeSpan.FromMilliseconds(10000), 8);
             client.DefaultRequestOptions.MaximumExecutionTime = TimeSpan.FromMinutes(3.0);
 
-            if (bufferManager != null) {
+            if (bufferManager != null)
+            {
                 client.BufferManager = bufferManager;
             }
         }
@@ -61,7 +63,8 @@ namespace SkunkLab.Storage
 
         public static BlobStorage CreateSingleton(string connectionString)
         {
-            if (instance == null) {
+            if (instance == null)
+            {
                 instance = new BlobStorage(connectionString);
             }
 
@@ -78,7 +81,8 @@ namespace SkunkLab.Storage
 
         public static BlobStorage New(string connectionString, long maxBufferPoolSize = 0, int defaultBufferSize = 0)
         {
-            if (maxBufferPoolSize > 0) {
+            if (maxBufferPoolSize > 0)
+            {
                 BufferManager manager = BufferManager.CreateBufferManager(maxBufferPoolSize, defaultBufferSize);
                 bufferManager = new SkunkLabBufferManager(manager, defaultBufferSize);
             }
@@ -89,7 +93,8 @@ namespace SkunkLab.Storage
         public static BlobStorage New(string connectionString, string sasToken, long maxBufferPoolSize = 0,
             int defaultBufferSize = 0)
         {
-            if (maxBufferPoolSize > 0) {
+            if (maxBufferPoolSize > 0)
+            {
                 BufferManager manager = BufferManager.CreateBufferManager(maxBufferPoolSize, defaultBufferSize);
                 bufferManager = new SkunkLabBufferManager(manager, defaultBufferSize);
             }
@@ -120,29 +125,35 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudBlockBlob blob = container.GetBlockBlobReference(filename);
                 blob.Properties.ContentType = contentType;
 
                 await blob.UploadFromStreamAsync(source, default, default, default, progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, filename, token.IsCancellationRequested, error));
@@ -168,13 +179,15 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnDownloadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudBlockBlob blob = container.GetBlockBlobReference(filename);
                 blob.Properties.ContentType = contentType;
@@ -182,16 +195,20 @@ namespace SkunkLab.Storage
                 await blob.UploadFromByteArrayAsync(source, 0, source.Length, default, default, default,
                     progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, filename, token.IsCancellationRequested, error));
@@ -221,29 +238,35 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudPageBlob blob = container.GetPageBlobReference(filename);
 
                 blob.Properties.ContentType = contentType;
                 await blob.UploadFromStreamAsync(source, null, default, default, default, progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, filename, token.IsCancellationRequested, error));
@@ -255,7 +278,8 @@ namespace SkunkLab.Storage
         {
             _ = filename ?? throw new ArgumentNullException(nameof(filename));
 
-            if (source == null) {
+            if (source == null)
+            {
                 throw new ArgumentException("source");
             }
 
@@ -272,13 +296,15 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudPageBlob blob = container.GetPageBlobReference(filename);
 
@@ -286,16 +312,20 @@ namespace SkunkLab.Storage
                 await blob.UploadFromByteArrayAsync(source, 0, source.Length, null, default, default, default,
                     progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, filename, token.IsCancellationRequested, error));
@@ -325,27 +355,33 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudAppendBlob blob = container.GetAppendBlobReference(filename);
                 await blob.UploadFromStreamAsync(source, default, default, default, progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, filename, token.IsCancellationRequested, error));
@@ -371,28 +407,34 @@ namespace SkunkLab.Storage
                         ? progress.BytesTransferred
                         : bytesTransferred;
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, filename, bytesTransferred, source.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudAppendBlob blob = container.GetAppendBlobReference(filename);
                 await blob.UploadFromByteArrayAsync(source, 0, source.Length, default, default, default,
                     progressHandler, token);
             }
-            catch (Exception ex) {
-                if (ex.InnerException is TaskCanceledException) {
+            catch (Exception ex)
+            {
+                if (ex.InnerException is TaskCanceledException)
+                {
                     source = null;
                 }
-                else {
+                else
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, filename, token.IsCancellationRequested, error));
@@ -456,11 +498,13 @@ namespace SkunkLab.Storage
 
         public async Task<BlobResultSegment> ListBlobsSegmentedAsync(string containerName, BlobContinuationToken token)
         {
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 return await container.ListBlobsSegmentedAsync(token);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceError(ex.Message);
                 throw ex;
             }
@@ -477,7 +521,8 @@ namespace SkunkLab.Storage
             _ = containerName ?? throw new ArgumentNullException(nameof(containerName));
             _ = blobFilename ?? throw new ArgumentNullException(nameof(blobFilename));
 
-            if (!File.Exists(filePath)) {
+            if (!File.Exists(filePath))
+            {
                 throw new FileNotFoundException(filePath);
             }
 
@@ -495,25 +540,30 @@ namespace SkunkLab.Storage
                         : bytesTransferred;
                     FileInfo info = new FileInfo(filePath);
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnDownloadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, blobFilename, bytesTransferred, info.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudBlockBlob blob = container.GetBlockBlobReference(blobFilename);
                 await blob.DownloadToFileAsync(filePath, FileMode.Create, default, default, default, progressHandler,
                     token);
             }
-            catch (Exception ex) {
-                if (!(ex.InnerException is TaskCanceledException)) {
+            catch (Exception ex)
+            {
+                if (!(ex.InnerException is TaskCanceledException))
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnDownloadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, blobFilename, token.IsCancellationRequested, error));
@@ -527,7 +577,8 @@ namespace SkunkLab.Storage
             _ = containerName ?? throw new ArgumentNullException(nameof(containerName));
             _ = blobFilename ?? throw new ArgumentNullException(nameof(blobFilename));
 
-            if (!File.Exists(filePath)) {
+            if (!File.Exists(filePath))
+            {
                 throw new FileNotFoundException(filePath);
             }
 
@@ -545,24 +596,29 @@ namespace SkunkLab.Storage
                         : bytesTransferred;
                     FileInfo info = new FileInfo(filePath);
                     if (watch.Elapsed.TotalMilliseconds > time + 1000.0 &&
-                        bytesTransferred <= progress.BytesTransferred) {
+                        bytesTransferred <= progress.BytesTransferred)
+                    {
                         OnUploadBytesTransferred?.Invoke(this,
                             new BytesTransferredEventArgs(containerName, blobFilename, bytesTransferred, info.Length));
                     }
                 });
 
-            try {
+            try
+            {
                 CloudBlobContainer container = await GetContainerReferenceAsync(containerName);
                 CloudBlockBlob blob = container.GetBlockBlobReference(blobFilename);
                 await blob.UploadFromFileAsync(filePath, default, default, default, progressHandler, token);
             }
-            catch (Exception ex) {
-                if (!(ex.InnerException is TaskCanceledException)) {
+            catch (Exception ex)
+            {
+                if (!(ex.InnerException is TaskCanceledException))
+                {
                     error = ex;
                     throw ex;
                 }
             }
-            finally {
+            finally
+            {
                 watch.Stop();
                 OnUploadCompleted?.Invoke(this,
                     new BlobCompleteEventArgs(containerName, blobFilename, token.IsCancellationRequested, error));
@@ -576,7 +632,8 @@ namespace SkunkLab.Storage
         public async Task<byte[]> DownloadAsync(ICloudBlob blob)
         {
             byte[] buffer = null;
-            using (MemoryStream stream = new MemoryStream()) {
+            using (MemoryStream stream = new MemoryStream())
+            {
                 await blob.DownloadToStreamAsync(stream);
                 buffer = stream.ToArray();
             }
@@ -586,7 +643,8 @@ namespace SkunkLab.Storage
 
         public async Task<CloudBlobContainer> GetContainerReferenceAsync(string containerName)
         {
-            if (string.IsNullOrEmpty(containerName)) {
+            if (string.IsNullOrEmpty(containerName))
+            {
                 return client.GetContainerReference("$root");
             }
 

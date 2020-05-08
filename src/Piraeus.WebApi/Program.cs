@@ -32,20 +32,25 @@ namespace Piraeus.WebApi
                             X509Certificate2 cert = config.GetServerCerticate();
                             int[] ports = config.GetPorts();
 
-                            foreach (int port in ports) {
-                                if (cert != null) {
+                            foreach (int port in ports)
+                            {
+                                if (cert != null)
+                                {
                                     options.ListenAnyIP(port, a => a.UseHttps(cert));
                                 }
-                                else {
+                                else
+                                {
                                     IPAddress address = GetIPAddress(Dns.GetHostName());
                                     options.Listen(address, port);
                                 }
                             }
 
-                            if (!string.IsNullOrEmpty(config.ServerCertificateFilename)) {
+                            if (!string.IsNullOrEmpty(config.ServerCertificateFilename))
+                            {
                                 string[] portStrings = config.Ports.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                                foreach (string portString in portStrings) {
+                                foreach (string portString in portStrings)
+                                {
                                     options.ListenAnyIP(Convert.ToInt32(portString),
                                         a => a.UseHttps(config.ServerCertificateFilename,
                                             config.ServerCertificatePassword));
@@ -64,8 +69,10 @@ namespace Piraeus.WebApi
         private static IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
                     return hostInfo.AddressList[index];
                 }
             }

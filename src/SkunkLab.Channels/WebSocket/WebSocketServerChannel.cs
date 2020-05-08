@@ -102,7 +102,8 @@ namespace SkunkLab.Channels.WebSocket
             get => state;
             internal set
             {
-                if (state != value) {
+                if (state != value)
+                {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
@@ -120,15 +121,19 @@ namespace SkunkLab.Channels.WebSocket
 
         public override async Task CloseAsync()
         {
-            if (IsConnected) {
+            if (IsConnected)
+            {
                 State = ChannelState.ClosedReceived;
             }
 
-            if (socket != null && (socket.State == WebSocketState.Open || socket.State == WebSocketState.Connecting)) {
-                try {
+            if (socket != null && (socket.State == WebSocketState.Open || socket.State == WebSocketState.Connecting))
+            {
+                try
+                {
                     await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Normal", CancellationToken.None);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Console.WriteLine($"Fault closing Web socket server socket - {ex.Message}");
                 }
             }
@@ -171,14 +176,17 @@ namespace SkunkLab.Channels.WebSocket
 
         protected void Disposing(bool dispose)
         {
-            if (dispose & !disposed) {
+            if (dispose & !disposed)
+            {
                 disposed = true;
 
-                if (State == ChannelState.Open) {
+                if (State == ChannelState.Open)
+                {
                     handler.Close();
                 }
 
-                if (socket != null) {
+                if (socket != null)
+                {
                     socket.Dispose();
                 }
             }

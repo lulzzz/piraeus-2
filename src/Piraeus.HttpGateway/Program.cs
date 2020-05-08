@@ -42,12 +42,15 @@ namespace Piraeus.HttpGateway
                         X509Certificate2 cert = config.GetServerCerticate();
                         int[] ports = config.GetPorts();
 
-                        foreach (int port in ports) {
-                            if (cert != null) {
+                        foreach (int port in ports)
+                        {
+                            if (cert != null)
+                            {
                                 Console.WriteLine($"Listening on {port} using certificate.");
                                 options.ListenAnyIP(port, a => a.UseHttps(cert));
                             }
-                            else {
+                            else
+                            {
                                 Console.WriteLine($"Listening on {port}.");
                                 options.ListenAnyIP(port);
                             }

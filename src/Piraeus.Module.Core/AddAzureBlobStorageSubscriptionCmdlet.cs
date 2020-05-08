@@ -41,11 +41,13 @@ namespace Piraeus.Module
         protected override void ProcessRecord()
         {
             string uriString;
-            if (string.IsNullOrEmpty(Filename)) {
+            if (string.IsNullOrEmpty(Filename))
+            {
                 uriString = string.Format("https://{0}.blob.core.windows.net?container={1}&blobtype={2}&clients={3}",
                     Account, Container, BlobType.ToString(), NumClients <= 0 ? 1 : NumClients);
             }
-            else {
+            else
+            {
                 uriString = string.Format(
                     "https://{0}.blob.core.windows.net?container={1}&blobtype={2}&clients={3}&file={4}", Account,
                     Container, BlobType.ToString(), NumClients <= 0 ? 1 : NumClients, Filename);

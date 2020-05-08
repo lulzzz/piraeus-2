@@ -78,7 +78,8 @@ namespace SkunkLab.Channels.WebSocket
         {
             TaskCompletionSource<Task> tcs = new TaskCompletionSource<Task>();
 
-            if (Socket != null && Socket.State == WebSocketState.Open) {
+            if (Socket != null && Socket.State == WebSocketState.Open)
+            {
                 Task task = sendQueue.Enqueue(() =>
                     Socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", token));
                 tcs.SetResult(task);
@@ -90,39 +91,51 @@ namespace SkunkLab.Channels.WebSocket
         internal async Task ProcessWebSocketRequestAsync(System.Net.WebSockets.WebSocket socket,
             Func<Task<WebSocketMessage>> messageRetriever)
         {
-            try {
+            try
+            {
                 Socket = socket;
                 OnOpen?.Invoke(this, new WebSocketOpenEventArgs());
 
-                while (!token.IsCancellationRequested && Socket.State == WebSocketState.Open) {
+                while (!token.IsCancellationRequested && Socket.State == WebSocketState.Open)
+                {
                     WebSocketMessage message = await messageRetriever();
-                    if (message.MessageType == WebSocketMessageType.Binary) {
+                    if (message.MessageType == WebSocketMessageType.Binary)
+                    {
                         OnReceive?.Invoke(this, new WebSocketReceiveEventArgs(message.Data as byte[]));
                     }
-                    else if (message.MessageType == WebSocketMessageType.Text) {
+                    else if (message.MessageType == WebSocketMessageType.Text)
+                    {
                         OnReceive?.Invoke(this,
                             new WebSocketReceiveEventArgs(Encoding.UTF8.GetBytes(message.Data as string)));
                     }
-                    else {
+                    else
+                    {
                         OnClose?.Invoke(this, new WebSocketCloseEventArgs(WebSocketCloseStatus.NormalClosure));
                         break;
                     }
                 }
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 if (!(Socket.State == WebSocketState.CloseReceived ||
-                      Socket.State == WebSocketState.CloseSent)) {
-                    if (IsFatalException(exception)) {
+                      Socket.State == WebSocketState.CloseSent))
+                {
+                    if (IsFatalException(exception))
+                    {
                         OnError?.Invoke(this, new WebSocketErrorEventArgs(exception));
                     }
                 }
             }
-            finally {
-                try {
+            finally
+            {
+                try
+                {
                     await CloseAsync();
                 }
-                finally {
-                    if (this is IDisposable disposable) {
+                finally
+                {
+                    if (this is IDisposable disposable)
+                    {
                         disposable.Dispose();
                     }
                 }
@@ -137,8 +150,10 @@ namespace SkunkLab.Channels.WebSocket
         internal Task SendAsync(byte[] message, WebSocketMessageType messageType)
         {
             TaskCompletionSource<Task> tcs = new TaskCompletionSource<Task>();
-            try {
-                if (Socket != null && Socket.State == WebSocketState.Open) {
+            try
+            {
+                if (Socket != null && Socket.State == WebSocketState.Open)
+                {
                     sendQueue.Enqueue(() =>
                         Socket.SendAsync(new ArraySegment<byte>(message), messageType, true, token));
                 }
@@ -152,8 +167,10 @@ namespace SkunkLab.Channels.WebSocket
 
         private static bool IsFatalException(Exception ex)
         {
-            if (ex is COMException exception) {
-                switch ((uint)exception.ErrorCode) {
+            if (ex is COMException exception)
+            {
+                switch ((uint)exception.ErrorCode)
+                {
                     case 0x80070026:
                     case 0x800703e3:
                     case 0x800704cd:

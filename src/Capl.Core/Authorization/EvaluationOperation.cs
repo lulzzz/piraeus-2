@@ -94,7 +94,8 @@ namespace Capl.Authorization
             operationType = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
             claimValue = reader.GetElementValue(AuthorizationConstants.Elements.Operation);
 
-            if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Operation)) {
+            if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Operation))
+            {
                 throw new SerializationException("Unexpected element " + reader.LocalName);
             }
         }

@@ -18,7 +18,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         public void Callback(object state)
         {
-            if (OnExpired != null) {
+            if (OnExpired != null)
+            {
                 OnExpired(this, new EventArgs());
             }
         }
@@ -47,7 +48,8 @@ namespace SkunkLab.Protocols.Mqtt
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing) {
+            if (disposing)
+            {
                 timer.Dispose();
             }
         }

@@ -52,15 +52,18 @@ namespace Piraeus.Grains.Notifications
             NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
             container = nvc["container"];
 
-            if (!int.TryParse(nvc["clients"], out clientCount)) {
+            if (!int.TryParse(nvc["clients"], out clientCount))
+            {
                 clientCount = 1;
             }
 
-            if (!string.IsNullOrEmpty(nvc["file"])) {
+            if (!string.IsNullOrEmpty(nvc["file"]))
+            {
                 appendFilename = nvc["file"];
             }
 
-            if (string.IsNullOrEmpty(container)) {
+            if (string.IsNullOrEmpty(container))
+            {
                 container = "$Root";
             }
 
@@ -70,7 +73,8 @@ namespace Piraeus.Grains.Notifications
 
             if (blobType != "block" &&
                 blobType != "page" &&
-                blobType != "append") {
+                blobType != "append")
+            {
                 logger?.LogWarningAsync($"Subscription '{metadata.SubscriptionUriString}' invalid blob type to write.")
                     .GetAwaiter();
                 return;
@@ -80,14 +84,16 @@ namespace Piraeus.Grains.Notifications
             Uri.TryCreate(metadata.SymmetricKey, UriKind.Absolute, out sasUri);
 
             storageArray = new BlobStorage[clientCount];
-            if (sasUri == null) {
+            if (sasUri == null)
+            {
                 connectionString =
                     $"DefaultEndpointsProtocol=https;AccountName={uri.Authority.Split(new[] { '.' })[0]};AccountKey={key};";
 
                 for (int i = 0; i < clientCount; i++)
                     storageArray[i] = BlobStorage.New(connectionString, 2048, 102400);
             }
-            else {
+            else
+            {
                 connectionString =
                     $"BlobEndpoint={(container != "$Root" ? uri.ToString().Replace(uri.LocalPath, "") : uri.ToString())};SharedAccessSignature={key}";
 
@@ -103,17 +109,21 @@ namespace Piraeus.Grains.Notifications
             EventMessage msg = null;
             queue.Enqueue(message);
 
-            try {
-                while (!queue.IsEmpty) {
+            try
+            {
+                while (!queue.IsEmpty)
+                {
                     bool isdequeued = queue.TryDequeue(out msg);
-                    if (!isdequeued) {
+                    if (!isdequeued)
+                    {
                         continue;
                     }
 
                     arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
 
                     payload = GetPayload(msg);
-                    if (payload == null) {
+                    if (payload == null)
+                    {
                         await logger?.LogWarningAsync(
                             $"Subscription '{metadata.SubscriptionUriString}' message not written to blob sink because message is null.");
                         return;
@@ -121,8 +131,10 @@ namespace Piraeus.Grains.Notifications
 
                     string filename = GetBlobName(msg.ContentType);
 
-                    if (blobType != "block") {
-                        if (blobType == "page") {
+                    if (blobType != "block")
+                    {
+                        if (blobType == "page")
+                        {
                             int pad = payload.Length % 512 != 0 ? 512 - payload.Length % 512 : 0;
                             byte[] buffer = new byte[payload.Length + pad];
                             Buffer.BlockCopy(payload, 0, buffer, 0, payload.Length);
@@ -137,7 +149,8 @@ namespace Piraeus.Grains.Notifications
                                     }, TaskContinuationOptions.OnlyOnFaulted);
                             await Task.WhenAll(task);
                         }
-                        else {
+                        else
+                        {
                             appendFilename ??= GetAppendFilename(msg.ContentType);
 
                             byte[] suffix = Encoding.UTF8.GetBytes(Environment.NewLine);
@@ -157,7 +170,8 @@ namespace Piraeus.Grains.Notifications
                             await Task.WhenAll(task);
                         }
                     }
-                    else {
+                    else
+                    {
                         Task task = storageArray[arrayIndex]
                             .WriteBlockBlobAsync(container, filename, payload, msg.ContentType);
                         Task innerTask =
@@ -175,15 +189,18 @@ namespace Piraeus.Grains.Notifications
                         "AzureBlob", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}'  message not written to blob sink.");
                 record = new MessageAuditRecord(msg.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob",
                     "AzureBlob", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (msg.Audit && record != null) {
+            finally
+            {
+                if (msg.Audit && record != null)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -194,21 +211,26 @@ namespace Piraeus.Grains.Notifications
         {
             AuditRecord record = null;
 
-            try {
+            try
+            {
                 BlobStorage storage = BlobStorage.New(connectionString, 2048, 102400);
 
-                if (blobType != "block") {
-                    if (blobType == "page") {
+                if (blobType != "block")
+                {
+                    if (blobType == "page")
+                    {
                         int pad = payload.Length % 512 != 0 ? 512 - payload.Length % 512 : 0;
                         byte[] buffer = new byte[payload.Length + pad];
                         Buffer.BlockCopy(payload, 0, buffer, 0, payload.Length);
                         await storage.WritePageBlobAsync(container, filename, buffer, contentType);
                     }
-                    else {
+                    else
+                    {
                         await storage.WriteAppendBlobAsync(container, filename, payload);
                     }
                 }
-                else {
+                else
+                {
                     string[] parts = filename.Split(new[] { '.' });
                     string path2 = parts.Length == 2
                         ? $"{parts[0]}-R.{parts[1]}"
@@ -221,15 +243,18 @@ namespace Piraeus.Grains.Notifications
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob",
                     "AzureBlob", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to blob sink in fault task.");
                 record = new MessageAuditRecord(id,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "AzureBlob",
                     "AzureBlob", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (canAudit && record != null) {
+            finally
+            {
+                if (canAudit && record != null)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -237,7 +262,8 @@ namespace Piraeus.Grains.Notifications
 
         private string GetAppendFilename(string contentType)
         {
-            if (appendFilename != null) {
+            if (appendFilename != null)
+            {
                 return appendFilename;
             }
 
@@ -249,13 +275,16 @@ namespace Piraeus.Grains.Notifications
         private string GetBlobName(string contentType)
         {
             string suffix = null;
-            if (contentType.Contains("text")) {
+            if (contentType.Contains("text"))
+            {
                 suffix = "txt";
             }
-            else if (contentType.Contains("json")) {
+            else if (contentType.Contains("json"))
+            {
                 suffix = "json";
             }
-            else if (contentType.Contains("xml")) {
+            else if (contentType.Contains("xml"))
+            {
                 suffix = "xml";
             }
 
@@ -266,7 +295,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

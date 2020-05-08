@@ -24,16 +24,20 @@ namespace Piraeus.Module
         protected override void ProcessRecord()
         {
             Uri uri;
-            if (Type == TransformType.Add) {
+            if (Type == TransformType.Add)
+            {
                 uri = new Uri(AuthorizationConstants.TransformUris.Add);
             }
-            else if (Type == TransformType.Remove) {
+            else if (Type == TransformType.Remove)
+            {
                 uri = new Uri(AuthorizationConstants.TransformUris.Remove);
             }
-            else if (Type == TransformType.Replace) {
+            else if (Type == TransformType.Replace)
+            {
                 uri = new Uri(AuthorizationConstants.TransformUris.Replace);
             }
-            else {
+            else
+            {
                 throw new ArgumentOutOfRangeException("Type");
             }
 

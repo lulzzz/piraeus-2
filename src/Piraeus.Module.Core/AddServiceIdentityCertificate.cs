@@ -41,17 +41,20 @@ namespace Piraeus.Module
         {
             string url = null;
 
-            if (string.IsNullOrEmpty(Password)) {
+            if (string.IsNullOrEmpty(Password))
+            {
                 throw new ArgumentNullException("Password");
             }
 
             if (!string.IsNullOrEmpty(Path) && string.IsNullOrEmpty(Store) && string.IsNullOrEmpty(Location) &&
-                string.IsNullOrEmpty(Thumbprint)) {
+                string.IsNullOrEmpty(Thumbprint))
+            {
                 url = string.Format(
                     $"{ServiceUrl}/api/serviceidentity/addcertificate?key={Name}&path={Path}&pwd={Password}");
             }
             else if (string.IsNullOrEmpty(Path) && !string.IsNullOrEmpty(Store) && !string.IsNullOrEmpty(Location) &&
-                     !string.IsNullOrEmpty(Thumbprint)) {
+                     !string.IsNullOrEmpty(Thumbprint))
+            {
                 url = string.Format(
                     $"{ServiceUrl}/api/serviceidentity/addcertificate2?key={Name}&store={Store}&location={Location}&thumbprint={Thumbprint}&pwd={Password}");
             }

@@ -30,14 +30,16 @@ namespace SkunkLab.Storage
             client.DefaultRequestOptions.RetryPolicy = new ExponentialRetry(TimeSpan.FromMilliseconds(10000), 8);
             client.DefaultRequestOptions.MaximumExecutionTime = TimeSpan.FromMinutes(3.0);
 
-            if (bufferManager != null) {
+            if (bufferManager != null)
+            {
                 client.BufferManager = bufferManager;
             }
         }
 
         public static TableStorage CreateSingleton(string connectionString)
         {
-            if (instance == null) {
+            if (instance == null)
+            {
                 instance = new TableStorage(connectionString);
             }
 
@@ -68,18 +70,21 @@ namespace SkunkLab.Storage
 
         public async Task WriteAsync(string tableName, ITableEntity entity)
         {
-            if (entity == null) {
+            if (entity == null)
+            {
                 Trace.TraceWarning("Table {0} entity is null", tableName);
                 return;
             }
 
-            try {
+            try
+            {
                 CloudTable table = client.GetTableReference(tableName);
                 await table.CreateIfNotExistsAsync();
                 TableOperation operation = TableOperation.InsertOrReplace(entity);
                 await table.ExecuteAsync(operation);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Trace.TraceWarning("Table {0} failed write.", tableName);
                 Trace.TraceError("Table {0} write error {1}", tableName, ex.Message);
             }
@@ -96,7 +101,8 @@ namespace SkunkLab.Storage
             var query = new TableQuery<T>();
             TableQuerySegment<T> segment = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
-            if (!(segment == null || segment.Results.Count == 0)) {
+            if (!(segment == null || segment.Results.Count == 0))
+            {
                 return segment.ToList();
             }
 
@@ -109,26 +115,31 @@ namespace SkunkLab.Storage
             CloudTable table = client.GetTableReference(tableName);
             await table.CreateIfNotExistsAsync();
             TableQuery<T> query;
-            if (!string.IsNullOrEmpty(partitionKey) && !string.IsNullOrEmpty(rowKey)) {
+            if (!string.IsNullOrEmpty(partitionKey) && !string.IsNullOrEmpty(rowKey))
+            {
                 string q1 = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
                 string q2 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey);
                 query = new TableQuery<T>().Where(TableQuery.CombineFilters(q1, TableOperators.And, q2));
             }
-            else if (!string.IsNullOrEmpty(partitionKey) && string.IsNullOrEmpty(rowKey)) {
+            else if (!string.IsNullOrEmpty(partitionKey) && string.IsNullOrEmpty(rowKey))
+            {
                 query = new TableQuery<T>().Where(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
             }
-            else if (string.IsNullOrEmpty(partitionKey) && !string.IsNullOrEmpty(rowKey)) {
+            else if (string.IsNullOrEmpty(partitionKey) && !string.IsNullOrEmpty(rowKey))
+            {
                 query = new TableQuery<T>().Where(
                     TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
             }
-            else {
+            else
+            {
                 query = new TableQuery<T>();
             }
 
             TableQuerySegment<T> segment = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
-            if (!(segment == null || segment.Results.Count == 0)) {
+            if (!(segment == null || segment.Results.Count == 0))
+            {
                 return segment.ToList();
             }
 
@@ -143,7 +154,8 @@ namespace SkunkLab.Storage
             var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition(fieldName, operation, value));
             TableQuerySegment<T> segment = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
-            if (!(segment == null || segment.Results.Count == 0)) {
+            if (!(segment == null || segment.Results.Count == 0))
+            {
                 return segment.ToList();
             }
 

@@ -41,7 +41,8 @@ namespace Piraeus.Module
         {
             string uriString = string.Format("iothub://{0}.azure-devices.net?deviceid={1}", Account, DeviceId);
 
-            if (!string.IsNullOrEmpty(PropertyName)) {
+            if (!string.IsNullOrEmpty(PropertyName))
+            {
                 uriString = string.Format("{0}&propname={1}&propvalue={1}", uriString, PropertyName, PropertyValue);
             }
 

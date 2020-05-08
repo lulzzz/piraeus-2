@@ -32,8 +32,10 @@ namespace Capl.Authorization.Transforms
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
             IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
-                foreach (Claim c in matchedClaims) {
-                    if (c.Type == claim.Type && c.Value == claim.Value) {
+                foreach (Claim c in matchedClaims)
+                {
+                    if (c.Type == claim.Type && c.Value == claim.Value)
+                    {
                         return true;
                     }
                 }
@@ -44,20 +46,25 @@ namespace Capl.Authorization.Transforms
             List<Claim> claimList = new List<Claim>(claimSet);
             List<string> valueList = new List<string>();
 
-            foreach (Claim claim in claimSet) {
+            foreach (Claim claim in claimSet)
+            {
                 valueList.Add(claim.Value);
                 claimList.Remove(claim);
             }
 
-            if (claimList.Count > 0) {
-                if (targetClaim.ClaimValue == null) {
+            if (claimList.Count > 0)
+            {
+                if (targetClaim.ClaimValue == null)
+                {
                     int index = 0;
-                    while (index < valueList.Count) {
+                    while (index < valueList.Count)
+                    {
                         claimList.Add(new Claim(targetClaim.ClaimType, valueList[index]));
                         index++;
                     }
                 }
-                else {
+                else
+                {
                     claimList.Add(new Claim(targetClaim.ClaimType, targetClaim.ClaimValue));
                 }
             }

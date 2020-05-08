@@ -18,7 +18,8 @@ namespace SkunkLab.Clients.Coap
             Uri uri = new Uri(resourceUriString);
             string key = verb.ToUpperInvariant() + uri.ToCanonicalString(false);
 
-            if (!container.ContainsKey(key)) {
+            if (!container.ContainsKey(key))
+            {
                 container.Add(key, action);
             }
         }
@@ -33,7 +34,8 @@ namespace SkunkLab.Clients.Coap
             Uri uri = new Uri(resourceUriString);
             string key = verb.ToUpperInvariant() + uri.ToCanonicalString(false);
 
-            if (container.ContainsKey(key)) {
+            if (container.ContainsKey(key))
+            {
                 return container[key];
             }
 

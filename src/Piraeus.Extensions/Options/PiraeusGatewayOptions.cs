@@ -73,16 +73,19 @@ namespace Piraeus.Extensions.Options
 
         private OrleansStorageType SetStorageType()
         {
-            if (string.IsNullOrEmpty(DataConnectionString)) {
+            if (string.IsNullOrEmpty(DataConnectionString))
+            {
                 return default;
             }
 
             string cs = DataConnectionString.ToLowerInvariant();
-            if (cs.Contains(":6380") || cs.Contains(":6379")) {
+            if (cs.Contains(":6380") || cs.Contains(":6379"))
+            {
                 return OrleansStorageType.Redis;
             }
 
-            if (cs.Contains("defaultendpointsprotocol=") && cs.Contains("accountname=") && cs.Contains("accountkey=")) {
+            if (cs.Contains("defaultendpointsprotocol=") && cs.Contains("accountname=") && cs.Contains("accountkey="))
+            {
                 return OrleansStorageType.AzureStorage;
             }
 

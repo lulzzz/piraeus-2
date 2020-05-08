@@ -74,12 +74,14 @@ namespace Piraeus.Adapters
 
             auditFactory = AuditFactory.CreateSingleton();
             if (config.AuditConnectionString != null &&
-                config.AuditConnectionString.Contains("DefaultEndpointsProtocol")) {
+                config.AuditConnectionString.Contains("DefaultEndpointsProtocol"))
+            {
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "messageaudit"),
                     AuditType.Message);
                 auditFactory.Add(new AzureTableAuditor(config.AuditConnectionString, "useraudit"), AuditType.User);
             }
-            else if (config.AuditConnectionString != null) {
+            else if (config.AuditConnectionString != null)
+            {
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.Message);
                 auditFactory.Add(new FileAuditor(config.AuditConnectionString), AuditType.User);
             }
@@ -116,7 +118,8 @@ namespace Piraeus.Adapters
             MessageAuditRecord record = null;
             int length = 0;
             DateTime sendTime = DateTime.UtcNow;
-            try {
+            try
+            {
                 byte[] message = ProtocolTransition.ConvertToHttp(e.Message);
                 Send(message).LogExceptions();
                 OnObserve?.Invoke(this,
@@ -127,15 +130,18 @@ namespace Piraeus.Adapters
                 record = new MessageAuditRecord(e.Message.MessageId, identity, Channel.TypeId, "WSN", length,
                     MessageDirectionType.Out, true, sendTime);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 string msg = string.Format("{0} - WSN adapter observe error on channel '{1}' with '{2}'",
                     DateTime.UtcNow.ToString("yyyy-MM-ddTHH-MM-ss.fffff"), Channel.Id, ex.Message);
                 logger?.LogError(ex, $"WSN adapter observe error on channel '{Channel.Id}'.");
                 record = new MessageAuditRecord(e.Message.MessageId, identity, Channel.TypeId, "WSN", length,
                     MessageDirectionType.Out, true, sendTime, msg);
             }
-            finally {
-                if (e.Message.Audit) {
+            finally
+            {
+                if (e.Message.Audit)
+                {
                     messageAuditor?.WriteAuditRecordAsync(record).Ignore();
                 }
             }
@@ -143,8 +149,10 @@ namespace Piraeus.Adapters
 
         private void Channel_OnClose(object sender, ChannelCloseEventArgs e)
         {
-            try {
-                if (!closing) {
+            try
+            {
+                if (!closing)
+                {
                     closing = true;
                     UserAuditRecord record = new UserAuditRecord(Channel.Id, identity, DateTime.UtcNow);
                     userAuditor?.UpdateAuditRecordAsync(record).IgnoreException();
@@ -152,7 +160,8 @@ namespace Piraeus.Adapters
 
                 OnClose?.Invoke(this, new ProtocolAdapterCloseEventArgs(e.ChannelId));
             }
-            catch {
+            catch
+            {
             }
         }
 
@@ -164,7 +173,8 @@ namespace Piraeus.Adapters
 
         private void Channel_OnOpen(object sender, ChannelOpenEventArgs e)
         {
-            if (!Channel.IsAuthenticated) {
+            if (!Channel.IsAuthenticated)
+            {
                 OnError?.Invoke(this,
                     new ProtocolAdapterErrorEventArgs(Channel.Id,
                         new SecurityException("Not authenticated on WSN channel")));
@@ -175,8 +185,10 @@ namespace Piraeus.Adapters
             adapter = new OrleansAdapter(identity, "WebSocket", "WSN", graphManager);
             adapter.OnObserve += Adapter_OnObserve;
 
-            if (subscriptions != null) {
-                foreach (var sub in subscriptions) {
+            if (subscriptions != null)
+            {
+                foreach (var sub in subscriptions)
+                {
                     SubscriptionMetadata metadata = new SubscriptionMetadata
                     {
                         Identity = identity,
@@ -204,8 +216,10 @@ namespace Piraeus.Adapters
 
         private async Task Send(byte[] message)
         {
-            try {
-                if (message.Length > config.MaxBufferSize) {
+            try
+            {
+                if (message.Length > config.MaxBufferSize)
+                {
                     logger?.LogErrorAsync(
                         $"Message size {message.Length} is greater than max message size {config.MaxBufferSize}.");
                     OnError.Invoke(this,
@@ -215,7 +229,8 @@ namespace Piraeus.Adapters
 
                 await Channel.SendAsync(message);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, $"WSN adapter send error on channel '{Channel.Id}'.");
             }
         }
@@ -232,8 +247,10 @@ namespace Piraeus.Adapters
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue) {
-                if (disposing) {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     adapter.Dispose();
                 }
 

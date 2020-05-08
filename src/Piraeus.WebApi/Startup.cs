@@ -82,7 +82,8 @@ namespace Piraeus.WebApi
 
             PskStorageAdapter pskAdpater = GetPskAdapter();
 
-            if (pskAdpater != null) {
+            if (pskAdpater != null)
+            {
                 services.AddSingleton(pskAdpater);
             }
 
@@ -96,7 +97,8 @@ namespace Piraeus.WebApi
                 log.SetMinimumLevel(Enum.Parse<LogLevel>(pconfig.LogLevel));
             });
 
-            if (!string.IsNullOrEmpty(pconfig.InstrumentationKey)) {
+            if (!string.IsNullOrEmpty(pconfig.InstrumentationKey))
+            {
                 services.AddApplicationInsightsTelemetry(pconfig.InstrumentationKey);
             }
 
@@ -106,18 +108,21 @@ namespace Piraeus.WebApi
 
         private PskStorageAdapter GetPskAdapter()
         {
-            if (!string.IsNullOrEmpty(pconfig.PskRedisConnectionString)) {
+            if (!string.IsNullOrEmpty(pconfig.PskRedisConnectionString))
+            {
                 return PskStorageAdapterFactory.Create(pconfig.PskRedisConnectionString);
             }
 
             if (!string.IsNullOrEmpty(pconfig.PskKeyVaultClientSecret) &&
                 !string.IsNullOrEmpty(pconfig.PskKeyVaultClientId) &&
-                !string.IsNullOrEmpty(pconfig.PskKeyVaultAuthority)) {
+                !string.IsNullOrEmpty(pconfig.PskKeyVaultAuthority))
+            {
                 return PskStorageAdapterFactory.Create(pconfig.PskKeyVaultAuthority, pconfig.PskKeyVaultClientId,
                     pconfig.PskKeyVaultClientSecret);
             }
 
-            if (!string.IsNullOrEmpty(pconfig.PskKeys)) {
+            if (!string.IsNullOrEmpty(pconfig.PskKeys))
+            {
                 return PskStorageAdapterFactory.Create(pconfig.PskIdentities, pconfig.PskKeys);
             }
 

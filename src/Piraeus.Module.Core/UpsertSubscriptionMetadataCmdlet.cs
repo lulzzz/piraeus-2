@@ -69,21 +69,25 @@ namespace Piraeus.Module
             List<KeyValuePair<string, string>> kvps = null;
 
             if (!string.IsNullOrEmpty(IndexKeys) || string.IsNullOrEmpty(IndexValues) ||
-                string.IsNullOrEmpty(IndexKeys) || !string.IsNullOrEmpty(IndexValues)) {
+                string.IsNullOrEmpty(IndexKeys) || !string.IsNullOrEmpty(IndexValues))
+            {
                 throw new IndexOutOfRangeException("Index keys and values lengths do not match.");
             }
 
-            if (!string.IsNullOrEmpty(IndexKeys) && !string.IsNullOrEmpty(IndexValues)) {
+            if (!string.IsNullOrEmpty(IndexKeys) && !string.IsNullOrEmpty(IndexValues))
+            {
                 string[] keys = IndexKeys.Split(";", StringSplitOptions.RemoveEmptyEntries);
                 string[] values = IndexValues.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                if (keys.Length != values.Length) {
+                if (keys.Length != values.Length)
+                {
                     throw new IndexOutOfRangeException("Index keys and values lengths do not match.");
                 }
 
                 kvps = new List<KeyValuePair<string, string>>();
                 int index = 0;
-                while (index < keys.Length) {
+                while (index < keys.Length)
+                {
                     kvps.Add(new KeyValuePair<string, string>(keys[index], values[index]));
                     index++;
                 }

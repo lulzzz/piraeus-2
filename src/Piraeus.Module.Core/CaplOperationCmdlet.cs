@@ -18,52 +18,68 @@ namespace Piraeus.Module
         protected override void ProcessRecord()
         {
             Uri operationUri;
-            if (Type == OperationType.BetweenDateTime) {
+            if (Type == OperationType.BetweenDateTime)
+            {
                 operationUri = BetweenDateTimeOperation.OperationUri;
             }
-            else if (Type == OperationType.Contains) {
+            else if (Type == OperationType.Contains)
+            {
                 operationUri = ContainsOperation.OperationUri;
             }
-            else if (Type == OperationType.Equal) {
+            else if (Type == OperationType.Equal)
+            {
                 operationUri = EqualOperation.OperationUri;
             }
-            else if (Type == OperationType.EqualDateTime) {
+            else if (Type == OperationType.EqualDateTime)
+            {
                 operationUri = EqualDateTimeOperation.OperationUri;
             }
-            else if (Type == OperationType.EqualNumeric) {
+            else if (Type == OperationType.EqualNumeric)
+            {
                 operationUri = EqualNumericOperation.OperationUri;
             }
-            else if (Type == OperationType.Exists) {
+            else if (Type == OperationType.Exists)
+            {
                 operationUri = ExistsOperation.OperationUri;
             }
-            else if (Type == OperationType.GreaterThan) {
+            else if (Type == OperationType.GreaterThan)
+            {
                 operationUri = GreaterThanOperation.OperationUri;
             }
-            else if (Type == OperationType.GreaterThanDateTime) {
+            else if (Type == OperationType.GreaterThanDateTime)
+            {
                 operationUri = GreaterThanOrEqualDateTimeOperation.OperationUri;
             }
-            else if (Type == OperationType.GreaterThanOrEqual) {
+            else if (Type == OperationType.GreaterThanOrEqual)
+            {
                 operationUri = GreaterThanOrEqualOperation.OperationUri;
             }
-            else if (Type == OperationType.GreaterThanOrEqualDateTime) {
+            else if (Type == OperationType.GreaterThanOrEqualDateTime)
+            {
                 operationUri = GreaterThanOrEqualDateTimeOperation.OperationUri;
             }
-            else if (Type == OperationType.LessThan) {
+            else if (Type == OperationType.LessThan)
+            {
                 operationUri = LessThanOperation.OperationUri;
             }
-            else if (Type == OperationType.LessThanDateTime) {
+            else if (Type == OperationType.LessThanDateTime)
+            {
                 operationUri = LessThanOrEqualDateTimeOperation.OperationUri;
             }
-            else if (Type == OperationType.LessThanOrEqual) {
+            else if (Type == OperationType.LessThanOrEqual)
+            {
                 operationUri = LessThanOrEqualOperation.OperationUri;
             }
-            else if (Type == OperationType.LessThanOrEqualDateTime) {
+            else if (Type == OperationType.LessThanOrEqualDateTime)
+            {
                 operationUri = LessThanOrEqualDateTimeOperation.OperationUri;
             }
-            else if (Type == OperationType.NotEqual) {
+            else if (Type == OperationType.NotEqual)
+            {
                 operationUri = NotEqualOperation.OperationUri;
             }
-            else {
+            else
+            {
                 throw new ArgumentOutOfRangeException("Type");
             }
 

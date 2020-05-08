@@ -63,7 +63,8 @@ namespace SkunkLab.Protocols.Mqtt
             ByteContainer vhContainer = new ByteContainer();
             vhContainer.Add(Topic);
 
-            if (qos > 0) {
+            if (qos > 0)
+            {
                 byte[] messageId = new byte[2];
                 messageId[0] = (byte)((MessageId >> 8) & 0x00FF);
                 messageId[1] = (byte)(MessageId & 0x00FF);
@@ -104,7 +105,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -118,7 +120,8 @@ namespace SkunkLab.Protocols.Mqtt
             Topic = ByteContainer.DecodeString(buffer, index, out int length);
             index += length;
 
-            if (QualityOfServiceLevel > 0) {
+            if (QualityOfServiceLevel > 0)
+            {
                 ushort messageId = (ushort)((buffer[index++] << 8) & 0xFF00);
                 messageId |= buffer[index++];
 

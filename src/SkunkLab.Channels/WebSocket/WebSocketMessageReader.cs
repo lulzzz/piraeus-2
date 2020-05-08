@@ -15,11 +15,14 @@ namespace SkunkLab.Channels.WebSocket
             ArraySegment<byte> arraySegment = new ArraySegment<byte>(buffer);
             WebSocketReceiveResult receiveResult =
                 await webSocket.ReceiveAsync(arraySegment, token).WithCancellation(token);
-            if (receiveResult.MessageType == WebSocketMessageType.Close) {
+            if (receiveResult.MessageType == WebSocketMessageType.Close)
+            {
                 message = new WebSocketMessage(null, WebSocketMessageType.Close);
             }
-            else {
-                if (receiveResult.EndOfMessage) {
+            else
+            {
+                if (receiveResult.EndOfMessage)
+                {
                     return receiveResult.MessageType switch
                     {
                         WebSocketMessageType.Text => new WebSocketMessage(
@@ -33,14 +36,17 @@ namespace SkunkLab.Channels.WebSocket
                 ByteBuffer bytebuffer = new ByteBuffer(maxMessageSize);
                 bytebuffer.Append(BufferSliceToByteArray(buffer, receiveResult.Count));
                 WebSocketMessageType messageType = receiveResult.MessageType;
-                while (true) {
+                while (true)
+                {
                     receiveResult = await webSocket.ReceiveAsync(arraySegment, token);
-                    if (receiveResult.MessageType != messageType) {
+                    if (receiveResult.MessageType != messageType)
+                    {
                         throw new InvalidOperationException("Wrong message type.");
                     }
 
                     bytebuffer.Append(BufferSliceToByteArray(buffer, receiveResult.Count));
-                    if (receiveResult.EndOfMessage) {
+                    if (receiveResult.EndOfMessage)
+                    {
                         return receiveResult.MessageType switch
                         {
                             WebSocketMessageType.Text => new WebSocketMessage(bytebuffer.GetString(),

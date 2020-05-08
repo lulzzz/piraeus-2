@@ -26,7 +26,8 @@ namespace SkunkLab.Storage
 
         public static KeyVaultPskStorage CreateSingleton(string authority, string clientId, string clientSecret)
         {
-            if (instance == null) {
+            if (instance == null)
+            {
                 Authority = authority;
                 ClientId = clientId;
                 ClientSecret = clientSecret;
@@ -46,7 +47,8 @@ namespace SkunkLab.Storage
 
         public override async Task<string> GetSecretAsync(string secretIdentifier)
         {
-            if (DateTime.Now > expiry) {
+            if (DateTime.Now > expiry)
+            {
                 client = new KeyVaultClient(GetAccessToken);
             }
 
@@ -56,7 +58,8 @@ namespace SkunkLab.Storage
 
         public override async Task RemoveSecretAsync(string key)
         {
-            if (DateTime.Now > expiry) {
+            if (DateTime.Now > expiry)
+            {
                 client = new KeyVaultClient(GetAccessToken);
             }
 
@@ -65,7 +68,8 @@ namespace SkunkLab.Storage
 
         public override async Task SetSecretAsync(string secretName, string value)
         {
-            if (DateTime.Now > expiry) {
+            if (DateTime.Now > expiry)
+            {
                 client = new KeyVaultClient(GetAccessToken);
             }
 
@@ -80,7 +84,8 @@ namespace SkunkLab.Storage
             ClientCredential clientCred = new ClientCredential(ClientId, ClientSecret);
             AuthenticationResult result = await authContext.AcquireTokenAsync(resource, clientCred);
 
-            if (result == null) {
+            if (result == null)
+            {
                 throw new InvalidOperationException("Failed to obtain the JWT token");
             }
 

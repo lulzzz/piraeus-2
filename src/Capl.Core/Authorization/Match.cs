@@ -84,16 +84,19 @@ namespace Capl.Authorization
             Type = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
             string required = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Required);
 
-            if (string.IsNullOrEmpty(required)) {
+            if (string.IsNullOrEmpty(required))
+            {
                 Required = true;
             }
-            else {
+            else
+            {
                 Required = XmlConvert.ToBoolean(required);
             }
 
             Value = reader.GetElementValue(AuthorizationConstants.Elements.Match);
 
-            if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Match)) {
+            if (!reader.IsRequiredEndElement(AuthorizationConstants.Elements.Match))
+            {
                 throw new SerializationException(string.Format("Unexpected element {0}", reader.LocalName));
             }
         }
@@ -108,7 +111,8 @@ namespace Capl.Authorization
             writer.WriteAttributeString(AuthorizationConstants.Attributes.ClaimType, ClaimType);
             writer.WriteAttributeString(AuthorizationConstants.Attributes.Required, XmlConvert.ToString(Required));
 
-            if (!string.IsNullOrEmpty(Value)) {
+            if (!string.IsNullOrEmpty(Value))
+            {
                 writer.WriteString(Value);
             }
 

@@ -20,10 +20,12 @@ namespace Piraeus.WebApi.Controllers
 
         public AccessControlController(IClusterClient clusterClient, Logger logger = null)
         {
-            if (!GraphManager.IsInitialized) {
+            if (!GraphManager.IsInitialized)
+            {
                 graphManager = GraphManager.Create(clusterClient);
             }
-            else {
+            else
+            {
                 graphManager = GraphManager.Instance;
             }
 
@@ -34,13 +36,15 @@ namespace Piraeus.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteAccessControlPolicy(string policyUriString)
         {
-            try {
+            try
+            {
                 _ = policyUriString ?? throw new ArgumentNullException(nameof(policyUriString));
 
                 await graphManager.ClearAccessControlPolicyAsync(policyUriString);
                 return StatusCode(200);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error deleting CAPL policy.");
                 return StatusCode(500, ex.Message);
             }
@@ -51,13 +55,15 @@ namespace Piraeus.WebApi.Controllers
         [Produces("application/xml")]
         public async Task<ActionResult<AuthorizationPolicy>> GetAccessControlPolicy(string policyUriString)
         {
-            try {
+            try
+            {
                 _ = policyUriString ?? throw new ArgumentNullException(nameof(policyUriString));
 
                 AuthorizationPolicy policy = await graphManager.GetAccessControlPolicyAsync(policyUriString);
                 return StatusCode(200, policy);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error getting CAPL policy.");
                 return StatusCode(500, ex.Message);
             }
@@ -67,13 +73,15 @@ namespace Piraeus.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> UpsertAccessControlPolicy(AuthorizationPolicy policy)
         {
-            try {
+            try
+            {
                 _ = policy ?? throw new ArgumentNullException(nameof(policy));
 
                 await graphManager.UpsertAcessControlPolicyAsync(policy.PolicyId.ToString(), policy);
                 return StatusCode(200);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 logger?.LogError(ex, "Error upserting CAPL policy.");
                 return StatusCode(500, ex.Message);
             }

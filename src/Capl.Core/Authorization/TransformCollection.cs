@@ -124,12 +124,15 @@ namespace Capl.Authorization
 
             reader.MoveToRequiredStartElement(AuthorizationConstants.Elements.Transforms);
 
-            while (reader.Read()) {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transform)) {
+            while (reader.Read())
+            {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Transform))
+                {
                     Add(ClaimTransform.Load(reader));
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transforms)) {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transforms))
+                {
                     break;
                 }
             }
@@ -139,7 +142,8 @@ namespace Capl.Authorization
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
 
-            if (Count == 0) {
+            if (Count == 0)
+            {
                 return;
             }
 

@@ -133,7 +133,8 @@ namespace SkunkLab.Protocols.Coap
             get => token;
             set
             {
-                if (value == null) {
+                if (value == null)
+                {
                     return;
                 }
 
@@ -147,7 +148,8 @@ namespace SkunkLab.Protocols.Coap
             get => tokenLength;
             set
             {
-                if (value > 8) {
+                if (value > 8)
+                {
                     throw new IndexOutOfRangeException("Token length is between 0 and 8 inclusive.");
                 }
 
@@ -168,7 +170,8 @@ namespace SkunkLab.Protocols.Coap
             int index = 0;
             byte header = message[index++];
 
-            if (header >> 0x06 != 1) {
+            if (header >> 0x06 != 1)
+            {
                 throw new CoapVersionMismatchException("Coap Version 1 is only supported version for Coap response.");
             }
 
@@ -187,20 +190,24 @@ namespace SkunkLab.Protocols.Coap
             int previous = 0;
             bool marker = (message[index] & 0xFF) == 0xFF;
 
-            while (!marker) {
+            while (!marker)
+            {
                 int delta = message[index] >> 0x04;
                 CoapOption CoapOption = CoapOption.Decode(message, index, previous, out index);
                 Options.Add(CoapOption);
                 previous += delta;
-                if (index < message.Length) {
+                if (index < message.Length)
+                {
                     marker = (message[index] & 0xFF) == 0xFF;
                 }
-                else {
+                else
+                {
                     break;
                 }
             }
 
-            if (marker) {
+            if (marker)
+            {
                 index++;
                 Payload = new byte[message.Length - index];
                 Buffer.BlockCopy(message, index, Payload, 0, Payload.Length);
@@ -230,7 +237,8 @@ namespace SkunkLab.Protocols.Coap
             header[index++] = (byte)((MessageId >> 8) & 0x00FF);
             header[index++] = (byte)(MessageId & 0x00FF);
 
-            if (TokenLength > 0) {
+            if (TokenLength > 0)
+            {
                 Buffer.BlockCopy(Token, 0, header, 4, TokenLength);
             }
 
@@ -238,31 +246,37 @@ namespace SkunkLab.Protocols.Coap
 
             byte[] options = null;
 
-            if (Options.Count > 0) {
+            if (Options.Count > 0)
+            {
                 OptionBuilder builder = new OptionBuilder(Options.ToArray());
                 options = builder.Encode();
                 length += options.Length;
             }
 
             byte[] buffer;
-            if (Payload != null) {
+            if (Payload != null)
+            {
                 length += Payload.Length + 1;
                 buffer = new byte[length];
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
-                if (options != null) {
+                if (options != null)
+                {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
                     Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length + options.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + options.Length + 1, Payload.Length);
                 }
-                else {
+                else
+                {
                     Buffer.BlockCopy(new byte[] { 0xFF }, 0, buffer, header.Length, 1);
                     Buffer.BlockCopy(Payload, 0, buffer, header.Length + 1, Payload.Length);
                 }
             }
-            else {
+            else
+            {
                 buffer = new byte[length];
                 Buffer.BlockCopy(header, 0, buffer, 0, header.Length);
-                if (options != null) {
+                if (options != null)
+                {
                     Buffer.BlockCopy(options, 0, buffer, header.Length, options.Length);
                 }
             }
@@ -288,12 +302,14 @@ namespace SkunkLab.Protocols.Coap
             message.locationPath =
                 locationpath == null ? new List<string>() : new List<string>(locationpath as string[]);
 
-            if (observe != null) {
+            if (observe != null)
+            {
                 message.Observe = (uint)observe == 0 ? true : false;
             }
 
             object contentType = message.Options.GetOptionValue(OptionType.ContentFormat);
-            if (contentType != null) {
+            if (contentType != null)
+            {
                 message.ContentType = (MediaType)Convert.ToInt32(contentType);
             }
 
@@ -302,7 +318,8 @@ namespace SkunkLab.Protocols.Coap
                 : 0;
 
             object accept = message.Options.GetOptionValue(OptionType.Accept);
-            if (accept != null) {
+            if (accept != null)
+            {
                 message.Accept = (MediaType)Convert.ToInt32(accept);
             }
 
@@ -324,50 +341,59 @@ namespace SkunkLab.Protocols.Coap
 
             void LoadString(OptionType type, string value)
             {
-                if (value != null) {
+                if (value != null)
+                {
                     Options.Add(new CoapOption(type, value));
                 }
             }
 
             void LoadBool(OptionType type, bool value)
             {
-                if (value) {
+                if (value)
+                {
                     Options.Add(new CoapOption(type, null));
                 }
             }
 
             void LoadUint(OptionType type, uint value, bool includeZero)
             {
-                if (value > 0) {
+                if (value > 0)
+                {
                     Options.Add(new CoapOption(type, value));
                 }
 
-                if (value == 0 && includeZero) {
+                if (value == 0 && includeZero)
+                {
                     Options.Add(new CoapOption(type, value));
                 }
             }
 
             Options.Clear();
 
-            if (ResourceUri != null) {
+            if (ResourceUri != null)
+            {
                 IEnumerable<CoapOption> resourceOptions = ResourceUri.DecomposeCoapUri();
                 foreach (CoapOption co in resourceOptions)
                     Options.Add(co);
             }
 
-            if (Observe.HasValue) {
+            if (Observe.HasValue)
+            {
                 LoadUint(OptionType.Observe, Convert.ToUInt32(!Observe.Value), true);
             }
 
-            if (NoResponse.HasValue) {
+            if (NoResponse.HasValue)
+            {
                 LoadUint(OptionType.NoResponse, Convert.ToUInt32(NoResponse.Value), false);
             }
 
-            if (IfMatch != null) {
+            if (IfMatch != null)
+            {
                 IfMatch.ForEach(s => LoadByteArray(OptionType.IfMatch, s));
             }
 
-            if (ETag != null) {
+            if (ETag != null)
+            {
                 ETag.ForEach(s => LoadByteArray(OptionType.ETag, s));
             }
 
@@ -375,12 +401,14 @@ namespace SkunkLab.Protocols.Coap
 
             LocationPath.ForEach(s => LoadString(OptionType.LocationPath, s));
 
-            if (ContentType.HasValue) {
+            if (ContentType.HasValue)
+            {
                 LoadUint(OptionType.ContentFormat, (uint)ContentType.Value, true);
             }
 
             LoadUint(OptionType.MaxAge, MaxAge, false);
-            if (Accept.HasValue) {
+            if (Accept.HasValue)
+            {
                 LoadUint(OptionType.Accept, (uint)Accept.Value, false);
             }
 

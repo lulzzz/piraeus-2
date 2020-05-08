@@ -29,7 +29,8 @@ namespace Piraeus.Grains
 
         public static GraphManager Create(IClusterClient client)
         {
-            if (Instance == null) {
+            if (Instance == null)
+            {
                 Instance = new GraphManager(client);
             }
 
@@ -38,7 +39,8 @@ namespace Piraeus.Grains
 
         public static GraphManager Create(OrleansConfig config)
         {
-            if (Instance == null) {
+            if (Instance == null)
+            {
                 Instance = new GraphManager(config);
             }
 
@@ -76,11 +78,13 @@ namespace Piraeus.Grains
         private IClientBuilder AddAppInsighlts(IClientBuilder builder, LoggerType loggers,
             string instrumentationKey = null)
         {
-            if (string.IsNullOrEmpty(instrumentationKey)) {
+            if (string.IsNullOrEmpty(instrumentationKey))
+            {
                 return builder;
             }
 
-            if (loggers.HasFlag(LoggerType.AppInsights)) {
+            if (loggers.HasFlag(LoggerType.AppInsights))
+            {
                 builder.AddApplicationInsightsTelemetryConsumer(instrumentationKey);
             }
 
@@ -91,12 +95,14 @@ namespace Piraeus.Grains
         {
             builder.ConfigureLogging(op =>
             {
-                if (loggers.HasFlag(LoggerType.Console)) {
+                if (loggers.HasFlag(LoggerType.Console))
+                {
                     op.AddConsole();
                     op.SetMinimumLevel(logLevel);
                 }
 
-                if (loggers.HasFlag(LoggerType.Debug)) {
+                if (loggers.HasFlag(LoggerType.Debug))
+                {
                     op.AddDebug();
                     op.SetMinimumLevel(logLevel);
                 }
@@ -107,14 +113,18 @@ namespace Piraeus.Grains
 
         private IClientBuilder AddStorageProvider(IClientBuilder builder, string connectionString)
         {
-            if (string.IsNullOrEmpty(connectionString)) {
+            if (string.IsNullOrEmpty(connectionString))
+            {
                 builder.UseLocalhostClustering();
             }
-            else {
-                if (connectionString.Contains("6379") || connectionString.Contains("6380")) {
+            else
+            {
+                if (connectionString.Contains("6379") || connectionString.Contains("6380"))
+                {
                     builder.UseRedisGatewayListProvider(options => options.ConnectionString = connectionString);
                 }
-                else {
+                else
+                {
                     builder.UseAzureStorageClustering(options => options.ConnectionString = connectionString);
                 }
             }
@@ -132,7 +142,8 @@ namespace Piraeus.Grains
                 attempt++;
                 Console.WriteLine(
                     $"Cluster client attempt {attempt} of {maxAttempts} failed to connect to cluster.  Exception: {exception}");
-                if (attempt > maxAttempts) {
+                if (attempt > maxAttempts)
+                {
                     return false;
                 }
 
@@ -337,7 +348,8 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null) {
+            if (subscriber != null)
+            {
                 await subscriber.AddSubscriptionAsync(subscriptionUriString);
             }
         }
@@ -346,14 +358,16 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null) {
+            if (subscriber != null)
+            {
                 await subscriber.ClearAsync();
             }
         }
 
         public ISubscriber GetSubscriber(string identity)
         {
-            if (string.IsNullOrEmpty(identity)) {
+            if (string.IsNullOrEmpty(identity))
+            {
                 return null;
             }
 
@@ -364,7 +378,8 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null) {
+            if (subscriber != null)
+            {
                 return await subscriber.GetSubscriptionsAsync();
             }
 
@@ -375,7 +390,8 @@ namespace Piraeus.Grains
         {
             ISubscriber subscriber = GetSubscriber(identity);
 
-            if (subscriber != null) {
+            if (subscriber != null)
+            {
                 await subscriber.RemoveSubscriptionAsync(subscriptionUriString);
             }
         }
@@ -445,7 +461,8 @@ namespace Piraeus.Grains
         {
             IServiceIdentity identity = GetServiceIdentity(key);
             X509Certificate2 cert = new X509Certificate2(path, password);
-            if (cert != null) {
+            if (cert != null)
+            {
                 byte[] certBytes = cert.Export(X509ContentType.Pfx, password);
                 await identity.AddCertificateAsync(certBytes);
             }
@@ -457,7 +474,8 @@ namespace Piraeus.Grains
             IServiceIdentity identity = GetServiceIdentity(key);
             X509Certificate2 cert = GetLocalCertificate(store, location, thumbprint);
 
-            if (cert != null) {
+            if (cert != null)
+            {
                 byte[] certBytes = cert.Export(X509ContentType.Pfx, password);
                 await identity.AddCertificateAsync(certBytes);
             }
@@ -476,7 +494,8 @@ namespace Piraeus.Grains
 
         private static X509Certificate2 GetLocalCertificate(string store, string location, string thumbprint)
         {
-            if (string.IsNullOrEmpty(store) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(thumbprint)) {
+            if (string.IsNullOrEmpty(store) || string.IsNullOrEmpty(location) || string.IsNullOrEmpty(thumbprint))
+            {
                 return null;
             }
 

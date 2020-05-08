@@ -26,18 +26,23 @@ namespace Capl.Authorization.Matching
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
             IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
-                if (claim.Type == claimType) {
+                if (claim.Type == claimType)
+                {
                     string claimValue = HttpUtility.HtmlDecode(claim.Value);
-                    using (Stream stream = new MemoryStream(Encoding.UTF32.GetBytes(claimValue))) {
-                        try {
+                    using (Stream stream = new MemoryStream(Encoding.UTF32.GetBytes(claimValue)))
+                    {
+                        try
+                        {
                             XPathDocument doc = new XPathDocument(stream);
                             XPathExpression expression = XPathExpression.Compile(xpath);
 
                             XPathNavigator nav = doc.CreateNavigator();
                             XPathNodeIterator iterator = nav.Select(expression);
 
-                            while (iterator.MoveNext()) {
-                                if (!string.IsNullOrEmpty(iterator.Current.Value)) {
+                            while (iterator.MoveNext())
+                            {
+                                if (!string.IsNullOrEmpty(iterator.Current.Value))
+                                {
                                     return true;
                                 }
                             }

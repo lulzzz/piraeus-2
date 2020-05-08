@@ -28,14 +28,16 @@ namespace SkunkLab.Storage
 
             container = new Dictionary<string, CloudQueue>();
 
-            if (bufferManager != null) {
+            if (bufferManager != null)
+            {
                 client.BufferManager = bufferManager;
             }
         }
 
         public static QueueStorage CreateSingleton(string connectionString)
         {
-            if (instance == null) {
+            if (instance == null)
+            {
                 instance = new QueueStorage(connectionString);
             }
 
@@ -84,7 +86,8 @@ namespace SkunkLab.Storage
         {
             CloudQueue queue = GetQueue(queueName);
 
-            if (!await queue.ExistsAsync()) {
+            if (!await queue.ExistsAsync())
+            {
                 throw new InvalidOperationException("Cloud queue does not exist.");
             }
 
@@ -92,17 +95,21 @@ namespace SkunkLab.Storage
 
             List<CloudQueueMessage> list = approxMessageCount.HasValue ? new List<CloudQueueMessage>() : null;
 
-            if (list == null) {
+            if (list == null)
+            {
                 return null;
             }
 
-            if (!numberOfMessages.HasValue) {
+            if (!numberOfMessages.HasValue)
+            {
                 CloudQueueMessage message = await queue.GetMessageAsync();
-                if (message != null) {
+                if (message != null)
+                {
                     list.Add(message);
                 }
             }
-            else {
+            else
+            {
                 list = new List<CloudQueueMessage>(await queue.GetMessagesAsync(numberOfMessages.Value));
             }
 
@@ -114,7 +121,8 @@ namespace SkunkLab.Storage
         {
             CloudQueue queue = GetQueue(queueName);
 
-            if (!await queue.ExistsAsync()) {
+            if (!await queue.ExistsAsync())
+            {
                 throw new InvalidOperationException("Cloud queue does not exist.");
             }
 
@@ -125,10 +133,12 @@ namespace SkunkLab.Storage
         private CloudQueue GetQueue(string queueName)
         {
             CloudQueue queue;
-            if (container.ContainsKey(queueName)) {
+            if (container.ContainsKey(queueName))
+            {
                 queue = container[queueName];
             }
-            else {
+            else
+            {
                 queue = client.GetQueueReference(queueName);
                 container.Add(queueName, queue);
             }

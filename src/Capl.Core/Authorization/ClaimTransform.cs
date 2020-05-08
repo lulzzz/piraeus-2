@@ -91,7 +91,8 @@ namespace Capl.Authorization
             IEnumerable<Claim> transformedClaims = null;
             TransformAction action = TransformAction.Create(Type, null);
 
-            if (MatchExpression != null) {
+            if (MatchExpression != null)
+            {
                 MatchExpression
                     matcher = MatchExpressionDictionary.Default[
                         MatchExpression.Type
@@ -100,18 +101,22 @@ namespace Capl.Authorization
             }
 
             bool eval;
-            if (Expression == null) {
+            if (Expression == null)
+            {
                 eval = true;
             }
-            else {
+            else
+            {
                 eval = Expression.Evaluate(claims);
             }
 
-            if (eval) {
+            if (eval)
+            {
                 transformedClaims = action.Execute(claims, matchedClaims, TargetClaim);
             }
 
-            if (transformedClaims != null) {
+            if (transformedClaims != null)
+            {
                 return transformedClaims;
             }
 
@@ -134,29 +139,35 @@ namespace Capl.Authorization
 
             Type = new Uri(reader.GetRequiredAttribute(AuthorizationConstants.Attributes.Type));
 
-            while (reader.Read()) {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Match)) {
+            while (reader.Read())
+            {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Match))
+                {
                     MatchExpression = Match.Load(reader);
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim)) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.TargetClaim))
+                {
                     TargetClaim = new LiteralClaim
                     {
                         ClaimType = reader.GetRequiredAttribute(AuthorizationConstants.Attributes.ClaimType)
                     };
 
-                    if (!reader.IsEmptyElement) {
+                    if (!reader.IsEmptyElement)
+                    {
                         TargetClaim.ClaimValue = reader.GetElementValue(AuthorizationConstants.Elements.TargetClaim);
                     }
                 }
 
                 if (reader.LocalName == AuthorizationConstants.Elements.Rule ||
                     reader.LocalName == AuthorizationConstants.Elements.LogicalAnd ||
-                    reader.LocalName == AuthorizationConstants.Elements.LogicalOr) {
+                    reader.LocalName == AuthorizationConstants.Elements.LogicalOr)
+                {
                     Expression = Term.Load(reader);
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transform)) {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.Transform))
+                {
                     break;
                 }
             }
@@ -173,29 +184,34 @@ namespace Capl.Authorization
             writer.WriteStartElement(AuthorizationConstants.Elements.Transform,
                 AuthorizationConstants.Namespaces.Xmlns);
 
-            if (TransformID != null) {
+            if (TransformID != null)
+            {
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.TransformId, TransformID.ToString());
             }
 
             writer.WriteAttributeString(AuthorizationConstants.Attributes.Type, Type.ToString());
 
-            if (MatchExpression != null) {
+            if (MatchExpression != null)
+            {
                 MatchExpression.WriteXml(writer);
             }
 
-            if (TargetClaim != null) {
+            if (TargetClaim != null)
+            {
                 writer.WriteStartElement(AuthorizationConstants.Elements.TargetClaim,
                     AuthorizationConstants.Namespaces.Xmlns);
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.ClaimType, TargetClaim.ClaimType);
 
-                if (!string.IsNullOrEmpty(TargetClaim.ClaimValue)) {
+                if (!string.IsNullOrEmpty(TargetClaim.ClaimValue))
+                {
                     writer.WriteString(TargetClaim.ClaimValue);
                 }
 
                 writer.WriteEndElement();
             }
 
-            if (Expression != null) {
+            if (Expression != null)
+            {
                 Expression.WriteXml(writer);
             }
 

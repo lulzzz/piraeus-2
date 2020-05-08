@@ -24,19 +24,24 @@ namespace Piraeus.Module
         protected override void ProcessRecord()
         {
             Uri matchUri;
-            if (Type == MatchType.Literal) {
+            if (Type == MatchType.Literal)
+            {
                 matchUri = LiteralMatchExpression.MatchUri;
             }
-            else if (Type == MatchType.Pattern) {
+            else if (Type == MatchType.Pattern)
+            {
                 matchUri = PatternMatchExpression.MatchUri;
             }
-            else if (Type == MatchType.ComplexType) {
+            else if (Type == MatchType.ComplexType)
+            {
                 matchUri = ComplexTypeMatchExpression.MatchUri;
             }
-            else if (Type == MatchType.Unary) {
+            else if (Type == MatchType.Unary)
+            {
                 matchUri = UnaryMatchExpression.MatchUri;
             }
-            else {
+            else
+            {
                 throw new ArgumentOutOfRangeException("Type");
             }
 

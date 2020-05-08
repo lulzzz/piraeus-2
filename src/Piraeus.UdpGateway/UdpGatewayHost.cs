@@ -68,7 +68,8 @@ namespace Piraeus.UdpGateway
             hostname = Dns.GetHostName();
 #endif
             int index = 0;
-            while (index < ports.Length) {
+            while (index < ports.Length)
+            {
                 listeners.Add(ports[index],
                     new UdpServerListener(new IPEndPoint(GetIPAddress(hostname), ports[index]), config, orleansConfig,
                         logger, sources[ports[index]].Token));
@@ -78,7 +79,8 @@ namespace Piraeus.UdpGateway
 
             KeyValuePair<int, UdpServerListener>[] tcpKvps = listeners.ToArray();
 
-            foreach (var item in tcpKvps) {
+            foreach (var item in tcpKvps)
+            {
                 item.Value.StartAsync().LogExceptions(logger);
                 logger?.LogInformation($"TCP listener started on port {item.Key}");
             }
@@ -99,8 +101,10 @@ namespace Piraeus.UdpGateway
         private IPAddress GetIPAddress(string hostname)
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(hostname);
-            for (int index = 0; index < hostInfo.AddressList.Length; index++) {
-                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork) {
+            for (int index = 0; index < hostInfo.AddressList.Length; index++)
+            {
+                if (hostInfo.AddressList[index].AddressFamily == AddressFamily.InterNetwork)
+                {
                     logger?.LogInformation($"IP address '{hostInfo.AddressList[index]}'.");
                     return hostInfo.AddressList[index];
                 }

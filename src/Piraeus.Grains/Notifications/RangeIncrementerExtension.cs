@@ -6,7 +6,8 @@
         {
             value++;
 
-            if (value < inclusiveMinimum || value > inclusiveMaximum) {
+            if (value < inclusiveMinimum || value > inclusiveMaximum)
+            {
                 value = inclusiveMinimum;
             }
 

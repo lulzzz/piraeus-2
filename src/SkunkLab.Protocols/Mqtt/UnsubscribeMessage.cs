@@ -36,7 +36,8 @@ namespace SkunkLab.Protocols.Mqtt
 
             ByteContainer topicContainer = new ByteContainer();
             int index = 0;
-            while (index < Topics.Count) {
+            while (index < Topics.Count)
+            {
                 topicContainer.Add(Topics[index]);
                 index++;
             }
@@ -65,7 +66,8 @@ namespace SkunkLab.Protocols.Mqtt
             int remainingLength = DecodeRemainingLength(message);
 
             int temp = remainingLength;
-            do {
+            do
+            {
                 index++;
                 temp /= 128;
             } while (temp > 0);
@@ -80,7 +82,8 @@ namespace SkunkLab.Protocols.Mqtt
 
             MessageId = messageId;
 
-            while (index < buffer.Length) {
+            while (index < buffer.Length)
+            {
                 string topic = ByteContainer.DecodeString(buffer, index, out int length);
                 index += length;
                 Topics.Add(topic);

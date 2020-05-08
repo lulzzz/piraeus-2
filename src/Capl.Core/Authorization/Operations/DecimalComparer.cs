@@ -22,11 +22,13 @@ namespace Capl.Authorization.Operations
             decimal left = Convert.ToDecimal(x, CultureInfo.InvariantCulture);
             decimal right = Convert.ToDecimal(y, CultureInfo.InvariantCulture);
 
-            if (left == right) {
+            if (left == right)
+            {
                 return 0;
             }
 
-            if (left < right) {
+            if (left < right)
+            {
                 return -1;
             }
 

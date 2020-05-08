@@ -30,22 +30,27 @@ namespace Piraeus.Grains
 
         public async Task ClearAsync()
         {
-            try {
-                foreach (ISubscription item in State.Subscriptions.Values) {
+            try
+            {
+                foreach (ISubscription item in State.Subscriptions.Values)
+                {
                     string id = await item.GetIdAsync();
-                    if (id != null) {
+                    if (id != null)
+                    {
                         await UnsubscribeAsync(id);
                     }
                 }
 
-                if (State.Metadata != null) {
+                if (State.Metadata != null)
+                {
                     ISigmaAlgebra resourceList = GrainFactory.GetGrain<ISigmaAlgebra>("resourcelist");
                     await resourceList.RemoveAsync(State.Metadata.ResourceUriString);
                 }
 
                 await ClearStateAsync();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system clear.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -92,9 +97,11 @@ namespace Piraeus.Grains
         {
             _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
-            try {
+            try
+            {
 
-                if (State.Metadata != null && metadata.ResourceUriString != this.GetPrimaryKeyString()) {
+                if (State.Metadata != null && metadata.ResourceUriString != this.GetPrimaryKeyString())
+                {
                     throw new ResourceIdentityMismatchException("Metadata resource mismatch.");
                 }
 
@@ -105,7 +112,8 @@ namespace Piraeus.Grains
 
                 await WriteStateAsync();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, $"Pi-system UpdateMetadataAsync '{metadata.ResourceUriString}'");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -118,15 +126,18 @@ namespace Piraeus.Grains
 
         public async Task<IEnumerable<string>> GetSubscriptionListAsync()
         {
-            try {
-                if (State.Subscriptions == null || State.Subscriptions.Count == 0) {
+            try
+            {
+                if (State.Subscriptions == null || State.Subscriptions.Count == 0)
+                {
                     return null;
                 }
 
                 string[] result = State.Subscriptions.Keys.ToArray();
                 return await Task.FromResult<IEnumerable<string>>(result);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger.LogErrorAsync(ex, "Pi-system GetSubscriptionListAsync");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -135,30 +146,35 @@ namespace Piraeus.Grains
 
         public async Task SubscribeAsync(ISubscription subscription)
         {
-            try {
+            try
+            {
                 _ = subscription ?? throw new ArgumentNullException(nameof(subscription));
 
                 string id = await subscription.GetIdAsync();
                 Uri uri = new Uri(id);
 
-                if (State.Subscriptions.ContainsKey(id)) {
+                if (State.Subscriptions.ContainsKey(id))
+                {
                     State.Subscriptions[id] = subscription;
                 }
-                else {
+                else
+                {
                     State.Subscriptions.Add(id, subscription);
                 }
 
                 SubscriptionMetadata metadata = await subscription.GetMetadataAsync();
 
                 if (!metadata.IsEphemeral && !string.IsNullOrEmpty(metadata.Identity) &&
-                    metadata.NotifyAddress == null) {
+                    metadata.NotifyAddress == null)
+                {
                     ISubscriber subscriber = GrainFactory.GetGrain<ISubscriber>(metadata.Identity.ToLowerInvariant());
                     await subscriber.AddSubscriptionAsync(metadata.SubscriptionUriString);
                 }
 
                 await WriteStateAsync();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system Subscribe");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -167,7 +183,8 @@ namespace Piraeus.Grains
 
         public async Task UnsubscribeAsync(string subscriptionUriString, string identity)
         {
-            try {
+            try
+            {
                 _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
                 _ = identity ?? throw new ArgumentNullException(nameof(identity));
 
@@ -177,7 +194,8 @@ namespace Piraeus.Grains
                 await subscriber.RemoveSubscriptionAsync(subscriptionUriString);
                 await WriteStateAsync();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system Unsubscribe.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -186,16 +204,19 @@ namespace Piraeus.Grains
 
         public async Task UnsubscribeAsync(string subscriptionUriString)
         {
-            try {
+            try
+            {
                 _ = subscriptionUriString ?? throw new ArgumentNullException(nameof(subscriptionUriString));
 
-                if (State.Subscriptions.ContainsKey(subscriptionUriString)) {
+                if (State.Subscriptions.ContainsKey(subscriptionUriString))
+                {
                     State.Subscriptions.Remove(subscriptionUriString);
                 }
 
                 await WriteStateAsync();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system Unsubscribe.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -208,7 +229,8 @@ namespace Piraeus.Grains
 
         public async Task PublishAsync(EventMessage message)
         {
-            try {
+            try
+            {
                 _ = message ?? throw new ArgumentNullException(nameof(message));
 
                 State.MessageCount++;
@@ -217,7 +239,8 @@ namespace Piraeus.Grains
 
                 List<Task> taskList = new List<Task>();
 
-                if (State.Subscriptions.Count > 0) {
+                if (State.Subscriptions.Count > 0)
+                {
                     ISubscription[] subscriptions = State.Subscriptions.Values.ToArray();
                     foreach (var item in subscriptions)
                         taskList.Add(item.NotifyAsync(message));
@@ -227,7 +250,8 @@ namespace Piraeus.Grains
 
                 await NotifyMetricsAsync();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system Publish.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -236,17 +260,21 @@ namespace Piraeus.Grains
 
         public async Task PublishAsync(EventMessage message, List<KeyValuePair<string, string>> indexes)
         {
-            try {
+            try
+            {
                 _ = message ?? throw new ArgumentNullException(nameof(message));
 
                 State.MessageCount++;
                 State.ByteCount += message.Message.LongLength;
                 State.LastMessageTimestamp = DateTime.UtcNow;
-                if (indexes == null) {
+                if (indexes == null)
+                {
                     await PublishAsync(message);
                 }
-                else {
-                    if (State.Subscriptions.Count > 0) {
+                else
+                {
+                    if (State.Subscriptions.Count > 0)
+                    {
                         List<Task> taskList = new List<Task>();
 
                         ISubscription[] subscriptions = State.Subscriptions.Values.ToArray();
@@ -257,7 +285,8 @@ namespace Piraeus.Grains
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system Publish.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -270,7 +299,8 @@ namespace Piraeus.Grains
 
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IMetricObserver observer)
         {
-            try {
+            try
+            {
                 _ = observer ?? throw new ArgumentNullException(nameof(observer));
 
                 string leaseKey = Guid.NewGuid().ToString();
@@ -282,7 +312,8 @@ namespace Piraeus.Grains
 
                 return await Task.FromResult(leaseKey);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system add metric observer.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -291,7 +322,8 @@ namespace Piraeus.Grains
 
         public async Task<string> AddObserverAsync(TimeSpan lifetime, IErrorObserver observer)
         {
-            try {
+            try
+            {
                 _ = observer ?? throw new ArgumentNullException(nameof(observer));
 
                 string leaseKey = Guid.NewGuid().ToString();
@@ -302,7 +334,8 @@ namespace Piraeus.Grains
                     TimeSpan.FromSeconds(60.0));
                 return await Task.FromResult(leaseKey);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system add error observer.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -311,14 +344,16 @@ namespace Piraeus.Grains
 
         public async Task RemoveObserverAsync(string leaseKey)
         {
-            try {
+            try
+            {
                 _ = leaseKey ?? throw new ArgumentNullException(nameof(leaseKey));
 
                 State.LeaseExpiry.Remove(leaseKey);
                 State.MetricLeases.Remove(leaseKey);
                 State.ErrorLeases.Remove(leaseKey);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system remove observer.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -327,10 +362,12 @@ namespace Piraeus.Grains
 
         public async Task<bool> RenewObserverLeaseAsync(string leaseKey, TimeSpan lifetime)
         {
-            try {
+            try
+            {
                 _ = leaseKey ?? throw new ArgumentNullException(nameof(leaseKey));
 
-                if (State.LeaseExpiry.ContainsKey(leaseKey)) {
+                if (State.LeaseExpiry.ContainsKey(leaseKey))
+                {
                     Tuple<DateTime, string> value = State.LeaseExpiry[leaseKey];
                     Tuple<DateTime, string> newValue =
                         new Tuple<DateTime, string>(DateTime.UtcNow.Add(lifetime), value.Item2);
@@ -340,7 +377,8 @@ namespace Piraeus.Grains
 
                 return await Task.FromResult(false);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex, "Pi-system remove observer.");
                 await NotifyErrorAsync(ex);
                 throw;
@@ -360,17 +398,20 @@ namespace Piraeus.Grains
             List<string> metricLeaseKeyList = new List<string>(metricQuery.Select(c => c.Key));
             List<string> errorLeaseKeyList = new List<string>(errorQuery.Select(c => c.Key));
 
-            foreach (string item in metricLeaseKeyList) {
+            foreach (string item in metricLeaseKeyList)
+            {
                 State.MetricLeases.Remove(item);
                 State.LeaseExpiry.Remove(item);
             }
 
-            foreach (string item in errorLeaseKeyList) {
+            foreach (string item in errorLeaseKeyList)
+            {
                 State.ErrorLeases.Remove(item);
                 State.LeaseExpiry.Remove(item);
             }
 
-            if (State.LeaseExpiry.Count == 0) {
+            if (State.LeaseExpiry.Count == 0)
+            {
                 leaseTimer.Dispose();
                 leaseTimer = null;
             }
@@ -380,7 +421,8 @@ namespace Piraeus.Grains
 
         private async Task NotifyErrorAsync(Exception ex)
         {
-            if (State.ErrorLeases.Count > 0) {
+            if (State.ErrorLeases.Count > 0)
+            {
                 foreach (var item in State.ErrorLeases.Values)
                     item.NotifyError(State.Metadata.ResourceUriString, ex);
             }
@@ -390,8 +432,10 @@ namespace Piraeus.Grains
 
         private async Task NotifyMetricsAsync()
         {
-            if (State.MetricLeases.Count > 0) {
-                foreach (var item in State.MetricLeases.Values) {
+            if (State.MetricLeases.Count > 0)
+            {
+                foreach (var item in State.MetricLeases.Values)
+                {
                     item.NotifyMetrics(new CommunicationMetrics(State.Metadata.ResourceUriString, State.MessageCount,
                         State.ByteCount, State.ErrorCount, State.LastMessageTimestamp.Value, State.LastErrorTimestamp));
                 }

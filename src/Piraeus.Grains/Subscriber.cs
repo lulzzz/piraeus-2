@@ -24,7 +24,8 @@ namespace Piraeus.Grains
 
         public override Task OnActivateAsync()
         {
-            if (State.Container == null) {
+            if (State.Container == null)
+            {
                 List<string> list = new List<string>();
                 State.Container = list;
             }
@@ -43,7 +44,8 @@ namespace Piraeus.Grains
 
         public async Task AddSubscriptionAsync(string subscriptionUriString)
         {
-            if (!State.Container.Contains(subscriptionUriString)) {
+            if (!State.Container.Contains(subscriptionUriString))
+            {
                 State.Container.Add(subscriptionUriString);
             }
 

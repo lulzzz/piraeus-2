@@ -35,12 +35,14 @@ namespace Capl.Authorization.Transforms
             _ = action ?? throw new ArgumentNullException(nameof(action));
 
             TransformAction transformAction;
-            if (transforms == null) {
+            if (transforms == null)
+            {
                 transformAction =
                     TransformsDictionary.Default
                         [action.ToString()]; //CaplConfigurationManager.Transforms[action.ToString()];
             }
-            else {
+            else
+            {
                 transformAction = transforms[action.ToString()];
             }
 

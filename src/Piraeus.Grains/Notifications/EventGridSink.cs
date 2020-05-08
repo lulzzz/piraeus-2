@@ -43,7 +43,8 @@ namespace Piraeus.Grains.Notifications
             topicKey = metadata.SymmetricKey;
             string uriString = new Uri(metadata.SubscriptionUriString).ToString();
             resourceUriString = uriString.Replace("/" + uri.Segments[^1], "");
-            if (!int.TryParse(nvc["clients"], out clientCount)) {
+            if (!int.TryParse(nvc["clients"], out clientCount))
+            {
                 clientCount = 1;
             }
 
@@ -59,10 +60,12 @@ namespace Piraeus.Grains.Notifications
             AuditRecord record = null;
             byte[] payload = null;
 
-            try {
+            try
+            {
                 arrayIndex = arrayIndex.RangeIncrement(0, clientCount - 1);
                 payload = GetPayload(message);
-                if (payload == null) {
+                if (payload == null)
+                {
                     await logger?.LogWarningAsync(
                         $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink because message is null.");
                     return;
@@ -81,15 +84,18 @@ namespace Piraeus.Grains.Notifications
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
                     "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink.");
                 record = new MessageAuditRecord(message.MessageId,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
                     "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (message.Audit && record != null) {
+            finally
+            {
+                if (message.Audit && record != null)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -98,7 +104,8 @@ namespace Piraeus.Grains.Notifications
         private async Task FaultTask(string id, byte[] payload, bool canAudit)
         {
             AuditRecord record = null;
-            try {
+            try
+            {
                 ServiceClientCredentials credentials = new TopicCredentials(topicKey);
                 EventGridClient client = new EventGridClient(credentials);
                 EventGridEvent gridEvent = new EventGridEvent(id, resourceUriString, payload, resourceUriString,
@@ -109,15 +116,18 @@ namespace Piraeus.Grains.Notifications
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
                     "EventGrid", payload.Length, MessageDirectionType.Out, true, DateTime.UtcNow);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 await logger?.LogErrorAsync(ex,
                     $"Subscription '{metadata.SubscriptionUriString}' message not written to event grid sink in fault task.");
                 record = new MessageAuditRecord(id,
                     uri.Query.Length > 0 ? uri.ToString().Replace(uri.Query, "") : uri.ToString(), "EventGrid",
                     "EventGrid", payload.Length, MessageDirectionType.Out, false, DateTime.UtcNow, ex.Message);
             }
-            finally {
-                if (canAudit && record != null) {
+            finally
+            {
+                if (canAudit && record != null)
+                {
                     await auditor?.WriteAuditRecordAsync(record);
                 }
             }
@@ -125,7 +135,8 @@ namespace Piraeus.Grains.Notifications
 
         private byte[] GetPayload(EventMessage message)
         {
-            switch (message.Protocol) {
+            switch (message.Protocol)
+            {
                 case ProtocolType.COAP:
                     CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                     return coap.Payload;

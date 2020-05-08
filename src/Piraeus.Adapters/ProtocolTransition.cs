@@ -25,43 +25,52 @@ namespace Piraeus.Adapters
 
             string uriString = CoapUri.Create(session.Config.Authority, message.ResourceUri, IsEncryptedChannel);
 
-            if (message.Protocol == ProtocolType.MQTT) {
+            if (message.Protocol == ProtocolType.MQTT)
+            {
                 MqttMessage msg = MqttMessage.DecodeMessage(message.Message);
                 PublishMessage pub = msg as PublishMessage;
                 MqttUri uri = new MqttUri(pub.Topic);
-                if (observableToken == null) {
+                if (observableToken == null)
+                {
                     RequestMessageType messageType = msg.QualityOfService == QualityOfServiceLevelType.AtMostOnce
                         ? RequestMessageType.NonConfirmable
                         : RequestMessageType.Confirmable;
                     coapMessage = new CoapRequest(id, messageType, MethodType.POST, new Uri(uriString),
                         MediaTypeConverter.ConvertToMediaType(message.ContentType));
                 }
-                else {
+                else
+                {
                     coapMessage = new CoapResponse(id, ResponseMessageType.NonConfirmable, ResponseCodeType.Content,
                         observableToken, MediaTypeConverter.ConvertToMediaType(uri.ContentType), msg.Payload);
                 }
             }
-            else if (message.Protocol == ProtocolType.COAP) {
+            else if (message.Protocol == ProtocolType.COAP)
+            {
                 CoapMessage msg = CoapMessage.DecodeMessage(message.Message);
-                if (observableToken == null) {
+                if (observableToken == null)
+                {
                     coapMessage = new CoapRequest(id,
                         msg.MessageType == CoapMessageType.Confirmable
                             ? RequestMessageType.Confirmable
                             : RequestMessageType.NonConfirmable, MethodType.POST, new Uri(uriString),
                         MediaTypeConverter.ConvertToMediaType(message.ContentType), msg.Payload);
                 }
-                else {
+                else
+                {
                     coapMessage = new CoapResponse(id, ResponseMessageType.NonConfirmable, ResponseCodeType.Content,
                         observableToken, MediaTypeConverter.ConvertToMediaType(message.ContentType), msg.Payload);
                 }
             }
-            else {
-                if (observableToken == null) {
+            else
+            {
+                if (observableToken == null)
+                {
                     coapMessage = new CoapRequest(id, RequestMessageType.NonConfirmable, MethodType.POST,
                         new Uri(uriString), MediaTypeConverter.ConvertToMediaType(message.ContentType),
                         message.Message);
                 }
-                else {
+                else
+                {
                     coapMessage = new CoapResponse(id, ResponseMessageType.NonConfirmable, ResponseCodeType.Content,
                         observableToken, MediaTypeConverter.ConvertToMediaType(message.ContentType), message.Message);
                 }
@@ -72,12 +81,14 @@ namespace Piraeus.Adapters
 
         public static byte[] ConvertToHttp(EventMessage message)
         {
-            if (message.Protocol == ProtocolType.MQTT) {
+            if (message.Protocol == ProtocolType.MQTT)
+            {
                 MqttMessage mqtt = MqttMessage.DecodeMessage(message.Message);
                 return mqtt.Payload;
             }
 
-            if (message.Protocol == ProtocolType.COAP) {
+            if (message.Protocol == ProtocolType.COAP)
+            {
                 CoapMessage coap = CoapMessage.DecodeMessage(message.Message);
                 return coap.Payload;
             }
@@ -87,11 +98,13 @@ namespace Piraeus.Adapters
 
         public static byte[] ConvertToMqtt(MqttSession session, EventMessage message)
         {
-            if (message.Protocol == ProtocolType.MQTT) {
+            if (message.Protocol == ProtocolType.MQTT)
+            {
                 return MqttConversion(session, message.Message);
             }
 
-            if (message.Protocol == ProtocolType.COAP) {
+            if (message.Protocol == ProtocolType.COAP)
+            {
                 CoapMessage msg = CoapMessage.DecodeMessage(message.Message);
                 CoapUri curi = new CoapUri(msg.ResourceUri.ToString());
                 QualityOfServiceLevelType qos = QualityOfServiceLevelType.AtLeastOnce;
@@ -103,7 +116,8 @@ namespace Piraeus.Adapters
                 return pub.Encode();
             }
 
-            if (message.Protocol == ProtocolType.REST) {
+            if (message.Protocol == ProtocolType.REST)
+            {
                 PublishMessage pubm = new PublishMessage(false, session.GetQoS(message.ResourceUri).Value, false,
                     session.NewId(), message.ResourceUri, message.Message);
                 return pubm.Encode();
@@ -121,7 +135,8 @@ namespace Piraeus.Adapters
             PublishMessage pm = new PublishMessage(false, qos ?? QualityOfServiceLevelType.AtMostOnce, false,
                 session.NewId(), uri.Resource, msg.Payload);
 
-            if (pm.QualityOfService != QualityOfServiceLevelType.AtMostOnce) {
+            if (pm.QualityOfService != QualityOfServiceLevelType.AtMostOnce)
+            {
                 session.Quarantine(pm, DirectionType.Out);
             }
 

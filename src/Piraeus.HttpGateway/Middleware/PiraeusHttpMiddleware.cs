@@ -46,7 +46,8 @@ namespace Piraeus.HttpGateway.Middleware
             adapter.OnClose += Adapter_OnClose;
             adapter.Init();
             await next(context);
-            if (context.Request.Method.ToUpperInvariant() == "GET") {
+            if (context.Request.Method.ToUpperInvariant() == "GET")
+            {
                 //long polling
                 //adapter = ProtocolAdapterFactory.Create(config, graphManager, context, null, null, source.Token);
 

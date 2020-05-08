@@ -26,11 +26,13 @@ namespace Capl.Authorization.Operations
             _ = operationUri ?? throw new ArgumentNullException(nameof(operationUri));
 
             Operation operation;
-            if (operations == null) {
+            if (operations == null)
+            {
                 operation = OperationsDictionary.Default[
                     operationUri.ToString()]; //CaplConfigurationManager.Operations[operationUri.ToString()];
             }
-            else {
+            else
+            {
                 operation = operations[operationUri.ToString()];
             }
 

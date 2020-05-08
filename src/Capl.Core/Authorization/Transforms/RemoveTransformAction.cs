@@ -29,14 +29,17 @@ namespace Capl.Authorization.Transforms
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
             _ = matchedClaims ?? throw new ArgumentNullException(nameof(matchedClaims));
 
-            if (targetClaim != null) {
+            if (targetClaim != null)
+            {
                 throw new ArgumentException("The expected value of targetClaim is null.");
             }
 
             ClaimsIdentity ci = new ClaimsIdentity(claims);
             IEnumerable<Claim> claimSet = ci.FindAll(delegate (Claim claim) {
-                foreach (Claim c in matchedClaims) {
-                    if (c.Type == claim.Type && c.Value == claim.Value) {
+                foreach (Claim c in matchedClaims)
+                {
+                    if (c.Type == claim.Type && c.Value == claim.Value)
+                    {
                         return true;
                     }
                 }

@@ -11,11 +11,13 @@ namespace Piraeus.Module
         public static T Deserialize<T>(string contentType, byte[] body)
         {
             T result = default;
-            if (contentType == "application/json") {
+            if (contentType == "application/json")
+            {
                 string jsonString = Encoding.UTF8.GetString(body);
                 result = JsonConvert.DeserializeObject<T>(jsonString);
             }
-            else if (contentType == "application/xml" || contentType == "text/xml") {
+            else if (contentType == "application/xml" || contentType == "text/xml")
+            {
                 XmlSerializer xs = new XmlSerializer(typeof(T));
                 using MemoryStream stream = new MemoryStream(body)
                 {
@@ -23,13 +25,16 @@ namespace Piraeus.Module
                 };
                 result = (T)xs.Deserialize(stream);
             }
-            else if (contentType == "text/plain") {
+            else if (contentType == "text/plain")
+            {
                 result = (T)Convert.ChangeType(Encoding.UTF8.GetString(body), typeof(T));
             }
-            else if (contentType == "application/octet-stream") {
+            else if (contentType == "application/octet-stream")
+            {
                 result = (T)Convert.ChangeType(body, typeof(T));
             }
-            else {
+            else
+            {
                 throw new InvalidCastException("contentType");
             }
 
@@ -39,24 +44,29 @@ namespace Piraeus.Module
         public static byte[] Serialize<T>(string contentType, T body)
         {
             byte[] result = null;
-            if (contentType == "application/json") {
+            if (contentType == "application/json")
+            {
                 string jsonString = JsonConvert.SerializeObject(body);
                 result = Encoding.UTF8.GetBytes(jsonString);
             }
-            else if (contentType == "application/xml" || contentType == "text/xml") {
+            else if (contentType == "application/xml" || contentType == "text/xml")
+            {
                 XmlSerializer xs = new XmlSerializer(typeof(T));
                 using MemoryStream stream = new MemoryStream();
                 xs.Serialize(stream, body);
                 stream.Position = 0;
                 result = stream.ToArray();
             }
-            else if (contentType == "text/plain") {
+            else if (contentType == "text/plain")
+            {
                 result = Encoding.UTF8.GetBytes(Convert.ToString(body));
             }
-            else if (contentType == "application/octet-stream") {
+            else if (contentType == "application/octet-stream")
+            {
                 result = body as byte[];
             }
-            else {
+            else
+            {
                 throw new InvalidCastException("contentType");
             }
 

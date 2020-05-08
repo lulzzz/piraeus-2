@@ -119,7 +119,8 @@ namespace SkunkLab.Channels.Http
 
             internal set
             {
-                if (value != state) {
+                if (value != state)
+                {
                     OnStateChange?.Invoke(this, new ChannelStateEventArgs(Id, value));
                 }
 
@@ -155,19 +156,22 @@ namespace SkunkLab.Channels.Http
 
         public override async Task ReceiveAsync()
         {
-            try {
+            try
+            {
                 byte[] message = await request.Content.ReadAsByteArrayAsync();
 
                 OnReceive?.Invoke(this, new ChannelReceivedEventArgs(Id, message));
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 OnError.Invoke(this, new ChannelErrorEventArgs(Id, ex));
             }
         }
 
         public override async Task SendAsync(byte[] message)
         {
-            try {
+            try
+            {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(endpoint);
                 SetSecurityToken(request);
                 SetResourceHeader(request);
@@ -182,20 +186,24 @@ namespace SkunkLab.Channels.Http
                 using HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
                 if (response.StatusCode == HttpStatusCode.OK ||
                     response.StatusCode == HttpStatusCode.Accepted ||
-                    response.StatusCode == HttpStatusCode.NoContent) {
+                    response.StatusCode == HttpStatusCode.NoContent)
+                {
                 }
             }
-            catch (WebException we) {
+            catch (WebException we)
+            {
                 OnError?.Invoke(this, new ChannelErrorEventArgs(Id, we));
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 OnError.Invoke(this, new ChannelErrorEventArgs(Id, ex));
             }
         }
 
         protected void Disposing(bool dispose)
         {
-            if (!disposed && dispose) {
+            if (!disposed && dispose)
+            {
                 request = null;
                 indexes = null;
                 certificate = null;
@@ -205,7 +213,8 @@ namespace SkunkLab.Channels.Http
 
         private void SetIndexes(HttpWebRequest request)
         {
-            if (indexes != null) {
+            if (indexes != null)
+            {
                 foreach (var item in indexes)
                     request.Headers.Add(HttpChannelConstants.INDEX_HEADER, item.Key + ";" + item.Value);
             }
@@ -213,19 +222,22 @@ namespace SkunkLab.Channels.Http
 
         private void SetResourceHeader(HttpWebRequest request)
         {
-            if (string.IsNullOrEmpty(resource)) {
+            if (string.IsNullOrEmpty(resource))
+            {
                 request.Headers.Add(HttpChannelConstants.RESOURCE_HEADER, resource);
             }
         }
 
         private void SetSecurityToken(HttpWebRequest request)
         {
-            if (!string.IsNullOrEmpty(securityToken)) {
+            if (!string.IsNullOrEmpty(securityToken))
+            {
                 request.Headers.Add("Authorization", string.Format("Bearer {0}", securityToken));
                 return;
             }
 
-            if (certificate != null) {
+            if (certificate != null)
+            {
                 request.ClientCertificates.Add(certificate);
             }
         }

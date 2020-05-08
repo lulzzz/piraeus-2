@@ -44,10 +44,13 @@ namespace Capl.Authorization
         {
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
-            foreach (Term item in this) {
+            foreach (Term item in this)
+            {
                 bool eval = item.Evaluate(claims);
-                if (!eval) {
-                    if (!Evaluates) {
+                if (!eval)
+                {
+                    if (!Evaluates)
+                    {
                         return true;
                     }
 
@@ -70,28 +73,35 @@ namespace Capl.Authorization
             string evaluates = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.Evaluates);
             string termId = reader.GetOptionalAttribute(AuthorizationConstants.Attributes.TermId);
 
-            if (!string.IsNullOrEmpty(termId)) {
+            if (!string.IsNullOrEmpty(termId))
+            {
                 TermId = new Uri(termId);
             }
 
-            if (!string.IsNullOrEmpty(evaluates)) {
+            if (!string.IsNullOrEmpty(evaluates))
+            {
                 Evaluates = XmlConvert.ToBoolean(evaluates);
             }
 
-            while (reader.Read()) {
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd)) {
+            while (reader.Read())
+            {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalAnd))
+                {
                     Add(Load(reader));
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr)) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.LogicalOr))
+                {
                     Add(LogicalOrCollection.Load(reader));
                 }
 
-                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule)) {
+                if (reader.IsRequiredStartElement(AuthorizationConstants.Elements.Rule))
+                {
                     Add(Rule.Load(reader));
                 }
 
-                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.LogicalAnd)) {
+                if (reader.IsRequiredEndElement(AuthorizationConstants.Elements.LogicalAnd))
+                {
                     return;
                     //break;
                 }
@@ -111,7 +121,8 @@ namespace Capl.Authorization
             writer.WriteStartElement(AuthorizationConstants.Elements.LogicalAnd,
                 AuthorizationConstants.Namespaces.Xmlns);
 
-            if (TermId != null) {
+            if (TermId != null)
+            {
                 writer.WriteAttributeString(AuthorizationConstants.Attributes.TermId, TermId.ToString());
             }
 

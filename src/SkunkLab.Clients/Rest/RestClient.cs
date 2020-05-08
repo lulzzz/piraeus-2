@@ -18,9 +18,12 @@ namespace Piraeus.Clients.Rest
         {
             sendChannel = ChannelFactory.Create(endpoint, securityToken) as HttpClientChannel;
 
-            if (observers != null) {
-                foreach (var ob in observers) {
-                    if (endpoint.Contains("?")) {
+            if (observers != null)
+            {
+                foreach (var ob in observers)
+                {
+                    if (endpoint.Contains("?"))
+                    {
                         endpoint += $"&sub={ob.ResourceUri.ToString().ToLowerInvariant()}";
                     }
                 }
@@ -39,7 +42,8 @@ namespace Piraeus.Clients.Rest
         {
             sendChannel = ChannelFactory.Create(endpoint, certificate) as HttpClientChannel;
 
-            if (observers != null) {
+            if (observers != null)
+            {
                 receiveChannel = ChannelFactory.Create(endpoint, certificate, observers, token);
 
                 Task receiveTask = receiveChannel.ReceiveAsync();
@@ -49,7 +53,8 @@ namespace Piraeus.Clients.Rest
 
         public async Task ReceiveAsync()
         {
-            if (!receiveChannel.IsConnected) {
+            if (!receiveChannel.IsConnected)
+            {
                 await receiveChannel.OpenAsync();
             }
 

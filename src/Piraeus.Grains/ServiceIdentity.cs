@@ -19,7 +19,8 @@ namespace Piraeus.Grains
 
         public async Task AddClaimsAsync(List<KeyValuePair<string, string>> claims)
         {
-            if (claims == null || claims.Count == 0) {
+            if (claims == null || claims.Count == 0)
+            {
                 return;
             }
 

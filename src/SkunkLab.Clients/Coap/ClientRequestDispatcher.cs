@@ -76,8 +76,10 @@ namespace SkunkLab.Clients.Coap
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue) {
-                if (disposing) {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     registry.Clear();
                     registry = null;
                 }
