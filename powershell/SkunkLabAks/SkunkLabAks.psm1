@@ -39,7 +39,7 @@ function Add-NGINX
     {
 		try
 		{
-			helm install nginx stable/nginx-ingress --namespace $Namespace --set controller.replicaCount=1
+			helm install nginx ingress-nginx/ingress-nginx --namespace $Namespace --set controller.replicaCount=1
 			if($LASTEXITCODE -ne 0 )
             {
 				Write-Host "Error installing NGINX, waiting 20 seconds to try install NGINX again..." -ForegroundColor Yellow
@@ -112,8 +112,8 @@ function Get-ExternalIP
     $looper = $TRUE
     while($looper)
     {   $externalIP = ""                  
-        $lineValue = kubectl get service -l app=nginx-ingress --namespace $Namespace
-        
+        #$lineValue = kubectl get service -l app=nginx-ingress --namespace $Namespace
+        $lineValue = kubectl get svc nginx-ingress-nginx-controller -n $Namespace
         Write-Host "Last Exit Code for get external ip $LASTEXITCODE" -ForegroundColor White
         if($LASTEXITCODE -ne 0 )
         {

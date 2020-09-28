@@ -12,7 +12,7 @@
 RootModule = 'SkunkLabAks.psm1'
 
 # Version number of this module.
-ModuleVersion = '3.1.6.6'
+ModuleVersion = '3.1.7.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()

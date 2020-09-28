@@ -4,7 +4,7 @@
 RootModule = 'Piraeus.Module.Core.dll'
 
 # Version number of this module.
-ModuleVersion = '1.3.0'
+ModuleVersion = '3.1.7.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -25,7 +25,7 @@ Copyright = '(c) SkunkLab. All rights reserved.'
 Description = 'Piraeus Powershell Management Scripts'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '6.2.3'
+PowerShellVersion = '7.0.0'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''

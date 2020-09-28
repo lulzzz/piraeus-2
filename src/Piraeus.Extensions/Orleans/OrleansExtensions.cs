@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
+using Orleans.Clustering.Redis;
+using Orleans.Configuration;
 using Orleans.Hosting;
 using Piraeus.Configuration;
 using Piraeus.GrainInterfaces;
